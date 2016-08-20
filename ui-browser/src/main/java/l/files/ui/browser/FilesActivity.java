@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager.OnBackStackChangedListener;
 import android.support.v4.widget.DrawerLayout;
@@ -25,6 +26,7 @@ import l.files.fs.Path;
 import l.files.fs.Paths;
 import l.files.fs.Stat;
 import l.files.premium.PremiumLock;
+import l.files.ui.base.app.BaseActivity;
 import l.files.ui.base.app.OptionsMenus;
 import l.files.ui.base.fs.OnOpenFileListener;
 import l.files.ui.browser.menu.ActionBarDrawerToggleMenu;
@@ -222,7 +224,7 @@ public final class FilesActivity extends BaseActivity implements
     }
 
     @Override
-    public void onSupportActionModeFinished(ActionMode mode) {
+    public void onSupportActionModeFinished(@NonNull ActionMode mode) {
         super.onSupportActionModeFinished(mode);
         drawer.setDrawerLockMode(LOCK_MODE_UNLOCKED);
     }

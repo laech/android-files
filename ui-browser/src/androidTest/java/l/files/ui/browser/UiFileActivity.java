@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import l.files.base.Consumer;
 import l.files.base.Provider;
 import l.files.fs.FileSystem;
 import l.files.fs.Files;
@@ -230,7 +231,7 @@ final class UiFileActivity {
     UiFileActivity assertCanPaste(final boolean can) {
         return findOptionMenuItem(android.R.id.paste, new Consumer<MenuItem>() {
             @Override
-            public void apply(MenuItem input) {
+            public void accept(MenuItem input) {
                 String msg = "Paste menu enabled to be " + can;
                 assertEquals(msg, can, input.isEnabled());
             }
@@ -248,7 +249,7 @@ final class UiFileActivity {
                 toolbar.showOverflowMenu();
                 MenuItem item = toolbar.getMenu().findItem(id);
                 assertNotNull(item);
-                consumer.apply(item);
+                consumer.accept(item);
                 toolbar.hideOverflowMenu();
             }
         });
@@ -295,8 +296,8 @@ final class UiFileActivity {
             final Consumer<FileView> assertion) {
         findItemOnMainThread(file, new Consumer<View>() {
             @Override
-            public void apply(View input) {
-                assertion.apply(Views.<FileView>find(android.R.id.content, input));
+            public void accept(View input) {
+                assertion.accept(Views.<FileView>find(android.R.id.content, input));
             }
         });
         return this;
@@ -357,7 +358,7 @@ final class UiFileActivity {
     private UiFileActivity selectMenuAction(int id) {
         findOptionMenuItem(id, new Consumer<MenuItem>() {
             @Override
-            public void apply(MenuItem item) {
+            public void accept(MenuItem item) {
                 assertTrue(item.isEnabled());
             }
         });
@@ -403,7 +404,7 @@ final class UiFileActivity {
             Path file, final boolean checked) {
         findItemOnMainThread(file, new Consumer<View>() {
             @Override
-            public void apply(View view) {
+            public void accept(View view) {
                 assertEquals(checked, view.isActivated());
             }
         });
@@ -438,7 +439,7 @@ final class UiFileActivity {
     UiFileActivity assertBookmarkMenuChecked(final boolean checked) {
         return findOptionMenuItem(R.id.bookmark, new Consumer<MenuItem>() {
             @Override
-            public void apply(MenuItem item) {
+            public void accept(MenuItem item) {
                 assertEquals(checked, item.isChecked());
             }
         });
@@ -447,7 +448,7 @@ final class UiFileActivity {
     UiFileActivity assertRefreshMenuVisible(final boolean visible) {
         return findOptionMenuItem(R.id.refresh, new Consumer<MenuItem>() {
             @Override
-            public void apply(MenuItem input) {
+            public void accept(MenuItem input) {
                 String msg = "Refresh menu visible to be " + visible;
                 assertEquals(msg, visible, input.isVisible());
             }
@@ -458,7 +459,7 @@ final class UiFileActivity {
 
         assertItemContentView(file, new Consumer<FileView>() {
             @Override
-            public void apply(FileView input) {
+            public void accept(FileView input) {
                 assertEquals(shown, input.hasPreviewContent());
             }
         });
@@ -470,7 +471,7 @@ final class UiFileActivity {
 
         assertItemContentView(file, new Consumer<FileView>() {
             @Override
-            public void apply(FileView input) {
+            public void accept(FileView input) {
                 assertEquals(displayed, input.isLinkIconVisible());
             }
         });
@@ -482,7 +483,7 @@ final class UiFileActivity {
 
         assertItemContentView(link, new Consumer<FileView>() {
             @Override
-            public void apply(FileView input) {
+            public void accept(FileView input) {
                 if (target != null) {
                     CharSequence expected = input.getResources().getString(
                             R.string.link_x, target);
@@ -499,7 +500,7 @@ final class UiFileActivity {
 
         assertItemContentView(file, new Consumer<FileView>() {
             @Override
-            public void apply(FileView view) {
+            public void accept(FileView view) {
                 assertEquals(expected, view.getSummary().getText());
             }
         });
@@ -520,7 +521,7 @@ final class UiFileActivity {
     UiFileActivity assertDisabled(Path file) {
         assertItemContentView(file, new Consumer<FileView>() {
             @Override
-            public void apply(FileView input) {
+            public void accept(FileView input) {
                 assertFalse(input.isEnabled());
             }
         });

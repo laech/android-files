@@ -3,6 +3,7 @@ package l.files.ui.browser;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
+import l.files.base.Consumer;
 import l.files.base.Provider;
 import l.files.fs.Path;
 import l.files.ui.bookmarks.BookmarksFragment;
@@ -81,7 +82,7 @@ final class UiBookmarksFragment {
                 bookmark,
                 new Consumer<View>() {
                     @Override
-                    public void apply(View view) {
+                    public void accept(View view) {
                         assertEquals(checked, view.isActivated());
                     }
                 });

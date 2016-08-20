@@ -2,7 +2,7 @@ package l.files.ui.browser.widget;
 
 import android.content.Context;
 
-import l.files.ui.browser.Consumer;
+import l.files.base.Consumer;
 
 import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
@@ -17,7 +17,7 @@ public final class Toaster implements Consumer<String> {
     }
 
     @Override
-    public void apply(final String message) {
+    public void accept(final String message) {
         makeText(context, message, LENGTH_SHORT).show();
     }
 }

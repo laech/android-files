@@ -130,7 +130,7 @@ public final class NewDirFragment extends FileCreationFragment {
         protected void onPostExecute(IOException e) {
             super.onPostExecute(e);
             if (e != null) {
-                toaster.apply(message(e));
+                toaster.accept(message(e));
             }
         }
 

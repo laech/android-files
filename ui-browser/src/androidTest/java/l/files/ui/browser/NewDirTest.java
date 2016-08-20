@@ -2,6 +2,7 @@ package l.files.ui.browser;
 
 import android.widget.EditText;
 
+import l.files.base.Consumer;
 import l.files.fs.Permission;
 
 import static l.files.fs.Files.createFile;
@@ -62,7 +63,7 @@ public final class NewDirTest extends BaseFilesActivityTest {
     public void test_name_field_is_limited_to_one_line() throws Throwable {
         checkNameField(new Consumer<EditText>() {
             @Override
-            public void apply(final EditText input) {
+            public void accept(final EditText input) {
                 assertEquals(1, input.getMaxLines());
             }
         });
@@ -71,7 +72,7 @@ public final class NewDirTest extends BaseFilesActivityTest {
     public void test_name_field_has_all_text_selected() throws Throwable {
         checkNameField(new Consumer<EditText>() {
             @Override
-            public void apply(final EditText input) {
+            public void accept(final EditText input) {
                 assertEquals(0, input.getSelectionStart());
                 assertEquals(input.getText().length(), input.getSelectionEnd());
             }
@@ -85,7 +86,7 @@ public final class NewDirTest extends BaseFilesActivityTest {
         runTestOnUiThread(new Runnable() {
             @Override
             public void run() {
-                assertion.apply(dialog.editText());
+                assertion.accept(dialog.editText());
             }
         });
     }

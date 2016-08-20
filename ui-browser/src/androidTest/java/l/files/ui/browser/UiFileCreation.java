@@ -8,6 +8,8 @@ import android.widget.EditText;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import l.files.base.Consumer;
+
 import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
@@ -66,10 +68,10 @@ abstract class UiFileCreation<T extends UiFileCreation> {
         doAnswer(new Answer<Void>() {
             @Override
             public Void answer(final InvocationOnMock i) throws Throwable {
-                original[0].apply((String) i.getArguments()[0]);
+                original[0].accept((String) i.getArguments()[0]);
                 return null;
             }
-        }).when(consumer).apply(anyString());
+        }).when(consumer).accept(anyString());
 
         awaitOnMainThread(context.instrumentation(), new Runnable() {
             @Override
@@ -84,7 +86,7 @@ abstract class UiFileCreation<T extends UiFileCreation> {
         awaitOnMainThread(context.instrumentation(), new Runnable() {
             @Override
             public void run() {
-                verify(consumer).apply(message);
+                verify(consumer).accept(message);
             }
         });
 

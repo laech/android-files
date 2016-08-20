@@ -12,7 +12,7 @@ import java.io.IOException;
 import l.files.fs.Files;
 import l.files.fs.Path;
 import l.files.fs.Stat;
-import l.files.ui.browser.BaseActivity;
+import l.files.ui.base.app.BaseActivity;
 import l.files.ui.browser.FileCreationFragment;
 import l.files.ui.browser.R;
 
@@ -175,7 +175,7 @@ public final class RenameFragment extends FileCreationFragment {
         protected void onPostExecute(IOException e) {
             super.onPostExecute(e);
             if (e != null) {
-                toaster.apply(message(e));
+                toaster.accept(message(e));
             }
         }
 

@@ -1,13 +1,12 @@
-package l.files.ui.browser;
+package l.files.ui.base.app;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import l.files.ui.base.app.OptionsMenu;
-import l.files.ui.base.app.OptionsMenus;
 import l.files.ui.base.view.ActionModeProvider;
 
 public class BaseActivity extends AppCompatActivity implements ActionModeProvider {
@@ -46,14 +45,14 @@ public class BaseActivity extends AppCompatActivity implements ActionModeProvide
     }
 
     @Override
-    public void onSupportActionModeFinished(ActionMode mode) {
+    public void onSupportActionModeFinished(@NonNull ActionMode mode) {
         super.onSupportActionModeFinished(mode);
         currentActionMode = null;
         currentActionModeCallback = null;
     }
 
     @Override
-    public ActionMode startSupportActionMode(ActionMode.Callback callback) {
+    public ActionMode startSupportActionMode(@NonNull ActionMode.Callback callback) {
         currentActionModeCallback = callback;
         return (currentActionMode = super.startSupportActionMode(callback));
     }

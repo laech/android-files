@@ -24,6 +24,7 @@ import android.widget.TextView.OnEditorActionListener;
 
 import java.io.IOException;
 
+import l.files.base.Consumer;
 import l.files.fs.Files;
 import l.files.fs.Path;
 import l.files.ui.browser.widget.Toaster;

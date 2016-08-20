@@ -8,6 +8,7 @@ import android.view.View;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import l.files.base.Consumer;
 import l.files.base.Provider;
 import l.files.ui.base.widget.StableAdapter;
 
@@ -144,7 +145,7 @@ final class Instrumentations {
             Object itemId) {
         findItemOnMainThread(in, recycler, itemId, new Consumer<View>() {
             @Override
-            public void apply(View input) {
+            public void accept(View input) {
                 input.performClick();
             }
         });
@@ -156,7 +157,7 @@ final class Instrumentations {
             Object itemId) {
         findItemOnMainThread(in, recycler, itemId, new Consumer<View>() {
             @Override
-            public void apply(View input) {
+            public void accept(View input) {
                 assertTrue(input.isEnabled());
                 input.performLongClick();
             }
@@ -197,7 +198,7 @@ final class Instrumentations {
                 if (position == i) {
                     Object thatId = adapter.getItemIdObject(position);
                     if (itemId.equals(thatId)) {
-                        consumer.apply(child);
+                        consumer.accept(child);
                         return;
                     }
                 }

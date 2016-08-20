@@ -10,6 +10,7 @@ import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.Date;
 
+import l.files.base.Consumer;
 import l.files.fs.Instant;
 import l.files.fs.Path;
 import l.files.fs.Paths;
@@ -173,7 +174,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
         screen().assertItemContentView(file, new Consumer<FileView>() {
             @Override
-            public void apply(FileView view) {
+            public void accept(FileView view) {
                 assertTrue(view.getSummary().getText().toString().contains(expected));
             }
         });
@@ -348,7 +349,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
         final CharSequence[] chars = {null};
         screen().assertItemContentView(file, new Consumer<FileView>() {
             @Override
-            public void apply(FileView input) {
+            public void accept(FileView input) {
                 chars[0] = input.getSummary().getText();
             }
         });
@@ -357,7 +358,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
         screen().assertItemContentView(file, new Consumer<FileView>() {
             @Override
-            public void apply(FileView input) {
+            public void accept(FileView input) {
                 assertNotEqual(chars[0], input.getSummary().getText());
             }
         });
@@ -371,7 +372,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
         final CharSequence[] date = {null};
         screen().assertItemContentView(file, new Consumer<FileView>() {
             @Override
-            public void apply(FileView input) {
+            public void accept(FileView input) {
                 date[0] = input.getSummary().getText();
             }
         });
@@ -380,7 +381,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
         screen().assertItemContentView(file, new Consumer<FileView>() {
             @Override
-            public void apply(FileView input) {
+            public void accept(FileView input) {
                 assertNotEqual(date[0], input.getSummary().getText());
             }
         });
