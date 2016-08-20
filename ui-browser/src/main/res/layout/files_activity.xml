@@ -23,7 +23,11 @@
                 android:background="@color/color_primary"
                 android:theme="@style/Toolbar"
                 app:contentInsetEnd="56dp"
+                app:contentInsetEndWithActions="56dp"
+                app:contentInsetLeft="56dp"
+                app:contentInsetRight="56dp"
                 app:contentInsetStart="56dp"
+                app:contentInsetStartWithNavigation="56dp"
                 app:layout_scrollFlags="scroll|snap|enterAlways"
                 app:popupTheme="@style/ToolbarPopup">
 
