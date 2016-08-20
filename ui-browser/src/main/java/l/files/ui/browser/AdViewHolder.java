@@ -17,12 +17,15 @@ import com.google.android.gms.ads.NativeExpressAdView;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import l.files.premium.PremiumLock;
+import l.files.ui.base.app.BaseActivity;
+import l.files.ui.base.app.LifeCycleListener;
 
 import static com.google.android.gms.ads.AdRequest.DEVICE_ID_EMULATOR;
 import static l.files.ui.base.view.Views.find;
 import static l.files.ui.browser.FilesAdapter.calculateCardContentWidthPixels;
 
-final class AdViewHolder extends RecyclerView.ViewHolder {
+final class AdViewHolder extends RecyclerView.ViewHolder
+        implements LifeCycleListener {
 
     static final int LAYOUT_ID = R.layout.files_grid_ad;
 
@@ -34,8 +37,13 @@ final class AdViewHolder extends RecyclerView.ViewHolder {
     AdViewHolder(View itemView, PremiumLock premiumLock) {
         super(itemView);
 
-        // TODO need to call destroy/pause on ad view?
         Context context = itemView.getContext();
+        if (init.compareAndSet(false, true)) {
+            MobileAds.initialize(
+                    context.getApplicationContext(),
+                    itemView.getResources().getString(R.string.ad_app_id));
+        }
+
         CardView card = find(R.id.card, this);
         adView = new NativeExpressAdView(context);
         adView.setAdUnitId(getAdUnitId(context));
@@ -45,11 +53,8 @@ final class AdViewHolder extends RecyclerView.ViewHolder {
 
         configureRemoveAdView(premiumLock);
 
-        if (init.compareAndSet(false, true)) {
-            MobileAds.initialize(
-                    context.getApplicationContext(),
-                    itemView.getResources().getString(R.string.ad_app_id));
-        }
+        ((BaseActivity) itemView.getContext())
+                .addWeaklyReferencedLifeCycleListener(this);
     }
 
     private AdListener newAdListener() {
@@ -114,4 +119,22 @@ final class AdViewHolder extends RecyclerView.ViewHolder {
         }
     }
 
+    @Override
+    public void onCreate() {
+    }
+
+    @Override
+    public void onDestroy() {
+        adView.destroy();
+    }
+
+    @Override
+    public void onResume() {
+        adView.resume();
+    }
+
+    @Override
+    public void onPause() {
+        adView.pause();
+    }
 }

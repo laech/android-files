@@ -1,5 +1,6 @@
 package l.files.ui.base.app;
 
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -7,7 +8,12 @@ import android.support.v7.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.util.IdentityHashMap;
+import java.util.Set;
+
 import l.files.ui.base.view.ActionModeProvider;
+
+import static java.util.Collections.newSetFromMap;
 
 public class BaseActivity extends AppCompatActivity implements ActionModeProvider {
 
@@ -15,6 +21,45 @@ public class BaseActivity extends AppCompatActivity implements ActionModeProvide
 
     private ActionMode currentActionMode;
     private ActionMode.Callback currentActionModeCallback;
+
+    private final Set<LifeCycleListener> lifeCycleListeners =
+            newSetFromMap(new IdentityHashMap<LifeCycleListener, Boolean>(2));
+
+    public void addWeaklyReferencedLifeCycleListener(LifeCycleListener listener) {
+        lifeCycleListeners.add(listener);
+    }
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        for (LifeCycleListener listener : lifeCycleListeners) {
+            listener.onCreate();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        for (LifeCycleListener listener : lifeCycleListeners) {
+            listener.onDestroy();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        for (LifeCycleListener listener : lifeCycleListeners) {
+            listener.onResume();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        for (LifeCycleListener listener : lifeCycleListeners) {
+            listener.onPause();
+        }
+    }
 
     public final void setOptionsMenu(OptionsMenu menu) {
         optionsMenu = OptionsMenus.nullToEmpty(menu);
@@ -25,11 +70,6 @@ public class BaseActivity extends AppCompatActivity implements ActionModeProvide
         super.onCreateOptionsMenu(menu);
         this.optionsMenu.onCreateOptionsMenu(menu);
         return true;
-    }
-
-    @Override
-    public void onOptionsMenuClosed(Menu menu) {
-        super.onOptionsMenuClosed(menu);
     }
 
     @Override
