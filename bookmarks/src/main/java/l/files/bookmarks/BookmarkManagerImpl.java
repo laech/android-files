@@ -38,14 +38,27 @@ final class BookmarkManagerImpl extends BookmarkManager {
     @SuppressLint("SdCardPath")
     private static Set<Path> createDefaultBookmarks() {
         Set<Path> defaults = new HashSet<>();
-        defaults.add(Paths.get(getExternalStorageDirectory()));
-        defaults.add(externalStoragePath(DIRECTORY_DCIM));
-        defaults.add(externalStoragePath(DIRECTORY_MUSIC));
-        defaults.add(externalStoragePath(DIRECTORY_MOVIES));
-        defaults.add(externalStoragePath(DIRECTORY_PICTURES));
-        defaults.add(externalStoragePath(DIRECTORY_DOWNLOADS));
-        defaults.add(Paths.get(new File("/sdcard2")));
+        addIfExists(defaults, Paths.get(getExternalStorageDirectory()));
+        addIfExists(defaults, externalStoragePath(DIRECTORY_DCIM));
+        addIfExists(defaults, externalStoragePath(DIRECTORY_MUSIC));
+        addIfExists(defaults, externalStoragePath(DIRECTORY_MOVIES));
+        addIfExists(defaults, externalStoragePath(DIRECTORY_PICTURES));
+        addIfExists(defaults, externalStoragePath(DIRECTORY_DOWNLOADS));
+        addIfExists(defaults, Paths.get(new File("/sdcard2")));
         return unmodifiableSet(defaults);
+    }
+
+    private static void addIfExists(Set<Path> paths, Path path) {
+        try {
+            if (exists(path)) {
+                paths.add(path);
+            }
+        } catch (IOException ignored) {
+        }
+    }
+
+    private static boolean exists(Path path) throws IOException {
+        return Files.exists(path, FOLLOW);
     }
 
     private static Path externalStoragePath(String name) {
@@ -68,7 +81,7 @@ final class BookmarkManagerImpl extends BookmarkManager {
             try {
                 Path path = Paths.get(new URI(uriString));
                 try {
-                    if (Files.exists(path, FOLLOW)) {
+                    if (exists(path)) {
                         paths.add(path);
                     }
                 } catch (IOException ignored) {
@@ -109,7 +122,7 @@ final class BookmarkManagerImpl extends BookmarkManager {
         for (String element : encoded) {
             try {
                 Path path = decode(element);
-                if (Files.exists(path, FOLLOW)) {
+                if (exists(path)) {
                     bookmarks.add(path);
                 }
             } catch (IllegalArgumentException e) {
