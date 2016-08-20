@@ -219,12 +219,12 @@ final class LocalObservable extends Native
                 fd = inotify.init(watchLimit);
                 wd = inotifyAddWatchWillCloseOnError(option);
             } else {
-                close();
+                doClose();
             }
         } catch (ErrnoException e) {
             fd = -1;
             wd = -1;
-            close();
+            suppressedClose(e);
             notifyIncompleteObservationOrClose();
             return;
         }
@@ -256,11 +256,7 @@ final class LocalObservable extends Native
             if (thread != null) {
                 thread.interrupt();
             }
-            try {
-                close();
-            } catch (Exception sup) {
-                addSuppressed(e, sup);
-            }
+            suppressedClose(e);
             throw e;
         }
 
@@ -356,6 +352,22 @@ final class LocalObservable extends Native
 
     @Override
     public void close() throws IOException {
+        try {
+            doClose();
+        } catch (ErrnoException e) {
+            throw ErrnoExceptions.toIOException(e);
+        }
+    }
+
+    private void suppressedClose(Throwable e) {
+        try {
+            doClose();
+        } catch (Throwable sup) {
+            addSuppressed(e, sup);
+        }
+    }
+
+    private void doClose() throws ErrnoException {
         if (!closed.compareAndSet(false, true)) {
             return;
         }
@@ -398,13 +410,13 @@ final class LocalObservable extends Native
             for (ErrnoException sup : suppressed) {
                 addSuppressed(e, sup);
             }
-            throw ErrnoExceptions.toIOException(e, root);
+            throw e;
         }
 
         if (!suppressed.isEmpty()) {
-            IOException e = new IOException();
-            for (ErrnoException sup : suppressed) {
-                addSuppressed(e, sup);
+            ErrnoException e = suppressed.get(0);
+            for (int i = 1; i < suppressed.size(); i++) {
+                addSuppressed(e, suppressed.get(i));
             }
             throw e;
         }
@@ -453,17 +465,15 @@ final class LocalObservable extends Native
     private void onEvent(int wd, int event, byte[] child) {
         try {
             handleEvent(wd, event, child);
-        } catch (final Exception e) {
-            try {
-                close();
-            } catch (Throwable sup) {
-                addSuppressed(e, sup);
+        } catch (Throwable e) {
+            if (!isClosed() || !(e instanceof ErrnoException)) {
+                suppressedClose(e);
+                throwOnMainThread(e);
             }
-            throwOnMainThread(e);
         }
     }
 
-    private static void throwOnMainThread(final Exception e) {
+    private static void throwOnMainThread(final Throwable e) {
         handler.post(new Runnable() {
             @Override
             public void run() {
@@ -476,7 +486,7 @@ final class LocalObservable extends Native
         });
     }
 
-    private void handleEvent(int wd, int event, byte[] child) throws IOException {
+    private void handleEvent(int wd, int event, byte[] child) throws ErrnoException {
         // Disable to avoid getting called on large number of events,
         // even just calling isVerboseEnabled has some overhead,
         // enable when needed for debugging
@@ -501,7 +511,7 @@ final class LocalObservable extends Native
                 observer(DELETE, child);
 
             } else if (isSelfDeleted(event, child)) {
-                close();
+                doClose();
                 observer(DELETE, (byte[]) null);
 
             } else if (isChildModified(event, child)) {
@@ -544,8 +554,8 @@ final class LocalObservable extends Native
             observer.onEvent(kind, name);
         } else {
             try {
-                close();
-            } catch (IOException e) {
+                doClose();
+            } catch (ErrnoException e) {
                 Log.w(getClass().getSimpleName(),
                         "Failed to close on notify event, "
                                 + kind + ", " + name, e);
@@ -553,14 +563,15 @@ final class LocalObservable extends Native
         }
     }
 
-    private void addWatchForNewDirectory(byte[] name) throws IOException {
-        if (released.get()) {
+    private void addWatchForNewDirectory(byte[] name) throws ErrnoException {
+        if (released.get() || closed.get()) {
             return;
         }
 
+        LocalPath child = root.resolve(name);
         try {
 
-            byte[] path = root.resolve(name).path;
+            byte[] path = child.path;
             int wd = inotify.addWatch(fd, path, CHILD_DIR_MASK);
             childDirs.put(wd, LocalName.wrap(name));
 
@@ -569,7 +580,7 @@ final class LocalObservable extends Native
         }
     }
 
-    private void handleAddChildDirWatchFailure(ErrnoException e) throws IOException {
+    private void handleAddChildDirWatchFailure(ErrnoException e) throws ErrnoException {
         if (e.errno == ENOENT) {
             // Ignore
 
@@ -582,7 +593,7 @@ final class LocalObservable extends Native
             notifyIncompleteObservationOrClose();
 
         } else {
-            throw ErrnoExceptions.toIOException(e);
+            throw e;
         }
     }
 
@@ -592,8 +603,8 @@ final class LocalObservable extends Native
             observer.onIncompleteObservation();
         } else {
             try {
-                close();
-            } catch (IOException e) {
+                doClose();
+            } catch (ErrnoException e) {
                 Log.w(getClass().getSimpleName(),
                         "Failed to close on incomplete observation.", e);
             }
