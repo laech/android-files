@@ -208,6 +208,9 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
                             path, stat, constraint, callback, MEDIA_TYPE, context);
                     if (sub != null) {
                         subs.add(sub);
+                    } else {
+                        callback.onPreviewFailed(path, stat, using);
+                        context.putPreviewable(path, stat, constraint, false);
                     }
                 }
 
