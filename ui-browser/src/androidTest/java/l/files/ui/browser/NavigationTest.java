@@ -88,11 +88,13 @@ public final class NavigationTest extends BaseFilesActivityTest {
     }
 
     public void test_can_preview() throws Exception {
-        Path empty = createFile(dir().resolve("empty"));
-        Path file = dir().resolve("file");
-        Path link = createSymbolicLink(dir().resolve("link"), file);
+        Path dir = createDir(dir().resolve("test_can_preview"));
+        Path empty = createFile(dir.resolve("empty"));
+        Path file = dir.resolve("file");
+        Path link = createSymbolicLink(dir.resolve("link"), file);
         writeUtf8(file, "hello");
         screen()
+                .clickInto(dir)
                 .assertThumbnailShown(file, true)
                 .assertThumbnailShown(link, true)
                 .assertThumbnailShown(empty, false);
