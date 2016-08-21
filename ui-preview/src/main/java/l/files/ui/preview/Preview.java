@@ -128,10 +128,29 @@ public final class Preview {
         mediaTypeCache.put(path, stat, constraint, media);
     }
 
+    public NoPreview getNoPreviewReason(Path path, Stat stat, Rect constraint) {
+
+        if (!stat.isRegularFile()) {
+            return NoPreview.NOT_REGULAR_FILE;
+        }
+
+        try {
+            if (!Files.isReadable(path)) {
+                return NoPreview.FILE_UNREADABLE;
+            }
+        } catch (IOException e) {
+            return new NoPreview(e);
+        }
+
+        if (TRUE.equals(noPreviewCache.get(path, stat, constraint, true))) {
+            return NoPreview.IN_NO_PREVIEW_CACHE;
+        }
+
+        return null;
+    }
+
     public boolean isPreviewable(Path path, Stat stat, Rect constraint) {
-        return stat.isRegularFile()
-                && isReadable(path)
-                && !TRUE.equals(noPreviewCache.get(path, stat, constraint, true));
+        return getNoPreviewReason(path, stat, constraint) == null;
     }
 
     void putPreviewable(Path path, Stat stat, Rect constraint, boolean previewable) {
@@ -139,14 +158,6 @@ public final class Preview {
             noPreviewCache.remove(path, stat, constraint);
         } else {
             noPreviewCache.put(path, stat, constraint, true);
-        }
-    }
-
-    private static boolean isReadable(Path path) {
-        try {
-            return Files.isReadable(path);
-        } catch (IOException e) {
-            return false;
         }
     }
 
@@ -188,7 +199,7 @@ public final class Preview {
 
         void onBlurredThumbnailAvailable(Path path, Stat stat, Bitmap thumbnail);
 
-        void onPreviewFailed(Path path, Stat stat, Using used, @Nullable Throwable cause);
+        void onPreviewFailed(Path path, Stat stat, Using used, Object cause);
 
     }
 

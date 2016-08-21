@@ -17,6 +17,7 @@ import java.util.Map;
 
 import l.files.fs.Path;
 import l.files.premium.PremiumLock;
+import l.files.ui.base.app.LifeCycleListenable;
 import l.files.ui.base.fs.FileInfo;
 import l.files.ui.base.fs.OnOpenFileListener;
 import l.files.ui.base.selection.Selection;
@@ -42,15 +43,18 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
     private final OnOpenFileListener listener;
 
     private final PremiumLock premiumLock;
+    private final LifeCycleListenable listenable;
 
     FilesAdapter(
             RecyclerView recyclerView,
+            LifeCycleListenable listenable,
             Selection<Path, FileInfo> selection,
             ActionModeProvider actionModeProvider,
             ActionMode.Callback actionModeCallback,
             OnOpenFileListener listener,
             PremiumLock premiumLock) {
 
+        this.listenable = requireNonNull(listenable);
         this.premiumLock = requireNonNull(premiumLock);
         this.actionModeProvider = requireNonNull(actionModeProvider);
         this.actionModeCallback = requireNonNull(actionModeCallback);
@@ -101,6 +105,7 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
                 return new FileViewHolder(
                         inflater.inflate(FileViewHolder.LAYOUT_ID, parent, false),
                         recyclerView,
+                        listenable,
                         selection,
                         actionModeProvider,
                         actionModeCallback,
@@ -113,6 +118,7 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
             case VIEW_TYPE_AD:
                 return new AdViewHolder(
                         inflater.inflate(AdViewHolder.LAYOUT_ID, parent, false),
+                        listenable,
                         premiumLock);
 
             default:

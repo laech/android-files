@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
@@ -182,6 +183,7 @@ public final class FilesFragment
         recycler.getRecycledViewPool().setMaxRecycledViews(VIEW_TYPE_HEADER, 50);
         recycler.setAdapter(adapter = new FilesAdapter(
                 recycler,
+                this,
                 selection(),
                 actionModeProvider(),
                 actionModeCallback(),
@@ -219,9 +221,9 @@ public final class FilesFragment
     @Override
     public void onRequestPermissionsResult(
             int requestCode,
-            String[] permissions,
-            int[] grantResults
-    ) {
+            @NonNull String[] permissions,
+            @NonNull int[] grantResults) {
+
         super.onRequestPermissionsResult(
                 requestCode,
                 permissions,

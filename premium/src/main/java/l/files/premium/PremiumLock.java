@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.pm.ApplicationInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -25,12 +24,12 @@ import java.util.List;
 import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
 import static android.content.Context.BIND_AUTO_CREATE;
-import static android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE;
 import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static android.widget.Toast.LENGTH_LONG;
 import static android.widget.Toast.LENGTH_SHORT;
 import static l.files.base.Objects.requireNonNull;
+import static l.files.ui.base.content.Contexts.isDebugBuild;
 
 public final class PremiumLock implements ServiceConnection {
 
@@ -48,7 +47,7 @@ public final class PremiumLock implements ServiceConnection {
     public PremiumLock(Activity activity) {
         this.activity = requireNonNull(activity);
         this.pref = getDefaultSharedPreferences(activity);
-        this.skuPremium = isDebugBuild()
+        this.skuPremium = isDebugBuild(activity)
                 ? "android.test.purchased"
                 : "l.files.premium";
     }
@@ -227,7 +226,7 @@ public final class PremiumLock implements ServiceConnection {
 
     void consumeTestPurchases() throws RemoteException, JSONException {
 
-        if (!isDebugBuild()) {
+        if (!isDebugBuild(activity)) {
             throw new IllegalStateException("Only available for debug build.");
         }
 
@@ -265,8 +264,4 @@ public final class PremiumLock implements ServiceConnection {
         new UpdatePurchaseStatus().execute();
     }
 
-    private boolean isDebugBuild() {
-        ApplicationInfo app = activity.getApplicationInfo();
-        return 0 != (app.flags & FLAG_DEBUGGABLE);
-    }
 }

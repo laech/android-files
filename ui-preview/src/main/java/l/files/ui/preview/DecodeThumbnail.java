@@ -101,7 +101,7 @@ Caused by: java.lang.OutOfMemoryError: Failed to allocate a 942852 byte allocati
         }
 
         if (result == null) {
-            publishProgress(NoPreview.FAILURE_UNAVAILABLE);
+            publishProgress(NoPreview.DECODE_RETURNED_NULL);
             return null;
         }
 

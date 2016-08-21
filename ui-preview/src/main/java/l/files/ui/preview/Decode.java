@@ -2,13 +2,17 @@ package l.files.ui.preview;
 
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -20,23 +24,35 @@ import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.setThreadPriority;
 import static java.lang.Math.min;
 import static java.lang.Runtime.getRuntime;
-import static java.util.concurrent.Executors.newFixedThreadPool;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.base.Objects.requireNonNull;
+import static l.files.ui.base.content.Contexts.isDebugBuild;
 import static l.files.ui.preview.Preview.Using.MEDIA_TYPE;
 
 public abstract class Decode extends AsyncTask<Object, Object, Object> {
 
-    private static final Executor executor = newFixedThreadPool(
-            min(getRuntime().availableProcessors(), 2),
+    private static final BlockingQueue<Runnable> queue =
+            new LinkedBlockingQueue<>();
+
+    private static final int N_THREADS =
+            min(getRuntime().availableProcessors(), 2);
+
+    private static final Executor executor = new ThreadPoolExecutor(
+            N_THREADS,
+            N_THREADS,
+            0L,
+            MILLISECONDS,
+            queue,
             new ThreadFactory() {
 
-                private final AtomicInteger threadNumber = new AtomicInteger(1);
+                private final AtomicInteger threadNumber =
+                        new AtomicInteger(1);
 
                 @Override
-                public Thread newThread(Runnable r) {
-                    return new Thread(r, "preview-decode-task-" + threadNumber.getAndIncrement());
+                public Thread newThread(@NonNull Runnable r) {
+                    return new Thread(r, "preview-decode-task-" +
+                            threadNumber.getAndIncrement());
                 }
-
             });
 
     final Path path;
@@ -84,6 +100,16 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
     }
 
     @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        if (isDebugBuild(context.context)) {
+            Log.i(getClass().getSimpleName(), "Decode enqueued" +
+                    ", current queue size " + queue.size() +
+                    ", " + path);
+        }
+    }
+
+    @Override
     protected final Object doInBackground(Object... params) {
         setThreadPriority(THREAD_PRIORITY_BACKGROUND);
 
@@ -114,18 +140,18 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
 
     private boolean checkIsCache() {
         if (path.startsWith(context.cacheDir)) {
-            publishProgress(NoPreview.FAILURE_UNAVAILABLE);
+            publishProgress(NoPreview.PATH_IN_CACHE_DIR);
             return true;
         }
         return false;
     }
 
     private boolean checkPreviewable() {
-        if (context.isPreviewable(path, stat, constraint)) {
-            return true;
+        NoPreview reason = context.getNoPreviewReason(path, stat, constraint);
+        if (reason != null) {
+            publishProgress(reason);
         }
-        publishProgress(NoPreview.FAILURE_UNAVAILABLE);
-        return false;
+        return reason == null;
     }
 
     private boolean checkThumbnailMemCache() {
@@ -200,7 +226,7 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
 
             } else if (value instanceof NoPreview) {
                 if (using == MEDIA_TYPE) {
-                    callback.onPreviewFailed(path, stat, using, ((NoPreview) value).failure);
+                    callback.onPreviewFailed(path, stat, using, ((NoPreview) value).cause);
                     context.putPreviewable(path, stat, constraint, false);
 
                 } else {
@@ -209,7 +235,7 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
                     if (sub != null) {
                         subs.add(sub);
                     } else {
-                        callback.onPreviewFailed(path, stat, using, ((NoPreview) value).failure);
+                        callback.onPreviewFailed(path, stat, using, ((NoPreview) value).cause);
                         context.putPreviewable(path, stat, constraint, false);
                     }
                 }

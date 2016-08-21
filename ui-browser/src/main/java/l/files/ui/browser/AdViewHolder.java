@@ -17,7 +17,7 @@ import com.google.android.gms.ads.NativeExpressAdView;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import l.files.premium.PremiumLock;
-import l.files.ui.base.app.BaseActivity;
+import l.files.ui.base.app.LifeCycleListenable;
 import l.files.ui.base.app.LifeCycleListener;
 
 import static com.google.android.gms.ads.AdRequest.DEVICE_ID_EMULATOR;
@@ -34,7 +34,11 @@ final class AdViewHolder extends RecyclerView.ViewHolder
     private final NativeExpressAdView adView;
     private boolean adLoaded;
 
-    AdViewHolder(View itemView, PremiumLock premiumLock) {
+    AdViewHolder(
+            View itemView,
+            LifeCycleListenable listenable,
+            PremiumLock premiumLock) {
+
         super(itemView);
 
         Context context = itemView.getContext();
@@ -53,8 +57,7 @@ final class AdViewHolder extends RecyclerView.ViewHolder
 
         configureRemoveAdView(premiumLock);
 
-        ((BaseActivity) itemView.getContext())
-                .addWeaklyReferencedLifeCycleListener(this);
+        listenable.addWeaklyReferencedLifeCycleListener(this);
     }
 
     private AdListener newAdListener() {
@@ -117,10 +120,6 @@ final class AdViewHolder extends RecyclerView.ViewHolder
         if (params instanceof StaggeredGridLayoutManager.LayoutParams) {
             ((StaggeredGridLayoutManager.LayoutParams) params).setFullSpan(true);
         }
-    }
-
-    @Override
-    public void onCreate() {
     }
 
     @Override

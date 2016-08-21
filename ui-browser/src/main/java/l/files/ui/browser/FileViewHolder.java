@@ -2,7 +2,6 @@ package l.files.ui.browser;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.support.annotation.Nullable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.view.ActionMode;
@@ -16,6 +15,8 @@ import java.lang.ref.WeakReference;
 
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.ui.base.app.LifeCycleListenable;
+import l.files.ui.base.app.LifeCycleListener;
 import l.files.ui.base.fs.FileInfo;
 import l.files.ui.base.fs.OnOpenFileListener;
 import l.files.ui.base.selection.Selection;
@@ -31,12 +32,13 @@ import static android.graphics.Color.WHITE;
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.base.Objects.requireNonNull;
+import static l.files.ui.base.content.Contexts.isDebugBuild;
 import static l.files.ui.base.view.Views.find;
 import static l.files.ui.browser.FilesAdapter.calculateCardContentWidthPixels;
 import static l.files.ui.preview.Preview.Using.FILE_EXTENSION;
 
 final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo>
-        implements Preview.Callback {
+        implements Preview.Callback, LifeCycleListener {
 
     static final int LAYOUT_ID = R.layout.files_grid_item;
 
@@ -61,6 +63,7 @@ final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo>
     FileViewHolder(
             View itemView,
             RecyclerView recyclerView,
+            LifeCycleListenable listenable,
             Selection<Path, FileInfo> selection,
             ActionModeProvider actionModeProvider,
             ActionMode.Callback actionModeCallback,
@@ -77,6 +80,8 @@ final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo>
         this.itemView.setOnClickListener(this);
         this.itemView.setOnLongClickListener(this);
         this.itemView.setTag(this);
+
+        listenable.addWeaklyReferencedLifeCycleListener(this);
     }
 
     @Override
@@ -307,13 +312,36 @@ final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo>
             Path item,
             Stat stat,
             Preview.Using used,
-            @Nullable Throwable cause) {
+            Object cause) {
 
         if (item.equals(previewPath())) {
             updateContent(null);
         }
 
-        Log.w(getClass().getSimpleName(),
-                "No preview " + item, cause);
+        if (isDebugBuild(context())) {
+            if (cause instanceof Throwable) {
+                Log.d(getClass().getSimpleName(),
+                        "No preview " + item, (Throwable) cause);
+            } else {
+                Log.d(getClass().getSimpleName(),
+                        "No preview " + item + " (" + cause + ")");
+            }
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        if (task != null) {
+            task.cancelAll();
+            task = null;
+        }
+    }
+
+    @Override
+    public void onResume() {
+    }
+
+    @Override
+    public void onPause() {
     }
 }
