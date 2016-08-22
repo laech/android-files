@@ -41,6 +41,13 @@
 
             </android.support.v7.widget.Toolbar>
 
+            <View
+                android:id="@+id/toolbar_shadow"
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:background="#70000000"
+                android:visibility="gone" />
+
         </android.support.design.widget.AppBarLayout>
 
         <FrameLayout
@@ -54,7 +61,7 @@
     <fragment
         android:id="@+id/bookmarks_fragment"
         android:name="l.files.ui.bookmarks.BookmarksFragment"
-        android:layout_width="300dp"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start" />
 

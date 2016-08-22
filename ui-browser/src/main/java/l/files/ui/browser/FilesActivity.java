@@ -36,12 +36,15 @@ import l.files.ui.preview.Preview;
 
 import static android.content.ContentResolver.SCHEME_FILE;
 import static android.graphics.Color.WHITE;
+import static android.os.Build.VERSION.SDK_INT;
+import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
 import static android.support.v4.view.GravityCompat.START;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_LOCKED_OPEN;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_UNLOCKED;
 import static android.view.KeyEvent.KEYCODE_BACK;
+import static android.view.View.VISIBLE;
 import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
 import static l.files.fs.LinkOption.FOLLOW;
@@ -102,6 +105,11 @@ public final class FilesActivity extends BaseActivity implements
         assert actionBar != null;
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setDisplayShowTitleEnabled(false);
+
+        if (SDK_INT <= LOLLIPOP) {
+            findViewById(R.id.toolbar_shadow).setVisibility(VISIBLE);
+            drawer.setDrawerShadow(R.drawable.drawer_shadow, START);
+        }
 
         setOptionsMenu(OptionsMenus.compose(
                 new ActionBarDrawerToggleMenu(drawer, getSupportFragmentManager()),

@@ -2,7 +2,6 @@
 <resources>
 
     <style name="Theme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowBackground">@drawable/window_background</item>
         <item name="colorPrimaryDark">@color/color_primary_dark</item>
         <item name="colorPrimary">@color/color_primary</item>
