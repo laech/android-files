@@ -9,8 +9,8 @@ android {
         applicationId 'l.files'
         minSdkVersion project.minSdkVersion
         targetSdkVersion project.targetSdkVersion
-        versionCode 24
-        versionName '4.3.2'
+        versionCode 25
+        versionName '4.4'
     }
 
     compileOptions {
