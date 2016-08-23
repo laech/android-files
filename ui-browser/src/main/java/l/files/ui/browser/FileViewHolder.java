@@ -22,6 +22,7 @@ import l.files.ui.base.fs.OnOpenFileListener;
 import l.files.ui.base.selection.Selection;
 import l.files.ui.base.selection.SelectionModeViewHolder;
 import l.files.ui.base.view.ActionModeProvider;
+import l.files.ui.browser.FilesAdapter.ScrollStateListener;
 import l.files.ui.browser.text.FileTextLayouts;
 import l.files.ui.browser.widget.FileView;
 import l.files.ui.preview.Decode;
@@ -29,6 +30,7 @@ import l.files.ui.preview.Preview;
 import l.files.ui.preview.Rect;
 
 import static android.graphics.Color.WHITE;
+import static android.support.v7.widget.RecyclerView.SCROLL_STATE_IDLE;
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.base.Objects.requireNonNull;
@@ -38,11 +40,10 @@ import static l.files.ui.browser.FilesAdapter.calculateCardContentWidthPixels;
 import static l.files.ui.preview.Preview.Using.FILE_EXTENSION;
 
 final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo>
-        implements Preview.Callback, LifeCycleListener {
+        implements Preview.Callback, LifeCycleListener, ScrollStateListener {
 
     static final int LAYOUT_ID = R.layout.files_grid_item;
 
-    private final RecyclerView recyclerView;
     private final Preview decorator;
     private final OnOpenFileListener listener;
     private final FileTextLayouts layouts;
@@ -60,9 +61,10 @@ final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo>
     private WeakReference<Bitmap> pendingUpdatePreview;
     private WeakReference<Bitmap> pendingUpdateBlurredThumbnail;
 
+    private int scrollState;
+
     FileViewHolder(
             View itemView,
-            RecyclerView recyclerView,
             LifeCycleListenable listenable,
             Selection<Path, FileInfo> selection,
             ActionModeProvider actionModeProvider,
@@ -71,7 +73,6 @@ final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo>
 
         super(itemView, selection, actionModeProvider, actionModeCallback);
 
-        this.recyclerView = requireNonNull(recyclerView, "recyclerView");
         this.decorator = Preview.get(itemView.getContext());
         this.listener = requireNonNull(listener, "listener");
         this.layouts = FileTextLayouts.get();
@@ -79,7 +80,6 @@ final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo>
         this.blur = find(R.id.blur, this);
         this.itemView.setOnClickListener(this);
         this.itemView.setOnLongClickListener(this);
-        this.itemView.setTag(this);
 
         listenable.addWeaklyReferencedLifeCycleListener(this);
     }
@@ -94,7 +94,20 @@ final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo>
         listener.onOpen(file.selfPath(), file.linkTargetOrSelfStat());
     }
 
-    void executePendingUpdate() {
+    @Override
+    public void onCurrentState(int newState) {
+        scrollState = newState;
+    }
+
+    @Override
+    public void onScrollStateChanged(RecyclerView view, int newState) {
+        scrollState = newState;
+        if (newState == SCROLL_STATE_IDLE) {
+            executePendingUpdate();
+        }
+    }
+
+    private void executePendingUpdate() {
 
         if (pendingUpdateTask) {
             Path file = previewPath();
@@ -222,8 +235,8 @@ final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo>
          * is actually wanted otherwise user will have to lift finger to see
          * things updated which is annoying.
          */
-        return recyclerView.getScrollState() == RecyclerView.SCROLL_STATE_IDLE ||
-                recyclerView.getScrollState() == RecyclerView.SCROLL_STATE_DRAGGING;
+        return scrollState == SCROLL_STATE_IDLE ||
+                scrollState == RecyclerView.SCROLL_STATE_DRAGGING;
     }
 
     private Path previewPath() {

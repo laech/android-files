@@ -9,6 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import l.files.ui.base.view.ActionModeProvider;
 import l.files.ui.base.widget.StableAdapter;
 import l.files.ui.browser.action.Selectable;
 
+import static android.support.v7.widget.RecyclerView.SCROLL_STATE_IDLE;
 import static l.files.base.Objects.requireNonNull;
 
 final class FilesAdapter extends StableAdapter<Object, ViewHolder>
@@ -34,8 +36,6 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
     static final int VIEW_TYPE_HEADER = 1;
     static final int VIEW_TYPE_AD = 2;
 
-    private final RecyclerView recyclerView;
-
     private final ActionModeProvider actionModeProvider;
     private final ActionMode.Callback actionModeCallback;
     private final Selection<Path, FileInfo> selection;
@@ -44,6 +44,8 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
 
     private final PremiumLock premiumLock;
     private final LifeCycleListenable listenable;
+
+    private int scrollState = SCROLL_STATE_IDLE;
 
     FilesAdapter(
             RecyclerView recyclerView,
@@ -60,21 +62,17 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
         this.actionModeCallback = requireNonNull(actionModeCallback);
         this.listener = requireNonNull(listener);
         this.selection = requireNonNull(selection);
-        this.recyclerView = requireNonNull(recyclerView);
-        this.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
 
             @Override
             public void onScrollStateChanged(RecyclerView view, int newState) {
                 super.onScrollStateChanged(view, newState);
-
-                if (newState != RecyclerView.SCROLL_STATE_IDLE) {
-                    return;
-                }
-
+                scrollState = newState;
                 for (int i = 0; i < view.getChildCount(); i++) {
                     Object tag = view.getChildAt(i).getTag();
-                    if (tag instanceof FileViewHolder) {
-                        ((FileViewHolder) tag).executePendingUpdate();
+                    if (tag instanceof ScrollStateListener) {
+                        ((ScrollStateListener) tag)
+                                .onScrollStateChanged(view, newState);
                     }
                 }
             }
@@ -99,41 +97,49 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         Context context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
+        View itemView;
+        ViewHolder holder;
         switch (viewType) {
 
             case VIEW_TYPE_FILE:
-                return new FileViewHolder(
-                        inflater.inflate(FileViewHolder.LAYOUT_ID, parent, false),
-                        recyclerView,
+                itemView = inflater.inflate(FileViewHolder.LAYOUT_ID, parent, false);
+                holder = new FileViewHolder(
+                        itemView,
                         listenable,
                         selection,
                         actionModeProvider,
                         actionModeCallback,
                         listener);
+                break;
 
             case VIEW_TYPE_HEADER:
-                return new HeaderViewHolder(
-                        inflater.inflate(HeaderViewHolder.LAYOUT_ID, parent, false));
+                itemView = inflater.inflate(HeaderViewHolder.LAYOUT_ID, parent, false);
+                holder = new HeaderViewHolder(itemView);
+                break;
 
             case VIEW_TYPE_AD:
-                return new AdViewHolder(
-                        inflater.inflate(AdViewHolder.LAYOUT_ID, parent, false),
-                        listenable,
-                        premiumLock);
+                itemView = inflater.inflate(AdViewHolder.LAYOUT_ID, parent, false);
+                holder = new AdViewHolder(itemView, listenable, premiumLock);
+                break;
 
             default:
                 throw new IllegalArgumentException(String.valueOf(viewType));
         }
+        itemView.setTag(holder);
+        return holder;
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         Object item = getItem(position);
-        if (item instanceof Header) {
+        if (holder instanceof ScrollStateListener) {
+            ((ScrollStateListener) holder).onCurrentState(scrollState);
+        }
+        if (holder instanceof HeaderViewHolder) {
             ((HeaderViewHolder) holder).bind((Header) item);
-        } else if (item instanceof FileInfo) {
+        } else if (holder instanceof FileViewHolder) {
             ((FileViewHolder) holder).bind((FileInfo) item);
-        } else if (item instanceof Ad) {
+        } else if (holder instanceof AdViewHolder) {
             ((AdViewHolder) holder).bind();
         } else {
             throw new IllegalArgumentException(String.valueOf(item));
@@ -185,5 +191,12 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
                         - res.getDimension(R.dimen.files_item_card_inner_space) * 2
                         - padding
         );
+    }
+
+    interface ScrollStateListener {
+
+        void onCurrentState(int newState);
+
+        void onScrollStateChanged(RecyclerView view, int newState);
     }
 }

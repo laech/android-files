@@ -93,8 +93,6 @@ final class AdViewHolder extends RecyclerView.ViewHolder
 
     private void configureRemoveAdView(final PremiumLock premiumLock) {
         View removeAdView = find(R.id.remove_ad, this);
-        removeAdView.setScaleX(0.75f);
-        removeAdView.setScaleY(0.75f);
         removeAdView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
