@@ -3,6 +3,7 @@ package l.files.ui.base.view;
 import android.support.v7.view.ActionMode;
 
 public final class ActionModes {
+
     private ActionModes() {
     }
 

@@ -15,7 +15,11 @@ public final class Views {
     }
 
     public static <T extends View> T find(int id, Fragment fragment) {
-        return find(id, fragment.getView());
+        View view = fragment.getView();
+        if (view == null) {
+            throw new IllegalStateException();
+        }
+        return find(id, view);
     }
 
     public static <T extends View> T find(int id, ViewHolder holder) {

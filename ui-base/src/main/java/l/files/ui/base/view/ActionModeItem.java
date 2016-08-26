@@ -4,6 +4,7 @@ import android.support.v7.view.ActionMode;
 import android.view.MenuItem;
 
 public abstract class ActionModeItem extends ActionModeAdapter {
+
     private final int id;
 
     public ActionModeItem(final int id) {
@@ -23,9 +24,7 @@ public abstract class ActionModeItem extends ActionModeAdapter {
     protected abstract void onItemSelected(ActionMode mode, MenuItem item);
 
     @Override
-    public final boolean onActionItemClicked(
-            final ActionMode mode,
-            final MenuItem item) {
+    public final boolean onActionItemClicked(ActionMode mode, MenuItem item) {
         if (item.getItemId() == id()) {
             onItemSelected(mode, item);
             return true;
