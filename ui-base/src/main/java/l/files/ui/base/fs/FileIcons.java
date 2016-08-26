@@ -6,6 +6,8 @@ import android.graphics.Typeface;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import l.files.fs.Path;
 import l.files.ui.base.R;
 
@@ -21,6 +23,8 @@ import static l.files.ui.base.fs.UserDirs.DIR_ROOT;
 import static l.files.ui.base.fs.UserDirs.DIR_SDCARD2;
 
 public final class FileIcons {
+
+    @Nullable
     private static Typeface font;
 
     private static final Map<Path, Integer> iconByDirectoryUri =

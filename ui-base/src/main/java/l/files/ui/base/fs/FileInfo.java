@@ -1,10 +1,11 @@
 package l.files.ui.base.fs;
 
 import android.content.Context;
-import android.support.annotation.Nullable;
 
 import java.io.IOException;
 import java.text.Collator;
+
+import javax.annotation.Nullable;
 
 import l.files.base.Objects;
 import l.files.fs.Files;
@@ -19,13 +20,25 @@ import static l.files.fs.media.MediaTypes.MEDIA_TYPE_OCTET_STREAM;
 public final class FileInfo implements Comparable<FileInfo> {
 
     private final Collator collator;
+
+    @Nullable
     private CollationKey collationKey;
+
+    @Nullable
     private Boolean readable;
+
+    @Nullable
     private String basicMediaType;
 
     private final Path selfPath;
+
+    @Nullable
     private final Stat selfStat;
+
+    @Nullable
     private final Path linkTargetPath;
+
+    @Nullable
     private final Stat linkTargetStat;
 
     private FileInfo(
@@ -90,7 +103,8 @@ public final class FileInfo implements Comparable<FileInfo> {
     }
 
     public Path linkTargetOrSelfPath() {
-        return linkTargetPath() != null ? linkTargetPath() : selfPath();
+        Path path = linkTargetPath();
+        return path != null ? path : selfPath();
     }
 
     private CollationKey collationKey() {
@@ -117,7 +131,7 @@ public final class FileInfo implements Comparable<FileInfo> {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
         }
