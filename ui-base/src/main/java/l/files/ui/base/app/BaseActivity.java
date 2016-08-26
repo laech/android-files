@@ -1,24 +1,29 @@
 package l.files.ui.base.app;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import javax.annotation.Nullable;
+
 import l.files.ui.base.view.ActionModeProvider;
+
+import static l.files.base.Objects.requireNonNull;
 
 public class BaseActivity extends AppCompatActivity
         implements ActionModeProvider {
 
     private OptionsMenu optionsMenu = OptionsMenus.EMPTY;
 
+    @Nullable
     private ActionMode currentActionMode;
+
+    @Nullable
     private ActionMode.Callback currentActionModeCallback;
 
     public final void setOptionsMenu(OptionsMenu menu) {
-        optionsMenu = OptionsMenus.nullToEmpty(menu);
+        optionsMenu = requireNonNull(menu, "menu");
     }
 
     @Override
@@ -41,16 +46,14 @@ public class BaseActivity extends AppCompatActivity
     }
 
     @Override
-    public void onSupportActionModeFinished(
-            @NonNull ActionMode mode) {
+    public void onSupportActionModeFinished(ActionMode mode) {
         super.onSupportActionModeFinished(mode);
         currentActionMode = null;
         currentActionModeCallback = null;
     }
 
     @Override
-    public ActionMode startSupportActionMode(
-            @NonNull ActionMode.Callback callback) {
+    public ActionMode startSupportActionMode(ActionMode.Callback callback) {
         currentActionModeCallback = callback;
         currentActionMode = super.startSupportActionMode(callback);
         return currentActionMode;

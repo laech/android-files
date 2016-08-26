@@ -7,10 +7,6 @@ public final class OptionsMenus {
     private OptionsMenus() {
     }
 
-    public static OptionsMenu nullToEmpty(OptionsMenu menu) {
-        return menu == null ? EMPTY : menu;
-    }
-
     public static OptionsMenu compose(OptionsMenu... menus) {
         return new CompositeMenu(menus);
     }

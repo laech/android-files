@@ -9,6 +9,7 @@ import java.util.IdentityHashMap;
 import java.util.Set;
 
 import static java.util.Collections.newSetFromMap;
+import static l.files.base.Objects.requireNonNull;
 
 public class BaseFragment extends Fragment
         implements LifeCycleListenable {
@@ -50,8 +51,8 @@ public class BaseFragment extends Fragment
         }
     }
 
-    public final void setOptionsMenu(final OptionsMenu menu) {
-        optionsMenu = OptionsMenus.nullToEmpty(menu);
+    public final void setOptionsMenu(OptionsMenu menu) {
+        optionsMenu = requireNonNull(menu);
     }
 
     @Override
