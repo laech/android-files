@@ -8,6 +8,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 
+import javax.annotation.Nullable;
+
 import l.files.ui.base.view.ActionModeProvider;
 
 import static l.files.base.Objects.requireNonNull;
@@ -19,6 +21,7 @@ public abstract class SelectionModeViewHolder<K, V> extends ViewHolder
     private final ActionModeProvider actionModeProvider;
     private final ActionMode.Callback actionModeCallback;
 
+    @Nullable
     private V item;
 
     public SelectionModeViewHolder(
@@ -40,6 +43,7 @@ public abstract class SelectionModeViewHolder<K, V> extends ViewHolder
     protected abstract K itemId(V item);
 
     protected final V item() {
+        assert item != null;
         return item;
     }
 
@@ -74,7 +78,7 @@ public abstract class SelectionModeViewHolder<K, V> extends ViewHolder
     private void setActivated(V item) {
         K itemId = itemId(item);
         boolean selected = selection.contains(itemId);
-        if (itemView.isActivated() != selected && itemId != null) {
+        if (itemView.isActivated() != selected) {
             itemView.setActivated(selected);
         }
     }
@@ -96,6 +100,7 @@ public abstract class SelectionModeViewHolder<K, V> extends ViewHolder
 
     @Override
     public boolean onLongClick(View v) {
+        assert item != null;
         selection.toggle(itemId(item), item);
         return true;
     }

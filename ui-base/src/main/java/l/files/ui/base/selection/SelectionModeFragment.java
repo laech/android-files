@@ -8,11 +8,14 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.annotation.Nullable;
+
 import l.files.ui.base.app.BaseFragment;
 import l.files.ui.base.view.ActionModeProvider;
 
 import static java.lang.System.currentTimeMillis;
 import static java.lang.System.identityHashCode;
+import static l.files.base.Objects.requireNonNull;
 
 public abstract class SelectionModeFragment<K, V> extends BaseFragment {
 
@@ -20,11 +23,14 @@ public abstract class SelectionModeFragment<K, V> extends BaseFragment {
 
     private static final Map<Integer, State> selections = new HashMap<>();
 
+    @Nullable
     private Integer selectionId;
+
+    @Nullable
     private Selection<K, V> selection;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setSelection(savedInstanceState);
@@ -32,7 +38,7 @@ public abstract class SelectionModeFragment<K, V> extends BaseFragment {
     }
 
     @SuppressWarnings("unchecked")
-    private void setSelection(Bundle savedInstanceState) {
+    private void setSelection(@Nullable Bundle savedInstanceState) {
         if (savedInstanceState != null) {
             selectionId = savedInstanceState.getInt(SELECTION_ID);
             State state = selections.get(selectionId);
@@ -53,7 +59,7 @@ public abstract class SelectionModeFragment<K, V> extends BaseFragment {
         Iterator<Entry<Integer, State>> it = selections.entrySet().iterator();
         while (it.hasNext()) {
             Entry<Integer, State> entry = it.next();
-            if (entry.getKey().intValue() == selectionId ||
+            if (entry.getKey().equals(selectionId) ||
                     now - entry.getValue().creationTime > 10000) {
                 it.remove();
             }
@@ -63,19 +69,23 @@ public abstract class SelectionModeFragment<K, V> extends BaseFragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        assert selection != null;
+        assert selectionId != null;
         selections.put(selectionId, new State(selection));
         outState.putInt(SELECTION_ID, selectionId);
     }
 
     @Override
-    public void onViewStateRestored(Bundle savedInstanceState) {
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
+        assert selection != null;
         if (!selection.isEmpty()) {
             actionModeProvider().startSupportActionMode(actionModeCallback());
         }
     }
 
     protected Selection<K, V> selection() {
+        assert selection != null;
         return selection;
     }
 
@@ -88,7 +98,7 @@ public abstract class SelectionModeFragment<K, V> extends BaseFragment {
         final long creationTime;
 
         State(Selection<?, ?> selection) {
-            this.selection = selection;
+            this.selection = requireNonNull(selection);
             this.creationTime = currentTimeMillis();
         }
     }
