@@ -1,9 +1,6 @@
 package l.files.ui.preview;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.BitmapFactory.Options;
-import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,6 +11,8 @@ import l.files.fs.Path;
 import l.files.fs.Stat;
 
 import static android.graphics.BitmapFactory.decodeStream;
+import static l.files.base.graphics.Bitmaps.decodeBounds;
+import static l.files.base.graphics.Bitmaps.scaleOptions;
 import static l.files.fs.Files.newBufferedInputStream;
 
 final class DecodeImage extends DecodeThumbnail {
@@ -72,18 +71,11 @@ final class DecodeImage extends DecodeThumbnail {
     @Override
     Result decode() throws IOException {
         Rect size = context.getSize(path, stat, constraint, true);
-        if (size == null) {
-            size = decodeSize();
-            if (size != null) {
-                publishProgress(size);
-            }
+        if (size != null) {
+            publishProgress(size);
         }
 
         if (isCancelled()) {
-            return null;
-        }
-
-        if (size == null) {
             return null;
         }
 
@@ -91,7 +83,13 @@ final class DecodeImage extends DecodeThumbnail {
         try {
 
             InputStream in = closer.register(newBufferedInputStream(path));
-            Bitmap bitmap = decodeStream(in, null, options(size));
+            if (size == null) {
+                size = decodeBounds(in);
+            }
+            if (size == null) {
+                return null;
+            }
+            Bitmap bitmap = decodeStream(in, null, scaleOptions(size, constraint));
             return bitmap != null ? new Result(bitmap, size) : null;
 
         } catch (Throwable e) {
@@ -99,42 +97,6 @@ final class DecodeImage extends DecodeThumbnail {
         } finally {
             closer.close();
         }
-    }
-
-    Rect decodeSize() throws IOException {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-
-        Closer closer = Closer.create();
-        try {
-
-            InputStream in = closer.register(newBufferedInputStream(path));
-            decodeStream(in, null, options);
-
-        } catch (Exception e) {
-            Log.w(getClass().getSimpleName(),
-                    "Failed to decode bitmap for " + path, e);
-            return null;
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
-        } finally {
-            closer.close();
-        }
-
-        if (options.outWidth > 0 && options.outHeight > 0) {
-            return Rect.of(options.outWidth, options.outHeight);
-        }
-        return null;
-    }
-
-
-    private Options options(Rect original) {
-        Rect scaled = original.scale(constraint);
-        float scale = scaled.width() / (float) original.width();
-        Options options = new Options();
-        options.inSampleSize = (int) (1 / scale);
-        return options;
     }
 
 }
