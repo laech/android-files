@@ -1,4 +1,4 @@
-package l.files.base.graphics.drawable;
+package l.files.ui.base.graphics.drawable;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -8,7 +8,7 @@ import android.test.AndroidTestCase;
 import static android.graphics.Bitmap.Config.ARGB_8888;
 import static android.graphics.Bitmap.createBitmap;
 import static android.graphics.Color.BLUE;
-import static l.files.base.graphics.drawable.Drawables.toBitmap;
+import static l.files.ui.base.graphics.drawable.Drawables.toBitmap;
 
 public final class DrawablesTest extends AndroidTestCase {
 

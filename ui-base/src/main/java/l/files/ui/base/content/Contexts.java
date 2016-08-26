@@ -1,4 +1,4 @@
-package l.files.base.content;
+package l.files.ui.base.content;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;

@@ -7,9 +7,9 @@ import android.support.annotation.Nullable;
 
 import java.io.IOException;
 
-import l.files.base.graphics.Rect;
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.ui.base.graphics.Rect;
 
 import static android.graphics.BitmapFactory.decodeByteArray;
 

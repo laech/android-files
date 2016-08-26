@@ -1,8 +1,8 @@
 package l.files.ui.preview;
 
-import l.files.base.graphics.Rect;
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.ui.base.graphics.Rect;
 
 interface Previewer {
 

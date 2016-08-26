@@ -13,7 +13,7 @@ import android.view.View;
 
 import java.lang.ref.WeakReference;
 
-import l.files.base.graphics.Rect;
+import l.files.ui.base.graphics.Rect;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.app.LifeCycleListenable;
@@ -34,7 +34,7 @@ import static android.support.v7.widget.RecyclerView.SCROLL_STATE_IDLE;
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.base.Objects.requireNonNull;
-import static l.files.base.content.Contexts.isDebugBuild;
+import static l.files.ui.base.content.Contexts.isDebugBuild;
 import static l.files.ui.base.view.Views.find;
 import static l.files.ui.browser.FilesAdapter.calculateCardContentWidthPixels;
 import static l.files.ui.preview.Preview.Using.FILE_EXTENSION;

@@ -15,11 +15,11 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import l.files.base.graphics.Rect;
 import l.files.base.io.Closer;
 import l.files.fs.Files;
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.ui.base.graphics.Rect;
 
 import static android.os.AsyncTask.SERIAL_EXECUTOR;
 import static java.lang.System.nanoTime;

@@ -1,4 +1,4 @@
 @NonnullByDefault
-package l.files.base.content.pm;
+package l.files.ui.base.content;
 
 import l.files.base.annotation.NonnullByDefault;

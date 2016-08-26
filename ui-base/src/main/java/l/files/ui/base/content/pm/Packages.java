@@ -1,4 +1,4 @@
-package l.files.base.content.pm;
+package l.files.ui.base.content.pm;
 
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -8,7 +8,7 @@ import android.graphics.drawable.Drawable;
 
 import javax.annotation.Nullable;
 
-import l.files.base.graphics.drawable.Drawables;
+import l.files.ui.base.graphics.drawable.Drawables;
 
 public final class Packages {
 

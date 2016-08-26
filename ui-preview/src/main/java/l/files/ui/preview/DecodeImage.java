@@ -5,15 +5,15 @@ import android.graphics.Bitmap;
 import java.io.IOException;
 import java.io.InputStream;
 
-import l.files.base.graphics.Rect;
 import l.files.base.io.Closer;
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.ui.base.graphics.Rect;
 
 import static android.graphics.BitmapFactory.decodeStream;
-import static l.files.base.graphics.Bitmaps.decodeBounds;
-import static l.files.base.graphics.Bitmaps.scaleOptions;
 import static l.files.fs.Files.newBufferedInputStream;
+import static l.files.ui.base.graphics.Bitmaps.decodeBounds;
+import static l.files.ui.base.graphics.Bitmaps.scaleOptions;
 
 final class DecodeImage extends DecodeThumbnail {
 

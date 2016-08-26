@@ -1,4 +1,4 @@
 @NonnullByDefault
-package l.files.base.graphics.drawable;
+package l.files.ui.base.graphics.drawable;
 
 import l.files.base.annotation.NonnullByDefault;

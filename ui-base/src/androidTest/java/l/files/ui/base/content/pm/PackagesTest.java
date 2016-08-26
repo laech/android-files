@@ -1,4 +1,4 @@
-package l.files.base.content.pm;
+package l.files.ui.base.content.pm;
 
 import android.content.pm.PackageManager;
 import android.test.AndroidTestCase;
@@ -12,8 +12,8 @@ import java.io.OutputStream;
 
 import l.files.base.io.Closer;
 
-import static l.files.base.content.pm.Packages.getApkIconBitmap;
-import static l.files.base.content.pm.Packages.getApkIconDrawable;
+import static l.files.ui.base.content.pm.Packages.getApkIconBitmap;
+import static l.files.ui.base.content.pm.Packages.getApkIconDrawable;
 
 public final class PackagesTest extends AndroidTestCase {
 

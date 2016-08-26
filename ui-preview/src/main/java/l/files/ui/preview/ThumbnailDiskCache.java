@@ -13,7 +13,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import l.files.base.graphics.Rect;
 import l.files.base.io.Closer;
 import l.files.fs.DirectoryNotEmpty;
 import l.files.fs.FileSystem.Consumer;
@@ -22,6 +21,7 @@ import l.files.fs.Instant;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.fs.TraversalCallback;
+import l.files.ui.base.graphics.Rect;
 
 import static android.graphics.Bitmap.CompressFormat.WEBP;
 import static android.graphics.BitmapFactory.decodeStream;

@@ -18,7 +18,7 @@ import l.files.ui.base.fs.FileInfo;
 import l.files.ui.browser.text.FileTextLayouts;
 import l.files.ui.browser.R;
 import l.files.ui.browser.graphics.drawable.ThumbnailTransitionDrawable;
-import l.files.base.graphics.Rect;
+import l.files.ui.base.graphics.Rect;
 
 import static android.graphics.Paint.ANTI_ALIAS_FLAG;
 import static android.os.Build.VERSION.SDK_INT;

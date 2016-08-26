@@ -10,9 +10,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import l.files.base.graphics.Rect;
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.ui.base.graphics.Rect;
 
 import static android.graphics.Bitmap.createScaledBitmap;
 import static l.files.base.Objects.requireNonNull;

@@ -1,4 +1,4 @@
-package l.files.base.graphics;
+package l.files.ui.base.graphics;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
@@ -11,8 +11,8 @@ import java.io.ByteArrayOutputStream;
 import static android.graphics.Bitmap.CompressFormat.JPEG;
 import static android.graphics.Bitmap.Config.ARGB_8888;
 import static android.graphics.Bitmap.createBitmap;
-import static l.files.base.graphics.Bitmaps.decodeBounds;
-import static l.files.base.graphics.Bitmaps.scaleOptions;
+import static l.files.ui.base.graphics.Bitmaps.decodeBounds;
+import static l.files.ui.base.graphics.Bitmaps.scaleOptions;
 
 public final class BitmapsTest extends TestCase {
 

@@ -1,4 +1,4 @@
-package l.files.base.graphics;
+package l.files.ui.base.graphics;
 
 import android.graphics.BitmapFactory.Options;
 

@@ -17,9 +17,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import l.files.base.graphics.Rect;
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.ui.base.graphics.Rect;
 
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.setThreadPriority;
@@ -27,7 +27,7 @@ import static java.lang.Math.min;
 import static java.lang.Runtime.getRuntime;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.base.Objects.requireNonNull;
-import static l.files.base.content.Contexts.isDebugBuild;
+import static l.files.ui.base.content.Contexts.isDebugBuild;
 import static l.files.ui.preview.Preview.Using.MEDIA_TYPE;
 
 public abstract class Decode extends AsyncTask<Object, Object, Object> {

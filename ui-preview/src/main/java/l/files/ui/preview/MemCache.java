@@ -2,9 +2,9 @@ package l.files.ui.preview;
 
 import android.support.v4.util.LruCache;
 
-import l.files.base.graphics.Rect;
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.ui.base.graphics.Rect;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 

@@ -3,11 +3,11 @@ package l.files.ui.preview;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 
-import l.files.base.graphics.Rect;
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.ui.base.graphics.Rect;
 
-import static l.files.base.content.pm.Packages.getApkIconBitmap;
+import static l.files.ui.base.content.pm.Packages.getApkIconBitmap;
 
 final class DecodeApk extends DecodeThumbnail {
 

@@ -1,4 +1,4 @@
-package l.files.base.graphics.drawable;
+package l.files.ui.base.graphics.drawable;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
