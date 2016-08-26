@@ -29,7 +29,7 @@ import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static android.widget.Toast.LENGTH_LONG;
 import static android.widget.Toast.LENGTH_SHORT;
 import static l.files.base.Objects.requireNonNull;
-import static l.files.ui.base.content.Contexts.isDebugBuild;
+import static l.files.base.content.Contexts.isDebugBuild;
 
 public final class PremiumLock implements ServiceConnection {
 

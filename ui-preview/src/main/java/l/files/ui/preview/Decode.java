@@ -27,7 +27,7 @@ import static java.lang.Math.min;
 import static java.lang.Runtime.getRuntime;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.base.Objects.requireNonNull;
-import static l.files.ui.base.content.Contexts.isDebugBuild;
+import static l.files.base.content.Contexts.isDebugBuild;
 import static l.files.ui.preview.Preview.Using.MEDIA_TYPE;
 
 public abstract class Decode extends AsyncTask<Object, Object, Object> {
