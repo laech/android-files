@@ -5,7 +5,8 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.Nullable;
+
+import javax.annotation.Nullable;
 
 import l.files.base.graphics.drawable.Drawables;
 

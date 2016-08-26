@@ -1,5 +1,7 @@
 package l.files.base.graphics;
 
+import javax.annotation.Nullable;
+
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.lang.Math.round;
@@ -42,7 +44,7 @@ public final class Rect {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
