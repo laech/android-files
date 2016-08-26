@@ -27,7 +27,7 @@ import l.files.ui.browser.text.FileTextLayouts;
 import l.files.ui.browser.widget.FileView;
 import l.files.ui.preview.Decode;
 import l.files.ui.preview.Preview;
-import l.files.ui.preview.Rect;
+import l.files.base.graphics.Rect;
 
 import static android.graphics.Color.WHITE;
 import static android.support.v7.widget.RecyclerView.SCROLL_STATE_IDLE;

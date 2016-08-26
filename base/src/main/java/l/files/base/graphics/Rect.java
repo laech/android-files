@@ -1,4 +1,4 @@
-package l.files.ui.preview;
+package l.files.base.graphics;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
@@ -20,10 +20,6 @@ public final class Rect {
 
     public int height() {
         return height;
-    }
-
-    public boolean contains(Rect that) {
-        return width() >= that.width() && height() >= that.height();
     }
 
     public static Rect of(int width, int height) {

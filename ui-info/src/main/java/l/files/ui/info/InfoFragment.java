@@ -13,11 +13,11 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import l.files.base.graphics.Rect;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.preview.Preview;
 import l.files.ui.preview.Preview.Using;
-import l.files.ui.preview.Rect;
 
 import static android.text.format.DateUtils.FORMAT_SHOW_DATE;
 import static android.text.format.DateUtils.FORMAT_SHOW_TIME;

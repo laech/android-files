@@ -11,6 +11,7 @@ import java.io.Reader;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 
+import l.files.base.graphics.Rect;
 import l.files.base.io.Closer;
 import l.files.fs.Files;
 import l.files.fs.Path;

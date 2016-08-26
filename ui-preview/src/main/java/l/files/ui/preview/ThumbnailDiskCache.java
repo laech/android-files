@@ -13,6 +13,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import l.files.base.graphics.Rect;
 import l.files.base.io.Closer;
 import l.files.fs.DirectoryNotEmpty;
 import l.files.fs.FileSystem.Consumer;

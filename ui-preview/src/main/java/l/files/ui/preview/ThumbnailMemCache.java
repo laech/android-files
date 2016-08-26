@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.v4.util.LruCache;
 
+import l.files.base.graphics.Rect;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 

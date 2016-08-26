@@ -10,6 +10,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import l.files.base.graphics.Rect;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 

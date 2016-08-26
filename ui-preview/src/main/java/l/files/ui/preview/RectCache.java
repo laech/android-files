@@ -6,6 +6,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+import l.files.base.graphics.Rect;
 import l.files.fs.Path;
 
 final class RectCache extends PersistenceCache<Rect> {

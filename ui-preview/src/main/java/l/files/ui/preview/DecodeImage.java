@@ -8,6 +8,7 @@ import android.util.Log;
 import java.io.IOException;
 import java.io.InputStream;
 
+import l.files.base.graphics.Rect;
 import l.files.base.io.Closer;
 import l.files.fs.Path;
 import l.files.fs.Stat;

@@ -3,6 +3,7 @@ package l.files.ui.preview;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 
+import l.files.base.graphics.Rect;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 

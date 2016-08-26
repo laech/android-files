@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import l.files.base.graphics.Rect;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 

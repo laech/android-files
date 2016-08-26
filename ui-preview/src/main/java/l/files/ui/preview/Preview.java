@@ -8,6 +8,7 @@ import android.util.DisplayMetrics;
 import java.io.IOException;
 import java.util.concurrent.Future;
 
+import l.files.base.graphics.Rect;
 import l.files.fs.Files;
 import l.files.fs.Path;
 import l.files.fs.Paths;

@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
 
+import l.files.base.graphics.Rect;
 import l.files.base.io.Closer;
 import l.files.fs.Path;
 import l.files.fs.Stat;
