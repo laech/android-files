@@ -1,9 +1,10 @@
 package l.files.base.graphics;
 
 import android.graphics.BitmapFactory.Options;
-import android.support.annotation.Nullable;
 
 import java.io.InputStream;
+
+import javax.annotation.Nullable;
 
 import static android.graphics.BitmapFactory.decodeStream;
 
