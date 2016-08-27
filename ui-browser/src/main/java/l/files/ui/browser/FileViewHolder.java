@@ -259,7 +259,7 @@ final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo>
     }
 
     private Rect scaleSize(Rect size) {
-        return size.scale(constraint);
+        return size.scaleDown(constraint);
     }
 
     private void backgroundBlurClear() {

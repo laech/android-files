@@ -11,6 +11,7 @@ import java.io.InputStream;
 import l.files.base.io.Closer;
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.ui.base.graphics.ScaledBitmap;
 import l.files.ui.base.graphics.Rect;
 
 import static android.graphics.Bitmap.Config.ARGB_8888;
@@ -59,7 +60,7 @@ final class DecodeSvg extends DecodeThumbnail {
     }
 
     @Override
-    Result decode() throws IOException {
+    ScaledBitmap decode() throws IOException {
         Closer closer = Closer.create();
         try {
 
@@ -75,7 +76,7 @@ final class DecodeSvg extends DecodeThumbnail {
                     (int) svg.getDocumentWidth(),
                     (int) svg.getDocumentHeight());
 
-            Rect scaledSize = originalSize.scale(constraint);
+            Rect scaledSize = originalSize.scaleDown(constraint);
             svg.setDocumentWidth(scaledSize.width());
             svg.setDocumentHeight(scaledSize.height());
 
@@ -88,7 +89,7 @@ final class DecodeSvg extends DecodeThumbnail {
             bitmap.eraseColor(WHITE);
             Canvas canvas = new Canvas(bitmap);
             svg.renderToCanvas(canvas);
-            return new Result(bitmap, originalSize);
+            return new ScaledBitmap(bitmap, originalSize);
 
         } catch (Throwable e) {
             throw closer.rethrow(e);

@@ -3,12 +3,14 @@ package l.files.ui.base.content.pm;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 
 import javax.annotation.Nullable;
 
-import l.files.ui.base.graphics.drawable.Drawables;
+import l.files.ui.base.graphics.Rect;
+import l.files.ui.base.graphics.ScaledBitmap;
+
+import static l.files.ui.base.graphics.drawable.Drawables.toBitmap;
 
 public final class Packages {
 
@@ -27,12 +29,12 @@ public final class Packages {
     }
 
     @Nullable
-    public static Bitmap getApkIconBitmap(String path, PackageManager pm) {
+    public static ScaledBitmap getApkIconBitmap(String path, Rect max, PackageManager pm) {
         Drawable drawable = getApkIconDrawable(path, pm);
         if (drawable == null) {
             return null;
         }
-        return Drawables.toBitmap(drawable);
+        return toBitmap(drawable, max);
     }
 
 }

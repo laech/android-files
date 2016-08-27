@@ -9,6 +9,7 @@ import java.io.IOException;
 
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.ui.base.graphics.ScaledBitmap;
 import l.files.ui.base.graphics.Rect;
 
 import static android.graphics.BitmapFactory.decodeByteArray;
@@ -65,7 +66,7 @@ final class DecodeAudioVideo extends DecodeThumbnail {
     }
 
     @Override
-    Result decode() throws IOException {
+    ScaledBitmap decode() throws IOException {
         if (isCancelled()) {
             return null;
         }
@@ -81,7 +82,7 @@ final class DecodeAudioVideo extends DecodeThumbnail {
             Bitmap bitmap = decode(retriever);
             if (bitmap != null) {
                 Rect size = Rect.of(bitmap.getWidth(), bitmap.getHeight());
-                return new Result(bitmap, size);
+                return new ScaledBitmap(bitmap, size);
             }
 
         } finally {

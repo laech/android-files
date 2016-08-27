@@ -1,5 +1,7 @@
 package l.files.ui.base.graphics;
 
+import android.graphics.Bitmap;
+
 import javax.annotation.Nullable;
 
 import static java.lang.Math.max;
@@ -24,6 +26,10 @@ public final class Rect {
         return height;
     }
 
+    public static Rect of(Bitmap bitmap) {
+        return of(bitmap.getWidth(), bitmap.getHeight());
+    }
+
     public static Rect of(int width, int height) {
         if (width <= 0 || height <= 0) {
             throw new IllegalArgumentException();
@@ -31,12 +37,13 @@ public final class Rect {
         return new Rect(width, height);
     }
 
-    public Rect scale(Rect constraint) {
-        if (constraint.width() >= width() && constraint.height() >= height()) {
+    public Rect scaleDown(Rect max) {
+        if (max.width() >= width() &&
+                max.height() >= height()) {
             return this;
         }
-        float widthRatio = constraint.width() / (float) width();
-        float heightRatio = constraint.height() / (float) height();
+        float widthRatio = max.width() / (float) width();
+        float heightRatio = max.height() / (float) height();
         float scale = min(widthRatio, heightRatio);
         int scaledWith = max(round(width() * scale), 1);
         int scaledHeight = max(round(height() * scale), 1);

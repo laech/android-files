@@ -11,6 +11,7 @@ import java.util.concurrent.ThreadFactory;
 import l.files.base.io.Closer;
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.ui.base.graphics.ScaledBitmap;
 import l.files.ui.base.graphics.Rect;
 
 import static android.graphics.Bitmap.Config.ARGB_8888;
@@ -76,7 +77,7 @@ final class DecodePdf extends DecodeThumbnail {
     }
 
     @Override
-    Result decode() throws IOException {
+    ScaledBitmap decode() throws IOException {
 
         if (isCancelled()) {
             return null;
@@ -116,7 +117,7 @@ final class DecodePdf extends DecodeThumbnail {
                 return null;
             }
 
-            Rect scaledSize = originalSize.scale(constraint);
+            Rect scaledSize = originalSize.scaleDown(constraint);
             Bitmap bitmap = createBitmap(
                     context.displayMetrics,
                     scaledSize.width(),
@@ -126,7 +127,7 @@ final class DecodePdf extends DecodeThumbnail {
 
             Pdf.render(page, bitmap);
 
-            return new Result(bitmap, originalSize);
+            return new ScaledBitmap(bitmap, originalSize);
 
         } catch (Throwable e) {
             throw closer.rethrow(e);

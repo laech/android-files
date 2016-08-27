@@ -138,7 +138,7 @@ public final class InfoFragment
     }
 
     private Rect scaleSize(Rect size) {
-        return size.scale(constraint);
+        return size.scaleDown(constraint);
     }
 
     @Override

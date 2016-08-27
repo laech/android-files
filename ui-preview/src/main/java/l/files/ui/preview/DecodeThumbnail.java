@@ -12,10 +12,10 @@ import java.util.concurrent.TimeoutException;
 
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.ui.base.graphics.ScaledBitmap;
 import l.files.ui.base.graphics.Rect;
 
-import static android.graphics.Bitmap.createScaledBitmap;
-import static l.files.base.Objects.requireNonNull;
+import static l.files.ui.base.graphics.Bitmaps.scaleDownBitmap;
 
 abstract class DecodeThumbnail extends Decode {
 
@@ -62,11 +62,11 @@ Caused by: java.lang.OutOfMemoryError: Failed to allocate a 942852 byte allocati
         super(path, stat, constraint, callback, using, context);
     }
 
-    boolean shouldScale() {
+    boolean shouldScaleDown() {
         return true;
     }
 
-    boolean shouldCacheToDisk(Result result, Bitmap scaledBitmap) {
+    boolean shouldCacheToDisk(ScaledBitmap result, Bitmap scaledBitmap) {
         return true;
     }
 
@@ -86,7 +86,7 @@ Caused by: java.lang.OutOfMemoryError: Failed to allocate a 942852 byte allocati
             return null;
         }
 
-        Result result;
+        ScaledBitmap result;
         try {
             result = decode();
         } catch (Exception e) {
@@ -96,7 +96,7 @@ Caused by: java.lang.OutOfMemoryError: Failed to allocate a 942852 byte allocati
 
         if (isCancelled()) {
             if (result != null) {
-                result.maybeScaled.recycle();
+                result.bitmap().recycle();
             }
             return null;
         }
@@ -107,21 +107,15 @@ Caused by: java.lang.OutOfMemoryError: Failed to allocate a 942852 byte allocati
         }
 
         if (context.getSize(path, stat, constraint, true) == null) {
-            publishProgress(result.originalSize);
+            publishProgress(result.originalSize());
         }
 
         final Bitmap scaledBitmap;
-        if (shouldScale()) {
-
-            Rect scaledSize = result.originalSize.scale(constraint);
-            scaledBitmap = createScaledBitmap(
-                    result.maybeScaled,
-                    scaledSize.width(),
-                    scaledSize.height(),
-                    true);
-
+        if (shouldScaleDown()) {
+            // TODO remove this, let thumbnailers do this
+            scaledBitmap =  scaleDownBitmap(result.bitmap(), constraint).bitmap();
         } else {
-            scaledBitmap = result.maybeScaled;
+            scaledBitmap = result.bitmap();
         }
 
         publishProgress(scaledBitmap);
@@ -129,11 +123,11 @@ Caused by: java.lang.OutOfMemoryError: Failed to allocate a 942852 byte allocati
         // TODO these ifs are also used else where, refactor this
 
         if (context.getBlurredThumbnail(path, stat, constraint, true) == null) {
-            publishProgress(generateBlurredThumbnail(result.maybeScaled));
+            publishProgress(generateBlurredThumbnail(result.bitmap()));
         }
 
-        if (result.maybeScaled != scaledBitmap) {
-            result.maybeScaled.recycle();
+        if (result.bitmap() != scaledBitmap) {
+            result.bitmap().recycle();
         }
 
         if (isCancelled()) {
@@ -149,7 +143,7 @@ Caused by: java.lang.OutOfMemoryError: Failed to allocate a 942852 byte allocati
     }
 
     @Nullable
-    abstract Result decode() throws IOException;
+    abstract ScaledBitmap decode() throws IOException;
 
     static Bitmap createBitmap(
             DisplayMetrics display,
@@ -162,14 +156,5 @@ Caused by: java.lang.OutOfMemoryError: Failed to allocate a 942852 byte allocati
         return bitmap;
     }
 
-    static final class Result {
-        final Bitmap maybeScaled;
-        final Rect originalSize;
-
-        Result(Bitmap maybeScaled, Rect originalSize) {
-            this.maybeScaled = requireNonNull(maybeScaled);
-            this.originalSize = requireNonNull(originalSize);
-        }
-    }
-
 }
+

@@ -8,12 +8,13 @@ import java.io.InputStream;
 import l.files.base.io.Closer;
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.ui.base.graphics.ScaledBitmap;
 import l.files.ui.base.graphics.Rect;
 
 import static android.graphics.BitmapFactory.decodeStream;
 import static l.files.fs.Files.newBufferedInputStream;
 import static l.files.ui.base.graphics.Bitmaps.decodeBounds;
-import static l.files.ui.base.graphics.Bitmaps.scaleOptions;
+import static l.files.ui.base.graphics.Bitmaps.scaleDownOptions;
 
 final class DecodeImage extends DecodeThumbnail {
 
@@ -63,13 +64,13 @@ final class DecodeImage extends DecodeThumbnail {
     }
 
     @Override
-    boolean shouldCacheToDisk(Result result, Bitmap scaledBitmap) {
-        return result.originalSize.width() > scaledBitmap.getWidth() ||
-                result.originalSize.height() > scaledBitmap.getHeight();
+    boolean shouldCacheToDisk(ScaledBitmap result, Bitmap scaledBitmap) {
+        return result.originalSize().width() > scaledBitmap.getWidth() ||
+                result.originalSize().height() > scaledBitmap.getHeight();
     }
 
     @Override
-    Result decode() throws IOException {
+    ScaledBitmap decode() throws IOException {
         Rect size = context.getSize(path, stat, constraint, true);
         if (size != null) {
             publishProgress(size);
@@ -89,8 +90,8 @@ final class DecodeImage extends DecodeThumbnail {
             if (size == null) {
                 return null;
             }
-            Bitmap bitmap = decodeStream(in, null, scaleOptions(size, constraint));
-            return bitmap != null ? new Result(bitmap, size) : null;
+            Bitmap bitmap = decodeStream(in, null, scaleDownOptions(size, constraint));
+            return bitmap != null ? new ScaledBitmap(bitmap, size) : null;
 
         } catch (Throwable e) {
             throw closer.rethrow(e);

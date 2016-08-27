@@ -1,13 +1,13 @@
 package l.files.ui.preview;
 
-import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
+import java.io.IOException;
 
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.thumbnail.ApkThumbnailer;
+import l.files.thumbnail.Thumbnailer;
 import l.files.ui.base.graphics.Rect;
-
-import static l.files.ui.base.content.pm.Packages.getApkIconBitmap;
+import l.files.ui.base.graphics.ScaledBitmap;
 
 final class DecodeApk extends DecodeThumbnail {
 
@@ -37,6 +37,8 @@ final class DecodeApk extends DecodeThumbnail {
 
     };
 
+    private final Thumbnailer thumbnailer;
+
     DecodeApk(
             Path path,
             Stat stat,
@@ -45,22 +47,12 @@ final class DecodeApk extends DecodeThumbnail {
             Preview.Using using,
             Preview context) {
         super(path, stat, constraint, callback, using, context);
+        thumbnailer = new ApkThumbnailer(context.context.getPackageManager());
     }
 
     @Override
-    boolean shouldScale() {
-        return false;
-    }
-
-    @Override
-    Result decode() {
-        PackageManager manager = context.context.getPackageManager();
-        Bitmap bitmap = getApkIconBitmap(path.toString(), manager);
-        if (bitmap == null) {
-            return null;
-        }
-        Rect size = Rect.of(bitmap.getWidth(), bitmap.getHeight());
-        return new Result(bitmap, size);
+    ScaledBitmap decode() throws IOException {
+        return thumbnailer.create(path, constraint);
     }
 
 }

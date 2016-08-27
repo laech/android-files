@@ -16,6 +16,7 @@ import l.files.fs.Files;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.fs.media.MediaTypes;
+import l.files.ui.base.graphics.ScaledBitmap;
 import l.files.ui.base.graphics.Rect;
 
 import static android.graphics.Bitmap.Config.ARGB_8888;
@@ -78,10 +79,10 @@ final class DecodeText extends DecodeThumbnail {
     }
 
     @Override
-    Result decode() throws IOException {
+    ScaledBitmap decode() throws IOException {
         String text = readDetectingCharset(path, PREVIEW_LIMIT);
         Bitmap bitmap = draw(text);
-        return new Result(bitmap, Rect.of(
+        return new ScaledBitmap(bitmap, Rect.of(
                 bitmap.getWidth(),
                 bitmap.getHeight()
         ));
