@@ -11,6 +11,7 @@ import l.files.fs.Instant;
 import l.files.fs.Path;
 import l.files.fs.Paths;
 import l.files.fs.Stat;
+import l.files.ui.base.graphics.Rect;
 
 import static java.io.File.createTempFile;
 import static l.files.fs.Files.setLastModifiedTime;

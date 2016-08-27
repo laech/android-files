@@ -1,5 +1,7 @@
 package l.files.ui.preview;
 
+import l.files.ui.base.graphics.Rect;
+
 public abstract class MemCacheTest<V, C extends MemCache<V>>
         extends CacheTest<V, C> {
 

@@ -2,6 +2,8 @@ package l.files.ui.preview;
 
 import android.graphics.Bitmap;
 
+import l.files.ui.base.graphics.Rect;
+
 import static android.graphics.Bitmap.Config.ARGB_8888;
 import static android.graphics.Bitmap.createBitmap;
 

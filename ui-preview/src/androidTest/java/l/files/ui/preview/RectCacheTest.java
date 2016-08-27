@@ -5,6 +5,8 @@ import java.io.DataInput;
 import java.io.DataInputStream;
 import java.nio.ByteBuffer;
 
+import l.files.ui.base.graphics.Rect;
+
 public final class RectCacheTest extends PersistenceCacheTest<Rect, RectCache> {
 
     public void test_invalid_input_ignored() throws Exception {

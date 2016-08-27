@@ -1,5 +1,7 @@
 package l.files.ui.preview;
 
+import l.files.ui.base.graphics.Rect;
+
 import static android.test.MoreAsserts.assertNotEqual;
 
 public abstract class PersistenceCacheTest<V, C extends PersistenceCache<V>>

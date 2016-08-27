@@ -11,6 +11,7 @@ import l.files.fs.Path;
 import l.files.fs.Paths;
 import l.files.fs.Stat;
 import l.files.testing.fs.PathBaseTest;
+import l.files.ui.base.graphics.Rect;
 import l.files.ui.preview.Preview.Using;
 
 import static java.lang.System.nanoTime;
