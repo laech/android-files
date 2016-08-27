@@ -1,0 +1,97 @@
+package l.files.thumbnail;
+
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.util.DisplayMetrics;
+import android.widget.TextView;
+
+import java.io.IOException;
+import java.io.InputStream;
+
+import l.files.base.io.Closer;
+import l.files.base.io.Readers;
+import l.files.fs.Path;
+import l.files.ui.base.graphics.Rect;
+import l.files.ui.base.graphics.ScaledBitmap;
+
+import static android.graphics.Bitmap.Config.ARGB_8888;
+import static android.graphics.Bitmap.createBitmap;
+import static android.graphics.Color.WHITE;
+import static android.graphics.Color.parseColor;
+import static android.graphics.Typeface.MONOSPACE;
+import static android.util.TypedValue.COMPLEX_UNIT_DIP;
+import static android.util.TypedValue.COMPLEX_UNIT_SP;
+import static android.util.TypedValue.applyDimension;
+import static android.view.View.MeasureSpec.AT_MOST;
+import static android.view.View.MeasureSpec.UNSPECIFIED;
+import static android.view.View.MeasureSpec.makeMeasureSpec;
+import static java.lang.Math.min;
+import static l.files.base.Objects.requireNonNull;
+import static l.files.fs.Files.UTF_8;
+import static l.files.fs.Files.newBufferedInputStream;
+
+public final class TextThumbnailer implements Thumbnailer {
+
+    private static final int PREVIEW_LIMIT = 256;
+    private static final int TEXT_COLOR = parseColor("#616161");
+
+    private final Context context;
+
+    public TextThumbnailer(Context context) {
+        this.context = requireNonNull(context, "context");
+    }
+
+    @Override
+    public ScaledBitmap create(Path path, Rect max) throws IOException {
+        Closer closer = Closer.create();
+        try {
+
+            InputStream in = closer.register(newBufferedInputStream(path));
+            return create(in, max);
+
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
+        }
+    }
+
+    ScaledBitmap create(InputStream in, Rect max) throws IOException {
+        // TODO support more charsets
+        String text = Readers.readString(in, PREVIEW_LIMIT, UTF_8);
+        if (text == null) {
+            return null;
+        }
+        Bitmap bitmap = draw(text, max, context);
+        return new ScaledBitmap(bitmap, Rect.of(bitmap));
+    }
+
+    private static Bitmap draw(String text, Rect max, Context context) {
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        int size = min(max.width(), max.height());
+        int padding = (int) applyDimension(COMPLEX_UNIT_DIP, 8, metrics);
+        TextView view = new TextView(context);
+        view.setMaxLines(10);
+        view.setLineSpacing(0, 1.1F);
+        view.setBackgroundColor(WHITE);
+        view.setTextColor(TEXT_COLOR);
+        view.setTypeface(MONOSPACE);
+        view.setTextSize(COMPLEX_UNIT_SP, 11);
+        view.setPadding(padding, padding, padding, padding);
+        view.setText(text.length() == PREVIEW_LIMIT ? text + "..." : text);
+        view.measure(
+                makeMeasureSpec(size, UNSPECIFIED),
+                makeMeasureSpec(size, AT_MOST)
+        );
+        view.layout(0, 0, size, size);
+
+        Bitmap bitmap = createBitmap(
+                size,
+                view.getMeasuredHeight(),
+                ARGB_8888);
+        view.draw(new Canvas(bitmap));
+        return bitmap;
+    }
+
+}
