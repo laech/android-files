@@ -3,6 +3,8 @@ package l.files.ui.base.graphics;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
 import javax.annotation.Nullable;
@@ -24,6 +26,38 @@ public final class Bitmaps {
             return Rect.of(options.outWidth, options.outHeight);
         }
         return null;
+    }
+
+    /**
+     * Decodes a bitmap from the input scaled down to fit {@code max}
+     * while maintaining its aspect ratio.
+     */
+    @Nullable
+    public static ScaledBitmap decodeScaledDownBitmap(InputStream in, Rect max)
+            throws IOException {
+
+        if (!in.markSupported()) {
+            in = new BufferedInputStream(in);
+        }
+
+        in.mark(8192);
+        Rect originalSize = decodeBounds(in);
+        if (originalSize == null) {
+            return null;
+        }
+
+        in.reset();
+        Options opts = scaleDownOptions(originalSize, max);
+        Bitmap bitmap = decodeStream(in, null, opts);
+        if (bitmap == null) {
+            return null;
+        }
+
+        ScaledBitmap result = scaleDownBitmap(bitmap, max);
+        if (result.bitmap() != bitmap) {
+            bitmap.recycle();
+        }
+        return new ScaledBitmap(result.bitmap(), originalSize);
     }
 
     /**

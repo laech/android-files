@@ -3,18 +3,13 @@ package l.files.ui.preview;
 import android.graphics.Bitmap;
 
 import java.io.IOException;
-import java.io.InputStream;
 
-import l.files.base.io.Closer;
 import l.files.fs.Path;
 import l.files.fs.Stat;
-import l.files.ui.base.graphics.ScaledBitmap;
+import l.files.thumbnail.ImageThumbnailer;
+import l.files.thumbnail.Thumbnailer;
 import l.files.ui.base.graphics.Rect;
-
-import static android.graphics.BitmapFactory.decodeStream;
-import static l.files.fs.Files.newBufferedInputStream;
-import static l.files.ui.base.graphics.Bitmaps.decodeBounds;
-import static l.files.ui.base.graphics.Bitmaps.scaleDownOptions;
+import l.files.ui.base.graphics.ScaledBitmap;
 
 final class DecodeImage extends DecodeThumbnail {
 
@@ -53,6 +48,8 @@ final class DecodeImage extends DecodeThumbnail {
 
     };
 
+    private final Thumbnailer thumbnailer;
+
     DecodeImage(
             Path path,
             Stat stat,
@@ -61,6 +58,7 @@ final class DecodeImage extends DecodeThumbnail {
             Preview.Using using,
             Preview context) {
         super(path, stat, constraint, callback, using, context);
+        thumbnailer = new ImageThumbnailer();
     }
 
     @Override
@@ -75,29 +73,7 @@ final class DecodeImage extends DecodeThumbnail {
         if (size != null) {
             publishProgress(size);
         }
-
-        if (isCancelled()) {
-            return null;
-        }
-
-        Closer closer = Closer.create();
-        try {
-
-            InputStream in = closer.register(newBufferedInputStream(path));
-            if (size == null) {
-                size = decodeBounds(in);
-            }
-            if (size == null) {
-                return null;
-            }
-            Bitmap bitmap = decodeStream(in, null, scaleDownOptions(size, constraint));
-            return bitmap != null ? new ScaledBitmap(bitmap, size) : null;
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
-        } finally {
-            closer.close();
-        }
+        return thumbnailer.create(path, constraint);
     }
 
 }
