@@ -1,23 +1,15 @@
 package l.files.ui.preview;
 
-import android.graphics.Bitmap;
-import android.util.DisplayMetrics;
-
-import java.io.Closeable;
-import java.io.IOException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
 
-import l.files.base.io.Closer;
 import l.files.fs.Path;
 import l.files.fs.Stat;
-import l.files.ui.base.graphics.ScaledBitmap;
+import l.files.thumbnail.PdfThumbnailer;
+import l.files.thumbnail.Thumbnailer;
 import l.files.ui.base.graphics.Rect;
+import l.files.ui.base.graphics.ScaledBitmap;
 
-import static android.graphics.Bitmap.Config.ARGB_8888;
-import static android.graphics.Color.WHITE;
-import static android.util.TypedValue.COMPLEX_UNIT_PT;
-import static android.util.TypedValue.applyDimension;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 
 final class DecodePdf extends DecodeThumbnail {
@@ -61,6 +53,8 @@ final class DecodePdf extends DecodeThumbnail {
 
     };
 
+    private final Thumbnailer<Path> thumbnailer;
+
     DecodePdf(
             Path path,
             Stat stat,
@@ -69,6 +63,7 @@ final class DecodePdf extends DecodeThumbnail {
             Preview.Using using,
             Preview context) {
         super(path, stat, constraint, callback, using, context);
+        thumbnailer = new PdfThumbnailer(context.displayMetrics);
     }
 
     @Override
@@ -77,68 +72,8 @@ final class DecodePdf extends DecodeThumbnail {
     }
 
     @Override
-    ScaledBitmap decode() throws IOException {
-
-        if (isCancelled()) {
-            return null;
-        }
-
-        Closer closer = Closer.create();
-        try {
-
-            final long doc = Pdf.open(path.toByteArray());
-            closer.register(new Closeable() {
-                @Override
-                public void close() throws IOException {
-                    Pdf.close(doc);
-                }
-            });
-
-            final long page = Pdf.openPage(doc, 0);
-            closer.register(new Closeable() {
-                @Override
-                public void close() throws IOException {
-                    Pdf.closePage(page);
-                }
-            });
-
-            if (isCancelled()) {
-                return null;
-            }
-
-            double pageWidthInPoints = Pdf.getPageWidthInPoints(page);
-            double pageHeightInPoints = Pdf.getPageHeightInPoints(page);
-            Rect originalSize = Rect.of(
-                    pointToPixel(pageWidthInPoints),
-                    pointToPixel(pageHeightInPoints)
-            );
-
-            if (isCancelled()) {
-                return null;
-            }
-
-            Rect scaledSize = originalSize.scaleDown(constraint);
-            Bitmap bitmap = createBitmap(
-                    context.displayMetrics,
-                    scaledSize.width(),
-                    scaledSize.height(),
-                    ARGB_8888);
-            bitmap.eraseColor(WHITE);
-
-            Pdf.render(page, bitmap);
-
-            return new ScaledBitmap(bitmap, originalSize);
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
-        } finally {
-            closer.close();
-        }
-    }
-
-    private int pointToPixel(double point) {
-        DisplayMetrics metrics = context.context.getResources().getDisplayMetrics();
-        return (int) (applyDimension(COMPLEX_UNIT_PT, (float) point, metrics) + 0.5f);
+    ScaledBitmap decode() throws Exception {
+        return thumbnailer.create(path, constraint);
     }
 
 }
