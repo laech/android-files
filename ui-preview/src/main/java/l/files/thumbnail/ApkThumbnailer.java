@@ -11,7 +11,7 @@ import l.files.ui.base.graphics.ScaledBitmap;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.ui.base.content.pm.Packages.getApkIconBitmap;
 
-public final class ApkThumbnailer implements Thumbnailer {
+public final class ApkThumbnailer implements Thumbnailer<Path> {
 
     private final PackageManager packageManager;
 

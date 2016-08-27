@@ -1,7 +1,5 @@
 package l.files.ui.preview;
 
-import java.io.IOException;
-
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.thumbnail.ApkThumbnailer;
@@ -37,7 +35,7 @@ final class DecodeApk extends DecodeThumbnail {
 
     };
 
-    private final Thumbnailer thumbnailer;
+    private final Thumbnailer<Path> thumbnailer;
 
     DecodeApk(
             Path path,
@@ -51,7 +49,7 @@ final class DecodeApk extends DecodeThumbnail {
     }
 
     @Override
-    ScaledBitmap decode() throws IOException {
+    ScaledBitmap decode() throws Exception {
         return thumbnailer.create(path, constraint);
     }
 

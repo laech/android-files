@@ -9,9 +9,7 @@ import android.widget.TextView;
 import java.io.IOException;
 import java.io.InputStream;
 
-import l.files.base.io.Closer;
 import l.files.base.io.Readers;
-import l.files.fs.Path;
 import l.files.ui.base.graphics.Rect;
 import l.files.ui.base.graphics.ScaledBitmap;
 
@@ -29,9 +27,8 @@ import static android.view.View.MeasureSpec.makeMeasureSpec;
 import static java.lang.Math.min;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.Files.UTF_8;
-import static l.files.fs.Files.newBufferedInputStream;
 
-public final class TextThumbnailer implements Thumbnailer {
+public final class TextThumbnailer implements Thumbnailer<InputStream> {
 
     private static final int PREVIEW_LIMIT = 256;
     private static final int TEXT_COLOR = parseColor("#616161");
@@ -43,23 +40,9 @@ public final class TextThumbnailer implements Thumbnailer {
     }
 
     @Override
-    public ScaledBitmap create(Path path, Rect max) throws IOException {
-        Closer closer = Closer.create();
-        try {
-
-            InputStream in = closer.register(newBufferedInputStream(path));
-            return create(in, max);
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
-        } finally {
-            closer.close();
-        }
-    }
-
-    ScaledBitmap create(InputStream in, Rect max) throws IOException {
+    public ScaledBitmap create(InputStream input, Rect max) throws IOException {
         // TODO support more charsets
-        String text = Readers.readString(in, PREVIEW_LIMIT, UTF_8);
+        String text = Readers.readString(input, PREVIEW_LIMIT, UTF_8);
         if (text == null) {
             return null;
         }

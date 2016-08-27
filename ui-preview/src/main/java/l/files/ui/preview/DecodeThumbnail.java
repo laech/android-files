@@ -4,7 +4,6 @@ import android.graphics.Bitmap;
 import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
 
-import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -12,8 +11,8 @@ import java.util.concurrent.TimeoutException;
 
 import l.files.fs.Path;
 import l.files.fs.Stat;
-import l.files.ui.base.graphics.ScaledBitmap;
 import l.files.ui.base.graphics.Rect;
+import l.files.ui.base.graphics.ScaledBitmap;
 
 import static l.files.ui.base.graphics.Bitmaps.scaleDownBitmap;
 
@@ -113,7 +112,7 @@ Caused by: java.lang.OutOfMemoryError: Failed to allocate a 942852 byte allocati
         final Bitmap scaledBitmap;
         if (shouldScaleDown()) {
             // TODO remove this, let thumbnailers do this
-            scaledBitmap =  scaleDownBitmap(result.bitmap(), constraint).bitmap();
+            scaledBitmap = scaleDownBitmap(result.bitmap(), constraint).bitmap();
         } else {
             scaledBitmap = result.bitmap();
         }
@@ -143,7 +142,7 @@ Caused by: java.lang.OutOfMemoryError: Failed to allocate a 942852 byte allocati
     }
 
     @Nullable
-    abstract ScaledBitmap decode() throws IOException;
+    abstract ScaledBitmap decode() throws Exception;
 
     static Bitmap createBitmap(
             DisplayMetrics display,

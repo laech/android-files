@@ -2,11 +2,10 @@ package l.files.ui.preview;
 
 import android.graphics.Bitmap;
 
-import java.io.IOException;
-
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.thumbnail.ImageThumbnailer;
+import l.files.thumbnail.PathStreamThumbnailer;
 import l.files.thumbnail.Thumbnailer;
 import l.files.ui.base.graphics.Rect;
 import l.files.ui.base.graphics.ScaledBitmap;
@@ -48,7 +47,7 @@ final class DecodeImage extends DecodeThumbnail {
 
     };
 
-    private final Thumbnailer thumbnailer;
+    private final Thumbnailer<Path> thumbnailer;
 
     DecodeImage(
             Path path,
@@ -58,7 +57,7 @@ final class DecodeImage extends DecodeThumbnail {
             Preview.Using using,
             Preview context) {
         super(path, stat, constraint, callback, using, context);
-        thumbnailer = new ImageThumbnailer();
+        thumbnailer = new PathStreamThumbnailer(new ImageThumbnailer());
     }
 
     @Override
@@ -68,7 +67,7 @@ final class DecodeImage extends DecodeThumbnail {
     }
 
     @Override
-    ScaledBitmap decode() throws IOException {
+    ScaledBitmap decode() throws Exception {
         Rect size = context.getSize(path, stat, constraint, true);
         if (size != null) {
             publishProgress(size);

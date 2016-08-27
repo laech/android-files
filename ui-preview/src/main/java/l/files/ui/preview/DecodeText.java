@@ -5,6 +5,7 @@ import java.io.IOException;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.fs.media.MediaTypes;
+import l.files.thumbnail.PathStreamThumbnailer;
 import l.files.thumbnail.TextThumbnailer;
 import l.files.thumbnail.Thumbnailer;
 import l.files.ui.base.graphics.Rect;
@@ -39,7 +40,7 @@ final class DecodeText extends DecodeThumbnail {
 
     };
 
-    private final Thumbnailer thumbnailer;
+    private final Thumbnailer<Path> thumbnailer;
 
     DecodeText(
             Path path,
@@ -49,11 +50,11 @@ final class DecodeText extends DecodeThumbnail {
             Preview.Using using,
             Preview context) {
         super(path, stat, constraint, callback, using, context);
-        thumbnailer = new TextThumbnailer(context.context);
+        thumbnailer = new PathStreamThumbnailer(new TextThumbnailer(context.context));
     }
 
     @Override
-    ScaledBitmap decode() throws IOException {
+    ScaledBitmap decode() throws Exception {
         return thumbnailer.create(path, constraint);
     }
 
