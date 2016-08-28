@@ -19,7 +19,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.CountDownLatch;
 
-import l.files.base.io.Closer;
 import l.files.fs.AlreadyExist;
 import l.files.fs.Event;
 import l.files.fs.FileSystem.Consumer;
@@ -75,22 +74,16 @@ public final class LocalObservableTest extends PathBaseTest {
         Path unreadableDir = dir1().resolve("unreadable");
 
         Files.createDir(readableDir);
-
-        Closer closer = Closer.create();
+        Recorder recorder = observe(dir1(), FOLLOW);
         try {
-
-            Recorder recorder = closer.register(observe(dir1(), FOLLOW));
             recorder.awaitModifyByCreateFile(readableDir, "aa");
             recorder.await(CREATE, unreadableDir, newCreateDir(
                     unreadableDir, EnumSet.of(OWNER_EXECUTE, OWNER_WRITE)));
 
             recorder.awaitNoEvent(newCreateFile(unreadableDir.resolve("zz")));
             recorder.awaitModifyByCreateFile(readableDir, "ab");
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            recorder.close();
         }
     }
 
@@ -107,67 +100,54 @@ public final class LocalObservableTest extends PathBaseTest {
         observables.add(createRandomChildDir(dir1()));
         observables.add(createRandomChildDir(dir1()));
 
-        Closer closer = Closer.create();
+        Recorder recorder = observe(dir1(), FOLLOW);
         try {
-
-            Recorder recorder = closer.register(observe(dir1(), FOLLOW));
             recorder.awaitCreateFile(dir1().resolve("1"));
             for (Path observable : observables) {
                 recorder.awaitModifyByCreateFile(observable, "1");
             }
             recorder.awaitNoEvent(newCreateFile(unobservable.resolve("1")));
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            recorder.close();
         }
     }
 
     public void test_no_observe_on_procfs() throws Exception {
 
-        Closer closer = Closer.create();
+        Tracker tracker = registerMockTracker();
         try {
-
-            Tracker tracker = closer.register(registerMockTracker());
-            Recorder observer = closer.register(observe(
+            Recorder observer = observe(
                     Paths.get("/proc/self"),
                     FOLLOW,
-                    false
-            ));
-            assertTrue(observer.isClosed());
-            verifyZeroInteractions(tracker);
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
+                    false);
+            try {
+                assertTrue(observer.isClosed());
+                verifyZeroInteractions(tracker);
+            } finally {
+                observer.close();
+            }
         } finally {
-            closer.close();
+            tracker.close();
         }
     }
 
     public void test_observe_on_regular_file() throws Exception {
         Path file = Files.createFile(dir1().resolve("file"));
-        Closer closer = Closer.create();
+        Recorder observer = observe(file, NOFOLLOW);
         try {
-            Recorder observer = closer.register(observe(file, NOFOLLOW));
             observer.awaitModifyByAppend(file, "hello");
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            observer.close();
         }
     }
 
     public void test_observe_on_link() throws Exception {
         Path file = Files.createSymbolicLink(dir1().resolve("link"), dir2());
-        Closer closer = Closer.create();
+        Recorder observer = observe(file, NOFOLLOW);
         try {
-            Recorder observer = closer.register(observe(file, NOFOLLOW));
             observer.awaitModifyBySetLastModifiedTime(file, EPOCH);
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            observer.close();
         }
     }
 
@@ -176,25 +156,23 @@ public final class LocalObservableTest extends PathBaseTest {
         Path src = Files.createDir(dir1().resolve("src"));
         Path dst = dir2().resolve("dst");
 
-        Closer closer = Closer.create();
+        Tracker tracker = registerMockTracker();
         try {
+            Recorder observer = observe(dir1(), NOFOLLOW);
+            try {
+                observer.awaitModify(src, newCreateFile(src.resolve("b")));
+                observer.awaitMove(src, dst);
+                observer.awaitNoEvent(newCreateFile(dst.resolve("c")));
 
-            Tracker tracker = closer.register(registerMockTracker());
-            Recorder observer = closer.register(observe(dir1(), NOFOLLOW));
-
-            observer.awaitModify(src, newCreateFile(src.resolve("b")));
-            observer.awaitMove(src, dst);
-            observer.awaitNoEvent(newCreateFile(dst.resolve("c")));
-
-            ArgumentCaptor<Integer> fd = ArgumentCaptor.forClass(Integer.class);
-            ArgumentCaptor<Integer> wd = ArgumentCaptor.forClass(Integer.class);
-            verify(tracker).onWatchAdded(fd.capture(), aryEq(src.toByteArray()), anyInt(), wd.capture());
-            verify(tracker).onWatchRemoved(fd.getValue(), wd.getValue());
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
+                ArgumentCaptor<Integer> fd = ArgumentCaptor.forClass(Integer.class);
+                ArgumentCaptor<Integer> wd = ArgumentCaptor.forClass(Integer.class);
+                verify(tracker).onWatchAdded(fd.capture(), aryEq(src.toByteArray()), anyInt(), wd.capture());
+                verify(tracker).onWatchRemoved(fd.getValue(), wd.getValue());
+            } finally {
+                observer.close();
+            }
         } finally {
-            closer.close();
+            tracker.close();
         }
     }
 
@@ -240,20 +218,19 @@ public final class LocalObservableTest extends PathBaseTest {
         given(consumer.accept(any(Path.class))).willReturn(true);
         Observer observer = mock(Observer.class);
 
-        Closer closer = Closer.create();
+        Tracker tracker = registerMockTracker();
         try {
-
-            Tracker tracker = closer.register(registerMockTracker());
-            LocalObservable observation = closer.register(new LocalObservable(dir1(), observer));
-            observation.start(FOLLOW, consumer, limit);
-            verify(observer, atLeastOnce()).onIncompleteObservation();
-            verify(consumer, times(count)).accept(notNull(Path.class));
-            verifyAllWatchesRemovedAndRootWatchAddedOnMaxUserWatchesReached(tracker, limit);
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
+            LocalObservable observation = new LocalObservable(dir1(), observer);
+            try {
+                observation.start(FOLLOW, consumer, limit);
+                verify(observer, atLeastOnce()).onIncompleteObservation();
+                verify(consumer, times(count)).accept(notNull(Path.class));
+                verifyAllWatchesRemovedAndRootWatchAddedOnMaxUserWatchesReached(tracker, limit);
+            } finally {
+                observation.close();
+            }
         } finally {
-            closer.close();
+            tracker.close();
         }
     }
 
@@ -270,26 +247,25 @@ public final class LocalObservableTest extends PathBaseTest {
         given(consumer.accept(any(Path.class))).willReturn(true);
         Observer observer = mock(Observer.class);
 
-        Closer closer = Closer.create();
+        Tracker tracker = registerMockTracker();
         try {
+            LocalObservable observation = new LocalObservable(dir1(), observer);
+            try {
+                observation.start(FOLLOW, consumer, limit);
+                verify(observer, never()).onIncompleteObservation();
+                assertFalse(observation.isClosed());
+                for (int i = 0; i < limit; i++) {
+                    createRandomChildDir(dir1());
+                }
 
-            Tracker tracker = closer.register(registerMockTracker());
-            LocalObservable observation = closer.register(new LocalObservable(dir1(), observer));
-            observation.start(FOLLOW, consumer, limit);
-            verify(observer, never()).onIncompleteObservation();
-            assertFalse(observation.isClosed());
-            for (int i = 0; i < limit; i++) {
-                createRandomChildDir(dir1());
+                verify(observer, timeout(10000).atLeastOnce()).onIncompleteObservation();
+                verify(consumer, times(count)).accept(notNull(Path.class));
+                verifyAllWatchesRemovedAndRootWatchAddedOnMaxUserWatchesReached(tracker, limit);
+            } finally {
+                observation.close();
             }
-
-            verify(observer, timeout(10000).atLeastOnce()).onIncompleteObservation();
-            verify(consumer, times(count)).accept(notNull(Path.class));
-            verifyAllWatchesRemovedAndRootWatchAddedOnMaxUserWatchesReached(tracker, limit);
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            tracker.close();
         }
     }
 
@@ -348,10 +324,9 @@ public final class LocalObservableTest extends PathBaseTest {
 
         Path a = Files.createDir(dir1().resolve("a"));
         Path b = Files.createDir(dir1().resolve("b"));
-        Closer closer = Closer.create();
+        Tracker tracker = registerMockTracker();
         try {
 
-            Tracker tracker = closer.register(registerMockTracker());
             Files.observe(dir1(), NOFOLLOW, mock(Observer.class)).close();
 
             ArgumentCaptor<Integer> fd = ArgumentCaptor.forClass(Integer.class);
@@ -373,25 +348,20 @@ public final class LocalObservableTest extends PathBaseTest {
             verify(tracker).onWatchRemoved(fd.getValue(), wd.getAllValues().get(1));
             verify(tracker).onClose(fd.getValue());
 
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            tracker.close();
         }
     }
 
     public void test_releases_fd_on_close() throws Exception {
         ArgumentCaptor<Integer> fd = ArgumentCaptor.forClass(Integer.class);
-        Closer closer = Closer.create();
+        Tracker tracker = registerMockTracker();
         try {
-            Tracker tracker = closer.register(registerMockTracker());
             Files.observe(dir1(), NOFOLLOW, mock(Observer.class)).close();
             verify(tracker).onInit(fd.capture());
             verify(tracker).onClose(fd.getValue());
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            tracker.close();
         }
     }
 
@@ -405,10 +375,8 @@ public final class LocalObservableTest extends PathBaseTest {
         Path dir = Files.createDir(dir1().resolve("dir"));
         Path link = Files.createSymbolicLink(dir1().resolve("link"), dir);
         Path file = link.resolve("file");
-        Closer closer = Closer.create();
+        Recorder observer = observe(link, NOFOLLOW);
         try {
-
-            Recorder observer = closer.register(observe(link, NOFOLLOW));
             // No follow, can observe the link
             observer.awaitModifyBySetLastModifiedTime(link, Instant.of(1, 1));
             // But not the child content
@@ -419,11 +387,8 @@ public final class LocalObservableTest extends PathBaseTest {
                 return;
             }
             fail();
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            observer.close();
         }
     }
 
@@ -432,16 +397,11 @@ public final class LocalObservableTest extends PathBaseTest {
         Path dir = Files.createDir(dir1().resolve("dir"));
         Path link = Files.createSymbolicLink(dir1().resolve("link"), dir);
         Path child = Files.createDir(link.resolve("dir"));
-        Closer closer = Closer.create();
+        Recorder observer = observe(link, FOLLOW);
         try {
-
-            Recorder observer = closer.register(observe(link, FOLLOW));
             observer.awaitModifyByCreateFile(child, "a");
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            observer.close();
         }
     }
 
@@ -463,16 +423,13 @@ public final class LocalObservableTest extends PathBaseTest {
     public void test_rename_dir() throws Exception {
         Path src = Files.createDir(dir1().resolve("a"));
         Path dst = dir1().resolve("b");
-        Closer closer = Closer.create();
+        Recorder observer = observe(dir1());
         try {
-            Recorder observer = closer.register(observe(dir1()));
             observer.awaitModifyByCreateFile(src, "1");
             observer.awaitMove(src, dst);
             observer.awaitModifyByCreateFile(dst, "2");
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            observer.close();
         }
     }
 
@@ -497,9 +454,8 @@ public final class LocalObservableTest extends PathBaseTest {
         Path src = Files.createDir(dir2().resolve("a"));
         Path dir = dir1().resolve("a");
         Path child = dir.resolve("b");
-        Closer closer = Closer.create();
+        Recorder observer = observe(dir1());
         try {
-            Recorder observer = closer.register(observe(dir1()));
             observer.awaitMove(src, dir);
             observer.await(
                     asList(
@@ -509,12 +465,9 @@ public final class LocalObservableTest extends PathBaseTest {
                     compose(
                             newCreateFile(child),
                             newMove(child, dir2().resolve("b"))
-                    )
-            );
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
+                    ));
         } finally {
-            closer.close();
+            observer.close();
         }
     }
 
@@ -522,32 +475,22 @@ public final class LocalObservableTest extends PathBaseTest {
 
         Path src = Files.createFile(dir2().resolve("a"));
         Path dst = dir1().resolve("b");
-        Closer closer = Closer.create();
+        Recorder observer = observe(dir1());
         try {
-
-            Recorder observer = closer.register(observe(dir1()));
             observer.awaitMove(src, dst);
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            observer.close();
         }
     }
 
     public void test_move_file_out() throws Exception {
 
         Path file = Files.createFile(dir1().resolve("a"));
-        Closer closer = Closer.create();
+        Recorder observer = observe(dir1());
         try {
-
-            Recorder observer = closer.register(observe(dir1()));
             observer.awaitMove(file, dir2().resolve("a"));
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            observer.close();
         }
     }
 
@@ -562,16 +505,11 @@ public final class LocalObservableTest extends PathBaseTest {
             Path src,
             Path dst) throws Exception {
 
-        Closer closer = Closer.create();
+        Recorder observer = observe(src);
         try {
-
-            Recorder observer = closer.register(observe(src));
             observer.awaitMove(src, dst);
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            observer.close();
         }
     }
 
@@ -585,16 +523,11 @@ public final class LocalObservableTest extends PathBaseTest {
             Path file,
             Path observable) throws Exception {
 
-        Closer closer = Closer.create();
+        Recorder observer = observe(observable);
         try {
-
-            Recorder observer = closer.register(observe(observable));
             observer.awaitModifyByAppend(file, "abc");
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            observer.close();
         }
     }
 
@@ -622,16 +555,11 @@ public final class LocalObservableTest extends PathBaseTest {
             newPerms.removeAll(Permission.write());
         }
 
-        Closer closer = Closer.create();
+        Recorder observer = observe(observable);
         try {
-
-            Recorder observer = closer.register(observe(observable));
             observer.awaitModify(target, newSetPermissions(target, newPerms));
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            observer.close();
         }
     }
 
@@ -650,16 +578,11 @@ public final class LocalObservableTest extends PathBaseTest {
 
         Instant old = Files.stat(target, NOFOLLOW).lastModifiedTime();
         Instant t = Instant.of(old.seconds() - 1, old.nanos());
-        Closer closer = Closer.create();
+        Recorder observer = observe(observable);
         try {
-
-            Recorder observer = closer.register(observe(observable));
             observer.awaitModifyBySetLastModifiedTime(target, t);
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            observer.close();
         }
     }
 
@@ -674,10 +597,8 @@ public final class LocalObservableTest extends PathBaseTest {
 
     private static void testDelete(Path target, Path observable) throws Exception {
         boolean file = Files.stat(target, NOFOLLOW).isRegularFile();
-        Closer closer = Closer.create();
+        Recorder observer = observe(observable);
         try {
-
-            Recorder observer = closer.register(observe(observable));
             List<WatchEvent> expected = new ArrayList<>();
             // If target is file and observing on the file itself, an IN_ATTRIB
             // event is first sent in addition to IN_DELETE when deleting
@@ -686,20 +607,16 @@ public final class LocalObservableTest extends PathBaseTest {
             }
             expected.add(event(DELETE, target));
             observer.await(expected, newDelete(target));
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            observer.close();
         }
     }
 
     public void test_delete_recreate_dir_will_be_observed() throws Exception {
         Path dir = dir1().resolve("dir");
         Path file = dir.resolve("file");
-        Closer closer = Closer.create();
+        Recorder observer = observe(dir1());
         try {
-            Recorder observer = closer.register(observe(dir1()));
             for (int i = 0; i < 10; i++) {
                 observer.awaitCreateDir(dir);
                 observer.await(
@@ -712,13 +629,10 @@ public final class LocalObservableTest extends PathBaseTest {
                                 newCreateFile(file),
                                 newDelete(file),
                                 newDelete(dir)
-                        )
-                );
+                        ));
             }
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            observer.close();
         }
     }
 
@@ -735,14 +649,11 @@ public final class LocalObservableTest extends PathBaseTest {
             Path target,
             Path observable) throws Exception {
 
-        Closer closer = Closer.create();
+        Recorder observer = observe(observable);
         try {
-            Recorder observer = closer.register(observe(observable));
             observer.awaitCreateFile(target);
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            observer.close();
         }
     }
 
@@ -750,14 +661,11 @@ public final class LocalObservableTest extends PathBaseTest {
             Path target,
             Path observable) throws Exception {
 
-        Closer closer = Closer.create();
+        Recorder observer = observe(observable);
         try {
-            Recorder observer = closer.register(observe(observable));
             observer.awaitCreateDir(target);
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            observer.close();
         }
     }
 
@@ -766,14 +674,11 @@ public final class LocalObservableTest extends PathBaseTest {
             Path target,
             Path observable) throws Exception {
 
-        Closer closer = Closer.create();
+        Recorder observer = observe(observable);
         try {
-            Recorder observer = closer.register(observe(observable));
             observer.awaitCreateSymbolicLink(link, target);
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            observer.close();
         }
     }
 
@@ -782,43 +687,33 @@ public final class LocalObservableTest extends PathBaseTest {
 
         Path dir = Files.createDir(dir1().resolve("dir"));
         Files.removePermissions(dir, Permission.read());
-        Closer closer = Closer.create();
+        Recorder observer = observe(dir1());
         try {
-            Recorder observer = closer.register(observe(dir1()));
             observer.awaitOnIncompleteObservation();
             observer.awaitCreateFile(dir1().resolve("parent watch still works"));
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            observer.close();
         }
     }
 
     public void test_create_dir_then_make_it_unreadable() throws Exception {
         Path dir = dir1().resolve("dir");
-        Closer closer = Closer.create();
+        Recorder observer = observe(dir1());
         try {
-
-            Recorder observer = closer.register(observe(dir1()));
             observer.awaitCreateDir(dir);
             observer.awaitModifyBySetPermissions(
                     dir,
-                    EnumSet.of(OWNER_WRITE, OWNER_EXECUTE)
-            );
+                    EnumSet.of(OWNER_WRITE, OWNER_EXECUTE));
             observer.awaitModifyByCreateFile(dir, "a");
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            observer.close();
         }
     }
 
     public void test_create_dir_then_create_items_into_it() throws Exception {
         Path dir = dir1().resolve("dir");
-        Closer closer = Closer.create();
+        Recorder observer = observe(dir1());
         try {
-            Recorder observer = closer.register(observe(dir1()));
             observer.awaitCreateDir(dir);
             observer.await(
                     asList(
@@ -830,12 +725,9 @@ public final class LocalObservableTest extends PathBaseTest {
                             newCreateFile(dir.resolve("file")),
                             newCreateDir(dir.resolve("dir2()")),
                             newCreateSymbolicLink(dir.resolve("link"), dir1())
-                    )
-            );
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
+                    ));
         } finally {
-            closer.close();
+            observer.close();
         }
     }
 
@@ -843,9 +735,8 @@ public final class LocalObservableTest extends PathBaseTest {
         Path parent = dir1().resolve("parent");
         Path file = parent.resolve("file");
         Path dir = parent.resolve("dir");
-        Closer closer = Closer.create();
+        Recorder observer = observe(dir1());
         try {
-            Recorder observer = closer.register(observe(dir1()));
             observer.awaitCreateDir(parent);
             observer.await(
                     asList(
@@ -859,12 +750,9 @@ public final class LocalObservableTest extends PathBaseTest {
                             newCreateDir(dir),
                             newDelete(file),
                             newDelete(dir)
-                    )
-            );
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
+                    ));
         } finally {
-            closer.close();
+            observer.close();
         }
     }
 
@@ -872,9 +760,8 @@ public final class LocalObservableTest extends PathBaseTest {
         Path parent = dir1().resolve("parent");
         Path file = parent.resolve("file");
         Path dir = parent.resolve("dir");
-        Closer closer = Closer.create();
+        Recorder observer = observe(dir1());
         try {
-            Recorder observer = closer.register(observe(dir1()));
             observer.awaitCreateDir(parent);
             observer.await(
                     asList(
@@ -888,12 +775,9 @@ public final class LocalObservableTest extends PathBaseTest {
                             newCreateDir(dir),
                             newMove(file, dir2().resolve("file")),
                             newMove(dir, dir2().resolve("dir"))
-                    )
-            );
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
+                    ));
         } finally {
-            closer.close();
+            observer.close();
         }
     }
 
@@ -901,9 +785,8 @@ public final class LocalObservableTest extends PathBaseTest {
         Path parent = dir1().resolve("parent");
         Path file = Files.createFile(dir2().resolve("file"));
         Path dir = Files.createDir(dir2().resolve("dir"));
-        Closer closer = Closer.create();
+        Recorder observer = observe(dir1());
         try {
-            Recorder observer = closer.register(observe(dir1()));
             observer.awaitCreateDir(parent);
             observer.await(
                     asList(
@@ -913,12 +796,9 @@ public final class LocalObservableTest extends PathBaseTest {
                     compose(
                             newMove(file, parent.resolve("file")),
                             newMove(dir, parent.resolve("dir"))
-                    )
-            );
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
+                    ));
         } finally {
-            closer.close();
+            observer.close();
         }
     }
 
@@ -927,10 +807,8 @@ public final class LocalObservableTest extends PathBaseTest {
         Path b = dir1().resolve("b");
         Path c = dir1().resolve("c");
         Path d = dir1().resolve("d");
-        Closer closer = Closer.create();
+        Recorder observer = observe(dir1());
         try {
-
-            Recorder observer = closer.register(observe(dir1()));
             observer.awaitCreateDir(a);
             observer.awaitCreateDir(b);
             observer.awaitModify(a, newCreateFile(a.resolve("1")));
@@ -938,11 +816,8 @@ public final class LocalObservableTest extends PathBaseTest {
             observer.awaitMove(c, dir2().resolve("2"));
             observer.awaitDelete(b);
             observer.awaitCreateFile(d);
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            observer.close();
         }
     }
 
@@ -1096,10 +971,8 @@ public final class LocalObservableTest extends PathBaseTest {
                 LinkOption option,
                 boolean verifyTracker) throws Exception {
 
-            Closer closer = Closer.create();
+            Tracker tracker = registerMockTracker();
             try {
-
-                Tracker tracker = closer.register(registerMockTracker());
                 Recorder observer = new Recorder(file);
                 observer.observation = Files.observe(file, option, observer);
                 if (verifyTracker) {
@@ -1109,11 +982,8 @@ public final class LocalObservableTest extends PathBaseTest {
 
                 InotifyTracker.get().registerTracker(observer);
                 return observer;
-
-            } catch (Throwable e) {
-                throw closer.rethrow(e);
             } finally {
-                closer.close();
+                tracker.close();
             }
         }
 
@@ -1240,46 +1110,36 @@ public final class LocalObservableTest extends PathBaseTest {
         }
 
         void awaitCreateFile(Path target) throws Exception {
-            Closer closer = Closer.create();
+            Tracker tracker = registerMockTracker();
             try {
-                Tracker tracker = closer.register(registerMockTracker());
                 await(CREATE, target, newCreateFile(target));
                 verifyZeroInteractions(tracker);
-            } catch (Throwable e) {
-                throw closer.rethrow(e);
             } finally {
-                closer.close();
+                tracker.close();
             }
         }
 
         void awaitCreateDir(Path target) throws Exception {
-            Closer closer = Closer.create();
+            Tracker tracker = registerMockTracker();
             try {
-                Tracker tracker = closer.register(registerMockTracker());
                 await(CREATE, target, newCreateDir(target));
                 verify(tracker).onWatchAdded(
                         eq(fd),
                         aryEq(target.toByteArray()),
                         anyInt(),
-                        anyInt()
-                );
-            } catch (Throwable e) {
-                throw closer.rethrow(e);
+                        anyInt());
             } finally {
-                closer.close();
+                tracker.close();
             }
         }
 
         void awaitCreateSymbolicLink(Path link, Path target) throws Exception {
-            Closer closer = Closer.create();
+            Tracker tracker = registerMockTracker();
             try {
-                Tracker tracker = closer.register(registerMockTracker());
                 await(CREATE, link, newCreateSymbolicLink(link, target));
                 verifyZeroInteractions(tracker);
-            } catch (Throwable e) {
-                throw closer.rethrow(e);
             } finally {
-                closer.close();
+                tracker.close();
             }
         }
 
@@ -1288,10 +1148,8 @@ public final class LocalObservableTest extends PathBaseTest {
         }
 
         void awaitMove(Path src, Path dst) throws Exception {
-            Closer closer = Closer.create();
+            Tracker tracker = registerMockTracker();
             try {
-                Tracker tracker = closer.register(registerMockTracker());
-
                 boolean rootIsSrcParent = root.equals(src.parent());
                 boolean rootIsDstParent = root.equals(dst.parent());
 
@@ -1318,10 +1176,8 @@ public final class LocalObservableTest extends PathBaseTest {
                             "\nsrc=" + src +
                             "\ndst=" + dst);
                 }
-            } catch (Throwable e) {
-                throw closer.rethrow(e);
             } finally {
-                closer.close();
+                tracker.close();
             }
         }
 
@@ -1406,15 +1262,12 @@ public final class LocalObservableTest extends PathBaseTest {
         }
 
         void awaitModify(Path target, Callable<Void> action) throws Exception {
-            Closer closer = Closer.create();
+            Tracker tracker = registerMockTracker();
             try {
-                Tracker tracker = closer.register(registerMockTracker());
                 await(MODIFY, target, action);
                 verifyZeroInteractions(tracker);
-            } catch (Throwable e) {
-                throw closer.rethrow(e);
             } finally {
-                closer.close();
+                tracker.close();
             }
         }
 
@@ -1653,15 +1506,12 @@ public final class LocalObservableTest extends PathBaseTest {
         Path dst = dir1().resolve("a");
         Path src = Files.createDir(dir2().resolve("a"));
         pre.action(src);
-        Closer closer = Closer.create();
+        Recorder observer = observe(dir1());
         try {
-            Recorder observer = closer.register(observe(dir1()));
             observer.awaitMove(src, dst);
             post.action(dst, observer);
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            observer.close();
         }
     }
 

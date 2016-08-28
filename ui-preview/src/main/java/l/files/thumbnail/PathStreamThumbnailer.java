@@ -2,7 +2,6 @@ package l.files.thumbnail;
 
 import java.io.InputStream;
 
-import l.files.base.io.Closer;
 import l.files.fs.Path;
 import l.files.ui.base.graphics.Rect;
 import l.files.ui.base.graphics.ScaledBitmap;
@@ -20,16 +19,11 @@ public final class PathStreamThumbnailer implements Thumbnailer<Path> {
 
     @Override
     public ScaledBitmap create(Path path, Rect max) throws Exception {
-        Closer closer = Closer.create();
+        InputStream in = newInputStream(path);
         try {
-
-            InputStream in = closer.register(newInputStream(path));
             return thumbnailer.create(in, max);
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            in.close();
         }
     }
 }

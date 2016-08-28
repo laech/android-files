@@ -13,11 +13,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 
-import l.files.base.io.Closer;
 import l.files.fs.Files;
 import l.files.fs.Path;
 import l.files.fs.Paths;
@@ -36,6 +34,7 @@ import static android.os.Environment.getExternalStoragePublicDirectory;
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.Event.CREATE;
+import static l.files.fs.Files.deleteIfExists;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.local.LocalObservableTest.Recorder.observe;
 import static org.hamcrest.CoreMatchers.not;
@@ -82,22 +81,19 @@ public final class LocalObservableDownloadTest extends PathBaseTest {
                 not(M)
         );
 
-        Closer closer = Closer.create();
         Path downloadDir = downloadsDir();
         Path downloadFile = downloadDir.resolve(
                 "test_notifies_files_downloaded_by_download_manager-" +
-                        currentTimeMillis()
-        );
+                        currentTimeMillis());
         try {
-
-            onCloseDeleteIfExists(downloadFile, closer);
-            Recorder observer = closer.register(observe(downloadDir));
-            observer.await(CREATE, downloadFile, newDownload(downloadFile));
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
+            Recorder observer = observe(downloadDir);
+            try {
+                observer.await(CREATE, downloadFile, newDownload(downloadFile));
+            } finally {
+                observer.close();
+            }
         } finally {
-            closer.close();
+            deleteIfExists(downloadFile);
         }
     }
 
@@ -120,15 +116,6 @@ public final class LocalObservableDownloadTest extends PathBaseTest {
         long id = downloadManager().enqueue(request);
 
         awaitSuccessfulDownload(id, saveTo);
-    }
-
-    private void onCloseDeleteIfExists(final Path path, Closer closer) {
-        closer.register(new Closeable() {
-            @Override
-            public void close() throws IOException {
-                Files.deleteIfExists(path);
-            }
-        });
     }
 
     private void awaitSuccessfulDownload(

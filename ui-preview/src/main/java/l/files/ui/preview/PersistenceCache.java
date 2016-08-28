@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import l.files.base.io.Closer;
 import l.files.fs.Files;
 import l.files.fs.Path;
 import l.files.fs.Stat;
@@ -26,6 +25,8 @@ import static java.lang.System.nanoTime;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.base.Throwables.addSuppressed;
+import static l.files.fs.Files.newBufferedDataInputStream;
+import static l.files.fs.Files.newBufferedDataOutputStream;
 
 abstract class PersistenceCache<V> extends MemCache<V> {
 
@@ -113,10 +114,8 @@ abstract class PersistenceCache<V> extends MemCache<V> {
         }
 
         Path file = cacheFile();
-        Closer closer = Closer.create();
+        DataInputStream in = newBufferedDataInputStream(file);
         try {
-
-            DataInputStream in = closer.register(Files.newBufferedDataInputStream(file));
 
             if (in.readInt() != SUPERCLASS_VERSION) {
                 return;
@@ -140,10 +139,8 @@ abstract class PersistenceCache<V> extends MemCache<V> {
             }
 
         } catch (FileNotFoundException ignore) {
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            in.close();
         }
     }
 
@@ -178,10 +175,9 @@ abstract class PersistenceCache<V> extends MemCache<V> {
         Files.createDirs(parent);
 
         Path tmp = parent.resolve(file.name() + "-" + nanoTime());
-        Closer closer = Closer.create();
+        DataOutputStream out = newBufferedDataOutputStream(tmp);
         try {
 
-            DataOutputStream out = closer.register(Files.newBufferedDataOutputStream(tmp));
             out.writeInt(SUPERCLASS_VERSION);
             out.writeInt(subclassVersion);
 
@@ -200,10 +196,8 @@ abstract class PersistenceCache<V> extends MemCache<V> {
                 addSuppressed(e, sup);
             }
             throw e;
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            out.close();
         }
 
         Files.move(tmp, file);

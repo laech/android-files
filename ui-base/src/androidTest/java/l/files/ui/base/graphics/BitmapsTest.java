@@ -7,7 +7,6 @@ import junit.framework.TestCase;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -16,12 +15,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.Callable;
 
-import l.files.base.io.Closer;
-
 import static android.graphics.Bitmap.CompressFormat.JPEG;
 import static android.graphics.Bitmap.CompressFormat.PNG;
 import static android.graphics.Bitmap.Config.ARGB_8888;
 import static android.graphics.Color.BLUE;
+import static java.io.File.createTempFile;
 import static l.files.ui.base.graphics.Bitmaps.decodeBounds;
 import static l.files.ui.base.graphics.Bitmaps.decodeScaledDownBitmap;
 import static l.files.ui.base.graphics.Bitmaps.scaleDownBitmap;
@@ -43,14 +41,11 @@ public final class BitmapsTest extends TestCase {
     }
 
     private void testDecodeScaledDownBitmap(Bitmap src, Rect max, Bitmap expected)
-            throws IOException {
+            throws Exception {
 
-        Closer closer = Closer.create();
+        final File file = createTempFile("BitmapsTest", null);
         try {
-
-            final File file = createTempFile(closer);
             write(src, file);
-
             ScaledBitmap result = decodeScaledDownBitmap(new Callable<InputStream>() {
                 @Override
                 public InputStream call() throws IOException {
@@ -62,34 +57,18 @@ public final class BitmapsTest extends TestCase {
             assertTrue(result.bitmap().sameAs(expected));
             assertEquals(Rect.of(src), result.originalSize());
 
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            assertTrue(file.delete() || !file.exists());
         }
     }
 
     private static void write(Bitmap src, File file) throws IOException {
-        Closer closer = Closer.create();
+        OutputStream out = new FileOutputStream(file);
         try {
-            OutputStream out = closer.register(new FileOutputStream(file));
             src.compress(PNG, 100, out);
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            out.close();
         }
-    }
-
-    private static File createTempFile(Closer closer) throws IOException {
-        final File file = File.createTempFile("BitmapsTest", null);
-        closer.register(new Closeable() {
-            @Override
-            public void close() throws IOException {
-                assertTrue(file.delete());
-            }
-        });
-        return file;
     }
 
     public void test_scaleDownBitmap_scale_to_fit() throws Exception {

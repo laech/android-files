@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import l.files.base.io.Closer;
 import l.files.fs.FileSystem.Consumer;
 
 import static java.util.Collections.reverse;
@@ -389,18 +388,14 @@ public final class Files {
 
     public static String readAllUtf8(Path path) throws IOException {
         StringBuilder builder = new StringBuilder();
-        Closer closer = Closer.create();
+        Reader reader = newReader(path, UTF_8);
         try {
-            Reader reader = closer.register(newReader(path, UTF_8));
             char[] buffer = new char[BUFFER_SIZE];
             for (int i; (i = reader.read(buffer)) != -1; ) {
                 builder.append(buffer, 0, i);
             }
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            reader.close();
         }
         return builder.toString();
     }
@@ -415,45 +410,34 @@ public final class Files {
             CharSequence content,
             Charset charset) throws IOException {
 
-        Closer closer = Closer.create();
+        Writer writer = newWriter(path, charset);
         try {
-            Writer writer = closer.register(newWriter(path, charset));
             writer.write(content.toString());
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            writer.close();
         }
     }
 
     public static void appendUtf8(Path path, CharSequence content)
             throws IOException {
 
-        Closer closer = Closer.create();
+        Writer writer = newWriter(path, UTF_8, true);
         try {
-            Writer writer = closer.register(newWriter(path, UTF_8, true));
             writer.write(content.toString());
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            writer.close();
         }
     }
 
     public static void copy(InputStream in, Path path) throws IOException {
-        Closer closer = Closer.create();
+        OutputStream out = newOutputStream(path);
         try {
-            OutputStream out = closer.register(newOutputStream(path));
             byte[] buffer = new byte[BUFFER_SIZE];
             for (int i; (i = in.read(buffer)) != -1; ) {
                 out.write(buffer, 0, i);
             }
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            out.close();
         }
     }
 

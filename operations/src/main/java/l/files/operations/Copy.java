@@ -11,11 +11,12 @@ import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import l.files.base.io.Closer;
 import l.files.fs.Files;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 
+import static l.files.fs.Files.newInputStream;
+import static l.files.fs.Files.newOutputStream;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
 final class Copy extends Paste {
@@ -112,24 +113,25 @@ final class Copy extends Paste {
             return;
         }
 
-        Closer closer = Closer.create();
+        InputStream source = newInputStream(src);
         try {
 
-            InputStream source = closer.register(Files.newInputStream(src));
-            OutputStream sink = closer.register(Files.newOutputStream(dst));
+            OutputStream sink = newOutputStream(dst);
+            try {
+                // TODO perform sync to disk
+                byte[] buf = new byte[BUFFER_SIZE];
+                int n;
+                while ((n = source.read(buf)) > 0) {
 
-            // TODO perform sync to disk
+                    if (isInterrupted()) {
+                        throw new InterruptedIOException();
+                    }
 
-            byte[] buf = new byte[BUFFER_SIZE];
-            int n;
-            while ((n = source.read(buf)) > 0) {
-
-                if (isInterrupted()) {
-                    throw new InterruptedIOException();
+                    sink.write(buf, 0, n);
+                    copiedByteCount.addAndGet(n);
                 }
-
-                sink.write(buf, 0, n);
-                copiedByteCount.addAndGet(n);
+            } finally {
+                sink.close();
             }
             copiedItemCount.incrementAndGet();
 
@@ -149,10 +151,8 @@ final class Copy extends Paste {
                 throw e;
             }
 
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            source.close();
         }
     }
 

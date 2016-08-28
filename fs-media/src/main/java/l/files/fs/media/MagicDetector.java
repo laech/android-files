@@ -7,7 +7,6 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import l.files.base.io.Closer;
 import l.files.fs.Path;
 
 import static l.files.fs.Files.newInputStream;
@@ -23,10 +22,13 @@ final class MagicDetector extends TikaDetector {
     }
 
     @Override
-    String detectFile(MimeTypes types, Path path, Closer closer) throws IOException {
-        InputStream in = closer.register(newInputStream(path));
-        return types.detect(new BufferedInputStream(in), new Metadata())
-                .getBaseType().toString();
+    String detectFile(MimeTypes types, Path path) throws IOException {
+        InputStream in = new BufferedInputStream(newInputStream(path));
+        try {
+            return types.detect(in, new Metadata()).getBaseType().toString();
+        } finally {
+            in.close();
+        }
     }
 
 }

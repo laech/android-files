@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import l.files.base.io.Closer;
 import l.files.fs.DirectoryNotEmpty;
 import l.files.fs.Files;
 import l.files.fs.Instant;
@@ -35,6 +34,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static l.files.fs.Files.UTF_8;
+import static l.files.fs.Files.newInputStream;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Permission.OWNER_EXECUTE;
@@ -237,14 +237,11 @@ public final class FilesTest extends PathBaseTest {
 
         Path file = Files.createFile(dir1().resolve("file"));
         Files.appendUtf8(file, initial);
-        Closer closer = Closer.create();
+        OutputStream out = provider.open(file);
         try {
-            OutputStream out = closer.register(provider.open(file));
             out.write(write.getBytes(UTF_8));
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            out.close();
         }
         assertEquals(result, Files.readAllUtf8(file));
     }
@@ -280,14 +277,13 @@ public final class FilesTest extends PathBaseTest {
     public void test_input_linkFollowSuccess() throws Exception {
         Path target = Files.createFile(dir1().resolve("target"));
         Path link = Files.createSymbolicLink(dir1().resolve("link"), target);
-        Files.newInputStream(link).close();
+        newInputStream(link).close();
     }
 
     public void test_input_cannotUseAfterClose() throws Exception {
         Path file = Files.createFile(dir1().resolve("a"));
-        Closer closer = Closer.create();
+        InputStream in = newInputStream(file);
         try {
-            InputStream in = closer.register(Files.newInputStream(file));
             FileDescriptor fd = ((FileInputStream) in).getFD();
 
             //noinspection ResultOfMethodCallIgnored
@@ -300,10 +296,8 @@ public final class FilesTest extends PathBaseTest {
             } catch (IOException e) {
                 // Pass
             }
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            in.close();
         }
     }
 

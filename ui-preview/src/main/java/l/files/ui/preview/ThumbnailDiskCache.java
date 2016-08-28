@@ -13,7 +13,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import l.files.base.io.Closer;
 import l.files.fs.DirectoryNotEmpty;
 import l.files.fs.FileSystem.Consumer;
 import l.files.fs.Files;
@@ -34,6 +33,9 @@ import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.base.Throwables.addSuppressed;
+import static l.files.fs.Files.newBufferedInputStream;
+import static l.files.fs.Files.newBufferedOutputStream;
+import static l.files.fs.Files.setLastModifiedTime;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.TraversalCallback.Result.CONTINUE;
@@ -148,10 +150,9 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
     @Override
     public Bitmap get(Path path, Stat stat, Rect constraint, boolean matchTime) throws IOException {
         Path cache = cacheFile(path, stat, constraint, matchTime);
-        Closer closer = Closer.create();
+        InputStream in = newBufferedInputStream(cache);
         try {
 
-            InputStream in = closer.register(Files.newBufferedInputStream(cache));
             int version = in.read();
             if (version != VERSION) {
                 return null;
@@ -169,7 +170,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
             }
 
             try {
-                Files.setLastModifiedTime(cache, NOFOLLOW, Instant.ofMillis(currentTimeMillis()));
+                setLastModifiedTime(cache, NOFOLLOW, Instant.ofMillis(currentTimeMillis()));
             } catch (IOException ignore) {
             }
 
@@ -177,10 +178,8 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
 
         } catch (FileNotFoundException e) {
             return null;
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            in.close();
         }
     }
 
@@ -198,10 +197,9 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
         Files.createDirs(parent);
 
         Path tmp = parent.resolve(cache.name() + "-" + nanoTime());
-        Closer closer = Closer.create();
+        OutputStream out = newBufferedOutputStream(tmp);
         try {
 
-            OutputStream out = closer.register(Files.newBufferedOutputStream(tmp));
             out.write(VERSION);
             thumbnail.compress(WEBP, 100, out);
 
@@ -212,10 +210,8 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
                 addSuppressed(e, sup);
             }
             throw e;
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            out.close();
         }
 
         Files.move(tmp, cache);

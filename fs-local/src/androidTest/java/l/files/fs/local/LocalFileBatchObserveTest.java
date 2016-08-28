@@ -3,7 +3,6 @@ package l.files.fs.local;
 import java.util.Collections;
 import java.util.HashMap;
 
-import l.files.base.io.Closer;
 import l.files.fs.BatchObserver;
 import l.files.fs.Event;
 import l.files.fs.FileSystem.Consumer;
@@ -41,19 +40,17 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
     }
 
     public void test_notifies_self_change() throws Exception {
-        Closer closer = Closer.create();
+        Observation observation = Files.observe(
+                dir1(),
+                NOFOLLOW,
+                observer,
+                consumer,
+                10,
+                MILLISECONDS,
+                false,
+                "LocalFileBatchObserveTest.test_notifies_self_change",
+                -1);
         try {
-
-            closer.register(Files.observe(
-                    dir1(),
-                    NOFOLLOW,
-                    observer,
-                    consumer,
-                    10,
-                    MILLISECONDS,
-                    false,
-                    "LocalFileBatchObserveTest.test_notifies_self_change",
-                    -1));
 
             Files.setLastModifiedTime(dir1(), NOFOLLOW, Instant.ofMillis(1));
 
@@ -63,10 +60,8 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
             verifyNoMoreInteractions(observer);
             verifyZeroInteractions(consumer);
 
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            observation.close();
         }
     }
 
@@ -80,20 +75,18 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
         Files.createFile(dir1().resolve("e"));
         Files.createDir(dir1().resolve("f"));
 
-        Closer closer = Closer.create();
+        Observation observation = Files.observe(
+                dir1(),
+                NOFOLLOW,
+                observer,
+                consumer,
+                500,
+                MILLISECONDS,
+                false,
+                "LocalFileBatchObserveTest.test_notifies_children_change",
+                -1);
         try {
 
-            Observation observation = Files.observe(
-                    dir1(),
-                    NOFOLLOW,
-                    observer,
-                    consumer,
-                    500,
-                    MILLISECONDS,
-                    false,
-                    "LocalFileBatchObserveTest.test_notifies_children_change",
-                    -1);
-            closer.register(observation);
             assertFalse(observation.isClosed());
 
             Files.setLastModifiedTime(a, NOFOLLOW, Instant.ofMillis(1));
@@ -112,30 +105,25 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
 
             verifyNoMoreInteractions(observer);
 
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            observation.close();
         }
     }
 
     public void test_notifies_latest_event() throws Exception {
 
         final Path file = Files.createFile(dir1().resolve("file"));
-
-        Closer closer = Closer.create();
+        final Observation observation = Files.observe(
+                dir1(),
+                NOFOLLOW,
+                observer,
+                consumer,
+                500,
+                MILLISECONDS,
+                false,
+                "LocalFileBatchObserveTest.test_notifies_latest_event",
+                -1);
         try {
-
-            closer.register(Files.observe(
-                    dir1(),
-                    NOFOLLOW,
-                    observer,
-                    consumer,
-                    500,
-                    MILLISECONDS,
-                    false,
-                    "LocalFileBatchObserveTest.test_notifies_latest_event",
-                    -1));
 
             Files.setLastModifiedTime(file, NOFOLLOW, Instant.ofMillis(1));
             Files.delete(file);
@@ -149,29 +137,25 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
 
             verifyNoMoreInteractions(observer);
 
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            observation.close();
         }
     }
 
     public void test_notifies_self_and_children_change() throws Exception {
 
         final Path child = Files.createFile(dir1().resolve("a"));
-
-        Closer closer = Closer.create();
+        final Observation observation = Files.observe(
+                dir1(),
+                NOFOLLOW,
+                observer,
+                consumer,
+                500,
+                MILLISECONDS,
+                false,
+                "LocalFileBatchObserveTest.test_notifies_self_and_children_change",
+                -1);
         try {
-            closer.register(Files.observe(
-                    dir1(),
-                    NOFOLLOW,
-                    observer,
-                    consumer,
-                    500,
-                    MILLISECONDS,
-                    false,
-                    "LocalFileBatchObserveTest.test_notifies_self_and_children_change",
-                    -1));
 
             verify(consumer).accept(child);
 
@@ -197,10 +181,8 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
 
             verifyNoMoreInteractions(observer);
 
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            observation.close();
         }
     }
 

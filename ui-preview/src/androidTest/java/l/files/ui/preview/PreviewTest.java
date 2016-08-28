@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import java.io.IOException;
 import java.io.InputStream;
 
-import l.files.base.io.Closer;
 import l.files.fs.Files;
 import l.files.fs.Path;
 import l.files.fs.Paths;
@@ -86,14 +85,11 @@ public final class PreviewTest extends PathBaseTest {
 
     private void testPreviewSuccessForTestFile(String testFile, String dstFileName) throws Throwable {
         Path file = dir1().resolve(dstFileName);
-        Closer closer = Closer.create();
+        InputStream in = getContext().getAssets().open(testFile);
         try {
-            InputStream in = closer.register(getContext().getAssets().open(testFile));
             Files.copy(in, file);
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            in.close();
         }
         testPreviewSuccess(file, FILE_EXTENSION);
         testPreviewSuccess(file, MEDIA_TYPE);

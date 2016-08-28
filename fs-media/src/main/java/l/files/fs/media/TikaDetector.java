@@ -10,7 +10,6 @@ import org.apache.tika.mime.MimeTypesFactory;
 import java.io.IOException;
 import java.io.InputStream;
 
-import l.files.base.io.Closer;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 
@@ -36,21 +35,16 @@ abstract class TikaDetector extends BasePropertyDetector {
             }
         }
 
-        Closer closer = Closer.create();
         try {
 
-            return detectFile(types, path, closer);
+            return detectFile(types, path);
 
         } catch (TaggedIOException e) {
             if (e.getCause() != null) {
-                throw closer.rethrow(e.getCause());
+                throw e.getCause();
             } else {
-                throw closer.rethrow(e);
+                throw e;
             }
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
-        } finally {
-            closer.close();
         }
     }
 
@@ -62,19 +56,15 @@ abstract class TikaDetector extends BasePropertyDetector {
          * and to avoid the unnecessary memory usage increase because of the caching
          * used for the jar content created by Android's Class.getResource*().
          */
-
-        Closer closer = Closer.create();
+        InputStream in = context.getResources()
+                .openRawResource(R.raw.tika_mimetypes_1_10);
         try {
-            InputStream in = closer.register(context.getResources()
-                    .openRawResource(R.raw.tika_mimetypes_1_10));
             return MimeTypesFactory.create(in);
-        }catch (Throwable e){
-            throw closer.rethrow(e);
         } finally {
-            closer.close();
+            in.close();
         }
     }
 
-    abstract String detectFile(MimeTypes types, Path path, Closer closer) throws IOException;
+    abstract String detectFile(MimeTypes types, Path path) throws IOException;
 
 }

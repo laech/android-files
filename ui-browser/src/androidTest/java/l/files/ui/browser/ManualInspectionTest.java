@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import l.files.base.io.Closer;
 import l.files.fs.Files;
 import l.files.fs.Instant;
 import l.files.fs.Path;
@@ -62,14 +61,11 @@ public final class ManualInspectionTest extends InstrumentationTestCase {
                 continue;
             }
 
-            Closer closer = Closer.create();
+            InputStream in = getInstrumentation().getContext().getAssets().open(res);
             try {
-                InputStream in = closer.register(getInstrumentation().getContext().getAssets().open(res));
                 Files.copy(in, file);
-            } catch (Throwable e) {
-                throw closer.rethrow(e);
             } finally {
-                closer.close();
+                in.close();
             }
         }
 

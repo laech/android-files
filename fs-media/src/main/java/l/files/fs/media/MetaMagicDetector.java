@@ -7,7 +7,6 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import l.files.base.io.Closer;
 import l.files.fs.Path;
 
 import static l.files.fs.Files.newInputStream;
@@ -25,12 +24,15 @@ final class MetaMagicDetector extends TikaDetector {
     }
 
     @Override
-    String detectFile(MimeTypes types, Path path, Closer closer) throws IOException {
+    String detectFile(MimeTypes types, Path path) throws IOException {
         Metadata meta = new Metadata();
         meta.add(RESOURCE_NAME_KEY, path.name().toString());
-        InputStream in = closer.register(newInputStream(path));
-        return types.detect(new BufferedInputStream(in), meta)
-                .getBaseType().toString();
+        InputStream in = new BufferedInputStream(newInputStream(path));
+        try {
+            return types.detect(in, meta).getBaseType().toString();
+        } finally {
+            in.close();
+        }
     }
 
 }

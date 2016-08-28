@@ -3,10 +3,8 @@ package l.files.thumbnail;
 import android.graphics.Bitmap;
 import android.util.DisplayMetrics;
 
-import java.io.Closeable;
 import java.io.IOException;
 
-import l.files.base.io.Closer;
 import l.files.fs.Path;
 import l.files.ui.base.graphics.Rect;
 import l.files.ui.base.graphics.ScaledBitmap;
@@ -30,43 +28,20 @@ public final class PdfThumbnailer implements Thumbnailer<Path> {
     @Override
     public ScaledBitmap create(Path path, Rect max) throws IOException {
 
-        Closer closer = Closer.create();
+        long doc = Pdf.open(path.toByteArray());
         try {
-
-            long doc = openDoc(path, closer);
-            long page = openPage(doc, closer);
-            Rect originalSize = getSize(page, metrics);
-            Rect scaledSize = originalSize.scaleDown(max);
-            Bitmap bitmap = renderPage(page, scaledSize, metrics);
-            return new ScaledBitmap(bitmap, originalSize);
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
-        } finally {
-            closer.close();
-        }
-    }
-
-    private static long openDoc(Path path, Closer closer) throws IOException {
-        final long doc = Pdf.open(path.toByteArray());
-        closer.register(new Closeable() {
-            @Override
-            public void close() throws IOException {
-                Pdf.close(doc);
-            }
-        });
-        return doc;
-    }
-
-    private static long openPage(long doc, Closer closer) throws IOException {
-        final long page = Pdf.openPage(doc, 0);
-        closer.register(new Closeable() {
-            @Override
-            public void close() throws IOException {
+            long page = Pdf.openPage(doc, 0);
+            try {
+                Rect originalSize = getSize(page, metrics);
+                Rect scaledSize = originalSize.scaleDown(max);
+                Bitmap bitmap = renderPage(page, scaledSize, metrics);
+                return new ScaledBitmap(bitmap, originalSize);
+            } finally {
                 Pdf.closePage(page);
             }
-        });
-        return page;
+        } finally {
+            Pdf.close(doc);
+        }
     }
 
     private static Rect getSize(long page, DisplayMetrics metrics) throws IOException {
