@@ -16,6 +16,11 @@ import static l.files.ui.base.graphics.Bitmaps.decodeScaledDownBitmap;
 public final class ImageThumbnailer implements Thumbnailer<Path> {
 
     @Override
+    public boolean accepts(Path path, String mediaType) {
+        return mediaType.startsWith("image/");
+    }
+
+    @Override
     public ScaledBitmap create(final Path path, Rect max, Context context) throws Exception {
         return decodeScaledDownBitmap(new Callable<InputStream>() {
             @Override

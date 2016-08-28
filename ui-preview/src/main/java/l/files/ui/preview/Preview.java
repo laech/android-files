@@ -2,11 +2,12 @@ package l.files.ui.preview;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
 
 import java.io.IOException;
 import java.util.concurrent.Future;
+
+import javax.annotation.Nullable;
 
 import l.files.fs.Files;
 import l.files.fs.Path;
@@ -19,6 +20,7 @@ import static l.files.base.Objects.requireNonNull;
 
 public final class Preview {
 
+    @Nullable
     private static Preview instance;
 
     public static Preview get(Context context) {
@@ -167,16 +169,14 @@ public final class Preview {
             Path path,
             Stat stat,
             Rect constraint,
-            Callback callback,
-            Using using) {
+            Callback callback) {
 
-        return DecodeChain.run(
-                path,
-                stat,
-                constraint,
-                callback,
-                using,
-                this);
+        if (!isPreviewable(path, stat, constraint)) {
+            return null;
+        }
+
+        return new Decode(path, stat, constraint, callback, this)
+                .executeOnPreferredExecutor();
     }
 
     public void clearThumbnailCache() {
@@ -187,20 +187,13 @@ public final class Preview {
         blurredThumbnailMemCache.clear();
     }
 
-    public enum Using {
-        FILE_EXTENSION,
-        MEDIA_TYPE
-    }
-
     public interface Callback {
-
-        void onSizeAvailable(Path path, Stat stat, Rect size);
 
         void onPreviewAvailable(Path path, Stat stat, Bitmap thumbnail);
 
         void onBlurredThumbnailAvailable(Path path, Stat stat, Bitmap thumbnail);
 
-        void onPreviewFailed(Path path, Stat stat, Using used, Object cause);
+        void onPreviewFailed(Path path, Stat stat, Object cause);
 
     }
 

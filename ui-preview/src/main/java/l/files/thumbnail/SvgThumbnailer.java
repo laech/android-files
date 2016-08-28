@@ -13,6 +13,7 @@ import java.io.InputStream;
 
 import javax.annotation.Nullable;
 
+import l.files.fs.Path;
 import l.files.ui.base.graphics.Rect;
 import l.files.ui.base.graphics.ScaledBitmap;
 
@@ -21,6 +22,11 @@ import static android.graphics.Bitmap.createBitmap;
 import static android.graphics.Color.WHITE;
 
 public final class SvgThumbnailer implements Thumbnailer<InputStream> {
+
+    @Override
+    public boolean accepts(Path path, String mediaType) {
+        return mediaType.startsWith("image/svg+xml");
+    }
 
     @Override
     public ScaledBitmap create(InputStream input, Rect max, Context context) throws Exception {

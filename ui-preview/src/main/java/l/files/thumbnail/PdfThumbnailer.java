@@ -20,6 +20,15 @@ import static android.util.TypedValue.applyDimension;
 public final class PdfThumbnailer implements Thumbnailer<Path> {
 
     @Override
+    public boolean accepts(Path path, String mediaType) {
+        return isLocalFile(path) && mediaType.equals("application/pdf");
+    }
+
+    private boolean isLocalFile(Path path) {
+        return path.fileSystem().scheme().equals("file");
+    }
+
+    @Override
     public ScaledBitmap create(Path path, Rect max, Context context) throws IOException {
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         long doc = Pdf.open(path.toByteArray());

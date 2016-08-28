@@ -13,13 +13,13 @@ import android.view.View;
 
 import java.lang.ref.WeakReference;
 
-import l.files.ui.base.graphics.Rect;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.app.LifeCycleListenable;
 import l.files.ui.base.app.LifeCycleListener;
 import l.files.ui.base.fs.FileInfo;
 import l.files.ui.base.fs.OnOpenFileListener;
+import l.files.ui.base.graphics.Rect;
 import l.files.ui.base.selection.Selection;
 import l.files.ui.base.selection.SelectionModeViewHolder;
 import l.files.ui.base.view.ActionModeProvider;
@@ -37,7 +37,6 @@ import static l.files.base.Objects.requireNonNull;
 import static l.files.ui.base.content.Contexts.isDebugBuild;
 import static l.files.ui.base.view.Views.find;
 import static l.files.ui.browser.FilesAdapter.calculateCardContentWidthPixels;
-import static l.files.ui.preview.Preview.Using.FILE_EXTENSION;
 
 final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo>
         implements Preview.Callback, LifeCycleListener, ScrollStateListener {
@@ -112,7 +111,7 @@ final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo>
         if (pendingUpdateTask) {
             Path file = previewPath();
             Stat stat = previewStat();
-            task = decorator.get(file, stat, constraint, this, FILE_EXTENSION);
+            task = decorator.get(file, stat, constraint, this);
         }
 
         if (pendingUpdateBlurredThumbnail != null) {
@@ -156,7 +155,7 @@ final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo>
         }
 
         ((CardView) itemView).setCardBackgroundColor(WHITE);
-        updateContent(retrievePreview(FILE_EXTENSION));
+        updateContent(retrievePreview());
     }
 
     private Rect calculateThumbnailConstraint(CardView card) {
@@ -179,7 +178,7 @@ final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo>
         content.setEnabled(item().isReadable());
     }
 
-    private Object retrievePreview(Preview.Using using) {
+    private Object retrievePreview() {
 
         if (task != null) {
             task.cancelAll();
@@ -205,7 +204,7 @@ final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo>
         }
 
         if (canInterruptScrollState()) {
-            task = decorator.get(file, stat, constraint, this, using);
+            task = decorator.get(file, stat, constraint, this);
         } else {
             pendingUpdateTask = true;
         }
@@ -286,18 +285,6 @@ final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo>
     }
 
     @Override
-    public void onSizeAvailable(Path item, Stat stat, Rect size) {
-        if (item.equals(previewPath())) {
-            Rect scaledSize = scaleSize(size);
-            if (canInterruptScrollState()) {
-                updateContent(scaledSize);
-            } else {
-                pendingUpdateSize = scaledSize;
-            }
-        }
-    }
-
-    @Override
     public void onPreviewAvailable(Path item, Stat stat, Bitmap bm) {
         if (item.equals(previewPath())) {
             if (canInterruptScrollState()) {
@@ -322,10 +309,7 @@ final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo>
 
     @Override
     public void onPreviewFailed(
-            Path item,
-            Stat stat,
-            Preview.Using used,
-            Object cause) {
+            Path item, Stat stat, Object cause) {
 
         if (item.equals(previewPath())) {
             updateContent(null);

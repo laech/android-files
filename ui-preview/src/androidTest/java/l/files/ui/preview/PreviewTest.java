@@ -11,7 +11,6 @@ import l.files.fs.Paths;
 import l.files.fs.Stat;
 import l.files.testing.fs.PathBaseTest;
 import l.files.ui.base.graphics.Rect;
-import l.files.ui.preview.Preview.Using;
 
 import static java.lang.System.nanoTime;
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -20,14 +19,9 @@ import static l.files.fs.Files.createSymbolicLink;
 import static l.files.fs.Files.writeUtf8;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.ui.preview.Preview.Using.FILE_EXTENSION;
-import static l.files.ui.preview.Preview.Using.MEDIA_TYPE;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
@@ -91,71 +85,58 @@ public final class PreviewTest extends PathBaseTest {
         } finally {
             in.close();
         }
-        testPreviewSuccess(file, FILE_EXTENSION);
-        testPreviewSuccess(file, MEDIA_TYPE);
+        testPreviewSuccess(file);
+        testPreviewSuccess(file);
     }
 
-    public void test_preview_proc_cpuinfo() throws Exception {
-        testPreviewSuccess(Paths.get("/proc/cpuinfo"), FILE_EXTENSION);
-        testPreviewSuccess(Paths.get("/proc/cpuinfo"), MEDIA_TYPE);
+    public void test_preview_proc_cpuinfo() throws Throwable {
+        testPreviewSuccess(Paths.get("/proc/cpuinfo"));
     }
 
-    public void test_preview_link() throws Exception {
+    public void test_preview_link() throws Throwable {
         Path file = createFile(dir1().resolve("file"));
         Path link = createSymbolicLink(dir1().resolve("link"), file);
         writeUtf8(file, "hi");
-        testPreviewSuccess(file, FILE_EXTENSION);
-        testPreviewSuccess(file, MEDIA_TYPE);
-        testPreviewSuccess(link, FILE_EXTENSION);
-        testPreviewSuccess(link, MEDIA_TYPE);
+        testPreviewSuccess(file);
+        testPreviewSuccess(file);
+        testPreviewSuccess(link);
+        testPreviewSuccess(link);
     }
 
-    public void test_preview_link_modified_target() throws Exception {
+    public void test_preview_link_modified_target() throws Throwable {
         Path file = createFile(dir1().resolve("file"));
         Path link = createSymbolicLink(dir1().resolve("link"), file);
         testPreviewFailure(link);
 
         writeUtf8(file, "hi");
-        testPreviewSuccess(link, FILE_EXTENSION);
-        testPreviewSuccess(link, MEDIA_TYPE);
+        testPreviewSuccess(link);
+        testPreviewSuccess(link);
     }
 
     private void testPreviewSuccessForContent(String content) throws Throwable {
         Path file = dir1().resolve(String.valueOf(nanoTime()));
         writeUtf8(file, content);
-        testPreviewSuccess(file, FILE_EXTENSION);
-        testPreviewSuccess(file, MEDIA_TYPE);
+        testPreviewSuccess(file);
+        testPreviewSuccess(file);
     }
 
-    private void testPreviewSuccess(Path file, Using using) throws Exception {
+    private void testPreviewSuccess(Path file) throws Throwable {
         Preview.Callback callback = mock(Preview.Callback.class);
         Stat stat = Files.stat(file, FOLLOW);
-        Decode task = newPreview().get(file, stat, Rect.of(100, 100), callback, using);
+        Decode task = newPreview().get(file, stat, Rect.of(100, 100), callback);
         assertNotNull(task);
 
-        try {
+        int millis = 60000;
 
-            int millis = 60000;
+        verify(callback, timeout(millis)).onPreviewAvailable(
+                eq(file),
+                eq(stat),
+                notNull(Bitmap.class));
 
-            verify(callback, timeout(millis))
-                    .onPreviewAvailable(eq(file), eq(stat), notNull(Bitmap.class));
-
-            verify(callback, timeout(millis))
-                    .onBlurredThumbnailAvailable(eq(file), eq(stat), notNull(Bitmap.class));
-
-            verify(callback, timeout(millis))
-                    .onSizeAvailable(eq(file), eq(stat), notNull(Rect.class));
-
-        } catch (Throwable e) {
-
-            verify(callback, never()).onPreviewFailed(
-                    any(Path.class),
-                    any(Stat.class),
-                    any(Using.class),
-                    anyObject());
-
-            throw e;
-        }
+        verify(callback, timeout(millis)).onBlurredThumbnailAvailable(
+                eq(file),
+                eq(stat),
+                notNull(Bitmap.class));
 
         task.awaitAll(1, MINUTES);
     }
@@ -164,7 +145,7 @@ public final class PreviewTest extends PathBaseTest {
         Preview.Callback callback = mock(Preview.Callback.class);
         Stat stat = Files.stat(file, NOFOLLOW);
         Rect rect = Rect.of(10, 10);
-        assertNull(newPreview().get(file, stat, rect, callback, MEDIA_TYPE));
+        assertNull(newPreview().get(file, stat, rect, callback));
     }
 
 }

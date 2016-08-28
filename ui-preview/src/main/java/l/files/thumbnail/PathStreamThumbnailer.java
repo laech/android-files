@@ -20,6 +20,11 @@ public final class PathStreamThumbnailer implements Thumbnailer<Path> {
     }
 
     @Override
+    public boolean accepts(Path path, String mediaType) {
+        return thumbnailer.accepts(path, mediaType);
+    }
+
+    @Override
     public ScaledBitmap create(Path path, Rect max, Context context) throws Exception {
         InputStream in = newInputStream(path);
         try {

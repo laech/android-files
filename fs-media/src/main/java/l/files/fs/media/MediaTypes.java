@@ -42,10 +42,6 @@ public final class MediaTypes {
         return PropertyDetector.INSTANCE.detect(context, path, stat).intern();
     }
 
-    public static String detectByFileExtension(String ext) {
-        return ExtensionDetector.INSTANCE.detect(ext).intern();
-    }
-
     /**
      * Detects the content type of this file based on its content.
      * Returns {@link #MEDIA_TYPE_OCTET_STREAM} if unknown.

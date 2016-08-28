@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import l.files.base.io.Readers;
+import l.files.fs.Path;
+import l.files.fs.media.MediaTypes;
 import l.files.ui.base.graphics.Rect;
 import l.files.ui.base.graphics.ScaledBitmap;
 
@@ -31,6 +33,11 @@ public final class TextThumbnailer implements Thumbnailer<InputStream> {
 
     private static final int PREVIEW_LIMIT = 256;
     private static final int TEXT_COLOR = parseColor("#616161");
+
+    @Override
+    public boolean accepts(Path path, String mediaType) {
+        return MediaTypes.generalize(mediaType).startsWith("text/");
+    }
 
     @Override
     public ScaledBitmap create(InputStream input, Rect max, Context context) throws IOException {

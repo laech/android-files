@@ -2,14 +2,13 @@ package l.files.ui.preview;
 
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
-import android.support.annotation.NonNull;
 import android.util.Log;
 
-import java.util.List;
+import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -17,30 +16,37 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.annotation.Nullable;
+
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.fs.media.MediaTypes;
+import l.files.thumbnail.ApkThumbnailer;
+import l.files.thumbnail.ImageThumbnailer;
+import l.files.thumbnail.MediaThumbnailer;
+import l.files.thumbnail.PathStreamThumbnailer;
+import l.files.thumbnail.PdfThumbnailer;
+import l.files.thumbnail.SvgThumbnailer;
+import l.files.thumbnail.TextThumbnailer;
+import l.files.thumbnail.Thumbnailer;
 import l.files.ui.base.graphics.Rect;
+import l.files.ui.base.graphics.ScaledBitmap;
 
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.setThreadPriority;
-import static java.lang.Math.min;
-import static java.lang.Runtime.getRuntime;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.ui.base.content.Contexts.isDebugBuild;
-import static l.files.ui.preview.Preview.Using.MEDIA_TYPE;
 
-public abstract class Decode extends AsyncTask<Object, Object, Object> {
+public final class Decode extends AsyncTask<Object, Object, Object> {
 
     private static final BlockingQueue<Runnable> queue =
             new LinkedBlockingQueue<>();
 
-    private static final int N_THREADS =
-            min(getRuntime().availableProcessors(), 2);
-
+    // TODO Use single thread due to PDF lib not thread safe
     private static final Executor executor = new ThreadPoolExecutor(
-            N_THREADS,
-            N_THREADS,
+            1,
+            1,
             0L,
             MILLISECONDS,
             queue,
@@ -50,44 +56,53 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
                         new AtomicInteger(1);
 
                 @Override
-                public Thread newThread(@NonNull Runnable r) {
+                public Thread newThread(Runnable r) {
                     return new Thread(r, "preview-decode-task-" +
                             threadNumber.getAndIncrement());
                 }
             });
 
-    final Path path;
-    final Stat stat;
-    final Rect constraint;
-    final Preview context;
-    final Preview.Callback callback;
-    final Preview.Using using;
+    // Need to update NoPreview cache version to invalidate
+    // cache when we add a new decoder so existing files
+    // marked as not previewable will get re-evaluated.
+    @SuppressWarnings("unchecked")
+    private static final Thumbnailer<Path>[] thumbnailers = new Thumbnailer[]{
+            new ImageThumbnailer(),
+            new MediaThumbnailer(),
+            new PdfThumbnailer(),
+            new PathStreamThumbnailer(new TextThumbnailer()),
+            new PathStreamThumbnailer(new SvgThumbnailer()),
+            new ApkThumbnailer(),
+    };
 
-    private final List<Decode> subs;
+    @Nullable
+    private volatile Future<?> saveThumbnailToDiskTask;
 
-    private boolean publishedSize;
+    private final Path path;
+    private final Stat stat;
+    private final Rect constraint;
+    private final Preview preview;
+    private final Preview.Callback callback;
 
     Decode(
             Path path,
             Stat stat,
             Rect constraint,
             Preview.Callback callback,
-            Preview.Using using,
-            Preview context) {
-
+            Preview preview
+    ) {
         this.path = requireNonNull(path);
         this.stat = requireNonNull(stat);
         this.constraint = requireNonNull(constraint);
         this.callback = requireNonNull(callback);
-        this.using = requireNonNull(using);
-        this.context = requireNonNull(context);
-        this.subs = new CopyOnWriteArrayList<>();
+        this.preview = requireNonNull(preview);
     }
 
     public void cancelAll() {
         cancel(true);
-        for (Decode sub : subs) {
-            sub.cancelAll();
+        Future<?> saveThumbnailToDiskTask = this.saveThumbnailToDiskTask;
+        if (saveThumbnailToDiskTask != null) {
+            saveThumbnailToDiskTask.cancel(true);
         }
     }
 
@@ -95,15 +110,16 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
             throws InterruptedException, ExecutionException, TimeoutException {
 
         get(timeout, unit);
-        for (Decode sub : subs) {
-            sub.awaitAll(timeout, unit);
+        Future<?> saveThumbnailToDiskTask = this.saveThumbnailToDiskTask;
+        if (saveThumbnailToDiskTask != null) {
+            saveThumbnailToDiskTask.get(timeout, unit);
         }
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        if (isDebugBuild(context.context)) {
+        if (isDebugBuild(preview.context)) {
             Log.i(getClass().getSimpleName(), "Decode enqueued" +
                     ", current queue size " + queue.size() +
                     ", " + path);
@@ -118,134 +134,142 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
             return null;
         }
 
-        if (!checkPreviewable()) {
-            return null;
-        }
+        try {
 
-        if (checkIsCache()) {
-            return null;
-        }
+            checkThumbnailMemCache();
+            checkThumbnailDiskCache();
+            checkIsPreviewable();
+            checkIsNotCacheFile();
+            decode();
 
-        if (checkThumbnailMemCache()) {
-            return null;
+        } catch (Stop ignored) {
+        } catch (Throwable e) {
+            Log.w(getClass().getSimpleName(),
+                    "Failed to get disk thumbnail for " + path, e);
+            publishProgress(new NoPreview(e));
         }
-
-        if (checkThumbnailDiskCache()) {
-            return null;
-        }
-
-        return onDoInBackground();
+        return null;
     }
 
-    abstract Object onDoInBackground();
+    private void decode() throws Exception {
+        if (isCancelled()) {
+            return;
+        }
 
-    private boolean checkIsCache() {
-        if (path.startsWith(context.cacheDir)) {
+        String mediaType = decodeMediaType();
+        for (Thumbnailer<Path> thumbnailer : thumbnailers) {
+            if (thumbnailer.accepts(path, mediaType.toLowerCase())) {
+                decode(thumbnailer);
+                break;
+            }
+        }
+        publishProgress(NoPreview.DECODE_RETURNED_NULL);
+    }
+
+    private void decode(Thumbnailer<Path> thumbnailer) throws Exception {
+        ScaledBitmap result = thumbnailer.create(path, constraint, preview.context);
+        if (result != null) {
+            publishProgress(result.bitmap());
+            saveThumbnailToDiskTask = preview.putThumbnailToDiskAsync(
+                    path, stat, constraint, result.bitmap());
+            publishBlurredIfNeeded(result.bitmap());
+            throw Stop.INSTANCE;
+        }
+    }
+
+    private String decodeMediaType() throws IOException {
+        String mediaType = preview.getMediaType(path, stat, constraint, true);
+        if (mediaType == null) {
+            mediaType = MediaTypes.detectByContent(preview.context, path, stat);
+            preview.putMediaType(path, stat, constraint, mediaType);
+        }
+        return mediaType;
+    }
+
+    private void checkIsNotCacheFile() {
+        if (path.startsWith(preview.cacheDir)) {
             publishProgress(NoPreview.PATH_IN_CACHE_DIR);
-            return true;
+            throw Stop.INSTANCE;
         }
-        return false;
     }
 
-    private boolean checkPreviewable() {
-        NoPreview reason = context.getNoPreviewReason(path, stat, constraint);
+    private void checkIsPreviewable() {
+        NoPreview reason = preview.getNoPreviewReason(path, stat, constraint);
         if (reason != null) {
             publishProgress(reason);
+            throw Stop.INSTANCE;
         }
-        return reason == null;
     }
 
-    private boolean checkThumbnailMemCache() {
-        Bitmap thumbnail = context.getThumbnail(path, stat, constraint, true);
+    private void checkThumbnailMemCache() {
+        Bitmap thumbnail = preview.getThumbnail(path, stat, constraint, true);
         if (thumbnail != null) {
             publishProgress(thumbnail);
-
-            if (context.getBlurredThumbnail(path, stat, constraint, true) == null) {
-                publishProgress(generateBlurredThumbnail(thumbnail));
-            }
-
-            return true;
+            publishBlurredIfNeeded(thumbnail);
+            throw Stop.INSTANCE;
         }
-        return false;
     }
 
-    private boolean checkThumbnailDiskCache() {
+    private void checkThumbnailDiskCache() {
         Bitmap thumbnail = null;
         try {
-            thumbnail = context.getThumbnailFromDisk(path, stat, constraint, true);
-        } catch (Exception e) {
+            thumbnail = preview.getThumbnailFromDisk(path, stat, constraint, true);
+        } catch (IOException e) {
             Log.w(getClass().getSimpleName(),
                     "Failed to get disk thumbnail for " + path, e);
         }
 
         if (thumbnail != null) {
-
-            if (context.getSize(path, stat, constraint, true) == null) {
-                context.putSize(path, stat, constraint, Rect.of(
-                        thumbnail.getWidth(),
-                        thumbnail.getHeight()));
-            }
-
             publishProgress(thumbnail);
-
-            if (context.getBlurredThumbnail(path, stat, constraint, true) == null) {
-                publishProgress(generateBlurredThumbnail(thumbnail));
-            }
-
-            return true;
+            publishBlurredIfNeeded(thumbnail);
+            throw Stop.INSTANCE;
         }
-        return false;
     }
 
-    // TODO save this to disk
-    BlurredThumbnail generateBlurredThumbnail(Bitmap bitmap) {
+    private void publishBlurredIfNeeded(Bitmap bitmap) {
+        if (preview.getBlurredThumbnail(path, stat, constraint, true) == null) {
+            publishProgress(generateBlurredThumbnail(bitmap));
+        }
+    }
+
+    private BlurredThumbnail generateBlurredThumbnail(Bitmap bitmap) {
         return new BlurredThumbnail(StackBlur.blur(bitmap));
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected void onProgressUpdate(Object... values) {
         super.onProgressUpdate(values);
         for (Object value : values) {
+            handleProgressUpdateValue(value);
+        }
+    }
 
-            if (value instanceof Rect) {
-                if (!publishedSize) {
-                    publishedSize = true;
-                    context.putSize(path, stat, constraint, (Rect) value);
-                    callback.onSizeAvailable(path, stat, (Rect) value);
-                }
+    private void handleProgressUpdateValue(Object value) {
 
-            } else if (value instanceof Bitmap) {
-                context.putThumbnail(path, stat, constraint, (Bitmap) value);
-                context.putPreviewable(path, stat, constraint, true);
-                callback.onPreviewAvailable(path, stat, (Bitmap) value);
+        if (value instanceof Bitmap) {
+            Bitmap result = (Bitmap) value;
+            preview.putThumbnail(path, stat, constraint, result);
+            preview.putPreviewable(path, stat, constraint, true);
+            callback.onPreviewAvailable(path, stat, result);
 
-            } else if (value instanceof BlurredThumbnail) {
-                Bitmap thumbnail = ((BlurredThumbnail) value).bitmap;
-                context.putBlurredThumbnail(path, stat, constraint, thumbnail);
-                callback.onBlurredThumbnailAvailable(path, stat, thumbnail);
+        } else if (value instanceof ScaledBitmap) {
+            ScaledBitmap result = (ScaledBitmap) value;
+            preview.putThumbnail(path, stat, constraint, result.bitmap());
+            preview.putSize(path, stat, constraint, result.originalSize());
+            preview.putPreviewable(path, stat, constraint, true);
+            callback.onPreviewAvailable(path, stat, result.bitmap());
 
-            } else if (value instanceof NoPreview) {
-                if (using == MEDIA_TYPE) {
-                    callback.onPreviewFailed(path, stat, using, ((NoPreview) value).cause);
-                    context.putPreviewable(path, stat, constraint, false);
+        } else if (value instanceof BlurredThumbnail) {
+            BlurredThumbnail blur = (BlurredThumbnail) value;
+            preview.putBlurredThumbnail(path, stat, constraint, blur.bitmap);
+            callback.onBlurredThumbnailAvailable(path, stat, blur.bitmap);
 
-                } else {
-                    Decode sub = DecodeChain.run(
-                            path, stat, constraint, callback, MEDIA_TYPE, context);
-                    if (sub != null) {
-                        subs.add(sub);
-                    } else {
-                        callback.onPreviewFailed(path, stat, using, ((NoPreview) value).cause);
-                        context.putPreviewable(path, stat, constraint, false);
-                    }
-                }
+        } else if (value instanceof NoPreview) {
+            preview.putPreviewable(path, stat, constraint, false);
+            callback.onPreviewFailed(path, stat, ((NoPreview) value).cause);
 
-            } else if (value instanceof Decode) {
-                Decode sub = (Decode) value;
-                subs.add(sub);
-                sub.executeOnPreferredExecutor();
-            }
+        } else {
+            throw new IllegalStateException(String.valueOf(value));
         }
     }
 
@@ -253,4 +277,13 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
         return (Decode) executeOnExecutor(executor);
     }
 
+    private static final class Stop extends RuntimeException {
+
+        static final Stop INSTANCE;
+
+        static {
+            INSTANCE = new Stop();
+            INSTANCE.setStackTrace(new StackTraceElement[0]);
+        }
+    }
 }

@@ -13,11 +13,10 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-import l.files.ui.base.graphics.Rect;
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.ui.base.graphics.Rect;
 import l.files.ui.preview.Preview;
-import l.files.ui.preview.Preview.Using;
 
 import static android.text.format.DateUtils.FORMAT_SHOW_DATE;
 import static android.text.format.DateUtils.FORMAT_SHOW_TIME;
@@ -121,7 +120,7 @@ public final class InfoFragment
             if (size != null) {
                 setImageViewMinSize(size);
             }
-            preview.get(file, stat, constraint, this, Using.MEDIA_TYPE);
+            preview.get(file, stat, constraint, this);
         }
     }
 
@@ -139,11 +138,6 @@ public final class InfoFragment
 
     private Rect scaleSize(Rect size) {
         return size.scaleDown(constraint);
-    }
-
-    @Override
-    public void onSizeAvailable(Path file, Stat stat, Rect size) {
-        setImageViewMinSize(size);
     }
 
     private void setImageViewMinSize(Rect size) {
@@ -173,7 +167,7 @@ public final class InfoFragment
     }
 
     @Override
-    public void onPreviewFailed(Path path, Stat stat, Using used, Object cause) {
+    public void onPreviewFailed(Path path, Stat stat, Object cause) {
         image.setVisibility(GONE);
     }
 
