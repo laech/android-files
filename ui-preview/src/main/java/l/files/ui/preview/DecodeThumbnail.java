@@ -1,6 +1,5 @@
 package l.files.ui.preview;
 
-import android.graphics.Bitmap;
 import android.support.annotation.Nullable;
 
 import java.util.concurrent.ExecutionException;
@@ -25,10 +24,6 @@ abstract class DecodeThumbnail extends Decode {
             Preview.Using using,
             Preview context) {
         super(path, stat, constraint, callback, using, context);
-    }
-
-    boolean shouldCacheToDisk(ScaledBitmap result, Bitmap scaledBitmap) {
-        return true;
     }
 
     @Override
@@ -83,10 +78,8 @@ abstract class DecodeThumbnail extends Decode {
             return null;
         }
 
-        if (shouldCacheToDisk(result, result.bitmap())) {
-            saveThumbnailToDiskTask = context.putThumbnailToDiskAsync(
-                    path, stat, constraint, result.bitmap());
-        }
+        saveThumbnailToDiskTask = context.putThumbnailToDiskAsync(
+                path, stat, constraint, result.bitmap());
 
         return null;
     }

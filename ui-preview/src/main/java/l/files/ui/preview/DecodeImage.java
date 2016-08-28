@@ -1,7 +1,5 @@
 package l.files.ui.preview;
 
-import android.graphics.Bitmap;
-
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.thumbnail.ImageThumbnailer;
@@ -57,12 +55,6 @@ final class DecodeImage extends DecodeThumbnail {
             Preview context) {
         super(path, stat, constraint, callback, using, context);
         thumbnailer = new ImageThumbnailer();
-    }
-
-    @Override
-    boolean shouldCacheToDisk(ScaledBitmap result, Bitmap scaledBitmap) {
-        return result.originalSize().width() > scaledBitmap.getWidth() ||
-                result.originalSize().height() > scaledBitmap.getHeight();
     }
 
     @Override
