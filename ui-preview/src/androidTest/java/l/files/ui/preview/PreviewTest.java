@@ -123,7 +123,9 @@ public final class PreviewTest extends PathBaseTest {
     private void testPreviewSuccess(Path file) throws Throwable {
         Preview.Callback callback = mock(Preview.Callback.class);
         Stat stat = Files.stat(file, FOLLOW);
-        Decode task = newPreview().get(file, stat, Rect.of(100, 100), callback);
+        Preview preview = newPreview();
+        Rect max = Rect.of(100, 100);
+        Decode task = preview.get(file, stat, max, callback);
         assertNotNull(task);
 
         int millis = 60000;
@@ -139,6 +141,13 @@ public final class PreviewTest extends PathBaseTest {
                 notNull(Bitmap.class));
 
         task.awaitAll(1, MINUTES);
+
+        assertNotNull(preview.getSize(file, stat, max, true));
+        assertNotNull(preview.getThumbnail(file, stat, max, true));
+        assertNotNull(preview.getBlurredThumbnail(file, stat, max, true));
+        assertNotNull(preview.getMediaType(file, stat, max, true));
+        assertNotNull(preview.getThumbnailFromDisk(file, stat, max, true));
+        assertNull(preview.getNoPreviewReason(file, stat, max));
     }
 
     private void testPreviewFailure(Path file) throws IOException {

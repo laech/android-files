@@ -169,7 +169,7 @@ public final class Decode extends AsyncTask<Object, Object, Object> {
     private void decode(Thumbnailer<Path> thumbnailer) throws Exception {
         ScaledBitmap result = thumbnailer.create(path, constraint, preview.context);
         if (result != null) {
-            publishProgress(result.bitmap());
+            publishProgress(result);
             saveThumbnailToDiskTask = preview.putThumbnailToDiskAsync(
                     path, stat, constraint, result.bitmap());
             publishBlurredIfNeeded(result.bitmap());
