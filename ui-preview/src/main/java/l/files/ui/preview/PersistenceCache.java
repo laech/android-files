@@ -114,9 +114,10 @@ abstract class PersistenceCache<V> extends MemCache<V> {
         }
 
         Path file = cacheFile();
-        DataInputStream in = newBufferedDataInputStream(file);
+        DataInputStream in = null;
         try {
 
+            in = newBufferedDataInputStream(file);
             if (in.readInt() != SUPERCLASS_VERSION) {
                 return;
             }
@@ -140,7 +141,9 @@ abstract class PersistenceCache<V> extends MemCache<V> {
 
         } catch (FileNotFoundException ignore) {
         } finally {
-            in.close();
+            if (in != null) {
+                in.close();
+            }
         }
     }
 
