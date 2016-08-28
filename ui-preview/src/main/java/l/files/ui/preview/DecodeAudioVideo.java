@@ -1,18 +1,11 @@
 package l.files.ui.preview;
 
-import android.graphics.Bitmap;
-import android.media.MediaMetadataRetriever;
-import android.net.Uri;
-import android.support.annotation.Nullable;
-
-import java.io.IOException;
-
 import l.files.fs.Path;
 import l.files.fs.Stat;
-import l.files.ui.base.graphics.ScaledBitmap;
+import l.files.thumbnail.MediaThumbnailer;
+import l.files.thumbnail.Thumbnailer;
 import l.files.ui.base.graphics.Rect;
-
-import static android.graphics.BitmapFactory.decodeByteArray;
+import l.files.ui.base.graphics.ScaledBitmap;
 
 final class DecodeAudioVideo extends DecodeThumbnail {
 
@@ -55,6 +48,8 @@ final class DecodeAudioVideo extends DecodeThumbnail {
 
     };
 
+    private final Thumbnailer<Path> thumbnailer;
+
     DecodeAudioVideo(
             Path path,
             Stat stat,
@@ -63,41 +58,12 @@ final class DecodeAudioVideo extends DecodeThumbnail {
             Preview.Using using,
             Preview context) {
         super(path, stat, constraint, callback, using, context);
+        thumbnailer = new MediaThumbnailer(context.context);
     }
 
     @Override
-    ScaledBitmap decode() throws IOException {
-        if (isCancelled()) {
-            return null;
-        }
-
-        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        try {
-            retriever.setDataSource(context.context, Uri.parse(path.toUri().toString()));
-
-            if (isCancelled()) {
-                return null;
-            }
-
-            Bitmap bitmap = decode(retriever);
-            if (bitmap != null) {
-                Rect size = Rect.of(bitmap.getWidth(), bitmap.getHeight());
-                return new ScaledBitmap(bitmap, size);
-            }
-
-        } finally {
-            retriever.release();
-        }
-        return null;
-    }
-
-    @Nullable
-    private Bitmap decode(MediaMetadataRetriever retriever) {
-        byte[] data = retriever.getEmbeddedPicture();
-        if (data != null) {
-            return decodeByteArray(data, 0, data.length);
-        }
-        return retriever.getFrameAtTime();
+    ScaledBitmap decode() throws Exception {
+        return thumbnailer.create(path, constraint);
     }
 
 }
