@@ -14,6 +14,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.Callable;
 
 import l.files.base.io.Closer;
 
@@ -47,11 +48,15 @@ public final class BitmapsTest extends TestCase {
         Closer closer = Closer.create();
         try {
 
-            File file = createTempFile(closer);
+            final File file = createTempFile(closer);
             write(src, file);
 
-            InputStream in = closer.register(new FileInputStream(file));
-            ScaledBitmap result = decodeScaledDownBitmap(in, max);
+            ScaledBitmap result = decodeScaledDownBitmap(new Callable<InputStream>() {
+                @Override
+                public InputStream call() throws IOException {
+                    return new FileInputStream(file);
+                }
+            }, max);
 
             assertNotNull(result);
             assertTrue(result.bitmap().sameAs(expected));
@@ -120,10 +125,15 @@ public final class BitmapsTest extends TestCase {
     }
 
     public void test_decodeBounds() throws Exception {
-        int width = 10;
-        int height = 11;
-        byte[] bytes = generateBitmapByteArray(width, height);
-        Rect bounds = decodeBounds(new ByteArrayInputStream(bytes));
+        final int width = 10;
+        final int height = 11;
+        final byte[] bytes = generateBitmapByteArray(width, height);
+        final Rect bounds = decodeBounds(new Callable<InputStream>() {
+            @Override
+            public InputStream call() {
+                return new ByteArrayInputStream(bytes);
+            }
+        });
         assertNotNull(bounds);
         assertEquals(width, bounds.width());
         assertEquals(height, bounds.height());

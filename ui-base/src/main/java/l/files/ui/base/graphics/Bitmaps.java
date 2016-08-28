@@ -3,9 +3,8 @@ package l.files.ui.base.graphics;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.Callable;
 
 import javax.annotation.Nullable;
 
@@ -28,27 +27,42 @@ public final class Bitmaps {
         return null;
     }
 
+    @Nullable
+    public static Rect decodeBounds(Callable<InputStream> provider)
+            throws Exception {
+
+        InputStream in = provider.call();
+        try {
+            return decodeBounds(in);
+        } finally {
+            in.close();
+        }
+    }
+
     /**
      * Decodes a bitmap from the input scaled down to fit {@code max}
-     * while maintaining its aspect ratio.
+     * while maintaining its aspect ratio. The input stream provider
+     * must return an input stream at the same initial position every
+     * time it's called as multiple pass through the source stream
+     * is required.
      */
     @Nullable
-    public static ScaledBitmap decodeScaledDownBitmap(InputStream in, Rect max)
-            throws IOException {
+    public static ScaledBitmap decodeScaledDownBitmap(
+            Callable<InputStream> provider, Rect max) throws Exception {
 
-        if (!in.markSupported()) {
-            in = new BufferedInputStream(in);
-        }
-
-        in.mark(8192);
-        Rect originalSize = decodeBounds(in);
+        Rect originalSize = decodeBounds(provider);
         if (originalSize == null) {
             return null;
         }
 
-        in.reset();
         Options opts = scaleDownOptions(originalSize, max);
-        Bitmap bitmap = decodeStream(in, null, opts);
+        Bitmap bitmap;
+        InputStream in = provider.call();
+        try {
+            bitmap = decodeStream(in, null, opts);
+        } finally {
+            in.close();
+        }
         if (bitmap == null) {
             return null;
         }
