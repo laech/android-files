@@ -44,7 +44,7 @@ final class DecodeImage extends DecodeThumbnail {
 
     };
 
-    private final Thumbnailer<Path> thumbnailer;
+    private final Thumbnailer<Path> thumbnailer = new ImageThumbnailer();
 
     DecodeImage(
             Path path,
@@ -54,7 +54,6 @@ final class DecodeImage extends DecodeThumbnail {
             Preview.Using using,
             Preview context) {
         super(path, stat, constraint, callback, using, context);
-        thumbnailer = new ImageThumbnailer();
     }
 
     @Override
@@ -63,7 +62,7 @@ final class DecodeImage extends DecodeThumbnail {
         if (size != null) {
             publishProgress(size);
         }
-        return thumbnailer.create(path, constraint);
+        return thumbnailer.create(path, constraint, context.context);
     }
 
 }

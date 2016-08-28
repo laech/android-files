@@ -48,7 +48,7 @@ final class DecodeAudioVideo extends DecodeThumbnail {
 
     };
 
-    private final Thumbnailer<Path> thumbnailer;
+    private final Thumbnailer<Path> thumbnailer = new MediaThumbnailer();
 
     DecodeAudioVideo(
             Path path,
@@ -58,12 +58,11 @@ final class DecodeAudioVideo extends DecodeThumbnail {
             Preview.Using using,
             Preview context) {
         super(path, stat, constraint, callback, using, context);
-        thumbnailer = new MediaThumbnailer(context.context);
     }
 
     @Override
     ScaledBitmap decode() throws Exception {
-        return thumbnailer.create(path, constraint);
+        return thumbnailer.create(path, constraint, context.context);
     }
 
 }

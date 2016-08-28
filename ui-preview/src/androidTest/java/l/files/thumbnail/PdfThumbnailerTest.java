@@ -2,7 +2,6 @@ package l.files.thumbnail;
 
 import android.content.res.AssetManager;
 import android.test.AndroidTestCase;
-import android.util.DisplayMetrics;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +22,7 @@ public final class PdfThumbnailerTest extends AndroidTestCase {
         Path path = createTestPdf();
         try {
             Rect max = Rect.of(10, 100);
-            ScaledBitmap result = newThumbnailer().create(path, max);
+            ScaledBitmap result = newThumbnailer().create(path, max, getContext());
             assertNotNull(result);
             assertEquals(max.width(), result.bitmap().getWidth());
             assertTrue(result.originalSize().width() > max.width());
@@ -60,10 +59,7 @@ public final class PdfThumbnailerTest extends AndroidTestCase {
     }
 
     private PdfThumbnailer newThumbnailer() {
-        return new PdfThumbnailer(getDisplayMetrics());
+        return new PdfThumbnailer();
     }
 
-    private DisplayMetrics getDisplayMetrics() {
-        return getContext().getResources().getDisplayMetrics();
-    }
 }

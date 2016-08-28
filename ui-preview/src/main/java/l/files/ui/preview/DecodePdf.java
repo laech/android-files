@@ -53,7 +53,7 @@ final class DecodePdf extends DecodeThumbnail {
 
     };
 
-    private final Thumbnailer<Path> thumbnailer;
+    private final Thumbnailer<Path> thumbnailer = new PdfThumbnailer();
 
     DecodePdf(
             Path path,
@@ -63,7 +63,6 @@ final class DecodePdf extends DecodeThumbnail {
             Preview.Using using,
             Preview context) {
         super(path, stat, constraint, callback, using, context);
-        thumbnailer = new PdfThumbnailer(context.displayMetrics);
     }
 
     @Override
@@ -73,7 +72,7 @@ final class DecodePdf extends DecodeThumbnail {
 
     @Override
     ScaledBitmap decode() throws Exception {
-        return thumbnailer.create(path, constraint);
+        return thumbnailer.create(path, constraint, context.context);
     }
 
 }

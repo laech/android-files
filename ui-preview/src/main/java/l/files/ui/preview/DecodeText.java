@@ -1,7 +1,5 @@
 package l.files.ui.preview;
 
-import java.io.IOException;
-
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.fs.media.MediaTypes;
@@ -40,7 +38,7 @@ final class DecodeText extends DecodeThumbnail {
 
     };
 
-    private final Thumbnailer<Path> thumbnailer;
+    private final Thumbnailer<Path> thumbnailer = new PathStreamThumbnailer(new TextThumbnailer());
 
     DecodeText(
             Path path,
@@ -50,12 +48,11 @@ final class DecodeText extends DecodeThumbnail {
             Preview.Using using,
             Preview context) {
         super(path, stat, constraint, callback, using, context);
-        thumbnailer = new PathStreamThumbnailer(new TextThumbnailer(context.context));
     }
 
     @Override
     ScaledBitmap decode() throws Exception {
-        return thumbnailer.create(path, constraint);
+        return thumbnailer.create(path, constraint, context.context);
     }
 
 }

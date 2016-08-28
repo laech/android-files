@@ -1,5 +1,7 @@
 package l.files.thumbnail;
 
+import android.content.Context;
+
 import java.io.InputStream;
 
 import l.files.fs.Path;
@@ -18,10 +20,10 @@ public final class PathStreamThumbnailer implements Thumbnailer<Path> {
     }
 
     @Override
-    public ScaledBitmap create(Path path, Rect max) throws Exception {
+    public ScaledBitmap create(Path path, Rect max, Context context) throws Exception {
         InputStream in = newInputStream(path);
         try {
-            return thumbnailer.create(in, max);
+            return thumbnailer.create(in, max, context);
         } finally {
             in.close();
         }

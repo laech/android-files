@@ -1,5 +1,6 @@
 package l.files.thumbnail;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.util.DisplayMetrics;
@@ -18,24 +19,18 @@ import l.files.ui.base.graphics.ScaledBitmap;
 import static android.graphics.Bitmap.Config.ARGB_8888;
 import static android.graphics.Bitmap.createBitmap;
 import static android.graphics.Color.WHITE;
-import static l.files.base.Objects.requireNonNull;
 
 public final class SvgThumbnailer implements Thumbnailer<InputStream> {
 
-    private final DisplayMetrics metrics;
-
-    public SvgThumbnailer(DisplayMetrics metrics) {
-        this.metrics = requireNonNull(metrics);
-    }
-
     @Override
-    public ScaledBitmap create(InputStream input, Rect max) throws Exception {
+    public ScaledBitmap create(InputStream input, Rect max, Context context) throws Exception {
         SVG svg = parseSvg(input);
         if (svg == null) {
             return null;
         }
         Rect originalSize = getSize(svg);
         Rect scaledSize = originalSize.scaleDown(max);
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         Bitmap bitmap = renderSvg(svg, scaledSize, metrics);
         return new ScaledBitmap(bitmap, originalSize);
 

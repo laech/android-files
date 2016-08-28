@@ -1,7 +1,6 @@
 package l.files.thumbnail;
 
 import android.test.AndroidTestCase;
-import android.util.DisplayMetrics;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -23,17 +22,14 @@ public final class SvgThumbnailerTest extends AndroidTestCase {
                 " xmlns=\"http://www.w3.org/2000/svg\"/>").getBytes(UTF_8));
         Rect originalSize = Rect.of(24, 24);
         Rect decodedSize = Rect.of(10, 10);
-        ScaledBitmap result = thumbnailer().create(in, decodedSize);
+        ScaledBitmap result = thumbnailer().create(in, decodedSize, getContext());
         assertNotNull(result);
         assertEquals(decodedSize, Rect.of(result.bitmap()));
         assertEquals(originalSize, result.originalSize());
     }
 
     private SvgThumbnailer thumbnailer() {
-        return new SvgThumbnailer(getDisplayMetrics());
+        return new SvgThumbnailer();
     }
 
-    private DisplayMetrics getDisplayMetrics() {
-        return getContext().getResources().getDisplayMetrics();
-    }
 }

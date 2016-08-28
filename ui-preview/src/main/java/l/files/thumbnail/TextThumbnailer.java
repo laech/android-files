@@ -25,7 +25,6 @@ import static android.view.View.MeasureSpec.AT_MOST;
 import static android.view.View.MeasureSpec.UNSPECIFIED;
 import static android.view.View.MeasureSpec.makeMeasureSpec;
 import static java.lang.Math.min;
-import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.Files.UTF_8;
 
 public final class TextThumbnailer implements Thumbnailer<InputStream> {
@@ -33,14 +32,8 @@ public final class TextThumbnailer implements Thumbnailer<InputStream> {
     private static final int PREVIEW_LIMIT = 256;
     private static final int TEXT_COLOR = parseColor("#616161");
 
-    private final Context context;
-
-    public TextThumbnailer(Context context) {
-        this.context = requireNonNull(context, "context");
-    }
-
     @Override
-    public ScaledBitmap create(InputStream input, Rect max) throws IOException {
+    public ScaledBitmap create(InputStream input, Rect max, Context context) throws IOException {
         // TODO support more charsets
         String text = Readers.readString(input, PREVIEW_LIMIT, UTF_8);
         if (text == null) {

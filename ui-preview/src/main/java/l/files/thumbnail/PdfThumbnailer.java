@@ -1,5 +1,6 @@
 package l.files.thumbnail;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.DisplayMetrics;
 
@@ -15,19 +16,12 @@ import static android.graphics.Bitmap.createBitmap;
 import static android.graphics.Color.WHITE;
 import static android.util.TypedValue.COMPLEX_UNIT_PT;
 import static android.util.TypedValue.applyDimension;
-import static l.files.base.Objects.requireNonNull;
 
 public final class PdfThumbnailer implements Thumbnailer<Path> {
 
-    private final DisplayMetrics metrics;
-
-    public PdfThumbnailer(DisplayMetrics metrics) {
-        this.metrics = requireNonNull(metrics, "metrics");
-    }
-
     @Override
-    public ScaledBitmap create(Path path, Rect max) throws IOException {
-
+    public ScaledBitmap create(Path path, Rect max, Context context) throws IOException {
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         long doc = Pdf.open(path.toByteArray());
         try {
             long page = Pdf.openPage(doc, 0);

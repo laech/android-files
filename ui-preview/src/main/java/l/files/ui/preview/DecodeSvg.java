@@ -39,7 +39,7 @@ final class DecodeSvg extends DecodeThumbnail {
 
     };
 
-    private final Thumbnailer<Path> thumbnailer;
+    private final Thumbnailer<Path> thumbnailer = new PathStreamThumbnailer(new SvgThumbnailer());
 
     DecodeSvg(
             Path path,
@@ -49,12 +49,11 @@ final class DecodeSvg extends DecodeThumbnail {
             Preview.Using using,
             Preview context) {
         super(path, stat, constraint, callback, using, context);
-        thumbnailer = new PathStreamThumbnailer(new SvgThumbnailer(context.displayMetrics));
     }
 
     @Override
     ScaledBitmap decode() throws Exception {
-        return thumbnailer.create(path, constraint);
+        return thumbnailer.create(path, constraint, context.context);
     }
 
 }
