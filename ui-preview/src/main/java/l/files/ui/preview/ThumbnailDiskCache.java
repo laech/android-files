@@ -150,9 +150,10 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
     @Override
     public Bitmap get(Path path, Stat stat, Rect constraint, boolean matchTime) throws IOException {
         Path cache = cacheFile(path, stat, constraint, matchTime);
-        InputStream in = newBufferedInputStream(cache);
+        InputStream in = null;
         try {
 
+            in = newBufferedInputStream(cache);
             int version = in.read();
             if (version != VERSION) {
                 return null;
@@ -179,7 +180,9 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
         } catch (FileNotFoundException e) {
             return null;
         } finally {
-            in.close();
+            if (in != null) {
+                in.close();
+            }
         }
     }
 
