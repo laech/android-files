@@ -26,7 +26,6 @@ import l.files.ui.base.view.ActionModeProvider;
 import l.files.ui.base.widget.StableAdapter;
 import l.files.ui.browser.action.Selectable;
 
-import static android.support.v7.widget.RecyclerView.SCROLL_STATE_IDLE;
 import static l.files.base.Objects.requireNonNull;
 
 final class FilesAdapter extends StableAdapter<Object, ViewHolder>
@@ -44,8 +43,7 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
 
     private final PremiumLock premiumLock;
     private final LifeCycleListenable listenable;
-
-    private int scrollState = SCROLL_STATE_IDLE;
+    private final RecyclerView recyclerView;
 
     FilesAdapter(
             RecyclerView recyclerView,
@@ -56,27 +54,13 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
             OnOpenFileListener listener,
             PremiumLock premiumLock) {
 
+        this.recyclerView = requireNonNull(recyclerView);
         this.listenable = requireNonNull(listenable);
         this.premiumLock = requireNonNull(premiumLock);
         this.actionModeProvider = requireNonNull(actionModeProvider);
         this.actionModeCallback = requireNonNull(actionModeCallback);
         this.listener = requireNonNull(listener);
         this.selection = requireNonNull(selection);
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-
-            @Override
-            public void onScrollStateChanged(RecyclerView view, int newState) {
-                super.onScrollStateChanged(view, newState);
-                scrollState = newState;
-                for (int i = 0; i < view.getChildCount(); i++) {
-                    Object tag = view.getChildAt(i).getTag();
-                    if (tag instanceof ScrollStateListener) {
-                        ((ScrollStateListener) tag)
-                                .onScrollStateChanged(view, newState);
-                    }
-                }
-            }
-        });
     }
 
     @Override
@@ -105,6 +89,7 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
                 itemView = inflater.inflate(FileViewHolder.LAYOUT_ID, parent, false);
                 holder = new FileViewHolder(
                         itemView,
+                        recyclerView,
                         listenable,
                         selection,
                         actionModeProvider,
@@ -132,9 +117,6 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         Object item = getItem(position);
-        if (holder instanceof ScrollStateListener) {
-            ((ScrollStateListener) holder).onCurrentState(scrollState);
-        }
         if (holder instanceof HeaderViewHolder) {
             ((HeaderViewHolder) holder).bind((Header) item);
         } else if (holder instanceof FileViewHolder) {
@@ -191,12 +173,5 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
                         - res.getDimension(R.dimen.files_item_card_inner_space) * 2
                         - padding
         );
-    }
-
-    interface ScrollStateListener {
-
-        void onCurrentState(int newState);
-
-        void onScrollStateChanged(RecyclerView view, int newState);
     }
 }

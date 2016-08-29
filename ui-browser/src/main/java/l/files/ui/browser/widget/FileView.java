@@ -407,10 +407,6 @@ public final class FileView extends View implements Drawable.Callback {
         return showLinkIcon;
     }
 
-    public void startPreviewTransition() {
-        preview.startTransition(transitionDuration);
-    }
-
     public boolean hasPreviewContent() {
         return preview.hasVisibleContent();
     }

@@ -9,7 +9,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
 import android.support.v7.view.ActionMode;
-import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
@@ -177,7 +176,6 @@ public final class FilesFragment
         recycler = find(android.R.id.list, this);
         recycler.setHasFixedSize(true);
         recycler.setItemViewCacheSize(spanCount * 3);
-        recycler.setItemAnimator(null);
         recycler.setLayoutManager(new StaggeredGridLayoutManager(spanCount, VERTICAL));
         recycler.getRecycledViewPool().setMaxRecycledViews(VIEW_TYPE_FILE, 50);
         recycler.getRecycledViewPool().setMaxRecycledViews(VIEW_TYPE_HEADER, 50);
@@ -362,11 +360,6 @@ public final class FilesFragment
 
             if (progressBar != null) {
                 progressBar.setVisibility(GONE);
-            }
-
-            // First load no animation to speed up
-            if (recycler.getItemAnimator() == null && adapter.getItemCount() != 0) {
-                recycler.setItemAnimator(new DefaultItemAnimator());
             }
 
             updateSelection(data);
