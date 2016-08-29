@@ -27,35 +27,35 @@ void throw_io_exception(JNIEnv *env, const char *msg) {
     (*env)->Throw(env, exception);
 }
 
-void Java_l_files_ui_preview_Pdf_init(JNIEnv *env, jclass clazz) {
+void Java_l_files_thumbnail_Pdf_init(JNIEnv *env, jclass clazz) {
     FPDF_InitLibrary();
 }
 
-jdouble Java_l_files_ui_preview_Pdf_getPageHeightInPoints(
+jdouble Java_l_files_thumbnail_Pdf_getPageHeightInPoints(
         JNIEnv *env, jclass clazz, jlong jpage) {
 
     return FPDF_GetPageHeight((FPDF_PAGE) (intptr_t) jpage);
 }
 
-jdouble Java_l_files_ui_preview_Pdf_getPageWidthInPoints(
+jdouble Java_l_files_thumbnail_Pdf_getPageWidthInPoints(
         JNIEnv *env, jclass clazz, jlong jpage) {
 
     return FPDF_GetPageWidth((FPDF_PAGE) (intptr_t) jpage);
 }
 
-void Java_l_files_ui_preview_Pdf_close(
+void Java_l_files_thumbnail_Pdf_close(
         JNIEnv *env, jclass clazz, jlong jdoc) {
 
     FPDF_CloseDocument((FPDF_DOCUMENT) (intptr_t) jdoc);
 }
 
-void Java_l_files_ui_preview_Pdf_closePage(
+void Java_l_files_thumbnail_Pdf_closePage(
         JNIEnv *env, jclass clazz, jlong jpage) {
 
     FPDF_ClosePage((FPDF_PAGE) (intptr_t) jpage);
 }
 
-jlong Java_l_files_ui_preview_Pdf_open(
+jlong Java_l_files_thumbnail_Pdf_open(
         JNIEnv *env, jclass clazz, jbyteArray jpath) {
 
     jsize len = (*env)->GetArrayLength(env, jpath);
@@ -94,7 +94,7 @@ jlong Java_l_files_ui_preview_Pdf_open(
 
 }
 
-jlong Java_l_files_ui_preview_Pdf_openPage(
+jlong Java_l_files_thumbnail_Pdf_openPage(
         JNIEnv *env, jclass clazz, jlong jdoc, jint i) {
 
     FPDF_PAGE page = FPDF_LoadPage((FPDF_DOCUMENT) (intptr_t) jdoc, i);
@@ -105,7 +105,7 @@ jlong Java_l_files_ui_preview_Pdf_openPage(
     return (jlong) (intptr_t) page;
 }
 
-void Java_l_files_ui_preview_Pdf_render(
+void Java_l_files_thumbnail_Pdf_render(
         JNIEnv *env, jclass clazz, jlong jpage, jobject jbitmap) {
 
     FPDF_PAGE page = (FPDF_PAGE) (intptr_t) jpage;

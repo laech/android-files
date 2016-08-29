@@ -16,6 +16,6 @@ LOCAL_C_INCLUDES += $(LOCAL_PATH)/include
 LOCAL_SHARED_LIBRARIES += libpdfium
 LOCAL_LDLIBS += -llog -ljnigraphics
 
-LOCAL_SRC_FILES :=  $(LOCAL_PATH)/l_files_ui_preview_Pdf.c
+LOCAL_SRC_FILES :=  $(LOCAL_PATH)/l_files_thumbnail_Pdf.c
 
 include $(BUILD_SHARED_LIBRARY)
