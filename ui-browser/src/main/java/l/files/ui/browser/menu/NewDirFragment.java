@@ -7,6 +7,8 @@ import android.widget.EditText;
 
 import java.io.IOException;
 
+import javax.annotation.Nullable;
+
 import l.files.fs.Files;
 import l.files.fs.Path;
 import l.files.ui.browser.FileCreationFragment;
@@ -30,7 +32,10 @@ public final class NewDirFragment extends FileCreationFragment {
         return fragment;
     }
 
+    @Nullable
     private AsyncTask<?, ?, ?> suggestion;
+
+    @Nullable
     private AsyncTask<?, ?, ?> creation;
 
     @Override
@@ -46,7 +51,7 @@ public final class NewDirFragment extends FileCreationFragment {
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         suggestName();
     }
@@ -59,6 +64,7 @@ public final class NewDirFragment extends FileCreationFragment {
 
     private class SuggestName extends AsyncTask<Path, Void, Path> {
 
+        @Nullable
         @Override
         protected Path doInBackground(Path... params) {
             Path base = params[0];
@@ -80,7 +86,7 @@ public final class NewDirFragment extends FileCreationFragment {
         }
 
         @Override
-        protected void onPostExecute(Path result) {
+        protected void onPostExecute(@Nullable Path result) {
             super.onPostExecute(result);
             if (result == null) {
                 set("");
@@ -116,6 +122,7 @@ public final class NewDirFragment extends FileCreationFragment {
             this.dir = requireNonNull(dir);
         }
 
+        @Nullable
         @Override
         protected IOException doInBackground(Path... params) {
             try {
@@ -127,9 +134,10 @@ public final class NewDirFragment extends FileCreationFragment {
         }
 
         @Override
-        protected void onPostExecute(IOException e) {
+        protected void onPostExecute(@Nullable IOException e) {
             super.onPostExecute(e);
             if (e != null) {
+                assert toaster != null;
                 toaster.accept(message(e));
             }
         }

@@ -18,8 +18,11 @@ import android.view.ViewStub;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.annotation.Nullable;
 
 import l.files.base.Provider;
 import l.files.fs.Path;
@@ -100,10 +103,14 @@ public final class FilesFragment
         return browser;
     }
 
+    @Nullable
     private Path directory;
     private int watchLimit;
+
+    @Nullable
     private FilesAdapter adapter;
 
+    @Nullable
     public RecyclerView recycler;
 
     private final Handler handler = new Handler();
@@ -149,24 +156,26 @@ public final class FilesFragment
     };
 
     public Path directory() {
+        assert directory != null;
         return directory;
     }
 
     public List<Object> items() {
+        assert adapter != null;
         return adapter.items();
     }
 
     @Override
     public View onCreateView(
             LayoutInflater inflater,
-            ViewGroup container,
-            Bundle state
+            @Nullable ViewGroup container,
+            @Nullable Bundle state
     ) {
         return inflater.inflate(R.layout.files_fragment, container, false);
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
         directory = getArguments().getParcelable(ARG_DIRECTORY);
@@ -250,21 +259,27 @@ public final class FilesFragment
         getLoaderManager().restartLoader(0, null, this);
     }
 
+    @Nullable
     private ProgressBar progressBar;
 
     private ProgressBar inflateProgressBar() {
         if (progressBar == null) {
-            ViewStub stub = (ViewStub) getView().findViewById(R.id.progress_stub);
+            View view = getView();
+            assert view != null;
+            ViewStub stub = (ViewStub) view.findViewById(R.id.progress_stub);
             progressBar = (ProgressBar) stub.inflate().findViewById(android.R.id.progress);
         }
         return progressBar;
     }
 
+    @Nullable
     private TextView emptyView;
 
     private TextView inflateEmptyView() {
         if (emptyView == null) {
-            ViewStub stub = (ViewStub) getView().findViewById(R.id.empty_stub);
+            View view = getView();
+            assert view != null;
+            ViewStub stub = (ViewStub) view.findViewById(R.id.empty_stub);
             emptyView = (TextView) stub.inflate().findViewById(android.R.id.empty);
         }
         return emptyView;
@@ -314,6 +329,7 @@ public final class FilesFragment
 
     @Override
     public void selectAll() {
+        assert adapter != null;
         adapter.selectAll();
     }
 
@@ -340,6 +356,7 @@ public final class FilesFragment
 
     @Override
     public Loader<Result> onCreateLoader(int id, Bundle bundle) {
+        assert directory != null;
         refreshEnabled = false;
         Activity context = getActivity();
         return new FilesLoader(
@@ -374,10 +391,12 @@ public final class FilesFragment
             } else {
                 items = data.items();
             }
+            assert adapter != null;
             adapter.setItems(items);
 
-            if (data.exception() != null) {
-                inflateEmptyView().setText(message(data.exception()));
+            IOException e = data.exception();
+            if (e != null) {
+                inflateEmptyView().setText(message(e));
                 inflateEmptyView().setVisibility(VISIBLE);
 
             } else if (adapter.isEmpty()) {
@@ -407,6 +426,7 @@ public final class FilesFragment
 
     @Override
     public void onLoaderReset(Loader<Result> loader) {
+        assert adapter != null;
         adapter.setItems(emptyList());
     }
 
@@ -430,6 +450,7 @@ public final class FilesFragment
 
         } else if (isPremiumPreferenceKey(key)
                 && activity.getPremiumLock().isUnlocked()) {
+            assert adapter != null;
             adapter.removeAd();
         }
     }

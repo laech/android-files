@@ -81,7 +81,7 @@ final class DateCategorizer extends BaseCategorizer {
             try {
                 return res.getString(id);
             } catch (Resources.NotFoundException e) {
-                return null;
+                throw new AssertionError(e);
             }
         }
         if (id >= -12) {

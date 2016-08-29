@@ -22,7 +22,7 @@ interface Categorizer {
 
         @Override
         public String label(FileInfo item, Resources res, int id) {
-            return null;
+            return "";
         }
 
         @Override

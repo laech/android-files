@@ -2,7 +2,6 @@ package l.files.ui.browser;
 
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.AsyncTaskLoader;
@@ -23,6 +22,8 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
 import java.io.IOException;
+
+import javax.annotation.Nullable;
 
 import l.files.base.Consumer;
 import l.files.fs.Files;
@@ -46,13 +47,17 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
     private final LoaderCallbacks<Existence> checkerCallback =
             new CheckerCallback();
 
+    @Nullable
     private TextInputLayout layout;
+
+    @Nullable
     private EditText editText;
 
+    @Nullable
     public Consumer<String> toaster;
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         toaster = new Toaster(getActivity());
     }
@@ -63,11 +68,13 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
 
         if (layout == null) {
             layout = (TextInputLayout) getDialog().findViewById(R.id.text_layout);
+            assert layout != null;
             layout.setHint(getString(getTitleResourceId()));
         }
 
         if (editText == null) {
             editText = (EditText) getDialog().findViewById(R.id.file_name);
+            assert editText != null;
             editText.setFilters(new InputFilter[]{new LengthFilter(255)});
             editText.addTextChangedListener(new FileTextWatcher());
             editText.setOnEditorActionListener(new OkActionListener());
@@ -95,6 +102,7 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
                 .create();
     }
 
+    @Nullable
     protected CharSequence getError(Path target) {
         return getString(R.string.name_exists);
     }
@@ -111,14 +119,18 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
     }
 
     protected Path parent() {
-        return getArguments().getParcelable(ARG_PARENT_PATH);
+        Path path = getArguments().getParcelable(ARG_PARENT_PATH);
+        assert path != null;
+        return path;
     }
 
     protected String getFilename() {
+        assert editText != null;
         return editText.getText().toString();
     }
 
     protected EditText getFilenameField() {
+        assert editText != null;
         return editText;
     }
 
@@ -133,7 +145,7 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
             if (id == LOADER_CHECKER) {
                 return newChecker();
             }
-            return null;
+            throw new IllegalArgumentException(String.valueOf(id));
         }
 
         private Loader<Existence> newChecker() {
@@ -142,6 +154,7 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
 
                 boolean started;
 
+                @Nullable
                 @Override
                 public Existence loadInBackground() {
                     try {
@@ -164,7 +177,7 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
         }
 
         @Override
-        public void onLoadFinished(Loader<Existence> loader, Existence existence) {
+        public void onLoadFinished(Loader<Existence> loader, @Nullable Existence existence) {
             if (loader.getId() == LOADER_CHECKER) {
                 onCheckFinished(existence);
             }
@@ -180,9 +193,11 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
             }
             Button ok = getOkButton();
             if (existence.exists) {
+                assert layout != null;
                 layout.setError(getError(existence.file));
                 ok.setEnabled(false);
             } else {
+                assert layout != null;
                 layout.setError(null);
                 ok.setEnabled(true);
             }

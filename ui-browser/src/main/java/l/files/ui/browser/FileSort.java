@@ -130,13 +130,15 @@ public enum FileSort {
 
         @Override
         public int compare(FileInfo a, FileInfo b) {
-            if (a.selfStat() == null && b.selfStat() == null) return a.compareTo(b);
-            if (a.selfStat() == null) return 1;
-            if (b.selfStat() == null) return -1;
+            Stat aStat = a.selfStat();
+            Stat bStat = b.selfStat();
+            if (aStat == null && bStat == null) return a.compareTo(b);
+            if (aStat == null) return 1;
+            if (bStat == null) return -1;
 
             return compareNotNull(
-                    a, a.selfStat(),
-                    b, b.selfStat());
+                    a, aStat,
+                    b, bStat);
         }
 
         protected abstract int compareNotNull(

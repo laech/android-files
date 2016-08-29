@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import l.files.fs.Files;
 import l.files.fs.Name;
 import l.files.fs.Path;
@@ -28,6 +30,8 @@ import static l.files.ui.base.fs.UserDirs.DIR_HOME;
 final class HierarchyAdapter extends BaseAdapter {
 
     private List<Path> hierarchy = emptyList();
+
+    @Nullable
     private Path directory;
 
     void set(Path dir) {
@@ -53,6 +57,7 @@ final class HierarchyAdapter extends BaseAdapter {
 
     @Override
     public boolean isEnabled(int position) {
+        assert directory != null;
         return !directory.equals(getItem(position));
     }
 
@@ -72,7 +77,7 @@ final class HierarchyAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, @Nullable View convertView, ViewGroup parent) {
         View view = convertView != null
                 ? convertView
                 : inflate(R.layout.files_activity_title, parent);
@@ -98,7 +103,7 @@ final class HierarchyAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getDropDownView(int position, View convertView, ViewGroup parent) {
+    public View getDropDownView(int position, @Nullable View convertView, ViewGroup parent) {
         View view = convertView != null
                 ? convertView
                 : inflate(R.layout.files_activity_title_item, parent);

@@ -12,6 +12,8 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 
+import javax.annotation.Nullable;
+
 import l.files.base.Provider;
 import l.files.fs.Path;
 import l.files.fs.Stat;
@@ -52,9 +54,11 @@ final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo>
     private final FileView content;
     private final RecyclerView recyclerView;
 
+    @Nullable
     private Rect constraint;
     private int textWidth;
 
+    @Nullable
     private Decode task;
 
     FileViewHolder(
@@ -115,7 +119,7 @@ final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo>
         return Rect.of(maxThumbnailWidth, maxThumbnailHeight);
     }
 
-    private void updateContent(Object preview) {
+    private void updateContent(@Nullable Object preview) {
         if (preview instanceof Rect) {
             content.set(layouts, item(), textWidth, (Rect) preview);
         } else if (preview instanceof Bitmap) {
@@ -135,6 +139,7 @@ final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo>
 
         final Path file = previewPath();
         final Stat stat = previewStat();
+        assert constraint != null;
         if (stat == null || !decorator.isPreviewable(file, stat, constraint)) {
             backgroundBlurClear();
             return null;
@@ -204,14 +209,17 @@ final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo>
         return item().linkTargetOrSelfPath();
     }
 
+    @Nullable
     private Stat previewStat() {
         return item().linkTargetOrSelfStat();
     }
 
+    @Nullable
     private Bitmap getCachedThumbnail(Path path, Stat stat) {
         long now = currentTimeMillis();
         long then = stat.lastModifiedTime().to(MILLISECONDS);
         boolean changedMoreThan5SecondsAgo = now - then > 5000;
+        assert constraint != null;
         if (changedMoreThan5SecondsAgo) {
             return decorator.getThumbnail(path, stat, constraint, true);
         } else {
@@ -220,6 +228,7 @@ final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo>
     }
 
     private Rect scaleSize(Rect size) {
+        assert constraint != null;
         return size.scaleDown(constraint);
     }
 
@@ -227,7 +236,7 @@ final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo>
         blur.setBackground(null);
     }
 
-    private void backgroundBlurSet(Bitmap bitmap) {
+    private void backgroundBlurSet(@Nullable Bitmap bitmap) {
         Resources res = itemView.getResources();
         RoundedBitmapDrawable drawable =
                 RoundedBitmapDrawableFactory.create(res, bitmap);

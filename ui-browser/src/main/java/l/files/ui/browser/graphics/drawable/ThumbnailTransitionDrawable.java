@@ -5,6 +5,8 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 
+import javax.annotation.Nullable;
+
 import l.files.ui.preview.SizedColorDrawable;
 
 import static android.graphics.Color.TRANSPARENT;
@@ -30,7 +32,7 @@ public final class ThumbnailTransitionDrawable extends TransitionDrawable {
         thumbnailDrawable.setBitmap(null);
     }
 
-    public void setBitmap(Bitmap bitmap) {
+    public void setBitmap(@Nullable Bitmap bitmap) {
         thumbnailDrawable.setBitmap(bitmap);
         if (bitmap == null) {
             sizedColorDrawable.setSize(0, 0);

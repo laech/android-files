@@ -12,13 +12,15 @@ import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.View;
 
+import javax.annotation.Nullable;
+
 import l.files.fs.Stat;
 import l.files.ui.base.fs.FileIcons;
 import l.files.ui.base.fs.FileInfo;
-import l.files.ui.browser.text.FileTextLayouts;
+import l.files.ui.base.graphics.Rect;
 import l.files.ui.browser.R;
 import l.files.ui.browser.graphics.drawable.ThumbnailTransitionDrawable;
-import l.files.ui.base.graphics.Rect;
+import l.files.ui.browser.text.FileTextLayouts;
 
 import static android.graphics.Paint.ANTI_ALIAS_FLAG;
 import static android.os.Build.VERSION.SDK_INT;
@@ -33,27 +35,38 @@ import static l.files.ui.base.fs.FileIcons.unknownIconStringId;
 
 public final class FileView extends View implements Drawable.Callback {
 
+    @Nullable
     private static TextPaint fileTypeIconPaint;
     private static float fileTypeIconSize;
 
+    @Nullable
     private static CharSequence linkArrow;
+    @Nullable
     private static TextPaint linkArrowPaint;
     private static float linkArrowSize;
 
+    @Nullable
     private static ColorStateList primaryColor;
+    @Nullable
     private static ColorStateList secondaryColor;
 
     private static float namePaddingTop;
     private static float textPaddingTop;
 
-    private static int transitionDuration;
-
     private final ThumbnailTransitionDrawable preview;
 
+    @Nullable
     private CharSequence fileTypeIcon;
+
+    @Nullable
     private Layout name;
+
+    @Nullable
     private Layout link;
+
+    @Nullable
     private Layout summary;
+
     private boolean previewNeedsPaddingTop;
 
     private boolean showLinkIcon;
@@ -89,9 +102,6 @@ public final class FileView extends View implements Drawable.Callback {
 
             namePaddingTop = res.getDimension(
                     R.dimen.files_item_name_padding_top);
-
-            transitionDuration = res.getInteger(
-                    android.R.integer.config_shortAnimTime);
 
         }
 
@@ -237,6 +247,8 @@ public final class FileView extends View implements Drawable.Callback {
 
         canvas.save();
 
+        assert primaryColor != null;
+        assert secondaryColor != null;
         int nameColor = getColor(primaryColor);
         int summaryColor = getColor(secondaryColor);
 
@@ -270,6 +282,7 @@ public final class FileView extends View implements Drawable.Callback {
                         : getPaddingTop() + fileTypeIconSize + namePaddingTop
         );
 
+        assert name != null;
         if (name.getPaint().getColor() != color) {
             name.getPaint().setColor(color);
         }
@@ -303,12 +316,14 @@ public final class FileView extends View implements Drawable.Callback {
 
     private void drawFileTypeIcon(Canvas canvas, int color) {
 
+        assert fileTypeIconPaint != null;
         if (fileTypeIconPaint.getColor() != color) {
             fileTypeIconPaint.setColor(color);
         }
 
         float fileTypeIconX = (getMeasuredWidth() - fileTypeIconSize) / 2;
         float fileTypeIconY = getPaddingTop() + fileTypeIconSize;
+        assert fileTypeIcon != null;
         canvas.drawText(
                 fileTypeIcon,
                 0,
@@ -318,11 +333,13 @@ public final class FileView extends View implements Drawable.Callback {
                 fileTypeIconPaint);
 
         if (showLinkIcon) {
+            assert linkArrowPaint != null;
             if (linkArrowPaint.getColor() != color) {
                 linkArrowPaint.setColor(color);
             }
             float linkArrowX = fileTypeIconX + fileTypeIconSize;
             float linkArrowY = fileTypeIconY - (linkArrowSize / 2);
+            assert linkArrow != null;
             canvas.drawText(
                     linkArrow,
                     0,
@@ -415,10 +432,12 @@ public final class FileView extends View implements Drawable.Callback {
         return list.getColorForState(getDrawableState(), list.getDefaultColor());
     }
 
+    @Nullable
     public Layout getSummary() {
         return summary;
     }
 
+    @Nullable
     public Layout getLink() {
         return link;
     }

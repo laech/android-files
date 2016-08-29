@@ -2,10 +2,11 @@ package l.files.ui.browser.text;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.support.annotation.Nullable;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
+
+import javax.annotation.Nullable;
 
 import l.files.fs.Name;
 import l.files.fs.Path;
@@ -31,6 +32,7 @@ public final class FileTextLayouts {
     private FileTextLayouts() {
     }
 
+    @Nullable
     private static DateFormatter formatter;
 
     private static DateFormatter createFormatter(final Context context) {
@@ -54,6 +56,7 @@ public final class FileTextLayouts {
                 false);
     }
 
+    @Nullable
     private static TextPaint namePaint;
 
     private TextPaint getNamePaint(Context context) {
@@ -115,6 +118,7 @@ public final class FileTextLayouts {
                 false);
     }
 
+    @Nullable
     private static TextPaint summaryPaint;
 
     private TextPaint getSummaryPaint(Context context) {

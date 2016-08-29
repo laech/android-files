@@ -9,6 +9,8 @@ import android.widget.EditText;
 
 import java.io.IOException;
 
+import javax.annotation.Nullable;
+
 import l.files.fs.Files;
 import l.files.fs.Path;
 import l.files.fs.Stat;
@@ -37,12 +39,17 @@ public final class RenameFragment extends FileCreationFragment {
         return fragment;
     }
 
+    @Nullable
     private AsyncTask<?, ?, ?> highlight;
+
+    @Nullable
     private AsyncTask<?, ?, ?> rename;
+
+    @Nullable
     private Path path;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         path = getArguments().getParcelable(ARG_PATH);
     }
@@ -68,6 +75,7 @@ public final class RenameFragment extends FileCreationFragment {
     @Override
     protected void restartChecker() {
 
+        assert path != null;
         String oldName = path.name().toString();
         String newName = getFilename();
         if (!oldName.equals(newName) &&
@@ -80,6 +88,7 @@ public final class RenameFragment extends FileCreationFragment {
     }
 
     private Path path() {
+        assert path != null;
         return path;
     }
 
@@ -92,6 +101,7 @@ public final class RenameFragment extends FileCreationFragment {
 
     private class Highlight extends AsyncTask<Path, Void, Pair<Path, Stat>> {
 
+        @Nullable
         @Override
         protected Pair<Path, Stat> doInBackground(Path... params) {
             Path path = params[0];
@@ -103,7 +113,7 @@ public final class RenameFragment extends FileCreationFragment {
         }
 
         @Override
-        protected void onPostExecute(Pair<Path, Stat> pair) {
+        protected void onPostExecute(@Nullable Pair<Path, Stat> pair) {
             super.onPostExecute(pair);
             if (pair != null) {
                 Path path = pair.first;
@@ -161,6 +171,7 @@ public final class RenameFragment extends FileCreationFragment {
             this.dst = requireNonNull(dst);
         }
 
+        @Nullable
         @Override
         protected IOException doInBackground(Path... params) {
             try {
@@ -172,9 +183,10 @@ public final class RenameFragment extends FileCreationFragment {
         }
 
         @Override
-        protected void onPostExecute(IOException e) {
+        protected void onPostExecute(@Nullable IOException e) {
             super.onPostExecute(e);
             if (e != null) {
+                assert toaster != null;
                 toaster.accept(message(e));
             }
         }

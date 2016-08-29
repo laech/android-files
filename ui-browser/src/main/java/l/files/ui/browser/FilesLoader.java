@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.os.OperationCanceledException;
-import android.support.annotation.Nullable;
 import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 
@@ -20,6 +19,8 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
+
+import javax.annotation.Nullable;
 
 import l.files.fs.BatchObserver;
 import l.files.fs.Event;
@@ -60,8 +61,14 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     private volatile boolean showHidden;
 
     private volatile boolean observing;
+
+    @Nullable
     private volatile Observation observation;
+
+    @Nullable
     private volatile Thread loadInBackgroundThread;
+
+    @Nullable
     private volatile Result cachedResult;
 
     private final ExecutorService executor;
@@ -281,7 +288,9 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         }
         Resources res = getContext().getResources();
         List<Object> sorted = sort.sort(files, res);
-        return (cachedResult = Result.of(unmodifiableList(sorted)));
+        Result result = Result.of(unmodifiableList(sorted));
+        cachedResult = result;
+        return result;
     }
 
     @Override
@@ -336,7 +345,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         return update(root.resolve(child), event);
     }
 
-    private boolean update(Path path, Event event) {
+    private boolean update(Path path, @Nullable Event event) {
 
         /*
          * This if statement may seem unnecessary given the try-catch below
@@ -409,9 +418,11 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     static final class Result {
 
         private final List<Object> items;
+
+        @Nullable
         private final IOException exception;
 
-        private Result(List<Object> items, IOException exception) {
+        private Result(List<Object> items, @Nullable IOException exception) {
             this.items = items;
             this.exception = exception;
         }

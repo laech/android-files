@@ -11,6 +11,8 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 
+import javax.annotation.Nullable;
+
 import l.files.ui.browser.R;
 
 import static android.graphics.Paint.ANTI_ALIAS_FLAG;
@@ -20,6 +22,7 @@ import static android.graphics.Shader.TileMode.CLAMP;
 
 final class ThumbnailDrawable extends Drawable {
 
+    @Nullable
     private static ColorFilter activatedFilter;
 
     private static final Paint paint;
@@ -30,6 +33,7 @@ final class ThumbnailDrawable extends Drawable {
         rect = new RectF(0, 0, 0, 0);
     }
 
+    @Nullable
     private BitmapShader shader;
     private int width;
     private int height;
@@ -47,7 +51,7 @@ final class ThumbnailDrawable extends Drawable {
         }
     }
 
-    void setBitmap(Bitmap bitmap) {
+    void setBitmap(@Nullable Bitmap bitmap) {
         if (bitmap == null) {
             shader = null;
             width = height = -1;
@@ -59,6 +63,7 @@ final class ThumbnailDrawable extends Drawable {
         invalidateSelf();
     }
 
+    @Nullable
     public BitmapShader getBitmapShader() {
         return shader;
     }
@@ -108,7 +113,7 @@ final class ThumbnailDrawable extends Drawable {
     }
 
     @Override
-    public void setColorFilter(ColorFilter filter) {
+    public void setColorFilter(@Nullable ColorFilter filter) {
     }
 
     @Override
