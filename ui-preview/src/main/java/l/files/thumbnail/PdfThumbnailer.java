@@ -18,6 +18,11 @@ import static android.util.TypedValue.applyDimension;
 
 public final class PdfThumbnailer implements Thumbnailer<Path> {
 
+    /**
+     * The PDF lib is not thread safe, need a global lock.
+     */
+    private static final Object lock = new Object();
+
     @Override
     public boolean accepts(Path path, String mediaType) {
         return isLocalFile(path) && mediaType.equals("application/pdf");
@@ -30,7 +35,15 @@ public final class PdfThumbnailer implements Thumbnailer<Path> {
     @Override
     public ScaledBitmap create(Path path, Rect max, Context context) throws IOException {
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-        long doc = Pdf.open(path.toByteArray());
+        byte[] pathByteArray = path.toByteArray();
+        synchronized (lock) {
+            return lockedCreate(pathByteArray, max, metrics);
+        }
+    }
+
+    private ScaledBitmap lockedCreate(
+            byte[] path, Rect max, DisplayMetrics metrics) throws IOException {
+        long doc = Pdf.open(path);
         try {
             long page = Pdf.openPage(doc, 0);
             try {

@@ -43,7 +43,6 @@ public final class Decode extends AsyncTask<Object, Object, Object> {
     private static final BlockingQueue<Runnable> queue =
             new LinkedBlockingQueue<>();
 
-    // TODO Use single thread due to PDF lib not thread safe
     private static final Executor executor = new ThreadPoolExecutor(
             1,
             1,
