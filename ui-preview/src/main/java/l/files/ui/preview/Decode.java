@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -34,6 +35,7 @@ import l.files.ui.base.graphics.ScaledBitmap;
 
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.setThreadPriority;
+import static java.util.Arrays.asList;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.ui.base.content.Contexts.isDebugBuild;
@@ -64,15 +66,13 @@ public final class Decode extends AsyncTask<Object, Object, Object> {
     // Need to update NoPreview cache version to invalidate
     // cache when we add a new decoder so existing files
     // marked as not previewable will get re-evaluated.
-    @SuppressWarnings("unchecked")
-    private static final Thumbnailer<Path>[] thumbnailers = new Thumbnailer[]{
+    private static final List<Thumbnailer<Path>> thumbnailers = asList(
             new ImageThumbnailer(),
             new MediaThumbnailer(),
             new PdfThumbnailer(),
             new PathStreamThumbnailer(new TextThumbnailer()),
             new PathStreamThumbnailer(new SvgThumbnailer()),
-            new ApkThumbnailer(),
-    };
+            new ApkThumbnailer());
 
     @Nullable
     private volatile Future<?> saveThumbnailToDiskTask;
