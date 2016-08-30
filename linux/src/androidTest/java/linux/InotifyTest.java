@@ -3,6 +3,7 @@ package linux;
 import junit.framework.TestCase;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 
 import static android.test.MoreAsserts.assertNotEqual;
@@ -53,8 +54,15 @@ public final class InotifyTest extends TestCase {
         int fd = inotify_init();
         try {
 
-            int wd = inotify_add_watch(fd, "/".getBytes(), IN_ALL_EVENTS);
-            inotify_rm_watch(fd, wd);
+            File dir = createTempDir();
+            try {
+
+                int wd = inotify_add_watch(fd, dir.getPath().getBytes(), IN_ALL_EVENTS);
+                inotify_rm_watch(fd, wd);
+
+            } finally {
+                assertTrue(dir.delete() || !dir.exists());
+            }
 
         } finally {
             close(fd);
@@ -68,5 +76,9 @@ public final class InotifyTest extends TestCase {
         } catch (NullPointerException e) {
             // Pass
         }
+    }
+
+    private File createTempDir() throws IOException {
+        return TempDir.createTempDir(getClass().getSimpleName());
     }
 }

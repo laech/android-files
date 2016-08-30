@@ -12,7 +12,6 @@ import java.util.Set;
 import linux.Dirent.DIR;
 
 import static android.test.MoreAsserts.assertNotEqual;
-import static java.io.File.createTempFile;
 import static linux.Dirent.DT_DIR;
 import static linux.Dirent.DT_REG;
 import static linux.Dirent.closedir;
@@ -58,10 +57,7 @@ public final class DirentTest extends TestCase {
 
 
     private File createTempDir() throws IOException {
-        File dir = createTempFile(getClass().getSimpleName(), null);
-        assertTrue(dir.delete());
-        assertTrue(dir.mkdir());
-        return dir;
+        return TempDir.createTempDir(getClass().getSimpleName());
     }
 
     public void test_fdopendir_throws_ErrnoException_on_invalid_fd() throws Exception {
@@ -74,12 +70,17 @@ public final class DirentTest extends TestCase {
     }
 
     public void test_fdopendir_returns_valid_dir() throws Exception {
-        int fd = Fcntl.open(new byte[]{'/'}, 0, 0);
-        DIR dir = Dirent.fdopendir(fd);
+        File tmp = createTempDir();
         try {
-            assertNotNull(Dirent.readdir(dir, new Dirent()));
+            int fd = Fcntl.open(tmp.getPath().getBytes(), 0, 0);
+            DIR dir = Dirent.fdopendir(fd);
+            try {
+                assertNotNull(Dirent.readdir(dir, new Dirent()));
+            } finally {
+                Dirent.closedir(dir);
+            }
         } finally {
-            Dirent.closedir(dir);
+            assertTrue(tmp.delete() || !tmp.exists());
         }
     }
 

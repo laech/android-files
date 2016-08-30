@@ -34,6 +34,7 @@ import static linux.Stat.fstat;
 import static linux.Stat.lstat;
 import static linux.Stat.mkdir;
 import static linux.Stat.stat;
+import static linux.TempDir.createTempDir;
 import static linux.Unistd.close;
 import static linux.Unistd.symlink;
 
@@ -133,16 +134,20 @@ public final class StatTest extends TestCase {
 
     public void test_fstat_returns_correct_information_for_directory() throws Exception {
 
-        File dir = new File("/");
-        int fd = open(dir.getPath().getBytes(), 0, 0);
+        File dir = createTempDir("StatTest");
         try {
+            int fd = open(dir.getPath().getBytes(), 0, 0);
+            try {
 
-            Stat stat = new Stat();
-            fstat(fd, stat);
-            assertStat(dir, stat);
+                Stat stat = new Stat();
+                fstat(fd, stat);
+                assertStat(dir, stat);
 
+            } finally {
+                close(fd);
+            }
         } finally {
-            close(fd);
+            assertTrue(dir.delete() || !dir.exists());
         }
     }
 
