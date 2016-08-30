@@ -35,6 +35,7 @@ import static l.files.fs.Event.DELETE;
 import static l.files.fs.Event.MODIFY;
 import static l.files.fs.Files.UTF_8;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static l.files.fs.local.ErrnoExceptions.toIOException;
 import static l.files.fs.local.LocalFileSystem.isSelfOrParent;
 import static linux.Errno.EACCES;
 import static linux.Errno.EINVAL;
@@ -226,7 +227,7 @@ final class LocalObservable extends Native
             wd = -1;
             suppressedClose(e);
             notifyIncompleteObservationOrClose();
-            return;
+            throw toIOException(e, root);
         }
 
         /* Using a new thread seems to be much quicker than using a thread pool
@@ -330,7 +331,7 @@ final class LocalObservable extends Native
                 Dirent.closedir(dir);
             }
         } catch (ErrnoException e) {
-            throw ErrnoExceptions.toIOException(e, root);
+            throw toIOException(e, root);
         }
 
         if (currentThread().isInterrupted()) {
@@ -355,7 +356,7 @@ final class LocalObservable extends Native
         try {
             doClose();
         } catch (ErrnoException e) {
-            throw ErrnoExceptions.toIOException(e);
+            throw toIOException(e);
         }
     }
 
