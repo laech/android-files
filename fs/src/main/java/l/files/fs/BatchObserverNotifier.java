@@ -118,8 +118,8 @@ final class BatchObserverNotifier implements Observer, Observation, Runnable {
     }
 
     @Override
-    public void onIncompleteObservation() {
-        batchObserver.onIncompleteObservation();
+    public void onIncompleteObservation(IOException cause) {
+        batchObserver.onIncompleteObservation(cause);
     }
 
     @Override

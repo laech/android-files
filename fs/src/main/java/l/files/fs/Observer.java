@@ -1,5 +1,7 @@
 package l.files.fs;
 
+import java.io.IOException;
+
 public interface Observer {
 
     /**
@@ -15,6 +17,6 @@ public interface Observer {
      * or some files are inaccessible.
      * This maybe called multiple times.
      */
-    void onIncompleteObservation();
+    void onIncompleteObservation(IOException cause);
 
 }

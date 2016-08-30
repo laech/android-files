@@ -188,10 +188,10 @@ public final class LocalObservableTest extends PathBaseTest {
                 observations.add(observation);
                 if (i <= maxUserInstances) {
                     assertFalse("Failed at " + i, observation.isClosed());
-                    verify(observer, never()).onIncompleteObservation();
+                    verify(observer, never()).onIncompleteObservation(any(IOException.class));
                 } else {
                     assertTrue("Failed at " + i, observation.isClosed());
-                    verify(observer).onIncompleteObservation();
+                    verify(observer).onIncompleteObservation(any(IOException.class));
                 }
             }
 
@@ -223,7 +223,7 @@ public final class LocalObservableTest extends PathBaseTest {
             LocalObservable observation = new LocalObservable(dir1(), observer);
             try {
                 observation.start(FOLLOW, consumer, limit);
-                verify(observer, atLeastOnce()).onIncompleteObservation();
+                verify(observer, atLeastOnce()).onIncompleteObservation(any(IOException.class));
                 verify(consumer, times(count)).accept(notNull(Path.class));
                 verifyAllWatchesRemovedAndRootWatchAddedOnMaxUserWatchesReached(tracker, limit);
             } finally {
@@ -252,13 +252,13 @@ public final class LocalObservableTest extends PathBaseTest {
             LocalObservable observation = new LocalObservable(dir1(), observer);
             try {
                 observation.start(FOLLOW, consumer, limit);
-                verify(observer, never()).onIncompleteObservation();
+                verify(observer, never()).onIncompleteObservation(any(IOException.class));
                 assertFalse(observation.isClosed());
                 for (int i = 0; i < limit; i++) {
                     createRandomChildDir(dir1());
                 }
 
-                verify(observer, timeout(10000).atLeastOnce()).onIncompleteObservation();
+                verify(observer, timeout(10000).atLeastOnce()).onIncompleteObservation(any(IOException.class));
                 verify(consumer, times(count)).accept(notNull(Path.class));
                 verifyAllWatchesRemovedAndRootWatchAddedOnMaxUserWatchesReached(tracker, limit);
             } finally {
@@ -1070,12 +1070,12 @@ public final class LocalObservableTest extends PathBaseTest {
         }
 
         @Override
-        public void onIncompleteObservation() {
-            observer.onIncompleteObservation();
+        public void onIncompleteObservation(IOException cause) {
+            observer.onIncompleteObservation(cause);
         }
 
         void awaitOnIncompleteObservation() {
-            verify(observer).onIncompleteObservation();
+            verify(observer).onIncompleteObservation(any(IOException.class));
         }
 
         void await(Event kind, Path file, Callable<?> action) throws Exception {
@@ -1229,7 +1229,7 @@ public final class LocalObservableTest extends PathBaseTest {
                             anyInt(),
                             anyInt()
                     );
-                    verify(observer, never()).onIncompleteObservation();
+                    verify(observer, never()).onIncompleteObservation(any(IOException.class));
                 } else {
                     verify(tracker, never()).onWatchAdded(
                             eq(fd),
@@ -1237,7 +1237,7 @@ public final class LocalObservableTest extends PathBaseTest {
                             anyInt(),
                             anyInt()
                     );
-                    verify(observer).onIncompleteObservation();
+                    verify(observer).onIncompleteObservation(any(IOException.class));
                 }
             } else {
                 verify(tracker, never()).onWatchAdded(
@@ -1246,7 +1246,7 @@ public final class LocalObservableTest extends PathBaseTest {
                         anyInt(),
                         anyInt()
                 );
-                verify(observer, never()).onIncompleteObservation();
+                verify(observer, never()).onIncompleteObservation(any(IOException.class));
             }
             verifyNoMoreInteractions(tracker);
         }

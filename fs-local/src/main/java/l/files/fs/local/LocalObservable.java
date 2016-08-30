@@ -226,8 +226,8 @@ final class LocalObservable extends Native
             fd = -1;
             wd = -1;
             suppressedClose(e);
-            notifyIncompleteObservationOrClose();
-            throw toIOException(e, root);
+            notifyIncompleteObservationOrClose(toIOException(e));
+            return;
         }
 
         /* Using a new thread seems to be much quicker than using a thread pool
@@ -423,7 +423,7 @@ final class LocalObservable extends Native
         }
     }
 
-    private void releaseChildWatches() {
+    private void releaseChildWatches(ErrnoException cause) {
         released.set(true);
         for (int wd : childDirs.keySet()) {
             try {
@@ -436,7 +436,7 @@ final class LocalObservable extends Native
             }
         }
         childDirs.clear();
-        notifyIncompleteObservationOrClose();
+        notifyIncompleteObservationOrClose(toIOException(cause));
     }
 
     @Override
@@ -587,21 +587,21 @@ final class LocalObservable extends Native
 
         } else if (e.errno == ENOSPC || e.errno == ENOMEM) {
 
-            releaseChildWatches();
+            releaseChildWatches(e);
 
         } else if (e.errno == EACCES) {
 
-            notifyIncompleteObservationOrClose();
+            notifyIncompleteObservationOrClose(toIOException(e));
 
         } else {
             throw e;
         }
     }
 
-    private void notifyIncompleteObservationOrClose() {
+    private void notifyIncompleteObservationOrClose(IOException cause) {
         Observer observer = observerRef.get();
         if (observer != null) {
-            observer.onIncompleteObservation();
+            observer.onIncompleteObservation(cause);
         } else {
             try {
                 doClose();
