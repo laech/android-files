@@ -383,7 +383,8 @@ public final class FilesFragment
 
             // TODO make this cleaner
             List<Object> items;
-            if (!((FilesActivity) getActivity()).getPremiumLock().isUnlocked()) {
+            if (!((FilesActivity) getActivity()).getPremiumLock().isUnlocked()
+                    && !data.items().isEmpty()) {
                 items = new ArrayList<>();
                 items.add(Ad.INSTANCE);
                 items.addAll(data.items());
