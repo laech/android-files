@@ -44,6 +44,7 @@ import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.Event.DELETE;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static l.files.ui.base.content.Contexts.isDebugBuild;
 
 final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
@@ -83,7 +84,10 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         }
 
         @Override
-        public void onIncompleteObservation() {
+        public void onIncompleteObservation(IOException cause) {
+            if (isDebugBuild(getContext())) {
+                Log.w("FilesLoader", "onIncompleteObservation()", cause);
+            }
         }
 
     };
