@@ -16,7 +16,6 @@ import l.files.fs.Path;
 import l.files.fs.Paths;
 import l.files.fs.Permission;
 import l.files.fs.Stat;
-import l.files.ui.browser.widget.FileView;
 
 import static android.test.MoreAsserts.assertNotEqual;
 import static android.text.format.DateFormat.getDateFormat;
@@ -174,10 +173,10 @@ public final class NavigationTest extends BaseFilesActivityTest {
         Context c = getActivity();
         final String expected = formatShortFileSize(c, size);
 
-        screen().assertItemContentView(file, new Consumer<FileView>() {
+        screen().assertSummary(file, new Consumer<String>() {
             @Override
-            public void accept(FileView view) {
-                assertTrue(view.getSummary().getText().toString().contains(expected));
+            public void accept(String summary) {
+                assertTrue(summary.contains(expected));
             }
         });
     }
@@ -237,8 +236,6 @@ public final class NavigationTest extends BaseFilesActivityTest {
         Path link = createSymbolicLink(dir().resolve("link"), dir);
 
         screen()
-                .assertLinkIconDisplayed(dir, false)
-                .assertLinkIconDisplayed(link, true)
                 .assertLinkPathDisplayed(dir, null)
                 .assertLinkPathDisplayed(link, dir);
     }
@@ -349,19 +346,19 @@ public final class NavigationTest extends BaseFilesActivityTest {
         setLastModifiedTime(file, NOFOLLOW, EPOCH);
 
         final CharSequence[] chars = {null};
-        screen().assertItemContentView(file, new Consumer<FileView>() {
+        screen().assertSummary(file, new Consumer<String>() {
             @Override
-            public void accept(FileView input) {
-                chars[0] = input.getSummary().getText();
+            public void accept(String summary) {
+                chars[0] = summary;
             }
         });
 
         modify(file);
 
-        screen().assertItemContentView(file, new Consumer<FileView>() {
+        screen().assertSummary(file, new Consumer<String>() {
             @Override
-            public void accept(FileView input) {
-                assertNotEqual(chars[0], input.getSummary().getText());
+            public void accept(String summary) {
+                assertNotEqual(chars[0], summary);
             }
         });
     }
@@ -372,19 +369,19 @@ public final class NavigationTest extends BaseFilesActivityTest {
         setLastModifiedTime(file, NOFOLLOW, Instant.of(100000, 1));
 
         final CharSequence[] date = {null};
-        screen().assertItemContentView(file, new Consumer<FileView>() {
+        screen().assertSummary(file, new Consumer<String>() {
             @Override
-            public void accept(FileView input) {
-                date[0] = input.getSummary().getText();
+            public void accept(String summary) {
+                date[0] = summary;
             }
         });
 
         modify(file);
 
-        screen().assertItemContentView(file, new Consumer<FileView>() {
+        screen().assertSummary(file, new Consumer<String>() {
             @Override
-            public void accept(FileView input) {
-                assertNotEqual(date[0], input.getSummary().getText());
+            public void accept(String summary) {
+                assertNotEqual(date[0], summary);
             }
         });
     }

@@ -4,6 +4,8 @@ import android.content.Context;
 import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
 
+import javax.annotation.Nullable;
+
 import l.files.ui.browser.R;
 
 import static android.support.v4.content.ContextCompat.getColor;
@@ -16,6 +18,9 @@ public final class ActivatedCardView extends CardView {
     {
         cardBackgroundColorActivated = getColor(getContext(), R.color.activated_background);
     }
+
+    @Nullable
+    private ActivatedListener listener;
 
     public ActivatedCardView(Context context) {
         super(context);
@@ -39,10 +44,14 @@ public final class ActivatedCardView extends CardView {
 
     @Override
     public void setActivated(boolean activated) {
+        boolean oldActivated = isActivated();
         super.setActivated(activated);
         setCardBackgroundColor(activated
                 ? cardBackgroundColorActivated
                 : cardBackgroundColorNotActivated);
+        if (oldActivated != activated && listener != null) {
+            listener.onActivated(activated);
+        }
     }
 
     @Override
@@ -52,4 +61,11 @@ public final class ActivatedCardView extends CardView {
         }
     }
 
+    public void setActivatedListener(ActivatedListener listener) {
+        this.listener = listener;
+    }
+
+    public interface ActivatedListener {
+        void onActivated(boolean activated);
+    }
 }

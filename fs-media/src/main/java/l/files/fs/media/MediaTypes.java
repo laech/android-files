@@ -33,16 +33,6 @@ public final class MediaTypes {
 
 
     /**
-     * Detects the content type of this file based on its properties
-     * without reading the content of this file.
-     * Returns {@link #MEDIA_TYPE_OCTET_STREAM} if unknown.
-     */
-    public static String detectByProperties(Context context, Path path, Stat stat)
-            throws IOException {
-        return PropertyDetector.INSTANCE.detect(context, path, stat).intern();
-    }
-
-    /**
      * Detects the content type of this file based on its content.
      * Returns {@link #MEDIA_TYPE_OCTET_STREAM} if unknown.
      */

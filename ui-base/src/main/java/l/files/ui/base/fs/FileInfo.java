@@ -1,6 +1,6 @@
 package l.files.ui.base.fs;
 
-import android.content.Context;
+import android.support.annotation.DrawableRes;
 
 import java.io.IOException;
 import java.text.Collator;
@@ -11,11 +11,26 @@ import l.files.base.Objects;
 import l.files.fs.Files;
 import l.files.fs.Path;
 import l.files.fs.Stat;
-import l.files.fs.media.MediaTypes;
 import l.files.ui.base.text.CollationKey;
 
 import static l.files.base.Objects.requireNonNull;
-import static l.files.fs.media.MediaTypes.MEDIA_TYPE_OCTET_STREAM;
+import static l.files.ui.base.R.drawable.ic_file_download_black_24dp;
+import static l.files.ui.base.R.drawable.ic_folder_black_24dp;
+import static l.files.ui.base.R.drawable.ic_home_black_24dp;
+import static l.files.ui.base.R.drawable.ic_insert_drive_file_black_24dp;
+import static l.files.ui.base.R.drawable.ic_library_music_black_24dp;
+import static l.files.ui.base.R.drawable.ic_phone_android_black_24dp;
+import static l.files.ui.base.R.drawable.ic_photo_library_black_24dp;
+import static l.files.ui.base.R.drawable.ic_sd_storage_black_24dp;
+import static l.files.ui.base.R.drawable.ic_video_library_black_24dp;
+import static l.files.ui.base.fs.UserDirs.DIR_DCIM;
+import static l.files.ui.base.fs.UserDirs.DIR_DOWNLOADS;
+import static l.files.ui.base.fs.UserDirs.DIR_HOME;
+import static l.files.ui.base.fs.UserDirs.DIR_MOVIES;
+import static l.files.ui.base.fs.UserDirs.DIR_MUSIC;
+import static l.files.ui.base.fs.UserDirs.DIR_PICTURES;
+import static l.files.ui.base.fs.UserDirs.DIR_ROOT;
+import static l.files.ui.base.fs.UserDirs.DIR_SDCARD2;
 
 public final class FileInfo implements Comparable<FileInfo> {
 
@@ -26,9 +41,6 @@ public final class FileInfo implements Comparable<FileInfo> {
 
     @Nullable
     private Boolean readable;
-
-    @Nullable
-    private String basicMediaType;
 
     private final Path selfPath;
 
@@ -55,6 +67,21 @@ public final class FileInfo implements Comparable<FileInfo> {
         this.collator = requireNonNull(collator);
     }
 
+    @DrawableRes
+    public int iconDrawableResourceId() {
+        Path p = selfPath();
+        if (p.equals(DIR_ROOT)) return ic_phone_android_black_24dp;
+        if (p.equals(DIR_HOME)) return ic_home_black_24dp;
+        if (p.equals(DIR_DCIM)) return ic_photo_library_black_24dp;
+        if (p.equals(DIR_MUSIC)) return ic_library_music_black_24dp;
+        if (p.equals(DIR_MOVIES)) return ic_video_library_black_24dp;
+        if (p.equals(DIR_PICTURES)) return ic_photo_library_black_24dp;
+        if (p.equals(DIR_DOWNLOADS)) return ic_file_download_black_24dp;
+        if (p.equals(DIR_SDCARD2)) return ic_sd_storage_black_24dp;
+        if (selfStat != null && selfStat.isDirectory()) return ic_folder_black_24dp;
+        return ic_insert_drive_file_black_24dp;
+    }
+
     public boolean isReadable() {
         if (readable == null) {
             try {
@@ -66,16 +93,8 @@ public final class FileInfo implements Comparable<FileInfo> {
         return readable;
     }
 
-    public String basicMediaType(Context context) {
-        if (basicMediaType == null) {
-            try {
-                basicMediaType = MediaTypes.detectByProperties(
-                        context, selfPath(), linkTargetOrSelfStat());
-            } catch (IOException e) {
-                basicMediaType = MEDIA_TYPE_OCTET_STREAM;
-            }
-        }
-        return basicMediaType;
+    public String name() {
+        return selfPath().name().toString();
     }
 
     public Path selfPath() {

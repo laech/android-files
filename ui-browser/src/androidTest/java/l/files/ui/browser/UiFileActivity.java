@@ -1,6 +1,8 @@
 package l.files.ui.browser;
 
 import android.app.Instrumentation;
+import android.content.res.Resources;
+import android.graphics.drawable.BitmapDrawable;
 import android.support.v4.app.Fragment;
 import android.support.v4.util.SimpleArrayMap;
 import android.support.v7.view.ActionMode;
@@ -9,12 +11,16 @@ import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+
+import javax.annotation.Nullable;
 
 import l.files.base.Consumer;
 import l.files.base.Provider;
@@ -24,11 +30,11 @@ import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.fs.FileInfo;
 import l.files.ui.base.fs.FileLabels;
-import l.files.ui.base.view.Views;
-import l.files.ui.browser.widget.FileView;
 
 import static android.support.v4.view.GravityCompat.START;
 import static android.view.KeyEvent.KEYCODE_BACK;
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 import static java.util.Arrays.asList;
 import static java.util.Collections.reverse;
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -42,6 +48,7 @@ import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.Files.stat;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static l.files.ui.base.view.Views.find;
 import static l.files.ui.browser.Instrumentations.await;
 import static l.files.ui.browser.Instrumentations.awaitOnMainThread;
 import static l.files.ui.browser.Instrumentations.clickItemOnMainThread;
@@ -291,18 +298,6 @@ final class UiFileActivity {
         return this;
     }
 
-    UiFileActivity assertItemContentView(
-            final Path file,
-            final Consumer<FileView> assertion) {
-        findItemOnMainThread(file, new Consumer<View>() {
-            @Override
-            public void accept(View input) {
-                assertion.accept(Views.<FileView>find(android.R.id.content, input));
-            }
-        });
-        return this;
-    }
-
     UiFileActivity assertActionBarTitle(final String title) {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
@@ -351,7 +346,6 @@ final class UiFileActivity {
     }
 
     private MenuItem renameMenu() {
-        //noinspection ConstantConditions
         return activity().currentActionMode().getMenu().findItem(R.id.rename);
     }
 
@@ -455,40 +449,33 @@ final class UiFileActivity {
         });
     }
 
-    UiFileActivity assertThumbnailShown(Path file, final boolean shown) {
-
-        assertItemContentView(file, new Consumer<FileView>() {
+    UiFileActivity assertThumbnailShown(Path path, final boolean shown) {
+        findItemOnMainThread(path, new Consumer<View>() {
             @Override
-            public void accept(FileView input) {
-                assertEquals(shown, input.hasPreviewContent());
+            public void accept(View view) {
+                ImageView imageView = find(R.id.image, view);
+                assertEquals(shown, imageView.getDrawable() instanceof BitmapDrawable);
             }
         });
-
         return this;
     }
 
-    UiFileActivity assertLinkIconDisplayed(Path file, final boolean displayed) {
+    UiFileActivity assertLinkPathDisplayed(
+            Path link,
+            @Nullable final Path target) {
 
-        assertItemContentView(file, new Consumer<FileView>() {
+        findItemOnMainThread(link, new Consumer<View>() {
             @Override
-            public void accept(FileView input) {
-                assertEquals(displayed, input.isLinkIconVisible());
-            }
-        });
-
-        return this;
-    }
-
-    UiFileActivity assertLinkPathDisplayed(Path link, final Path target) {
-
-        assertItemContentView(link, new Consumer<FileView>() {
-            @Override
-            public void accept(FileView input) {
+            public void accept(View view) {
+                TextView linkView = find(R.id.link, view);
                 if (target != null) {
-                    CharSequence expected = input.getResources().getString(
-                            R.string.link_x, target);
-                    CharSequence actual = input.getLink().getText();
+                    Resources res = view.getResources();
+                    String expected = res.getString(R.string.link_x, target);
+                    CharSequence actual = linkView.getText().toString();
                     assertEquals(expected, actual);
+                    assertEquals(VISIBLE, linkView.getVisibility());
+                } else {
+                    assertEquals(GONE, linkView.getVisibility());
                 }
             }
         });
@@ -496,15 +483,25 @@ final class UiFileActivity {
         return this;
     }
 
-    UiFileActivity assertSummary(Path file, final CharSequence expected) {
-
-        assertItemContentView(file, new Consumer<FileView>() {
+    UiFileActivity assertSummary(Path path, final CharSequence expected) {
+        return assertSummary(path, new Consumer<String>() {
             @Override
-            public void accept(FileView view) {
-                assertEquals(expected, view.getSummary().getText());
+            public void accept(String summary) {
+                assertEquals(expected, summary);
             }
         });
+    }
 
+    UiFileActivity assertSummary(
+            final Path path,
+            final Consumer<String> assertion) {
+        findItemOnMainThread(path, new Consumer<View>() {
+            @Override
+            public void accept(View view) {
+                TextView summaryView = find(R.id.summary, view);
+                assertion.accept(summaryView.getText().toString());
+            }
+        });
         return this;
     }
 
@@ -518,11 +515,13 @@ final class UiFileActivity {
         return this;
     }
 
-    UiFileActivity assertDisabled(Path file) {
-        assertItemContentView(file, new Consumer<FileView>() {
+    UiFileActivity assertDisabled(Path path) {
+        findItemOnMainThread(path, new Consumer<View>() {
             @Override
-            public void accept(FileView input) {
-                assertFalse(input.isEnabled());
+            public void accept(View view) {
+                assertFalse(find(R.id.title, view).isEnabled());
+                assertFalse(find(R.id.summary, view).isEnabled());
+                assertFalse(find(R.id.link, view).isEnabled());
             }
         });
         return this;
