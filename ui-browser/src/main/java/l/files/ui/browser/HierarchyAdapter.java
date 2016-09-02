@@ -1,10 +1,11 @@
 package l.files.ui.browser;
 
-import android.content.res.AssetManager;
+import android.graphics.PorterDuff;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -16,16 +17,16 @@ import javax.annotation.Nullable;
 import l.files.fs.Files;
 import l.files.fs.Name;
 import l.files.fs.Path;
-import l.files.ui.base.fs.FileIcons;
 import l.files.ui.base.fs.FileLabels;
 
-import static android.R.id.icon;
-import static android.R.id.title;
+import static android.graphics.Color.WHITE;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
+import static l.files.ui.base.fs.FileIcons.getDirectoryIconDrawableResourceId;
 import static l.files.ui.base.fs.UserDirs.DIR_HOME;
+import static l.files.ui.base.view.Views.find;
 
 final class HierarchyAdapter extends BaseAdapter {
 
@@ -82,16 +83,16 @@ final class HierarchyAdapter extends BaseAdapter {
                 ? convertView
                 : inflate(R.layout.files_activity_title, parent);
 
-        Path file = getItem(position);
+        Path path = getItem(position);
 
-        TextView title = (TextView) view.findViewById(android.R.id.title);
-        title.setText(FileLabels.get(parent.getResources(), file));
+        TextView title = find(android.R.id.title, view);
+        title.setText(FileLabels.get(parent.getResources(), path));
 
-        TextView icon = (TextView) view.findViewById(android.R.id.icon);
-        icon.setTypeface(FileIcons.font(view.getContext().getAssets()));
-        icon.setText(FileIcons.directoryIconStringId(file));
+        ImageView icon = find(android.R.id.icon, view);
+        icon.setImageResource(getDirectoryIconDrawableResourceId(path));
+        icon.setColorFilter(WHITE, PorterDuff.Mode.SRC_ATOP);
 
-        if (file.equals(DIR_HOME)) {
+        if (path.equals(DIR_HOME)) {
             title.setVisibility(GONE);
             icon.setVisibility(VISIBLE);
         } else {
@@ -109,18 +110,16 @@ final class HierarchyAdapter extends BaseAdapter {
                 : inflate(R.layout.files_activity_title_item, parent);
 
         boolean enabled = isEnabled(position);
-        Path res = getItem(position);
+        Path path = getItem(position);
         view.setEnabled(enabled);
 
-        AssetManager assets = parent.getContext().getAssets();
-        TextView iconView = (TextView) view.findViewById(icon);
-        iconView.setText(FileIcons.directoryIconStringId(res));
-        iconView.setTypeface(FileIcons.font(assets));
+        ImageView iconView = find(android.R.id.icon, view);
+        iconView.setImageResource(getDirectoryIconDrawableResourceId(path));
         iconView.setEnabled(enabled);
 
-        TextView titleView = (TextView) view.findViewById(title);
-        Name name = res.name();
-        titleView.setText(!name.isEmpty() ? name.toString() : res.toString());
+        TextView titleView = find(android.R.id.title, view);
+        Name name = path.name();
+        titleView.setText(!name.isEmpty() ? name.toString() : path.toString());
         titleView.setEnabled(enabled);
 
         return view;

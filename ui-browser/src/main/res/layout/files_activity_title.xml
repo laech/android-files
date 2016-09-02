@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="?attr/selectableItemBackgroundBorderless"
-    android:minHeight="?attr/actionBarSize"
-    tools:ignore="Overdraw">
+    android:minHeight="?attr/actionBarSize">
 
     <TextView
         android:id="@android:id/title"
@@ -17,13 +15,10 @@
         android:gravity="center"
         android:maxLines="1" />
 
-    <TextView
+    <ImageView
         android:id="@android:id/icon"
-        style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:textSize="24sp" />
+        android:layout_gravity="center" />
 
 </FrameLayout>
