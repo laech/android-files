@@ -28,7 +28,7 @@
             android:layout_marginLeft="16dp"
             android:layout_marginStart="16dp"
             android:alpha="0.54"
-            app:srcCompat="@{FileIcons.getDirectoryIconDrawableResourceId(path)}" />
+            app:srcCompat="@{FileIcons.getDirectory(path)}" />
 
         <TextView
             android:layout_width="match_parent"

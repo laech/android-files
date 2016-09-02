@@ -17,6 +17,7 @@ import javax.annotation.Nullable;
 import l.files.fs.Files;
 import l.files.fs.Name;
 import l.files.fs.Path;
+import l.files.ui.base.fs.FileIcons;
 import l.files.ui.base.fs.FileLabels;
 
 import static android.graphics.Color.WHITE;
@@ -24,7 +25,6 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
-import static l.files.ui.base.fs.FileIcons.getDirectoryIconDrawableResourceId;
 import static l.files.ui.base.fs.UserDirs.DIR_HOME;
 import static l.files.ui.base.view.Views.find;
 
@@ -89,7 +89,7 @@ final class HierarchyAdapter extends BaseAdapter {
         title.setText(FileLabels.get(parent.getResources(), path));
 
         ImageView icon = find(android.R.id.icon, view);
-        icon.setImageResource(getDirectoryIconDrawableResourceId(path));
+        icon.setImageResource(FileIcons.getDirectory(path));
         icon.setColorFilter(WHITE, PorterDuff.Mode.SRC_ATOP);
 
         if (path.equals(DIR_HOME)) {
@@ -114,7 +114,7 @@ final class HierarchyAdapter extends BaseAdapter {
         view.setEnabled(enabled);
 
         ImageView iconView = find(android.R.id.icon, view);
-        iconView.setImageResource(getDirectoryIconDrawableResourceId(path));
+        iconView.setImageResource(FileIcons.getDirectory(path));
         iconView.setEnabled(enabled);
 
         TextView titleView = find(android.R.id.title, view);

@@ -28,7 +28,7 @@ public final class FileIcons {
     }
 
     @DrawableRes
-    public static int getDirectoryIconDrawableResourceId(Path p) {
+    public static int getDirectory(Path p) {
         if (p.equals(DIR_ROOT)) return ic_phone_android_black_24dp;
         if (p.equals(DIR_HOME)) return ic_home_black_24dp;
         if (p.equals(DIR_DCIM)) return ic_photo_library_black_24dp;
@@ -41,7 +41,7 @@ public final class FileIcons {
     }
 
     @DrawableRes
-    public static int getFileIconDrawableResourceId() {
+    public static int getFile() {
         return ic_insert_drive_file_black_24dp;
     }
 }

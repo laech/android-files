@@ -14,8 +14,6 @@ import l.files.fs.Stat;
 import l.files.ui.base.text.CollationKey;
 
 import static l.files.base.Objects.requireNonNull;
-import static l.files.ui.base.fs.FileIcons.getDirectoryIconDrawableResourceId;
-import static l.files.ui.base.fs.FileIcons.getFileIconDrawableResourceId;
 
 public final class FileInfo implements Comparable<FileInfo> {
 
@@ -55,9 +53,9 @@ public final class FileInfo implements Comparable<FileInfo> {
     @DrawableRes
     public int iconDrawableResourceId() {
         if (selfStat != null && selfStat.isDirectory()) {
-            return getDirectoryIconDrawableResourceId(selfPath());
+            return FileIcons.getDirectory(selfPath());
         }
-        return getFileIconDrawableResourceId();
+        return FileIcons.getFile();
     }
 
     public boolean isReadable() {
