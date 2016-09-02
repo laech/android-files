@@ -10,6 +10,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import l.files.bookmarks.BookmarkManager;
 import l.files.fs.Path;
 import l.files.ui.base.text.CollationKey;
@@ -22,6 +24,8 @@ final class BookmarksLoader extends AsyncTaskLoader<List<Path>> {
     private final Path home;
     private final BookmarkManager manager;
     private final BookmarkChangedListener listener;
+
+    @Nullable
     private List<Path> bookmarks;
 
     BookmarksLoader(Context context, BookmarkManager manager, Path home) {

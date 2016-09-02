@@ -182,6 +182,7 @@ final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo>
         }
 
         if (preview instanceof Bitmap) {
+            imageView.setAlpha(1f);
             imageView.setImageBitmap((Bitmap) preview);
 
         } else if (preview instanceof Rect) {
@@ -192,8 +193,8 @@ final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo>
 
         } else {
             Drawable drawable = getDrawable(context(), file.iconDrawableResourceId());
-            drawable.setAlpha(150);
             setTintList(drawable, titleView.getTextColors());
+            imageView.setAlpha(0.54f);
             imageView.setImageDrawable(drawable);
         }
 

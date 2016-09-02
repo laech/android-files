@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.NavigationView xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/Sidebar"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:background="@android:color/white"
     android:fitsSystemWindows="true">
 
     <android.support.v7.widget.RecyclerView

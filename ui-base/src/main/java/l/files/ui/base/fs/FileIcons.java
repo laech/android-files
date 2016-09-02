@@ -13,6 +13,15 @@ import l.files.ui.base.R;
 
 import static android.graphics.Typeface.createFromAsset;
 import static java.util.Collections.unmodifiableMap;
+import static l.files.ui.base.R.drawable.ic_file_download_black_24dp;
+import static l.files.ui.base.R.drawable.ic_folder_black_24dp;
+import static l.files.ui.base.R.drawable.ic_home_black_24dp;
+import static l.files.ui.base.R.drawable.ic_insert_drive_file_black_24dp;
+import static l.files.ui.base.R.drawable.ic_library_music_black_24dp;
+import static l.files.ui.base.R.drawable.ic_phone_android_black_24dp;
+import static l.files.ui.base.R.drawable.ic_photo_library_black_24dp;
+import static l.files.ui.base.R.drawable.ic_sd_storage_black_24dp;
+import static l.files.ui.base.R.drawable.ic_video_library_black_24dp;
 import static l.files.ui.base.fs.UserDirs.DIR_DCIM;
 import static l.files.ui.base.fs.UserDirs.DIR_DOWNLOADS;
 import static l.files.ui.base.fs.UserDirs.DIR_HOME;
@@ -43,17 +52,6 @@ public final class FileIcons {
         return unmodifiableMap(icons);
     }
 
-    private static boolean isArchive(String media) {
-        return media.endsWith("/zip")
-                || media.endsWith("/x-gzip")
-                || media.endsWith("/x-tar")
-                || media.endsWith("/x-rar-compressed")
-                || media.endsWith("/x-ace-compressed")
-                || media.endsWith("/x-bzip2")
-                || media.endsWith("/x-compress")
-                || media.endsWith("/x-7z-compressed");
-    }
-
     public static Typeface font(AssetManager assets) {
         if (font == null) {
             font = createFromAsset(assets, "MaterialIcons-Regular.ttf");
@@ -70,25 +68,22 @@ public final class FileIcons {
         return R.string.ic_dir;
     }
 
-    public static int fileIconStringId(String media) {
-        if (media.equals("application/pdf")) return R.string.ic_file_pdf;
-        if (media.startsWith("audio/")) return R.string.ic_file_music;
-        if (media.startsWith("video/")) return R.string.ic_file_video;
-        if (media.startsWith("image/")) return R.string.ic_file_image;
-        if (media.startsWith("text/")) return R.string.ic_file_text;
-        if (isArchive(media)) return R.string.ic_file_archive;
-        return defaultFileIconStringId();
-    }
-
-    public static int defaultFileIconStringId() {
-        return R.string.ic_file;
-    }
-
-    public static int unknownIconStringId() {
-        return R.string.ic_unknown;
-    }
-
     private FileIcons() {
     }
 
+    public static int getDirectoryIconDrawableResourceId(Path p) {
+        if (p.equals(DIR_ROOT)) return ic_phone_android_black_24dp;
+        if (p.equals(DIR_HOME)) return ic_home_black_24dp;
+        if (p.equals(DIR_DCIM)) return ic_photo_library_black_24dp;
+        if (p.equals(DIR_MUSIC)) return ic_library_music_black_24dp;
+        if (p.equals(DIR_MOVIES)) return ic_video_library_black_24dp;
+        if (p.equals(DIR_PICTURES)) return ic_photo_library_black_24dp;
+        if (p.equals(DIR_DOWNLOADS)) return ic_file_download_black_24dp;
+        if (p.equals(DIR_SDCARD2)) return ic_sd_storage_black_24dp;
+        return ic_folder_black_24dp;
+    }
+
+    public static int getFileIconDrawableResourceId() {
+        return ic_insert_drive_file_black_24dp;
+    }
 }

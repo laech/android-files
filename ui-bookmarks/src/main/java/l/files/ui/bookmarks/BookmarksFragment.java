@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import l.files.bookmarks.BookmarkManager;
 import l.files.fs.Path;
 import l.files.ui.base.fs.OnOpenFileListener;
@@ -30,10 +32,14 @@ public final class BookmarksFragment
         extends SelectionModeFragment<Path, Path>
         implements LoaderCallbacks<List<Path>> {
 
+    @Nullable
     public RecyclerView recycler;
+
+    @Nullable
     private BookmarksAdapter adapter;
 
     public List<Path> bookmarks() {
+        assert adapter != null;
         List<Object> items = adapter.items();
         List<Path> bookmarks = new ArrayList<>(items.size());
         for (Object item : items) {
@@ -46,12 +52,14 @@ public final class BookmarksFragment
 
     @Override
     public View onCreateView(
-            LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+            LayoutInflater inflater,
+            @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.bookmarks_fragment, container, false);
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
         adapter = new BookmarksAdapter(
@@ -93,11 +101,13 @@ public final class BookmarksFragment
         List<Object> items = new ArrayList<>(bookmarks.size() + 1);
         items.add(getString(R.string.bookmarks));
         items.addAll(bookmarks);
+        assert adapter != null;
         adapter.setItems(items);
     }
 
     @Override
     public void onLoaderReset(Loader<List<Path>> loader) {
+        assert adapter != null;
         adapter.setItems(Collections.<Path>emptyList());
     }
 }

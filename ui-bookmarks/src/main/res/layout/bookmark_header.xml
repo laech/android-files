@@ -4,11 +4,11 @@
     android:layout_height="wrap_content"
     android:layout_marginBottom="16dp"
     android:layout_marginEnd="16dp"
-    android:layout_marginLeft="18dp"
+    android:layout_marginLeft="16dp"
     android:layout_marginRight="16dp"
-    android:layout_marginStart="18dp"
+    android:layout_marginStart="16dp"
     android:layout_marginTop="@dimen/bookmark_header_margin_top"
     android:fontFamily="sans-serif-medium"
     android:text="@string/bookmarks"
-    android:textAppearance="?android:attr/textAppearanceSmall"
-    android:textColor="?android:attr/textColorTertiaryInverse" />
+    android:textColor="#8a000000"
+    android:textSize="14sp" />

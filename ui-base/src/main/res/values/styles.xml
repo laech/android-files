@@ -14,10 +14,6 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="Sidebar">
-        <item name="android:background">@color/color_primary</item>
-    </style>
-
     <style name="Toolbar" parent="Theme.AppCompat">
         <item name="android:textColorSecondary">?android:attr/textColorPrimary</item>
     </style>
