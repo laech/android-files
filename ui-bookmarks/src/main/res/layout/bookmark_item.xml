@@ -1,33 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="48dp"
-    android:background="?android:attr/activatedBackgroundIndicator"
-    android:foreground="?attr/selectableItemBackground"
-    android:orientation="horizontal">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <ImageView
-        android:id="@+id/icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginLeft="16dp"
-        android:layout_marginStart="16dp"
-        android:alpha="0.54" />
+    <data>
 
-    <TextView
-        android:id="@+id/title"
+        <import type="l.files.ui.base.fs.FileIcons" />
+
+        <import type="l.files.ui.base.fs.FileLabels" />
+
+        <variable
+            name="path"
+            type="l.files.fs.Path" />
+
+    </data>
+
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginEnd="16dp"
-        android:layout_marginLeft="72dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginStart="72dp"
-        android:ellipsize="end"
-        android:fontFamily="sans-serif-medium"
-        android:gravity="center_vertical"
-        android:maxLines="1"
-        android:textColor="#de000000"
-        android:textSize="14sp" />
+        android:layout_height="48dp"
+        android:background="?android:attr/activatedBackgroundIndicator"
+        android:foreground="?attr/selectableItemBackground"
+        android:orientation="horizontal">
 
-</FrameLayout>
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="16dp"
+            android:layout_marginStart="16dp"
+            android:alpha="0.54"
+            app:srcCompat="@{FileIcons.getDirectoryIconDrawableResourceId(path)}" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="16dp"
+            android:layout_marginLeft="72dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginStart="72dp"
+            android:ellipsize="end"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center_vertical"
+            android:maxLines="1"
+            android:text="@{FileLabels.get(context.resources, path)}"
+            android:textColor="#de000000"
+            android:textSize="14sp" />
+
+    </FrameLayout>
+
+</layout>

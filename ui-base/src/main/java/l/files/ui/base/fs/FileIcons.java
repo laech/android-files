@@ -1,5 +1,7 @@
 package l.files.ui.base.fs;
 
+import android.support.annotation.DrawableRes;
+
 import l.files.fs.Path;
 
 import static l.files.ui.base.R.drawable.ic_file_download_black_24dp;
@@ -25,6 +27,7 @@ public final class FileIcons {
     private FileIcons() {
     }
 
+    @DrawableRes
     public static int getDirectoryIconDrawableResourceId(Path p) {
         if (p.equals(DIR_ROOT)) return ic_phone_android_black_24dp;
         if (p.equals(DIR_HOME)) return ic_home_black_24dp;
@@ -37,6 +40,7 @@ public final class FileIcons {
         return ic_folder_black_24dp;
     }
 
+    @DrawableRes
     public static int getFileIconDrawableResourceId() {
         return ic_insert_drive_file_black_24dp;
     }

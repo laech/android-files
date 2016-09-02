@@ -1,75 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<l.files.ui.browser.widget.ActivatedCardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/card"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginBottom="@dimen/files_item_space_vertical"
-    android:layout_marginEnd="@dimen/files_item_space_horizontal"
-    android:layout_marginLeft="@dimen/files_item_space_horizontal"
-    android:layout_marginRight="@dimen/files_item_space_horizontal"
-    android:layout_marginStart="@dimen/files_item_space_horizontal"
-    android:layout_marginTop="@dimen/files_item_space_vertical"
-    android:foreground="?attr/selectableItemBackground"
-    app:cardElevation="1dp"
-    app:cardPreventCornerOverlap="false"
-    app:cardUseCompatPadding="true">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <LinearLayout
-        android:id="@+id/blur"
+    <l.files.ui.browser.widget.ActivatedCardView
+        android:id="@+id/card"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:paddingBottom="12dp">
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/files_item_space_vertical"
+        android:layout_marginEnd="@dimen/files_item_space_horizontal"
+        android:layout_marginLeft="@dimen/files_item_space_horizontal"
+        android:layout_marginRight="@dimen/files_item_space_horizontal"
+        android:layout_marginStart="@dimen/files_item_space_horizontal"
+        android:layout_marginTop="@dimen/files_item_space_vertical"
+        android:foreground="?attr/selectableItemBackground"
+        app:cardElevation="1dp"
+        app:cardPreventCornerOverlap="false"
+        app:cardUseCompatPadding="true">
 
-        <ImageView
-            android:id="@+id/image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:minHeight="32dp"
-            android:minWidth="32dp" />
+        <LinearLayout
+            android:id="@+id/blur"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:paddingBottom="12dp">
 
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="@dimen/files_item_name_padding_top"
-            android:gravity="center_horizontal"
-            android:paddingEnd="12dp"
-            android:paddingLeft="12dp"
-            android:paddingRight="12dp"
-            android:paddingStart="12dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="13sp" />
+            <ImageView
+                android:id="@+id/image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:minHeight="32dp"
+                android:minWidth="32dp" />
 
-        <TextView
-            android:id="@+id/link"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:gravity="center_horizontal"
-            android:paddingEnd="12dp"
-            android:paddingLeft="12dp"
-            android:paddingRight="12dp"
-            android:paddingStart="12dp"
-            android:textColor="?android:attr/textColorSecondary"
-            android:textSize="12sp" />
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="@dimen/files_item_name_padding_top"
+                android:gravity="center_horizontal"
+                android:paddingEnd="12dp"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:paddingStart="12dp"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="13sp" />
 
-        <TextView
-            android:id="@+id/summary"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:gravity="center_horizontal"
-            android:paddingEnd="12dp"
-            android:paddingLeft="12dp"
-            android:paddingRight="12dp"
-            android:paddingStart="12dp"
-            android:textColor="?android:attr/textColorSecondary"
-            android:textSize="12sp" />
+            <TextView
+                android:id="@+id/link"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center_horizontal"
+                android:paddingEnd="12dp"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:paddingStart="12dp"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="12sp" />
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/summary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center_horizontal"
+                android:paddingEnd="12dp"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:paddingStart="12dp"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="12sp" />
 
-</l.files.ui.browser.widget.ActivatedCardView>
+        </LinearLayout>
+
+    </l.files.ui.browser.widget.ActivatedCardView>
+</layout>
