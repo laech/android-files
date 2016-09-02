@@ -8,6 +8,8 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
 
+import javax.annotation.Nullable;
+
 public interface Path extends Parcelable {
 
     FileSystem fileSystem();
@@ -44,6 +46,7 @@ public interface Path extends Parcelable {
      */
     Name name();
 
+    @Nullable
     Path parent();
 
     /**

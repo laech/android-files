@@ -1,5 +1,7 @@
 package l.files.operations;
 
+import javax.annotation.Nullable;
+
 public final class Progress {
 
     public static final Progress NONE = normalize(0, 0);
@@ -74,7 +76,7 @@ public final class Progress {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 

@@ -2,6 +2,8 @@ package l.files.fs;
 
 import java.io.IOException;
 
+import javax.annotation.Nullable;
+
 public interface Observer {
 
     /**
@@ -9,7 +11,7 @@ public interface Observer {
      *              null the event is for the child of the observed file with
      *              that this name
      */
-    void onEvent(Event event, Name child);
+    void onEvent(Event event, @Nullable Name child);
 
     /**
      * Called when we can no longer fully observe on all files.

@@ -5,6 +5,8 @@ import android.os.Parcel;
 import java.io.IOException;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
 import l.files.fs.Permission;
@@ -186,7 +188,7 @@ final class LocalStat implements l.files.fs.Stat {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
         }

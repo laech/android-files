@@ -4,6 +4,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import javax.annotation.Nullable;
+
 import static java.util.Collections.unmodifiableSet;
 
 final class ConcurrentBiMap<A, B> {
@@ -11,6 +13,7 @@ final class ConcurrentBiMap<A, B> {
     private final ConcurrentMap<A, B> ab = new ConcurrentHashMap<>();
     private final ConcurrentMap<B, A> ba = new ConcurrentHashMap<>();
 
+    @Nullable
     B get(A a) {
         return ab.get(a);
     }
@@ -20,6 +23,7 @@ final class ConcurrentBiMap<A, B> {
         ba.put(b, a);
     }
 
+    @Nullable
     B remove(A a) {
         B b = ab.remove(a);
         if (b != null) {
@@ -28,6 +32,7 @@ final class ConcurrentBiMap<A, B> {
         return b;
     }
 
+    @Nullable
     A remove2(B b) {
         A a = ba.remove(b);
         if (a != null) {

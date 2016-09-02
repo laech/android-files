@@ -9,6 +9,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Nullable;
+
 import l.files.fs.FileSystem.Consumer;
 
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
@@ -34,7 +36,10 @@ final class BatchObserverNotifier implements Observer, Observation, Runnable {
     private final long batchIntervalNanos;
     private final TimeUnit batchInternalUnit;
 
+    @Nullable
     private Observation observation;
+
+    @Nullable
     private ScheduledFuture<?> checker;
 
     /**
@@ -97,7 +102,7 @@ final class BatchObserverNotifier implements Observer, Observation, Runnable {
     }
 
     @Override
-    public void onEvent(Event event, Name child) {
+    public void onEvent(Event event, @Nullable Name child) {
         synchronized (this) {
 
             if (child == null) {
@@ -166,7 +171,7 @@ final class BatchObserverNotifier implements Observer, Observation, Runnable {
 
     @Override
     public boolean isClosed() {
-        return observation.isClosed();
+        return observation == null || observation.isClosed();
     }
 
 }

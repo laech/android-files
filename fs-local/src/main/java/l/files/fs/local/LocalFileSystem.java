@@ -9,6 +9,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import l.files.fs.FileSystem;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
@@ -293,7 +295,7 @@ public final class LocalFileSystem extends Native implements FileSystem {
             LinkOption option,
             Observer observer,
             Consumer<? super Path> childrenConsumer,
-            String logTag,
+            @Nullable String logTag,
             int watchLimit)
             throws IOException, InterruptedException {
 

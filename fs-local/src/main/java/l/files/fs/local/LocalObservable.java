@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.annotation.Nullable;
+
 import l.files.fs.Event;
 import l.files.fs.FileSystem.Consumer;
 import l.files.fs.Files;
@@ -174,6 +176,7 @@ final class LocalObservable extends Native
 
     private final LocalPath root;
 
+    @Nullable
     private final String tag;
 
     /**
@@ -200,7 +203,7 @@ final class LocalObservable extends Native
         this(root, observer, null);
     }
 
-    LocalObservable(LocalPath root, Observer observer, String tag) {
+    LocalObservable(LocalPath root, Observer observer, @Nullable String tag) {
         this.root = requireNonNull(root);
         this.observerRef = new WeakReference<>(requireNonNull(observer));
         this.thread = new AtomicReference<>(null);
@@ -463,7 +466,7 @@ final class LocalObservable extends Native
     private native void observe(int fd);
 
     @SuppressWarnings("unused") // Called from native code
-    private void onEvent(int wd, int event, byte[] child) {
+    private void onEvent(int wd, int event, @Nullable byte[] child) {
         try {
             handleEvent(wd, event, child);
         } catch (Throwable e) {
@@ -487,7 +490,7 @@ final class LocalObservable extends Native
         });
     }
 
-    private void handleEvent(int wd, int event, byte[] child) throws ErrnoException {
+    private void handleEvent(int wd, int event, @Nullable byte[] child) throws ErrnoException {
         // Disable to avoid getting called on large number of events,
         // even just calling isVerboseEnabled has some overhead,
         // enable when needed for debugging
@@ -525,7 +528,8 @@ final class LocalObservable extends Native
                 onObserverStopped(wd);
 
             } else {
-                throw new RuntimeException(eventNames(event) + ": " + new String(child, UTF_8));
+                throw new RuntimeException(eventNames(event) + ": " +
+                        (child != null ? new String(child, UTF_8) : null));
             }
 
         } else {
@@ -541,7 +545,7 @@ final class LocalObservable extends Native
         }
     }
 
-    private void observer(Event kind, byte[] name) {
+    private void observer(Event kind, @Nullable byte[] name) {
         notifyEventOrClose(kind, name == null ? null : LocalName.wrap(name));
     }
 
@@ -549,7 +553,7 @@ final class LocalObservable extends Native
         notifyEventOrClose(kind, name);
     }
 
-    private void notifyEventOrClose(Event kind, LocalName name) {
+    private void notifyEventOrClose(Event kind, @Nullable LocalName name) {
         Observer observer = observerRef.get();
         if (observer != null) {
             observer.onEvent(kind, name);
@@ -634,28 +638,28 @@ final class LocalObservable extends Native
         return 0 != (event & IN_IGNORED);
     }
 
-    private boolean isChildCreated(int mask, byte[] child) {
+    private boolean isChildCreated(int mask, @Nullable byte[] child) {
         return (child != null && 0 != (mask & IN_CREATE)) ||
                 (child != null && 0 != (mask & IN_MOVED_TO));
     }
 
-    private boolean isChildModified(int mask, byte[] child) {
+    private boolean isChildModified(int mask, @Nullable byte[] child) {
         return (child != null && 0 != (mask & IN_ATTRIB)) ||
                 (child != null && 0 != (mask & IN_MODIFY)) ||
                 (child != null && 0 != (mask & IN_CLOSE_WRITE));
     }
 
-    private boolean isChildDeleted(int event, byte[] child) {
+    private boolean isChildDeleted(int event, @Nullable byte[] child) {
         return (child != null && 0 != (event & IN_MOVED_FROM)) ||
                 (child != null && 0 != (event & IN_DELETE));
     }
 
-    private boolean isSelfModified(int mask, byte[] child) {
+    private boolean isSelfModified(int mask, @Nullable byte[] child) {
         return (child == null && 0 != (mask & IN_ATTRIB)) ||
                 (child == null && 0 != (mask & IN_MODIFY));
     }
 
-    private boolean isSelfDeleted(int mask, byte[] child) {
+    private boolean isSelfDeleted(int mask, @Nullable byte[] child) {
         return (child == null && 0 != (mask & IN_DELETE_SELF)) ||
                 (child == null && 0 != (mask & IN_MOVE_SELF));
     }

@@ -11,6 +11,8 @@ import android.support.v7.view.ActionMode;
 
 import java.util.Collection;
 
+import javax.annotation.Nullable;
+
 import l.files.fs.Path;
 import l.files.ui.operations.R;
 
@@ -21,7 +23,9 @@ public final class DeleteDialog extends AppCompatDialogFragment {
     public static final String FRAGMENT_TAG = "delete-dialog";
 
     // Null after screen rotation, in that case dismiss dialog
+    @Nullable
     private final Collection<Path> paths;
+    @Nullable
     private final ActionMode mode;
 
     public DeleteDialog() {
@@ -29,13 +33,13 @@ public final class DeleteDialog extends AppCompatDialogFragment {
     }
 
     @SuppressLint("ValidFragment")
-    DeleteDialog(Collection<Path> paths, ActionMode mode) {
+    DeleteDialog(@Nullable Collection<Path> paths, @Nullable ActionMode mode) {
         this.paths = paths;
         this.mode = mode;
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (paths == null || mode == null) {
             setShowsDialog(false);
@@ -45,6 +49,7 @@ public final class DeleteDialog extends AppCompatDialogFragment {
 
     @Override
     public AlertDialog onCreateDialog(Bundle savedInstanceState) {
+        assert paths != null;
         return new AlertDialog.Builder(getActivity())
                 .setMessage(getConfirmMessage(paths.size()))
                 .setNegativeButton(android.R.string.cancel, null)
@@ -52,6 +57,7 @@ public final class DeleteDialog extends AppCompatDialogFragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         requestDelete(paths);
+                        assert mode != null;
                         mode.finish();
                     }
                 })

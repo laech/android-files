@@ -6,6 +6,8 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 public interface FileSystem {
 
     String scheme();
@@ -108,7 +110,7 @@ public interface FileSystem {
             LinkOption option,
             Observer observer,
             Consumer<? super Path> childrenConsumer,
-            String logTag,
+            @Nullable String logTag,
             int watchLimit)
             throws IOException, InterruptedException;
 

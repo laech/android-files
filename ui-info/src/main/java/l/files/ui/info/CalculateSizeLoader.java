@@ -7,6 +7,8 @@ import android.util.Log;
 import java.io.IOException;
 import java.util.Collection;
 
+import javax.annotation.Nullable;
+
 import l.files.fs.Files;
 import l.files.fs.Name;
 import l.files.fs.Path;
@@ -25,6 +27,8 @@ final class CalculateSizeLoader
     private volatile int currentCount;
     private volatile long currentSize;
     private volatile long currentSizeOnDisk;
+
+    @Nullable
     private volatile Size result;
 
     private final Path dir;
@@ -70,8 +74,9 @@ final class CalculateSizeLoader
             currentSizeOnDisk = 0;
         }
 
-        result = Size.of(currentCount, currentSize, currentSizeOnDisk);
-        return result;
+        Size size = Size.of(currentCount, currentSize, currentSizeOnDisk);
+        result = size;
+        return size;
     }
 
     @Override

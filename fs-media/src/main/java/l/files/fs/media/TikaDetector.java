@@ -10,6 +10,8 @@ import org.apache.tika.mime.MimeTypesFactory;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.annotation.Nullable;
+
 import l.files.fs.Path;
 import l.files.fs.Stat;
 
@@ -18,6 +20,7 @@ import l.files.fs.Stat;
  */
 abstract class TikaDetector extends BasePropertyDetector {
 
+    @Nullable
     private static volatile MimeTypes types;
 
     @Override
@@ -37,7 +40,9 @@ abstract class TikaDetector extends BasePropertyDetector {
 
         try {
 
-            return detectFile(types, path);
+            MimeTypes t = types;
+            assert t != null;
+            return detectFile(t, path);
 
         } catch (TaggedIOException e) {
             if (e.getCause() != null) {

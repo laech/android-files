@@ -39,6 +39,7 @@ abstract class Task extends AsyncTask<Void, TaskState, Void> {
         this.clock = requireNonNull(clock);
         this.handler = requireNonNull(handler);
         this.callback = requireNonNull(callback);
+        this.state = TaskState.pending(id, target, clock.read());
     }
 
     @Override

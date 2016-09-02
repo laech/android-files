@@ -3,6 +3,8 @@ package l.files.ui.operations;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import javax.annotation.Nullable;
+
 import l.files.base.Objects;
 import l.files.fs.Path;
 
@@ -39,7 +41,7 @@ final class FailureMessage implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
         }

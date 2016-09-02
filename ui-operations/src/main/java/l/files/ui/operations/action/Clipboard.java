@@ -1,10 +1,10 @@
 package l.files.ui.operations.action;
 
-import android.support.annotation.Nullable;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.annotation.Nullable;
 
 import l.files.fs.Path;
 
@@ -20,8 +20,9 @@ public enum Clipboard {
         CUT, COPY
     }
 
+    @Nullable
     private Action action;
-    private Set<Path> files;
+    private Set<Path> files = emptySet();
 
     Clipboard() {
         clear();

@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.annotation.Nullable;
+
 import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.ui.base.fs.FileInfo;
@@ -33,8 +35,8 @@ public final class InfoMultiFragment extends InfoBaseFragment {
     @Override
     public View onCreateView(
             LayoutInflater inflater,
-            ViewGroup container,
-            Bundle savedInstanceState) {
+            @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.info_multi_fragment, container, false);
     }
 

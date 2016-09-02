@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Nullable;
+
 import l.files.fs.FileSystem.Consumer;
 
 import static java.util.Collections.reverse;
@@ -30,7 +32,6 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class Files {
 
-    public static final Charset ISO_8859_1 = Charset.forName("ISO-8859-1");
     public static final Charset UTF_8 = Charset.forName("UTF-8");
 
     private Files() {
@@ -186,7 +187,7 @@ public final class Files {
             Path path,
             LinkOption option,
             TraversalCallback<? super Path> visitor,
-            Comparator<Path> childrenComparator) throws IOException {
+            @Nullable Comparator<Path> childrenComparator) throws IOException {
 
         new Traverser(path, option, visitor, childrenComparator).traverse();
     }
@@ -196,7 +197,7 @@ public final class Files {
             LinkOption option,
             Observer observer,
             Consumer<? super Path> consumer,
-            String logTag,
+            @Nullable String logTag,
             int watchLimit)
             throws IOException, InterruptedException {
 

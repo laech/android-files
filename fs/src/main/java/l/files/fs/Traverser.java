@@ -9,6 +9,8 @@ import java.util.Deque;
 import java.util.List;
 import java.util.ListIterator;
 
+import javax.annotation.Nullable;
+
 import l.files.fs.TraversalCallback.Result;
 
 import static l.files.base.Objects.requireNonNull;
@@ -20,6 +22,8 @@ final class Traverser {
     private final LinkOption rootOption;
     private final TraversalCallback<Path> visitor;
     private final Deque<Node> stack;
+
+    @Nullable
     private final Comparator<Path> childrenComparator;
 
     @SuppressWarnings("unchecked")
@@ -27,7 +31,7 @@ final class Traverser {
             Path root,
             LinkOption option,
             TraversalCallback<? super Path> visitor,
-            Comparator<Path> childrenComparator) {
+            @Nullable Comparator<Path> childrenComparator) {
 
         this.childrenComparator = childrenComparator;
         this.rootOption = requireNonNull(option, "option");

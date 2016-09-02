@@ -1,5 +1,7 @@
 package l.files.operations;
 
+import javax.annotation.Nullable;
+
 import static l.files.base.Objects.requireNonNull;
 
 public final class TaskId {
@@ -33,7 +35,7 @@ public final class TaskId {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 

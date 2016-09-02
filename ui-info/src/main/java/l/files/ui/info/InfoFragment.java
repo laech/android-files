@@ -13,6 +13,8 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import javax.annotation.Nullable;
+
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.graphics.Rect;
@@ -32,7 +34,7 @@ public final class InfoFragment
 
     private static final String ARG_STAT = "stat";
 
-    public static InfoFragment create(Path path, Stat stat) {
+    public static InfoFragment create(Path path, @Nullable Stat stat) {
 
         Bundle bundle = new Bundle();
         bundle.putParcelable(ARG_DIR, path.parent());
@@ -44,25 +46,51 @@ public final class InfoFragment
         return fragment;
     }
 
+    @Nullable
     private Rect constraint;
+
+    @Nullable
     private View root;
+
+    @Nullable
     private TextView name;
+
+    @Nullable
     private TextView date;
+
+    @Nullable
     private ImageView image;
 
     public TextView getNameView() {
+        assert name != null;
         return name;
     }
 
     public TextView getDateView() {
+        assert date != null;
         return date;
+    }
+
+    public View getRootView() {
+        assert root != null;
+        return root;
+    }
+
+    public ImageView getImageView() {
+        assert image != null;
+        return image;
+    }
+
+    public Rect getConstraint() {
+        assert constraint != null;
+        return constraint;
     }
 
     @Override
     public View onCreateView(
             LayoutInflater inflater,
-            ViewGroup container,
-            Bundle savedInstanceState) {
+            @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.info_fragment, container, false);
     }
 
@@ -73,7 +101,7 @@ public final class InfoFragment
         root = find(R.id.root, this);
         image = find(R.id.image, this);
 
-        Path file = dir.resolve(children.get(0));
+        Path file = getDirectory().resolve(getChildren().get(0));
         Stat stat = getArguments().getParcelable(ARG_STAT);
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         constraint = Rect.of((int) (metrics.widthPixels * 0.75), metrics.heightPixels);
@@ -88,8 +116,8 @@ public final class InfoFragment
             initImage(file, stat);
 
             date.setText(formatDate(stat));
-            size.setText(formatSize(stat.size()));
-            sizeOnDisk.setText(formatSizeOnDisk(stat.sizeOnDisk()));
+            getSizeView().setText(formatSize(stat.size()));
+            getSizeOnDiskView().setText(formatSizeOnDisk(stat.sizeOnDisk()));
 
             if (stat.isDirectory()) {
                 initLoader();
@@ -97,12 +125,13 @@ public final class InfoFragment
 
         } else {
             date.setText(R.string.__);
-            size.setText(R.string.__);
+            getSizeOnDiskView().setText(R.string.__);
         }
     }
 
     private void initImage(Path file, Stat stat) {
         Preview preview = Preview.get(getActivity());
+        Rect constraint = getConstraint();
         Bitmap blurred = preview.getBlurredThumbnail(file, stat, constraint, true);
         if (blurred != null) {
             setBlurBackground(blurred);
@@ -110,10 +139,7 @@ public final class InfoFragment
 
         Bitmap thumbnail = preview.getThumbnail(file, stat, constraint, true);
         if (thumbnail != null) {
-            if (blurred == null) {
-                // TODO
-            }
-            image.setImageBitmap(thumbnail);
+            getImageView().setImageBitmap(thumbnail);
 
         } else {
             Rect size = preview.getSize(file, stat, constraint, false);
@@ -127,7 +153,7 @@ public final class InfoFragment
     private void setBlurBackground(Bitmap bitmap) {
         Drawable drawable = new BitmapDrawable(getResources(), bitmap);
         drawable.setAlpha((int) (0.3f * 255));
-        root.setBackground(drawable);
+        getRootView().setBackground(drawable);
     }
 
     private String formatDate(Stat stat) {
@@ -137,7 +163,7 @@ public final class InfoFragment
     }
 
     private Rect scaleSize(Rect size) {
-        return size.scaleDown(constraint);
+        return size.scaleDown(getConstraint());
     }
 
     private void setImageViewMinSize(Rect size) {
@@ -146,20 +172,19 @@ public final class InfoFragment
     }
 
     private void setImageViewMinSize(int width, int height) {
-        image.setMinimumWidth(width);
-        image.setMinimumHeight(height);
+        getImageView().setMinimumWidth(width);
+        getImageView().setMinimumHeight(height);
     }
 
     @Override
     public void onPreviewAvailable(Path file, Stat stat, Bitmap thumbnail) {
-        image.setImageBitmap(thumbnail);
-        image.setAlpha(0F);
-        image.animate().alpha(1).setDuration(animationDuration());
+        getImageView().setImageBitmap(thumbnail);
+        getImageView().setAlpha(0F);
+        getImageView().animate().alpha(1).setDuration(animationDuration());
     }
 
     @Override
     public void onBlurredThumbnailAvailable(Path path, Stat stat, Bitmap thumbnail) {
-        // TODO
     }
 
     private int animationDuration() {
@@ -168,7 +193,7 @@ public final class InfoFragment
 
     @Override
     public void onPreviewFailed(Path path, Stat stat, Object cause) {
-        image.setVisibility(GONE);
+        getImageView().setVisibility(GONE);
     }
 
 }

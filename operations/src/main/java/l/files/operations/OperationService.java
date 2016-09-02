@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
+import javax.annotation.Nullable;
+
 import l.files.fs.Path;
 import l.files.operations.Task.Callback;
 
@@ -86,9 +88,10 @@ public final class OperationService extends Service {
                 .setAction(ACTION_CANCEL).putExtra(EXTRA_TASK_ID, id);
     }
 
-    private Handler handler;
-    private Map<Integer, AsyncTask<?, ?, ?>> tasks;
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private final Map<Integer, AsyncTask<?, ?, ?>> tasks = new HashMap<>();
 
+    @Nullable
     TaskListener listener;
     boolean foreground = true;
 
@@ -100,8 +103,6 @@ public final class OperationService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        tasks = new HashMap<>();
-        handler = new Handler(Looper.getMainLooper());
         if (listener == null) {
             listener = findListener();
         }
@@ -160,7 +161,9 @@ public final class OperationService extends Service {
                         stopSelf();
                     }
                 }
-                listener.onUpdate(OperationService.this, state);
+                if (listener != null) {
+                    listener.onUpdate(OperationService.this, state);
+                }
             }
         });
         tasks.put(startId, task.executeOnExecutor(executor));
@@ -178,7 +181,9 @@ public final class OperationService extends Service {
         if (task != null) {
             task.cancel(true);
         } else {
-            listener.onNotFound(this, TaskNotFound.create(startId));
+            if (listener != null) {
+                listener.onNotFound(this, TaskNotFound.create(startId));
+            }
         }
         if (tasks.isEmpty()) {
             stopSelf();

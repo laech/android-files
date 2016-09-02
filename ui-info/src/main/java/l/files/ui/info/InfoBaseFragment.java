@@ -10,6 +10,8 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.ui.info.CalculateSizeLoader.Size;
@@ -30,23 +32,48 @@ public abstract class InfoBaseFragment
     static final String ARG_DIR = "dir";
     static final String ARG_CHILDREN = "children";
 
-    Path dir;
-    List<Name> children;
+    @Nullable
+    private Path dir;
 
-    TextView size;
-    TextView sizeOnDisk;
-    ProgressBar calculatingSize;
+    @Nullable
+    private List<Name> children;
+
+    @Nullable
+    private TextView size;
+
+    @Nullable
+    private TextView sizeOnDisk;
+
+    @Nullable
+    private ProgressBar calculatingSize;
+
+    public Path getDirectory() {
+        assert dir != null;
+        return dir;
+    }
+
+    public List<Name> getChildren() {
+        assert children != null;
+        return children;
+    }
 
     public TextView getSizeView() {
+        assert size != null;
         return size;
     }
 
     public TextView getSizeOnDiskView() {
+        assert sizeOnDisk != null;
         return sizeOnDisk;
     }
 
+    public ProgressBar getCalculatingSizeProgressBar() {
+        assert calculatingSize != null;
+        return calculatingSize;
+    }
+
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setStyle(STYLE_NO_FRAME, R.style.Theme_Dialog_NoTitle);
     }
@@ -71,9 +98,9 @@ public abstract class InfoBaseFragment
             public void run() {
                 CalculateSizeLoader loader = sizeLoader();
                 if (loader != null && !loader.finished()) {
-                    size.setText(formatSizeCount(loader.currentSize(), loader.currentCount()));
-                    sizeOnDisk.setText(formatSizeOnDisk(loader.currentSizeOnDisk()));
-                    calculatingSize.setVisibility(VISIBLE);
+                    getSizeView().setText(formatSizeCount(loader.currentSize(), loader.currentCount()));
+                    getSizeOnDiskView().setText(formatSizeOnDisk(loader.currentSizeOnDisk()));
+                    getCalculatingSizeProgressBar().setVisibility(VISIBLE);
                     handler.postDelayed(this, 100);
                 }
             }
@@ -103,14 +130,16 @@ public abstract class InfoBaseFragment
 
     @Override
     public Loader<Size> onCreateLoader(int id, Bundle args) {
+        assert dir != null;
+        assert children != null;
         return new CalculateSizeLoader(getActivity(), dir, children);
     }
 
     @Override
     public void onLoadFinished(Loader<Size> loader, Size data) {
-        size.setText(formatSizeCount(data.size(), data.count()));
-        sizeOnDisk.setText(formatSizeOnDisk(data.sizeOnDisk()));
-        calculatingSize.setVisibility(GONE);
+        getSizeView().setText(formatSizeCount(data.size(), data.count()));
+        getSizeOnDiskView().setText(formatSizeOnDisk(data.sizeOnDisk()));
+        getCalculatingSizeProgressBar().setVisibility(GONE);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package l.files.ui.operations;
 
 import android.content.Context;
+import android.support.annotation.PluralsRes;
 
 import l.files.operations.Clock;
 import l.files.operations.Progress;
@@ -96,6 +97,7 @@ abstract class ProgressViewer implements TaskStateViewer {
      * Same template requirement as {@link #getTitleRunning()} but for the
      * preparing state.
      */
+    @PluralsRes
     protected abstract int getTitlePreparing();
 
     /**
@@ -104,6 +106,7 @@ abstract class ProgressViewer implements TaskStateViewer {
      * place holders, the first one is for the number of items being processed,
      * the other one is for {@link TaskState#target()}'s destination.
      */
+    @PluralsRes
     protected abstract int getTitleRunning();
 
     /**

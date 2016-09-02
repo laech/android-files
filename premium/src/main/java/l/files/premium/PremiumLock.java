@@ -21,6 +21,8 @@ import org.json.JSONObject;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
 import static android.content.Context.BIND_AUTO_CREATE;
@@ -42,6 +44,8 @@ public final class PremiumLock implements ServiceConnection {
 
     private final Activity activity;
     private final SharedPreferences pref;
+
+    @Nullable
     private volatile IInAppBillingService billingService;
 
     public PremiumLock(Activity activity) {
@@ -150,7 +154,9 @@ public final class PremiumLock implements ServiceConnection {
 
     private void startActivityForPurchase() throws RemoteException, SendIntentException {
 
-        Bundle intent = billingService.getBuyIntent(
+        IInAppBillingService service = billingService;
+        assert service != null;
+        Bundle intent = service.getBuyIntent(
                 BILLING_API_VERSION,
                 activity.getPackageName(),
                 skuPremium,
@@ -183,7 +189,9 @@ public final class PremiumLock implements ServiceConnection {
         protected Object doInBackground(Object... params) {
             try {
 
-                return billingService.getPurchases(
+                IInAppBillingService service = billingService;
+                assert service != null;
+                return service.getPurchases(
                         BILLING_API_VERSION,
                         activity.getPackageName(),
                         ITEM_TYPE_INAPP,

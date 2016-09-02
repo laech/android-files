@@ -51,7 +51,7 @@ final class InotifyTracker {
     int init(int watchLimit) throws ErrnoException {
 
         int fd = inotify_init();
-        entries.put(fd, new Entry(fd, watchLimit));
+        entries.put(fd, new Entry(watchLimit));
 
         try {
 
@@ -205,12 +205,10 @@ final class InotifyTracker {
 
     private final class Entry {
 
-        private final int fd;
         private final Set<Integer> wds = new HashSet<>();
         private final int watchLimit;
 
-        private Entry(int fd, int watchLimit) {
-            this.fd = fd;
+        private Entry(int watchLimit) {
             this.watchLimit = watchLimit;
         }
 
@@ -230,27 +228,6 @@ final class InotifyTracker {
             synchronized (this) {
                 return wds.size();
             }
-        }
-
-        void release() {
-
-            Set<Integer> copy;
-            synchronized (this) {
-                copy = new HashSet<>(wds);
-                wds.clear();
-            }
-
-            if (copy.isEmpty()) {
-                return;
-            }
-
-            for (int wd : copy) {
-                try {
-                    removeWatch(fd, wd);
-                } catch (ErrnoException ignored) {
-                }
-            }
-
         }
 
     }
