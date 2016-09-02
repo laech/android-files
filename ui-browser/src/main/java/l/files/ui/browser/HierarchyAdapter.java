@@ -1,12 +1,9 @@
 package l.files.ui.browser;
 
-import android.graphics.PorterDuff;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,16 +14,13 @@ import javax.annotation.Nullable;
 import l.files.fs.Files;
 import l.files.fs.Name;
 import l.files.fs.Path;
-import l.files.ui.base.fs.FileIcons;
-import l.files.ui.base.fs.FileLabels;
+import l.files.ui.browser.databinding.FilesActivityTitleBinding;
+import l.files.ui.browser.databinding.FilesActivityTitleItemBinding;
 
 import static android.graphics.Color.WHITE;
-import static android.view.View.GONE;
-import static android.view.View.VISIBLE;
+import static android.graphics.PorterDuff.Mode.SRC_ATOP;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
-import static l.files.ui.base.fs.UserDirs.DIR_HOME;
-import static l.files.ui.base.view.Views.find;
 
 final class HierarchyAdapter extends BaseAdapter {
 
@@ -58,8 +52,12 @@ final class HierarchyAdapter extends BaseAdapter {
 
     @Override
     public boolean isEnabled(int position) {
+        return isEnabled(getItem(position));
+    }
+
+    private boolean isEnabled(Path path) {
         assert directory != null;
-        return !directory.equals(getItem(position));
+        return !directory.equals(path);
     }
 
     @Override
@@ -79,54 +77,39 @@ final class HierarchyAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, @Nullable View convertView, ViewGroup parent) {
-        View view = convertView != null
-                ? convertView
-                : inflate(R.layout.files_activity_title, parent);
-
-        Path path = getItem(position);
-
-        TextView title = find(android.R.id.title, view);
-        title.setText(FileLabels.get(parent.getResources(), path));
-
-        ImageView icon = find(android.R.id.icon, view);
-        icon.setImageResource(FileIcons.getDirectory(path));
-        icon.setColorFilter(WHITE, PorterDuff.Mode.SRC_ATOP);
-
-        if (path.equals(DIR_HOME)) {
-            title.setVisibility(GONE);
-            icon.setVisibility(VISIBLE);
+        FilesActivityTitleBinding binding;
+        if (convertView != null) {
+            binding = (FilesActivityTitleBinding) convertView.getTag();
         } else {
-            title.setVisibility(VISIBLE);
-            icon.setVisibility(GONE);
+            binding = FilesActivityTitleBinding.inflate(inflator(parent), parent, false);
+            binding.icon.setColorFilter(WHITE, SRC_ATOP);
+            binding.getRoot().setTag(binding);
         }
-
-        return view;
+        Path path = getItem(position);
+        binding.setPath(path);
+        return binding.getRoot();
     }
 
     @Override
     public View getDropDownView(int position, @Nullable View convertView, ViewGroup parent) {
-        View view = convertView != null
-                ? convertView
-                : inflate(R.layout.files_activity_title_item, parent);
+        FilesActivityTitleItemBinding binding;
+        if (convertView != null) {
+            binding = (FilesActivityTitleItemBinding) convertView.getTag();
+        } else {
+            binding = FilesActivityTitleItemBinding.inflate(inflator(parent), parent, false);
+            binding.getRoot().setTag(binding);
+        }
 
-        boolean enabled = isEnabled(position);
         Path path = getItem(position);
-        view.setEnabled(enabled);
-
-        ImageView iconView = find(android.R.id.icon, view);
-        iconView.setImageResource(FileIcons.getDirectory(path));
-        iconView.setEnabled(enabled);
-
-        TextView titleView = find(android.R.id.title, view);
         Name name = path.name();
-        titleView.setText(!name.isEmpty() ? name.toString() : path.toString());
-        titleView.setEnabled(enabled);
+        binding.setPath(path);
+        binding.setEnabled(isEnabled(path));
+        binding.setName(!name.isEmpty() ? name.toString() : path.toString());
 
-        return view;
+        return binding.getRoot();
     }
 
-    private View inflate(int layout, ViewGroup parent) {
-        return LayoutInflater.from(parent.getContext())
-                .inflate(layout, parent, false);
+    private LayoutInflater inflator(ViewGroup parent) {
+        return LayoutInflater.from(parent.getContext());
     }
 }

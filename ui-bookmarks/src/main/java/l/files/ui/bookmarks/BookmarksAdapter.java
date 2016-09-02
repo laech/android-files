@@ -1,14 +1,11 @@
 package l.files.ui.bookmarks;
 
-import android.databinding.BindingMethod;
-import android.databinding.BindingMethods;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
 import l.files.fs.Path;
 import l.files.ui.base.fs.OnOpenFileListener;
@@ -82,13 +79,6 @@ final class BookmarksAdapter extends StableAdapter<Object, ViewHolder> {
         }
     }
 
-    @BindingMethods({
-            @BindingMethod(
-                    type = ImageView.class,
-                    attribute = "app:srcCompat",
-                    method = "setImageResource"
-            )
-    })
     class BookmarkHolder extends SelectionModeViewHolder<Path, Path> {
 
         private final BookmarkItemBinding binding;
