@@ -2,25 +2,21 @@ package l.files.ui.browser;
 
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
-import static l.files.ui.base.view.Views.find;
+import l.files.ui.browser.databinding.FilesGridHeaderBinding;
 
 final class HeaderViewHolder extends RecyclerView.ViewHolder {
 
-    static final int LAYOUT_ID = R.layout.files_grid_header;
+    private final FilesGridHeaderBinding binding;
 
-    private final TextView title;
-
-    HeaderViewHolder(View itemView) {
-        super(itemView);
-        title = find(android.R.id.title, this);
+    HeaderViewHolder(FilesGridHeaderBinding binding) {
+        super(binding.getRoot());
+        this.binding = binding;
     }
 
     void bind(Header header) {
-        title.setText(header.toString());
+        binding.setHeader(header);
         ViewGroup.LayoutParams params = itemView.getLayoutParams();
         if (params instanceof StaggeredGridLayoutManager.LayoutParams) {
             ((StaggeredGridLayoutManager.LayoutParams) params).setFullSpan(true);

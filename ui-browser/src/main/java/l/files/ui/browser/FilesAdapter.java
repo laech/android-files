@@ -9,7 +9,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
@@ -25,6 +24,8 @@ import l.files.ui.base.selection.Selection;
 import l.files.ui.base.view.ActionModeProvider;
 import l.files.ui.base.widget.StableAdapter;
 import l.files.ui.browser.action.Selectable;
+import l.files.ui.browser.databinding.FilesGridHeaderBinding;
+import l.files.ui.browser.databinding.FilesGridItemBinding;
 
 import static l.files.base.Objects.requireNonNull;
 
@@ -81,37 +82,31 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         Context context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
-        View itemView;
-        ViewHolder holder;
         switch (viewType) {
 
             case VIEW_TYPE_FILE:
-                itemView = inflater.inflate(FileViewHolder.LAYOUT_ID, parent, false);
-                holder = new FileViewHolder(
-                        itemView,
+                return new FileViewHolder(
+                        FilesGridItemBinding.inflate(inflater, parent, false),
                         recyclerView,
                         listenable,
                         selection,
                         actionModeProvider,
                         actionModeCallback,
                         listener);
-                break;
 
             case VIEW_TYPE_HEADER:
-                itemView = inflater.inflate(HeaderViewHolder.LAYOUT_ID, parent, false);
-                holder = new HeaderViewHolder(itemView);
-                break;
+                return new HeaderViewHolder(
+                        FilesGridHeaderBinding.inflate(inflater, parent, false));
 
             case VIEW_TYPE_AD:
-                itemView = inflater.inflate(AdViewHolder.LAYOUT_ID, parent, false);
-                holder = new AdViewHolder(itemView, listenable, premiumLock);
-                break;
+                return new AdViewHolder(
+                        inflater.inflate(AdViewHolder.LAYOUT_ID, parent, false),
+                        listenable,
+                        premiumLock);
 
             default:
                 throw new IllegalArgumentException(String.valueOf(viewType));
         }
-        itemView.setTag(holder);
-        return holder;
     }
 
     @Override

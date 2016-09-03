@@ -2,7 +2,7 @@ package l.files.ui.browser;
 
 import static l.files.base.Objects.requireNonNull;
 
-final class Header {
+public final class Header {
 
     private final String header;
 
