@@ -8,6 +8,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 
+import java.util.List;
+
 import javax.annotation.Nullable;
 
 import l.files.ui.base.view.ActionModeProvider;
@@ -47,7 +49,7 @@ public abstract class SelectionModeViewHolder<K, V> extends ViewHolder
         return item;
     }
 
-    public void bind(V item) {
+    public void bind(V item, List<Object> payloads) {
         this.item = item;
         setActivated(item);
     }

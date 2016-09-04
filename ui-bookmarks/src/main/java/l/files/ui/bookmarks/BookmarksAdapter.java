@@ -7,6 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.List;
+
 import l.files.fs.Path;
 import l.files.ui.base.fs.OnOpenFileListener;
 import l.files.ui.base.selection.Selection;
@@ -16,6 +18,7 @@ import l.files.ui.base.widget.StableAdapter;
 import l.files.ui.bookmarks.databinding.BookmarkHeaderBinding;
 import l.files.ui.bookmarks.databinding.BookmarkItemBinding;
 
+import static java.util.Collections.emptyList;
 import static l.files.base.Objects.requireNonNull;
 
 final class BookmarksAdapter extends StableAdapter<Object, ViewHolder> {
@@ -54,7 +57,7 @@ final class BookmarksAdapter extends StableAdapter<Object, ViewHolder> {
     public void onBindViewHolder(ViewHolder holder, int position) {
         Object item = getItem(position);
         if (holder instanceof BookmarkHolder) {
-            ((BookmarkHolder) holder).bind((Path) item);
+            ((BookmarkHolder) holder).bind((Path) item, emptyList());
         } else {
             ((HeaderHolder) holder).bind((String) item);
         }
@@ -94,8 +97,8 @@ final class BookmarksAdapter extends StableAdapter<Object, ViewHolder> {
         }
 
         @Override
-        public void bind(Path path) {
-            super.bind(path);
+        public void bind(Path path, List<Object> payloads) {
+            super.bind(path, payloads);
             binding.setPath(path);
         }
 

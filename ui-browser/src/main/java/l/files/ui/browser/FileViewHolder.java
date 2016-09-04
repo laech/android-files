@@ -18,6 +18,8 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup.MarginLayoutParams;
 
+import java.util.List;
+
 import javax.annotation.Nullable;
 
 import l.files.base.Provider;
@@ -99,20 +101,39 @@ public final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo
         listener.onOpen(file.selfPath(), file.linkTargetOrSelfStat());
     }
 
-    // TODO support partial update
     @Override
-    public void bind(FileInfo file) {
-        super.bind(file);
+    public void bind(FileInfo file, List<Object> payloads) {
+        super.bind(file, payloads);
 
         if (constraint == null) {
             constraint = calculateThumbnailConstraint(binding.card);
         }
 
+        if (payloads.isEmpty()) {
+            bindFull(file);
+        } else {
+            bindPartial(payloads);
+        }
+        binding.executePendingBindings();
+    }
+
+    private void bindFull(FileInfo file) {
+        assert constraint != null;
         binding.card.setCardBackgroundColor(WHITE);
         binding.setFile(file);
         binding.setWidth(constraint.width());
         binding.setThumbnail(retrieveThumbnail());
-        binding.executePendingBindings();
+    }
+
+    private void bindPartial(List<Object> payloads) {
+        for (Object payload : payloads) {
+            if (payload instanceof Bitmap) {
+                binding.setThumbnail(new BitmapDrawable(
+                        resources(), (Bitmap) payload));
+                binding.image.setAlpha(0f);
+                binding.image.animate().alpha(1f);
+            }
+        }
     }
 
     private Rect calculateThumbnailConstraint(CardView card) {
@@ -254,20 +275,17 @@ public final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo
     private void backgroundBlurFadeIn(Bitmap thumbnail) {
         backgroundBlurSet(thumbnail);
         binding.blur.setAlpha(0f);
-        binding.blur.animate()
-                .alpha(1)
-                .setDuration(itemView.getResources().getInteger(
-                        android.R.integer.config_longAnimTime));
+        binding.blur.animate().alpha(1);
     }
 
     @Override
-    public void onPreviewAvailable(Path path, Stat stat, Bitmap bm) {
+    public void onPreviewAvailable(Path path, Stat stat, final Bitmap bm) {
         runWhenUiIsIdle(path, canUpdate, new Runnable() {
             @Override
             public void run() {
                 int position = getAdapterPosition();
                 if (position != NO_POSITION) {
-                    recyclerView.getAdapter().notifyItemChanged(position);
+                    recyclerView.getAdapter().notifyItemChanged(position, bm);
                 }
             }
         });

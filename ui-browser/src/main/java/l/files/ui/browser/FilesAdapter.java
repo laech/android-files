@@ -27,6 +27,7 @@ import l.files.ui.browser.action.Selectable;
 import l.files.ui.browser.databinding.FilesGridHeaderBinding;
 import l.files.ui.browser.databinding.FilesGridItemBinding;
 
+import static java.util.Collections.emptyList;
 import static l.files.base.Objects.requireNonNull;
 
 final class FilesAdapter extends StableAdapter<Object, ViewHolder>
@@ -110,17 +111,22 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(ViewHolder holder, int position, List<Object> payloads) {
         Object item = getItem(position);
         if (holder instanceof HeaderViewHolder) {
             ((HeaderViewHolder) holder).bind((Header) item);
         } else if (holder instanceof FileViewHolder) {
-            ((FileViewHolder) holder).bind((FileInfo) item);
+            ((FileViewHolder) holder).bind((FileInfo) item, payloads);
         } else if (holder instanceof AdViewHolder) {
             ((AdViewHolder) holder).bind();
         } else {
             throw new IllegalArgumentException(String.valueOf(item));
         }
+    }
+
+    @Override
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        onBindViewHolder(holder, position, emptyList());
     }
 
     @Override
