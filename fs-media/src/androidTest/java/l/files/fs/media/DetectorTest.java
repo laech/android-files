@@ -6,45 +6,54 @@ import l.files.fs.Files;
 import l.files.fs.Path;
 import l.files.testing.fs.PathBaseTest;
 
-public abstract class BasePropertyDetectorTest extends PathBaseTest {
+public final class DetectorTest extends PathBaseTest {
 
-    /**
-     * The detector to be tested, using the given file system.
-     */
-    abstract BasePropertyDetector detector();
+    private Detector detector() {
+        return Detector.INSTANCE;
+    }
+
+    public void test_can_detect_by_name() throws Exception {
+        Path file = createTextFile("a.txt", "");
+        assertEquals("text/plain", detector().detect(getContext(), file));
+    }
+
+    public void test_can_detect_by_content() throws Exception {
+        Path file = createTextFile("a.png");
+        assertEquals("text/plain", detector().detect(getContext(), file));
+    }
 
     public void test_detects_directory_type() throws Exception {
         Path dir = createDir("a");
-        assertEquals("inode/directory", detector().detect(null, dir));
+        assertEquals("inode/directory", detector().detect(getContext(), dir));
     }
 
     public void test_detects_file_type() throws Exception {
         Path file = createTextFile("a.txt");
-        assertEquals("text/plain", detector().detect(null, file));
+        assertEquals("text/plain", detector().detect(getContext(), file));
     }
 
     public void test_detects_file_type_uppercase_extension() throws Exception {
         Path file = createTextFile("a.TXT");
-        assertEquals("text/plain", detector().detect(null, file));
+        assertEquals("text/plain", detector().detect(getContext(), file));
     }
 
     public void test_detects_linked_file_type() throws Exception {
         Path file = createTextFile("a.mp3");
         Path link = createSymbolicLink("b.txt", file);
-        assertEquals("text/plain", detector().detect(null, link));
+        assertEquals("text/plain", detector().detect(getContext(), link));
     }
 
     public void test_detects_linked_directory_type() throws Exception {
         Path dir = createDir("a");
         Path link = createSymbolicLink("b", dir);
-        assertEquals("inode/directory", detector().detect(null, link));
+        assertEquals("inode/directory", detector().detect(getContext(), link));
     }
 
     public void test_detects_multi_linked_directory_type() throws Exception {
         Path dir = createDir("a");
         Path link1 = createSymbolicLink("b", dir);
         Path link2 = createSymbolicLink("c", link1);
-        assertEquals("inode/directory", detector().detect(null, link2));
+        assertEquals("inode/directory", detector().detect(getContext(), link2));
     }
 
     public void test_fails_on_broken_circular_links() throws Exception {
@@ -53,7 +62,7 @@ public abstract class BasePropertyDetectorTest extends PathBaseTest {
         Files.createSymbolicLink(link1, link2);
         Files.createSymbolicLink(link2, link1);
         try {
-            detector().detect(null, link1);
+            detector().detect(getContext(), link1);
             fail();
         } catch (IOException e) {
             // Pass

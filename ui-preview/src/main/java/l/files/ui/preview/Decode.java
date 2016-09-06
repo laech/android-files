@@ -66,12 +66,13 @@ public final class Decode extends AsyncTask<Object, Object, Object> {
     // Need to update NoPreview cache version to invalidate
     // cache when we add a new decoder so existing files
     // marked as not previewable will get re-evaluated.
+    // Order matters, from specific to general
     private static final List<Thumbnailer<Path>> thumbnailers = asList(
+            new PathStreamThumbnailer(new SvgThumbnailer()),
             new ImageThumbnailer(),
             new MediaThumbnailer(),
             new PdfThumbnailer(),
             new PathStreamThumbnailer(new TextThumbnailer()),
-            new PathStreamThumbnailer(new SvgThumbnailer()),
             new ApkThumbnailer());
 
     @Nullable
@@ -179,7 +180,7 @@ public final class Decode extends AsyncTask<Object, Object, Object> {
     private String decodeMediaType() throws IOException {
         String mediaType = preview.getMediaType(path, stat, constraint, true);
         if (mediaType == null) {
-            mediaType = MediaTypes.detectByContent(preview.context, path, stat);
+            mediaType = MediaTypes.detect(preview.context, path, stat);
             preview.putMediaType(path, stat, constraint, mediaType);
         }
         return mediaType;

@@ -17,8 +17,8 @@ import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.media.MediaTypes.MEDIA_TYPE_ANY;
+import static l.files.ui.base.content.Contexts.isDebugBuild;
 import static l.files.ui.base.fs.IOExceptions.message;
-import static l.files.ui.browser.BuildConfig.DEBUG;
 
 final class OpenFile extends AsyncTask<Void, Void, Object> {
 
@@ -74,7 +74,7 @@ final class OpenFile extends AsyncTask<Void, Void, Object> {
     }
 
     private void debug(String media) {
-        if (DEBUG) {
+        if (isDebugBuild(context)) {
             makeText(context, "[DEBUG] " + media, LENGTH_SHORT).show();
         }
     }

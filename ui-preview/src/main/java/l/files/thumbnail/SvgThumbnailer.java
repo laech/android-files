@@ -25,7 +25,7 @@ public final class SvgThumbnailer implements Thumbnailer<InputStream> {
 
     @Override
     public boolean accepts(Path path, String mediaType) {
-        return mediaType.startsWith("image/svg+xml");
+        return mediaType.equals("image/svg+xml");
     }
 
     @Override

@@ -31,16 +31,6 @@ public final class MediaTypes {
         return mediaType;
     }
 
-
-    /**
-     * Detects the content type of this file based on its content.
-     * Returns {@link #MEDIA_TYPE_OCTET_STREAM} if unknown.
-     */
-    public static String detectByContent(Context context, Path path, Stat stat)
-            throws IOException {
-        return MagicDetector.INSTANCE.detect(context, path, stat).intern();
-    }
-
     /**
      * Detects the content type of this file based on its properties
      * and its content.
@@ -48,7 +38,7 @@ public final class MediaTypes {
      */
     public static String detect(Context context, Path path, Stat stat)
             throws IOException {
-        return MetaMagicDetector.INSTANCE.detect(context, path, stat).intern();
+        return Detector.INSTANCE.detect(context, path, stat).intern();
     }
 
 }

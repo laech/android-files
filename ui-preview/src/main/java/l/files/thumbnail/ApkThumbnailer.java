@@ -14,8 +14,7 @@ public final class ApkThumbnailer implements Thumbnailer<Path> {
 
     @Override
     public boolean accepts(Path path, String mediaType) {
-        return mediaType.equals("application/zip") &&
-                path.name().ext().equalsIgnoreCase("apk");
+        return mediaType.equals("application/vnd.android.package-archive");
     }
 
     @Override
