@@ -24,8 +24,6 @@ import l.files.ui.base.selection.Selection;
 import l.files.ui.base.view.ActionModeProvider;
 import l.files.ui.base.widget.StableAdapter;
 import l.files.ui.browser.action.Selectable;
-import l.files.ui.browser.databinding.FilesGridHeaderBinding;
-import l.files.ui.browser.databinding.FilesGridItemBinding;
 
 import static java.util.Collections.emptyList;
 import static l.files.base.Objects.requireNonNull;
@@ -87,7 +85,7 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
 
             case VIEW_TYPE_FILE:
                 return new FileViewHolder(
-                        FilesGridItemBinding.inflate(inflater, parent, false),
+                        inflater.inflate(FileViewHolder.LAYOUT_ID, parent, false),
                         recyclerView,
                         listenable,
                         selection,
@@ -97,7 +95,7 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
 
             case VIEW_TYPE_HEADER:
                 return new HeaderViewHolder(
-                        FilesGridHeaderBinding.inflate(inflater, parent, false));
+                        inflater.inflate(HeaderViewHolder.LAYOUT_ID, parent, false));
 
             case VIEW_TYPE_AD:
                 return new AdViewHolder(

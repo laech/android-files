@@ -6,20 +6,23 @@ import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.util.List;
 
 import l.files.fs.Path;
+import l.files.ui.base.fs.FileIcons;
+import l.files.ui.base.fs.FileLabels;
 import l.files.ui.base.fs.OnOpenFileListener;
 import l.files.ui.base.selection.Selection;
 import l.files.ui.base.selection.SelectionModeViewHolder;
 import l.files.ui.base.view.ActionModeProvider;
 import l.files.ui.base.widget.StableAdapter;
-import l.files.ui.bookmarks.databinding.BookmarkHeaderBinding;
-import l.files.ui.bookmarks.databinding.BookmarkItemBinding;
 
 import static java.util.Collections.emptyList;
 import static l.files.base.Objects.requireNonNull;
+import static l.files.ui.base.view.Views.find;
 
 final class BookmarksAdapter extends StableAdapter<Object, ViewHolder> {
 
@@ -49,8 +52,8 @@ final class BookmarksAdapter extends StableAdapter<Object, ViewHolder> {
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         return viewType == 0
-                ? new BookmarkHolder(BookmarkItemBinding.inflate(inflater, parent, false))
-                : new HeaderHolder(BookmarkHeaderBinding.inflate(inflater, parent, false));
+                ? new BookmarkHolder(inflater.inflate(R.layout.bookmark_item, parent, false))
+                : new HeaderHolder(inflater.inflate(R.layout.bookmark_header, parent, false));
     }
 
     @Override
@@ -70,25 +73,27 @@ final class BookmarksAdapter extends StableAdapter<Object, ViewHolder> {
 
     private static class HeaderHolder extends RecyclerView.ViewHolder {
 
-        private final BookmarkHeaderBinding binding;
+        private final TextView headerView;
 
-        HeaderHolder(BookmarkHeaderBinding binding) {
-            super(binding.getRoot());
-            this.binding = binding;
+        HeaderHolder(View itemView) {
+            super(itemView);
+            this.headerView = find(R.id.header, itemView);
         }
 
         void bind(String header) {
-            binding.setHeader(header);
+            headerView.setText(header);
         }
     }
 
     class BookmarkHolder extends SelectionModeViewHolder<Path, Path> {
 
-        private final BookmarkItemBinding binding;
+        private final TextView titleView;
+        private final ImageView iconView;
 
-        BookmarkHolder(BookmarkItemBinding binding) {
-            super(binding.getRoot(), selection, actionModeProvider, actionModeCallback);
-            this.binding = binding;
+        BookmarkHolder(View itemView) {
+            super(itemView, selection, actionModeProvider, actionModeCallback);
+            this.titleView = find(R.id.title, itemView);
+            this.iconView = find(R.id.icon, itemView);
         }
 
         @Override
@@ -99,7 +104,8 @@ final class BookmarksAdapter extends StableAdapter<Object, ViewHolder> {
         @Override
         public void bind(Path path, List<Object> payloads) {
             super.bind(path, payloads);
-            binding.setPath(path);
+            titleView.setText(FileLabels.get(resources(), path));
+            iconView.setImageResource(FileIcons.getDirectory(path));
         }
 
         @Override

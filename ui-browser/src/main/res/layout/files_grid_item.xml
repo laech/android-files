@@ -1,118 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<l.files.ui.browser.widget.ActivatedCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/card"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/files_item_space_vertical"
+    android:layout_marginEnd="@dimen/files_item_space_horizontal"
+    android:layout_marginLeft="@dimen/files_item_space_horizontal"
+    android:layout_marginRight="@dimen/files_item_space_horizontal"
+    android:layout_marginStart="@dimen/files_item_space_horizontal"
+    android:layout_marginTop="@dimen/files_item_space_vertical"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardElevation="1dp"
+    app:cardPreventCornerOverlap="false"
+    app:cardUseCompatPadding="true">
 
-    <data>
-
-        <import type="java.lang.Math" />
-
-        <import type="android.view.View" />
-
-        <import type="android.graphics.drawable.BitmapDrawable" />
-
-        <import type="l.files.ui.browser.text.FileTextLayouts" />
-
-        <variable
-            name="file"
-            type="l.files.ui.base.fs.FileInfo" />
-
-        <variable
-            name="thumbnail"
-            type="android.graphics.drawable.Drawable" />
-
-        <variable
-            name="blurImage"
-            type="android.graphics.drawable.Drawable" />
-
-        <variable
-            name="width"
-            type="int" />
-
-    </data>
-
-    <l.files.ui.browser.widget.ActivatedCardView
-        android:id="@+id/card"
+    <LinearLayout
+        android:id="@+id/blur"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/files_item_space_vertical"
-        android:layout_marginEnd="@dimen/files_item_space_horizontal"
-        android:layout_marginLeft="@dimen/files_item_space_horizontal"
-        android:layout_marginRight="@dimen/files_item_space_horizontal"
-        android:layout_marginStart="@dimen/files_item_space_horizontal"
-        android:layout_marginTop="@dimen/files_item_space_vertical"
-        android:foreground="?attr/selectableItemBackground"
-        app:cardElevation="1dp"
-        app:cardPreventCornerOverlap="false"
-        app:cardUseCompatPadding="true">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingBottom="12dp">
 
-        <LinearLayout
-            android:id="@+id/blur"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@{blurImage}"
-            android:orientation="vertical"
-            android:paddingBottom="12dp">
+        <ImageView
+            android:id="@+id/image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:minHeight="32dp"
+            android:minWidth="32dp" />
 
-            <ImageView
-                android:id="@+id/image"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="@{(width - thumbnail.intrinsicWidth) / 2}"
-                android:enabled="@{file.readable}"
-                android:minHeight="32dp"
-                android:minWidth="32dp"
-                android:src="@{thumbnail}" />
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/files_item_name_padding_top"
+            android:gravity="center_horizontal"
+            android:paddingEnd="12dp"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:paddingStart="12dp"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="13sp" />
 
-            <TextView
-                android:id="@+id/title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="@dimen/files_item_name_padding_top"
-                android:enabled="@{file.readable}"
-                android:gravity="center_horizontal"
-                android:paddingEnd="12dp"
-                android:paddingLeft="12dp"
-                android:paddingRight="12dp"
-                android:paddingStart="12dp"
-                android:text="@{file.name()}"
-                android:textColor="?android:attr/textColorPrimary"
-                android:textSize="13sp" />
+        <TextView
+            android:id="@+id/link"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center_horizontal"
+            android:paddingEnd="12dp"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:paddingStart="12dp"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="12sp" />
 
-            <TextView
-                android:id="@+id/link"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:enabled="@{file.readable}"
-                android:gravity="center_horizontal"
-                android:paddingEnd="12dp"
-                android:paddingLeft="12dp"
-                android:paddingRight="12dp"
-                android:paddingStart="12dp"
-                android:text="@{file.linkTargetPath() != null ? @string/link_x(file.linkTargetPath().toString()) : null}"
-                android:textColor="?android:attr/textColorSecondary"
-                android:textSize="12sp"
-                android:visibility="@{file.linkTargetPath() != null ? View.VISIBLE : View.GONE}" />
+        <TextView
+            android:id="@+id/summary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center_horizontal"
+            android:paddingEnd="12dp"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:paddingStart="12dp"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="12sp" />
 
-            <TextView
-                android:id="@+id/summary"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:enabled="@{file.readable}"
-                android:gravity="center_horizontal"
-                android:paddingEnd="12dp"
-                android:paddingLeft="12dp"
-                android:paddingRight="12dp"
-                android:paddingStart="12dp"
-                android:text="@{FileTextLayouts.getSummary(context, file)}"
-                android:textColor="?android:attr/textColorSecondary"
-                android:textSize="12sp"
-                android:visibility="@{file.selfStat() != null ? View.VISIBLE : View.GONE}" />
+    </LinearLayout>
 
-        </LinearLayout>
-
-    </l.files.ui.browser.widget.ActivatedCardView>
-</layout>
+</l.files.ui.browser.widget.ActivatedCardView>

@@ -1,48 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/selectableItemBackgroundBorderless"
+    android:minHeight="?attr/actionBarSize">
 
-    <data>
-
-        <import type="android.view.View" />
-
-        <import type="l.files.ui.base.fs.UserDirs" />
-
-        <import type="l.files.ui.base.fs.FileIcons" />
-
-        <import type="l.files.ui.base.fs.FileLabels" />
-
-        <variable
-            name="path"
-            type="l.files.fs.Path" />
-
-    </data>
-
-    <FrameLayout
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/title"
+        style="@style/ToolbarTitle"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:minHeight="?attr/actionBarSize">
+        android:layout_gravity="center"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxLines="1" />
 
-        <TextView
-            style="@style/ToolbarTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:ellipsize="end"
-            android:gravity="center"
-            android:maxLines="1"
-            android:text="@{FileLabels.get(context.resources, path)}"
-            android:visibility="@{UserDirs.DIR_HOME.equals(path) ? View.GONE : View.VISIBLE}" />
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
 
-        <ImageView
-            android:id="@+id/icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:visibility="@{UserDirs.DIR_HOME.equals(path) ? View.VISIBLE : View.GONE}"
-            app:srcCompat="@{FileIcons.getDirectory(path)}" />
-
-    </FrameLayout>
-
-</layout>
+</FrameLayout>
