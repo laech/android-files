@@ -1,5 +1,10 @@
 package l.files.ui.browser;
 
+import android.support.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import java.io.IOException;
 
 import l.files.fs.Files;
@@ -12,9 +17,11 @@ import static l.files.ui.browser.FileSort.MODIFIED;
 import static l.files.ui.browser.FileSort.NAME;
 import static l.files.ui.browser.FileSort.SIZE;
 
+@RunWith(AndroidJUnit4.class)
 public final class SortTest extends BaseFilesActivityTest {
 
-    public void test_updates_list_on_sort_option_change_on_back() throws Exception {
+    @Test
+    public void updates_list_on_sort_option_change_on_back() throws Exception {
         Path a = createDir(dir().resolve("a"));
         Path aa = createFile("aa", "aa", Instant.of(1, 1), a);
         Path ab = createFile("ab", "ab", Instant.of(2, 1), a);
@@ -28,7 +35,8 @@ public final class SortTest extends BaseFilesActivityTest {
                 .pressBack().assertAllItemsDisplayedInOrder(a, c, b);
     }
 
-    public void test_updates_list_on_sort_option_change() throws Exception {
+    @Test
+    public void updates_list_on_sort_option_change() throws Exception {
         Path a = createFile("a", "a", Instant.of(11, 0));
         Path b = createFile("b", "bbb", Instant.of(12, 0));
         Path c = createFile("c", "cc", Instant.of(13, 0));

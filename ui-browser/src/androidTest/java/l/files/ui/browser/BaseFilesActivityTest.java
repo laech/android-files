@@ -1,16 +1,22 @@
 package l.files.ui.browser;
 
 import android.content.Intent;
+import android.support.test.rule.ActivityTestRule;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.support.test.uiautomator.UiSelector;
-import android.test.ActivityInstrumentationTestCase2;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.annotation.Nullable;
 
 import l.files.base.Provider;
 import l.files.base.Throwables;
@@ -24,20 +30,36 @@ import static android.content.Intent.ACTION_MAIN;
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.M;
 import static android.os.Environment.getExternalStorageDirectory;
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
 import static java.util.Collections.singletonList;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.TraversalCallback.Result.CONTINUE;
 import static l.files.ui.browser.FilesActivity.EXTRA_DIRECTORY;
 import static l.files.ui.browser.FilesActivity.EXTRA_WATCH_LIMIT;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-public class BaseFilesActivityTest extends ActivityInstrumentationTestCase2<FilesActivity> {
+public class BaseFilesActivityTest {
 
+    @Rule
+    public final ActivityTestRule<FilesActivity> activityTestRule =
+            new ActivityTestRule<FilesActivity>(FilesActivity.class, false, false) {
+                @Nullable
+                @Override
+                protected Intent getActivityIntent() {
+                    return activityIntent;
+                }
+            };
+
+    @Nullable
     private Path dir;
+
+    @Nullable
     private UiFileActivity screen;
 
-    public BaseFilesActivityTest() {
-        super(FilesActivity.class);
-    }
+    @Nullable
+    private Intent activityIntent;
 
     private File createTempFolder() throws IOException {
         File dir = File.createTempFile(getClass().getSimpleName(), null);
@@ -46,9 +68,8 @@ public class BaseFilesActivityTest extends ActivityInstrumentationTestCase2<File
         return dir;
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         dir = Paths.get(createTempFolder());
         setActivityIntent(newIntent(dir));
         screen = new UiFileActivity(
@@ -61,21 +82,30 @@ public class BaseFilesActivityTest extends ActivityInstrumentationTestCase2<File
                 });
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         screen = null;
-        if (Files.exists(dir, NOFOLLOW)) {
+        if (dir != null && Files.exists(dir, NOFOLLOW)) {
             Files.traverse(dir, NOFOLLOW, delete());
         }
         dir = null;
-        super.tearDown();
     }
 
-    @Override
     public FilesActivity getActivity() {
-        FilesActivity activity = super.getActivity();
+        FilesActivity activity = activityTestRule.getActivity();
+        if (activity == null) {
+            activity = activityTestRule.launchActivity(activityIntent);
+        }
         allowPermissionsIfNeeded();
         return activity;
+    }
+
+    public void setActivityIntent(Intent intent) {
+        this.activityIntent = intent;
+    }
+
+    void runTestOnUiThread(Runnable runnable) throws Throwable {
+        activityTestRule.runOnUiThread(runnable);
     }
 
     private static boolean permissionAllowed;
@@ -121,10 +151,12 @@ public class BaseFilesActivityTest extends ActivityInstrumentationTestCase2<File
 
     UiFileActivity screen() {
         getActivity();
+        assert screen != null;
         return screen;
     }
 
     Path dir() {
+        assert dir != null;
         return dir;
     }
 

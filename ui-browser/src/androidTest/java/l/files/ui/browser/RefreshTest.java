@@ -1,5 +1,10 @@
 package l.files.ui.browser;
 
+import android.support.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import java.io.IOException;
 import java.util.Random;
 
@@ -27,10 +32,13 @@ import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.ui.browser.FileSort.MODIFIED;
 import static l.files.ui.browser.FilesLoader.BATCH_UPDATE_MILLIS;
+import static org.junit.Assert.assertFalse;
 
+@RunWith(AndroidJUnit4.class)
 public final class RefreshTest extends BaseFilesActivityTest {
 
-    public void test_manual_refresh_updates_outdated_files()
+    @Test
+    public void manual_refresh_updates_outdated_files()
             throws Exception {
 
         int watchLimit = 5;
@@ -94,7 +102,8 @@ public final class RefreshTest extends BaseFilesActivityTest {
         screen().assertListMatchesFileSystem(dir);
     }
 
-    public void test_auto_detect_files_added_and_removed_while_loading() throws Exception {
+    @Test
+    public void auto_detect_files_added_and_removed_while_loading() throws Exception {
 
         for (int i = 0; i < 10; i++) {
             Files.createDir(dir().resolve(String.valueOf(i)));
@@ -142,7 +151,8 @@ public final class RefreshTest extends BaseFilesActivityTest {
         return dir.resolve(String.valueOf(Math.random()));
     }
 
-    public void test_auto_show_correct_information_on_large_change_events() throws Exception {
+    @Test
+    public void auto_show_correct_information_on_large_change_events() throws Exception {
         createFile(dir().resolve("a"));
         screen().assertListMatchesFileSystem(dir());
 

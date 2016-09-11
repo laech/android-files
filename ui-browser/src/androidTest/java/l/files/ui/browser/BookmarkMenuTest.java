@@ -1,11 +1,18 @@
 package l.files.ui.browser;
 
+import android.support.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import l.files.fs.Files;
 import l.files.fs.Path;
 
+@RunWith(AndroidJUnit4.class)
 public final class BookmarkMenuTest extends BaseFilesActivityTest {
 
-    public void test_bookmark_menu_is_unchecked_for_non_bookmarked_directory()
+    @Test
+    public void bookmark_menu_is_unchecked_for_non_bookmarked_directory()
             throws Exception {
 
         Path dir1 = Files.createDir(dir().resolve("Not bookmarked 1"));
@@ -18,7 +25,8 @@ public final class BookmarkMenuTest extends BaseFilesActivityTest {
                 .assertBookmarkMenuChecked(false);
     }
 
-    public void test_bookmark_menu_is_checked_for_bookmarked_directory()
+    @Test
+    public void bookmark_menu_is_checked_for_bookmarked_directory()
             throws Exception {
 
         Path dir = Files.createDir(dir().resolve("Bookmarked"));
@@ -28,7 +36,8 @@ public final class BookmarkMenuTest extends BaseFilesActivityTest {
                 .assertBookmarkMenuChecked(true);
     }
 
-    public void test_bookmark_unbookmark_directory_checks_bookmark_menu_correctly()
+    @Test
+    public void bookmark_unbookmark_directory_checks_bookmark_menu_correctly()
             throws Exception {
 
         Path dir = Files.createDir(dir().resolve("Bookmarked then unbookmarked"));
@@ -40,7 +49,8 @@ public final class BookmarkMenuTest extends BaseFilesActivityTest {
                 .assertBookmarkMenuChecked(false);
     }
 
-    public void test_navigate_through_bookmarked_unbookmarked_directories_checks_bookmark_menu_correctly()
+    @Test
+    public void navigate_through_bookmarked_unbookmarked_directories_checks_bookmark_menu_correctly()
             throws Exception {
 
         Path bookmarked = Files.createDir(dir().resolve("Bookmarked"));

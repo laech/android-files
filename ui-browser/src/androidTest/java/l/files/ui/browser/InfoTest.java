@@ -1,5 +1,10 @@
 package l.files.ui.browser;
 
+import android.support.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import l.files.fs.Path;
 import l.files.fs.Stat;
 
@@ -17,9 +22,11 @@ import static l.files.fs.Files.writeUtf8;
 import static l.files.fs.Instant.EPOCH;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
+@RunWith(AndroidJUnit4.class)
 public final class InfoTest extends BaseFilesActivityTest {
 
-    public void test_gets_info_of_multiple_files() throws Exception {
+    @Test
+    public void gets_info_of_multiple_files() throws Exception {
 
         Path child1 = createFile(dir().resolve("1"));
         Path child2 = createDir(dir().resolve("2"));
@@ -45,7 +52,8 @@ public final class InfoTest extends BaseFilesActivityTest {
                                 + st3.sizeOnDisk()));
     }
 
-    public void test_gets_info_of_file() throws Exception {
+    @Test
+    public void gets_info_of_file() throws Exception {
 
         Path path = dir().resolve("test.txt");
         writeUtf8(path, "hello world");
@@ -60,7 +68,8 @@ public final class InfoTest extends BaseFilesActivityTest {
                 .assertSizeOnDisk(formatSizeOnDisk(stat.sizeOnDisk()));
     }
 
-    public void test_gets_info_of_link() throws Exception {
+    @Test
+    public void gets_info_of_link() throws Exception {
 
         setLastModifiedTime(dir(), NOFOLLOW, EPOCH);
         Path path = createSymbolicLink(dir().resolve("link"), dir());
@@ -75,7 +84,8 @@ public final class InfoTest extends BaseFilesActivityTest {
                 .assertSizeOnDisk(formatSizeOnDisk(stat.sizeOnDisk()));
     }
 
-    public void test_gets_info_of_empty_dir() throws Exception {
+    @Test
+    public void gets_info_of_empty_dir() throws Exception {
 
         Path dir = createDir(dir().resolve("dir"));
         Stat stat = stat(dir, NOFOLLOW);
@@ -89,7 +99,8 @@ public final class InfoTest extends BaseFilesActivityTest {
                 .assertSizeOnDisk(formatSizeOnDisk(stat.sizeOnDisk()));
     }
 
-    public void test_gets_info_of_non_empty_dir() throws Exception {
+    @Test
+    public void gets_info_of_non_empty_dir() throws Exception {
 
         Path dir = createDir(dir().resolve("dir"));
         Path child1 = createDir(dir.resolve("dir"));

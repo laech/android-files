@@ -8,6 +8,7 @@ import android.view.View;
 
 import static android.view.MenuItem.OnActionExpandListener;
 import static android.view.MenuItem.OnMenuItemClickListener;
+import static java.lang.Thread.currentThread;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
@@ -18,6 +19,7 @@ import static org.mockito.Mockito.mock;
 final class Mocks {
 
     static MenuItem mockMenuItem(int id) {
+        currentThread().setContextClassLoader(Mocks.class.getClassLoader());
         MenuItem item = mock(MenuItem.class);
         given(item.getItemId()).willReturn(id);
         given(item.setActionProvider(any(ActionProvider.class))).willReturn(item);

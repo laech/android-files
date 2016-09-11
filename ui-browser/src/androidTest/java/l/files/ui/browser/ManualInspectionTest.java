@@ -1,6 +1,10 @@
 package l.files.ui.browser;
 
+import android.support.test.runner.AndroidJUnit4;
 import android.test.InstrumentationTestCase;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -22,8 +26,10 @@ import static l.files.fs.Files.UTF_8;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
+@RunWith(AndroidJUnit4.class)
 public final class ManualInspectionTest extends InstrumentationTestCase {
 
+    @Test
     public void test() throws Exception {
         Path dir = Paths.get(getExternalStorageDirectory()).resolve("test");
         Files.createDirs(dir);

@@ -1,5 +1,10 @@
 package l.files.ui.browser;
 
+import android.support.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
@@ -11,10 +16,14 @@ import static java.lang.Thread.sleep;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.ui.browser.Tests.timeout;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
+@RunWith(AndroidJUnit4.class)
 public final class FileOperationTest extends BaseFilesActivityTest {
 
-    public void test_delete() throws Exception {
+    @Test
+    public void delete() throws Exception {
 
         final Path file = Files.createFile(dir().resolve("file"));
         final Path link = Files.createSymbolicLink(dir().resolve("link"), file);
@@ -42,7 +51,8 @@ public final class FileOperationTest extends BaseFilesActivityTest {
 
     }
 
-    public void test_cut_files() throws Exception {
+    @Test
+    public void cut_files() throws Exception {
 
         final Path file = Files.createFile(dir().resolve("a"));
         final Path dir = Files.createDir(dir().resolve("dir"));
@@ -63,7 +73,8 @@ public final class FileOperationTest extends BaseFilesActivityTest {
 
     }
 
-    public void test_copy() throws Exception {
+    @Test
+    public void copy() throws Exception {
 
         Path dstDir = Files.createDir(dir().resolve("dstDir"));
         Path srcFile = Files.createFile(dir().resolve("srcFile"));
@@ -107,7 +118,8 @@ public final class FileOperationTest extends BaseFilesActivityTest {
         return false;
     }
 
-    public void test_paste_menu_is_disabled_inside_folder_being_copied()
+    @Test
+    public void paste_menu_is_disabled_inside_folder_being_copied()
             throws Exception {
 
         Path dir = Files.createDir(dir().resolve("dir"));
