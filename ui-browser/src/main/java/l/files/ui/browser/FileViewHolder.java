@@ -251,8 +251,13 @@ public final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo
     private Drawable newIcon() {
         int resId = item().iconDrawableResourceId();
         Drawable drawable = DrawableCompat.wrap(getDrawable(context(), resId)).mutate();
-        setTintList(drawable, summaryView.getTextColors());
+        setTintList(drawable, titleView.getTextColors());
+        setIconAlpha(drawable);
         return drawable;
+    }
+
+    private void setIconAlpha(Drawable drawable) {
+        drawable.setAlpha(125);
     }
 
     private final Provider<Boolean> canUpdate = new Provider<Boolean>() {
@@ -422,6 +427,10 @@ public final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo
             imageView.setColorFilter(color, PorterDuff.Mode.MULTIPLY);
         } else {
             imageView.setColorFilter(null);
+            Drawable drawable = imageView.getDrawable();
+            if (!(drawable instanceof BitmapDrawable)) {
+                setIconAlpha(drawable);
+            }
         }
     }
 
