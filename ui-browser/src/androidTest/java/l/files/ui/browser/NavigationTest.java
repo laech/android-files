@@ -21,6 +21,8 @@ import l.files.fs.Paths;
 import l.files.fs.Permission;
 import l.files.fs.Stat;
 
+import static android.os.Build.VERSION.SDK_INT;
+import static android.os.Build.VERSION_CODES.N;
 import static android.test.MoreAsserts.assertNotEqual;
 import static android.text.format.DateFormat.getDateFormat;
 import static android.text.format.DateFormat.getTimeFormat;
@@ -52,6 +54,7 @@ import static l.files.ui.browser.FileSort.NAME;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 @RunWith(AndroidJUnit4.class)
 public final class NavigationTest extends BaseFilesActivityTest {
@@ -160,6 +163,9 @@ public final class NavigationTest extends BaseFilesActivityTest {
     public void can_navigate_into_etc_proc_self_fdinfo_without_crashing()
             throws Exception {
 
+        assumeTrue("Skipping test, no permission to read /proc on Android N",
+                SDK_INT != N);
+
         screen().selectFromNavigationMode(Paths.get("/"));
         screen().clickInto(Paths.get("/proc"));
         screen().clickInto(Paths.get("/proc/self"));
@@ -169,6 +175,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
     @Test
     public void can_navigate_through_title_list_drop_down() throws Exception {
         Path parent = dir().parent();
+        assert parent != null;
         screen()
                 .selectFromNavigationMode(parent)
                 .assertNavigationModeHierarchy(parent);
@@ -302,11 +309,13 @@ public final class NavigationTest extends BaseFilesActivityTest {
     @Test
     public void press_action_bar_up_indicator_will_go_back() throws Exception {
         Path dir = createDir(dir().resolve("dir"));
+        Path parent = dir.parent();
+        assert parent != null;
         screen()
                 .clickInto(dir)
                 .assertCurrentDirectory(dir)
                 .pressActionBarUpIndicator()
-                .assertCurrentDirectory(dir.parent());
+                .assertCurrentDirectory(parent);
     }
 
     @Test
