@@ -3,7 +3,6 @@ package l.files.ui.browser;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
@@ -147,7 +146,7 @@ public final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo
     private void bindPartial(List<Object> payloads) {
         for (Object payload : payloads) {
             if (payload instanceof Bitmap) {
-                bindImage(item(), new BitmapDrawable(resources(), (Bitmap) payload));
+                bindImage(item(), createdRoundedThumbnail((Bitmap) payload));
                 imageView.setAlpha(0f);
                 imageView.animate().alpha(1f);
             }
@@ -226,7 +225,7 @@ public final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo
             if (blurred == null) {
                 // TODO
             }
-            return new BitmapDrawable(resources(), thumbnail);
+            return createdRoundedThumbnail(thumbnail);
         }
 
         runWhenUiIsIdle(file, canInterruptScrollState, new Runnable() {
@@ -326,13 +325,18 @@ public final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo
     }
 
     private void backgroundBlurSet(Bitmap bitmap) {
-        Resources res = itemView.getResources();
+        RoundedBitmapDrawable drawable = createdRoundedThumbnail(bitmap);
+        drawable.setAlpha((int) (0.5f * 255));
+        blurView.setBackground(drawable);
+    }
+
+    private RoundedBitmapDrawable createdRoundedThumbnail(Bitmap bitmap) {
+        Resources res = resources();
         RoundedBitmapDrawable drawable =
                 RoundedBitmapDrawableFactory.create(res, bitmap);
-        drawable.setAlpha((int) (0.5f * 255));
         drawable.setCornerRadius(res.getDimension(
                 R.dimen.files_item_card_inner_radius));
-        blurView.setBackground(drawable);
+        return drawable;
     }
 
     private void backgroundBlurFadeIn(Bitmap thumbnail) {
@@ -428,7 +432,7 @@ public final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo
         } else {
             imageView.setColorFilter(null);
             Drawable drawable = imageView.getDrawable();
-            if (!(drawable instanceof BitmapDrawable)) {
+            if (!(drawable instanceof RoundedBitmapDrawable)) {
                 setIconAlpha(drawable);
             }
         }
