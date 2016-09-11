@@ -29,6 +29,7 @@ import static android.app.DownloadManager.STATUS_SUCCESSFUL;
 import static android.content.Context.DOWNLOAD_SERVICE;
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.M;
+import static android.os.Build.VERSION_CODES.N;
 import static android.os.Environment.DIRECTORY_DOWNLOADS;
 import static android.os.Environment.getExternalStoragePublicDirectory;
 import static java.lang.System.currentTimeMillis;
@@ -37,8 +38,7 @@ import static l.files.fs.Event.CREATE;
 import static l.files.fs.Files.deleteIfExists;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.local.LocalObservableTest.Recorder.observe;
-import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assume.assumeThat;
+import static org.junit.Assume.assumeTrue;
 
 @RunWith(AndroidJUnit4.class)
 public final class LocalObservableDownloadTest extends PathBaseTest {
@@ -74,12 +74,13 @@ public final class LocalObservableDownloadTest extends PathBaseTest {
     @Test
     public void notifies_files_downloaded_by_download_manager() throws Exception {
 
-        assumeThat(
-                "Skipping test on API 23 due to Android bug: " +
+        assumeTrue("Skipping test on API 23 (Android M) due to Android bug: " +
                         "https://code.google.com/p/android/issues/detail?id=189231",
-                SDK_INT,
-                not(M)
-        );
+                SDK_INT != M);
+
+        assumeTrue("Skipping test on API 24 (Android N) due to no permission " +
+                        "to observe on download directory.",
+                SDK_INT != N);
 
         Path downloadDir = downloadsDir();
         Path downloadFile = downloadDir.resolve(
