@@ -13,7 +13,7 @@ buildscript {
     ext.targetSdkVersion = 24
     ext.compileSdkVersion = 24
     ext.buildToolsVersion = '24.0.2'
-    ext.supportLibVersion = '24.2.0'
+    ext.supportLibVersion = '24.2.1'
     ext.firebaseVersion = '9.4.0'
 
 }
