@@ -8,7 +8,7 @@ import static android.graphics.Bitmap.Config.ARGB_8888;
 import static android.graphics.Bitmap.createBitmap;
 
 public final class ThumbnailMemCacheTest
-        extends MemCacheTest<Bitmap, ThumbnailMemCache> {
+        extends MemCacheTest<Object, Bitmap, ThumbnailMemCache> {
 
     public void test_constraint_is_used_as_part_of_key() throws Exception {
         Rect constraint = newConstraint();

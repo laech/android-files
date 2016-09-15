@@ -5,6 +5,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.v4.util.LruCache;
 
+import java.util.AbstractMap.SimpleImmutableEntry;
+
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.graphics.Rect;
@@ -13,9 +15,9 @@ import static android.content.Context.ACTIVITY_SERVICE;
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.KITKAT;
 
-final class ThumbnailMemCache extends MemCache<Bitmap> {
+final class ThumbnailMemCache extends MemCache<Object, Bitmap> {
 
-    private final LruCache<ByteBuffer, Snapshot<Bitmap>> delegate;
+    private final LruCache<Object, Snapshot<Bitmap>> delegate;
     private final boolean keyIncludeConstraint;
 
     ThumbnailMemCache(
@@ -31,9 +33,9 @@ final class ThumbnailMemCache extends MemCache<Bitmap> {
 
     ThumbnailMemCache(int size, boolean keyIncludeConstraint) {
         this.keyIncludeConstraint = keyIncludeConstraint;
-        this.delegate = new LruCache<ByteBuffer, Snapshot<Bitmap>>(size) {
+        this.delegate = new LruCache<Object, Snapshot<Bitmap>>(size) {
             @Override
-            protected int sizeOf(ByteBuffer key, Snapshot<Bitmap> value) {
+            protected int sizeOf(Object key, Snapshot<Bitmap> value) {
                 if (SDK_INT >= KITKAT) {
                     return value.get().getAllocationByteCount();
                 } else {
@@ -56,16 +58,14 @@ final class ThumbnailMemCache extends MemCache<Bitmap> {
     }
 
     @Override
-    void key(ByteBuffer key, Path path, Stat stat, Rect constraint) {
-        path.toByteArray(key.asOutputStream());
-        if (keyIncludeConstraint) {
-            key.putInt(constraint.width())
-                    .putInt(constraint.height());
-        }
+    Object getKey(Path path, Stat stat, Rect constraint) {
+        return keyIncludeConstraint
+                ? new SimpleImmutableEntry<>(path, constraint)
+                : path;
     }
 
     @Override
-    LruCache<ByteBuffer, Snapshot<Bitmap>> delegate() {
+    LruCache<Object, Snapshot<Bitmap>> delegate() {
         return delegate;
     }
 

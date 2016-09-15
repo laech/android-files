@@ -1,11 +1,12 @@
 package l.files.ui.preview;
 
+import l.files.fs.Path;
 import l.files.ui.base.graphics.Rect;
 
 import static android.test.MoreAsserts.assertNotEqual;
 
 public abstract class PersistenceCacheTest<V, C extends PersistenceCache<V>>
-        extends MemCacheTest<V, C> {
+        extends MemCacheTest<Path, V, C> {
 
     public void test_removed_item_will_not_be_persisted() throws Exception {
 

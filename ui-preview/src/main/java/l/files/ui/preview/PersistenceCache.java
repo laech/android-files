@@ -15,8 +15,11 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.annotation.Nullable;
+
 import l.files.fs.Files;
 import l.files.fs.Path;
+import l.files.fs.Paths;
 import l.files.fs.Stat;
 import l.files.ui.base.graphics.Rect;
 
@@ -28,19 +31,19 @@ import static l.files.base.Throwables.addSuppressed;
 import static l.files.fs.Files.newBufferedDataInputStream;
 import static l.files.fs.Files.newBufferedDataOutputStream;
 
-abstract class PersistenceCache<V> extends MemCache<V> {
+abstract class PersistenceCache<V> extends MemCache<Path, V> {
 
     private final Executor loader = SERIAL_EXECUTOR;
     private final AtomicBoolean loaded = new AtomicBoolean(false);
     private final AtomicBoolean dirty = new AtomicBoolean(false);
 
-    private final LruCache<ByteBuffer, Snapshot<V>> cache =
-            new LruCache<ByteBuffer, Snapshot<V>>(2000) {
+    private final LruCache<Path, Snapshot<V>> cache =
+            new LruCache<Path, Snapshot<V>>(2000) {
 
                 @Override
                 protected void entryRemoved(
                         boolean evicted,
-                        ByteBuffer key,
+                        Path key,
                         Snapshot<V> oldValue,
                         Snapshot<V> newValue) {
 
@@ -52,7 +55,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
 
             };
 
-    private static final int SUPERCLASS_VERSION = 3;
+    private static final int SUPERCLASS_VERSION = 4;
 
     private final Path cacheDir;
     private final int subclassVersion;
@@ -63,8 +66,8 @@ abstract class PersistenceCache<V> extends MemCache<V> {
     }
 
     @Override
-    final void key(ByteBuffer key, Path path, Stat stat, Rect constraint) {
-        path.toByteArray(key.asOutputStream());
+    Path getKey(Path path, Stat stat, Rect constraint) {
+        return path;
     }
 
     @Override
@@ -79,7 +82,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
     }
 
     @Override
-    LruCache<ByteBuffer, Snapshot<V>> delegate() {
+    LruCache<Path, Snapshot<V>> delegate() {
         return cache;
     }
 
@@ -95,6 +98,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
         }
 
         new AsyncTask<Object, Object, Object>() {
+            @Nullable
             @Override
             protected Object doInBackground(Object... params) {
                 try {
@@ -128,7 +132,11 @@ abstract class PersistenceCache<V> extends MemCache<V> {
             while (true) {
                 try {
 
-                    ByteBuffer key = ByteBuffer.readFrom(in);
+                    String scheme = in.readUTF();
+                    short len = in.readShort();
+                    byte[] bytes = new byte[len];
+                    in.readFully(bytes);
+                    Path key = Paths.get(scheme, bytes);
                     long time = in.readLong();
                     V value = read(in);
 
@@ -155,6 +163,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
         }
 
         new AsyncTask<Object, Object, Object>() {
+            @Nullable
             @Override
             protected Object doInBackground(Object... params) {
                 try {
@@ -175,6 +184,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
 
         Path file = cacheFile();
         Path parent = file.parent();
+        assert parent != null;
         Files.createDirs(parent);
 
         Path tmp = parent.resolve(file.name() + "-" + nanoTime());
@@ -184,10 +194,13 @@ abstract class PersistenceCache<V> extends MemCache<V> {
             out.writeInt(SUPERCLASS_VERSION);
             out.writeInt(subclassVersion);
 
-            Map<ByteBuffer, Snapshot<V>> snapshot = cache.snapshot();
-            for (Map.Entry<ByteBuffer, Snapshot<V>> entry : snapshot.entrySet()) {
+            Map<Path, Snapshot<V>> snapshot = cache.snapshot();
+            for (Map.Entry<Path, Snapshot<V>> entry : snapshot.entrySet()) {
 
-                entry.getKey().writeTo(out);
+                byte[] bytes = entry.getKey().toByteArray();
+                out.writeUTF(entry.getKey().fileSystem().scheme());
+                out.writeShort(bytes.length);
+                out.write(bytes);
                 out.writeLong(entry.getValue().time());
                 write(out, entry.getValue().get());
             }

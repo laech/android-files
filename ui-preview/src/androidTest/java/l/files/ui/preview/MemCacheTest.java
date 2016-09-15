@@ -2,7 +2,7 @@ package l.files.ui.preview;
 
 import l.files.ui.base.graphics.Rect;
 
-public abstract class MemCacheTest<V, C extends MemCache<V>>
+public abstract class MemCacheTest<K, V, C extends MemCache<K, V>>
         extends CacheTest<V, C> {
 
     public void test_removed_item_no_longer_available() throws Exception {
