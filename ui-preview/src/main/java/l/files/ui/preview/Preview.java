@@ -14,6 +14,7 @@ import l.files.fs.Path;
 import l.files.fs.Paths;
 import l.files.fs.Stat;
 import l.files.ui.base.graphics.Rect;
+import l.files.ui.base.graphics.ScaledBitmap;
 
 import static java.lang.Boolean.TRUE;
 import static l.files.base.Objects.requireNonNull;
@@ -97,7 +98,7 @@ public final class Preview {
     }
 
     @Nullable
-    Bitmap getThumbnailFromDisk(
+    ScaledBitmap getThumbnailFromDisk(
             Path path,
             Stat stat,
             Rect constraint,
@@ -109,7 +110,7 @@ public final class Preview {
             Path path,
             Stat stat,
             Rect constraint,
-            Bitmap thumbnail) {
+            ScaledBitmap thumbnail) {
         return thumbnailDiskCache.putAsync(path, stat, constraint, thumbnail);
     }
 

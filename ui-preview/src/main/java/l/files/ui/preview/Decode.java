@@ -171,7 +171,7 @@ public final class Decode extends AsyncTask<Object, Object, Object> {
         if (result != null) {
             publishProgress(result);
             saveThumbnailToDiskTask = preview.putThumbnailToDiskAsync(
-                    path, stat, constraint, result.bitmap());
+                    path, stat, constraint, result);
             publishBlurredIfNeeded(result.bitmap());
             throw Stop.INSTANCE;
         }
@@ -211,7 +211,7 @@ public final class Decode extends AsyncTask<Object, Object, Object> {
     }
 
     private void checkThumbnailDiskCache() {
-        Bitmap thumbnail = null;
+        ScaledBitmap thumbnail = null;
         try {
             thumbnail = preview.getThumbnailFromDisk(path, stat, constraint, true);
         } catch (IOException e) {
@@ -221,7 +221,7 @@ public final class Decode extends AsyncTask<Object, Object, Object> {
 
         if (thumbnail != null) {
             publishProgress(thumbnail);
-            publishBlurredIfNeeded(thumbnail);
+            publishBlurredIfNeeded(thumbnail.bitmap());
             throw Stop.INSTANCE;
         }
     }

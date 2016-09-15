@@ -7,6 +7,7 @@ import l.files.fs.Files;
 import l.files.fs.Instant;
 import l.files.fs.Path;
 import l.files.ui.base.graphics.Rect;
+import l.files.ui.base.graphics.ScaledBitmap;
 
 import static android.graphics.Bitmap.Config.ARGB_8888;
 import static android.graphics.Bitmap.createBitmap;
@@ -19,7 +20,7 @@ import static l.files.fs.Files.setLastModifiedTime;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class ThumbnailDiskCacheTest
-        extends CacheTest<Bitmap, ThumbnailDiskCache> {
+        extends CacheTest<ScaledBitmap, ThumbnailDiskCache> {
 
     public void test_cache_file_stored_in_cache_dir() throws Exception {
         Path cacheFilePath = cache.cacheFile(this.file, stat, newConstraint(), true);
@@ -31,7 +32,7 @@ public final class ThumbnailDiskCacheTest
 
     public void test_cleans_old_cache_files_not_accessed_in_30_days() throws Exception {
         Rect constraint = newConstraint();
-        Bitmap value = newValue();
+        ScaledBitmap value = newValue();
 
         Path cacheFile = cache.cacheFile(file, stat, constraint, true);
         assertFalse(exists(cacheFile, NOFOLLOW));
@@ -56,7 +57,7 @@ public final class ThumbnailDiskCacheTest
 
     public void test_updates_modified_time_on_read() throws Exception {
         Rect constraint = newConstraint();
-        Bitmap value = newValue();
+        ScaledBitmap value = newValue();
 
         cache.put(file, stat, constraint, value);
 
@@ -73,7 +74,7 @@ public final class ThumbnailDiskCacheTest
 
     public void test_constraint_is_used_as_part_of_key() throws Exception {
         Rect constraint = newConstraint();
-        Bitmap value = newValue();
+        ScaledBitmap value = newValue();
         cache.put(file, stat, constraint, value);
         assertValueEquals(value, cache.get(file, stat, constraint, true));
         assertNull(cache.get(file, stat, newConstraint(), true));
@@ -81,7 +82,7 @@ public final class ThumbnailDiskCacheTest
     }
 
     @Override
-    void assertValueEquals(Bitmap a, Bitmap b) {
+    void assertValueEquals(ScaledBitmap a, ScaledBitmap b) {
         assertNotNull(a);
         assertNotNull(b);
     }
@@ -100,7 +101,7 @@ public final class ThumbnailDiskCacheTest
     }
 
     @Override
-    Bitmap newValue() {
+    ScaledBitmap newValue() {
         Bitmap bitmap = createBitmap(
                 random.nextInt(5) + 1,
                 random.nextInt(10) + 1,
@@ -108,7 +109,7 @@ public final class ThumbnailDiskCacheTest
         );
         Canvas canvas = new Canvas(bitmap);
         canvas.drawColor(BLUE);
-        return bitmap;
+        return new ScaledBitmap(bitmap, Rect.of(bitmap));
     }
 
 }

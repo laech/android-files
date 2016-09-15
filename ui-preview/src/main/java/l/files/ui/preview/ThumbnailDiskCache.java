@@ -3,10 +3,10 @@ package l.files.ui.preview;
 import android.graphics.Bitmap;
 import android.util.Log;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -21,6 +21,7 @@ import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.fs.TraversalCallback;
 import l.files.ui.base.graphics.Rect;
+import l.files.ui.base.graphics.ScaledBitmap;
 
 import static android.graphics.Bitmap.CompressFormat.WEBP;
 import static android.graphics.BitmapFactory.decodeStream;
@@ -33,14 +34,14 @@ import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.base.Throwables.addSuppressed;
-import static l.files.fs.Files.newBufferedInputStream;
-import static l.files.fs.Files.newBufferedOutputStream;
+import static l.files.fs.Files.newBufferedDataInputStream;
+import static l.files.fs.Files.newBufferedDataOutputStream;
 import static l.files.fs.Files.setLastModifiedTime;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.TraversalCallback.Result.CONTINUE;
 
-final class ThumbnailDiskCache extends Cache<Bitmap> {
+final class ThumbnailDiskCache extends Cache<ScaledBitmap> {
 
     private static final ExecutorService executor =
             newFixedThreadPool(2, new ThreadFactory() {
@@ -60,7 +61,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
     private static final int BACKGROUND_THREAD_PRIORITY =
             THREAD_PRIORITY_LOWEST + THREAD_PRIORITY_MORE_FAVORABLE;
 
-    private static final int VERSION = 4;
+    private static final byte VERSION = 5;
 
     final Path cacheDir;
 
@@ -148,16 +149,20 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
 
 
     @Override
-    public Bitmap get(Path path, Stat stat, Rect constraint, boolean matchTime) throws IOException {
+    public ScaledBitmap get(Path path, Stat stat, Rect constraint, boolean matchTime) throws IOException {
         Path cache = cacheFile(path, stat, constraint, matchTime);
-        InputStream in = null;
+        DataInputStream in = null;
         try {
 
-            in = newBufferedInputStream(cache);
-            int version = in.read();
+            in = newBufferedDataInputStream(cache);
+            byte version = in.readByte();
             if (version != VERSION) {
                 return null;
             }
+
+            int originalWidth = in.readInt();
+            int originalHeight = in.readInt();
+            Rect originalSize = Rect.of(originalWidth, originalHeight);
 
             Bitmap bitmap = decodeStream(in);
             if (bitmap == null) {
@@ -175,7 +180,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
             } catch (IOException ignore) {
             }
 
-            return bitmap;
+            return new ScaledBitmap(bitmap, originalSize);
 
         } catch (FileNotFoundException e) {
             return null;
@@ -187,24 +192,27 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
     }
 
     @Override
-    Snapshot<Bitmap> put(
+    Snapshot<ScaledBitmap> put(
             Path path,
             Stat stat,
             Rect constraint,
-            Bitmap thumbnail) throws IOException {
+            ScaledBitmap thumbnail) throws IOException {
 
         purgeOldCacheFiles(path, constraint);
 
         Path cache = cacheFile(path, stat, constraint, true);
         Path parent = cache.parent();
+        assert parent != null;
         Files.createDirs(parent);
 
         Path tmp = parent.resolve(cache.name() + "-" + nanoTime());
-        OutputStream out = newBufferedOutputStream(tmp);
+        DataOutputStream out = newBufferedDataOutputStream(tmp);
         try {
 
-            out.write(VERSION);
-            thumbnail.compress(WEBP, 100, out);
+            out.writeByte(VERSION);
+            out.writeInt(thumbnail.originalSize().width());
+            out.writeInt(thumbnail.originalSize().height());
+            thumbnail.bitmap().compress(WEBP, 100, out);
 
         } catch (Exception e) {
             try {
@@ -242,7 +250,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
         }
     }
 
-    public Future<?> putAsync(Path path, Stat stat, Rect constraint, Bitmap thumbnail) {
+    public Future<?> putAsync(Path path, Stat stat, Rect constraint, ScaledBitmap thumbnail) {
         return executor.submit(new WriteThumbnail(
                 path, stat, constraint, new WeakReference<>(thumbnail)));
     }
@@ -251,13 +259,13 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
         private final Path path;
         private final Stat stat;
         private final Rect constraint;
-        private final WeakReference<Bitmap> ref;
+        private final WeakReference<ScaledBitmap> ref;
 
         private WriteThumbnail(
                 Path path,
                 Stat stat,
                 Rect constraint,
-                WeakReference<Bitmap> ref) {
+                WeakReference<ScaledBitmap> ref) {
             this.path = requireNonNull(path);
             this.stat = requireNonNull(stat);
             this.constraint = requireNonNull(constraint);
@@ -268,7 +276,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
         public void run() {
             setThreadPriority(BACKGROUND_THREAD_PRIORITY);
 
-            Bitmap thumbnail = ref.get();
+            ScaledBitmap thumbnail = ref.get();
             if (thumbnail != null) {
                 try {
                     put(path, stat, constraint, thumbnail);
