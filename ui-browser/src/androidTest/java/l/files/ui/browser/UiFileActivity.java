@@ -3,7 +3,9 @@ package l.files.ui.browser;
 import android.app.Instrumentation;
 import android.content.res.Resources;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.support.v4.app.Fragment;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.util.SimpleArrayMap;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.RecyclerView;
@@ -454,7 +456,9 @@ final class UiFileActivity {
             @Override
             public void accept(View view) {
                 ImageView imageView = find(R.id.image, view);
-                assertEquals(shown, imageView.getDrawable() instanceof BitmapDrawable);
+                Drawable drawable = imageView.getDrawable();
+                assertEquals(shown, drawable instanceof BitmapDrawable
+                        || drawable instanceof RoundedBitmapDrawable);
             }
         });
         return this;
