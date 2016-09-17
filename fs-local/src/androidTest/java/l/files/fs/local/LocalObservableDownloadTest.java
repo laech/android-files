@@ -29,7 +29,6 @@ import static android.app.DownloadManager.STATUS_SUCCESSFUL;
 import static android.content.Context.DOWNLOAD_SERVICE;
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.M;
-import static android.os.Build.VERSION_CODES.N;
 import static android.os.Environment.DIRECTORY_DOWNLOADS;
 import static android.os.Environment.getExternalStoragePublicDirectory;
 import static java.lang.System.currentTimeMillis;
@@ -80,7 +79,8 @@ public final class LocalObservableDownloadTest extends PathBaseTest {
 
         assumeTrue("Skipping test on API 24 (Android N) due to no permission " +
                         "to observe on download directory.",
-                SDK_INT != N);
+                SDK_INT != 24);
+//                SDK_INT != N); // TODO Change to 'N' after upgrade to API 24
 
         Path downloadDir = downloadsDir();
         Path downloadFile = downloadDir.resolve(

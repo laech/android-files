@@ -22,7 +22,6 @@ import l.files.fs.Permission;
 import l.files.fs.Stat;
 
 import static android.os.Build.VERSION.SDK_INT;
-import static android.os.Build.VERSION_CODES.N;
 import static android.test.MoreAsserts.assertNotEqual;
 import static android.text.format.DateFormat.getDateFormat;
 import static android.text.format.DateFormat.getTimeFormat;
@@ -164,7 +163,8 @@ public final class NavigationTest extends BaseFilesActivityTest {
             throws Exception {
 
         assumeTrue("Skipping test, no permission to read /proc on Android N",
-                SDK_INT != N);
+                SDK_INT != 24);
+//                SDK_INT != N); // TODO Change to 'N' after upgrade to API 24
 
         screen().selectFromNavigationMode(Paths.get("/"));
         screen().clickInto(Paths.get("/proc"));
