@@ -5,7 +5,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.1.3'
+        classpath 'com.android.tools.build:gradle:2.2.0'
         classpath 'com.google.gms:google-services:3.0.0'
     }
 
@@ -13,7 +13,7 @@ buildscript {
     // Cannot target API 24 yet, need to handle FileUriExposedException when clicking on a file
     ext.targetSdkVersion = 23
     ext.compileSdkVersion = 23
-    ext.buildToolsVersion = '24.0.2'
+    ext.buildToolsVersion = '24.0.3'
     ext.supportLibVersion = '24.2.1'
     ext.firebaseVersion = '9.4.0'
 
