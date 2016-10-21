@@ -16,6 +16,7 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 
 final class Files {
 
+    // TODO match only "* (d+)" otherwise too annoying, and wrong when file is date yyyy-mm-dd or is version e.g. a-2.0
     private static final Pattern NAME_WITH_NUMBER_SUFFIX =
             Pattern.compile("(.*?\\s*)(\\d+)");
 
