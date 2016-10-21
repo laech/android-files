@@ -6,7 +6,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -26,6 +28,7 @@ import linux.Fcntl;
 import linux.Stdio;
 import linux.Unistd;
 
+import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
@@ -63,20 +66,20 @@ public final class LocalFileSystem extends Native implements FileSystem {
 
     public static final LocalFileSystem INSTANCE = new LocalFileSystem();
 
-    private static final int[] PERMISSION_BITS = permissionsToBits();
+    private static final Map<Permission, Integer> PERMISSION_BITS = permissionsToBits();
 
-    private static int[] permissionsToBits() {
-        int[] bits = new int[9];
-        bits[OWNER_READ.ordinal()] = S_IRUSR;
-        bits[OWNER_WRITE.ordinal()] = S_IWUSR;
-        bits[OWNER_EXECUTE.ordinal()] = S_IXUSR;
-        bits[GROUP_READ.ordinal()] = S_IRGRP;
-        bits[GROUP_WRITE.ordinal()] = S_IWGRP;
-        bits[GROUP_EXECUTE.ordinal()] = S_IXGRP;
-        bits[OTHERS_READ.ordinal()] = S_IROTH;
-        bits[OTHERS_WRITE.ordinal()] = S_IWOTH;
-        bits[OTHERS_EXECUTE.ordinal()] = S_IXOTH;
-        return bits;
+    private static Map<Permission, Integer> permissionsToBits() {
+        Map<Permission, Integer> map = new EnumMap<>(Permission.class);
+        map.put(OWNER_READ, S_IRUSR);
+        map.put(OWNER_WRITE, S_IWUSR);
+        map.put(OWNER_EXECUTE, S_IXUSR);
+        map.put(GROUP_READ, S_IRGRP);
+        map.put(GROUP_WRITE, S_IWGRP);
+        map.put(GROUP_EXECUTE, S_IXGRP);
+        map.put(OTHERS_READ, S_IROTH);
+        map.put(OTHERS_WRITE, S_IWOTH);
+        map.put(OTHERS_EXECUTE, S_IXOTH);
+        return unmodifiableMap(map);
     }
 
     public static Set<Permission> permissionsFromMode(int mode) {
@@ -96,7 +99,7 @@ public final class LocalFileSystem extends Native implements FileSystem {
     private static int permissionsToMode(Set<Permission> permissions) {
         int mode = 0;
         for (Permission permission : permissions) {
-            mode |= PERMISSION_BITS[permission.ordinal()];
+            mode |= PERMISSION_BITS.get(permission);
         }
         return mode;
     }
