@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -80,7 +80,7 @@ public final class LocalFileSystem extends Native implements FileSystem {
     }
 
     public static Set<Permission> permissionsFromMode(int mode) {
-        Set<Permission> permissions = new HashSet<>(9, 1);
+        Set<Permission> permissions = EnumSet.noneOf(Permission.class);
         if ((mode & S_IRUSR) != 0) permissions.add(OWNER_READ);
         if ((mode & S_IWUSR) != 0) permissions.add(OWNER_WRITE);
         if ((mode & S_IXUSR) != 0) permissions.add(OWNER_EXECUTE);
