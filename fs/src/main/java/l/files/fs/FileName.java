@@ -3,6 +3,8 @@ package l.files.fs;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import java.util.Arrays;
 
 import static l.files.fs.Files.UTF_8;
@@ -29,12 +31,9 @@ public final class FileName implements Parcelable {
         return new FileName(name);
     }
 
-    private int indexOfExtensionSeparator() {
-        int i = bytes.length - 1;
-        while (i >= 0 && bytes[i] != '.') {
-            i--;
-        }
-        return (i == -1 || i == 0 || i == bytes.length - 1) ? -1 : i;
+    private int indexOfExtensionSeparator(int defaultValue) {
+        int i = ArrayUtils.lastIndexOf(bytes, (byte) '.');
+        return (i <= 0 || i == bytes.length - 1) ? defaultValue : i;
     }
 
     public byte[] toByteArray() {
@@ -55,10 +54,8 @@ public final class FileName implements Parcelable {
      * </pre>
      */
     public String base() {
-        int i = indexOfExtensionSeparator();
-        return i != -1
-                ? new String(bytes, 0, i, UTF_8)
-                : toString();
+        int i = indexOfExtensionSeparator(bytes.length);
+        return new String(bytes, 0, i, UTF_8);
     }
 
     /**
@@ -75,11 +72,7 @@ public final class FileName implements Parcelable {
      * </pre>
      */
     public String extension() {
-        int i = indexOfExtensionSeparator();
-        if (i == -1) {
-            return "";
-        }
-        int start = i + 1;
+        int start = indexOfExtensionSeparator(bytes.length - 1) + 1;
         int count = bytes.length - start;
         return new String(bytes, start, count, UTF_8);
     }
