@@ -79,7 +79,7 @@ final class BookmarkManagerImpl extends BookmarkManager {
         Set<Path> paths = new HashSet<>();
         for (String uriString : uriStrings) {
             try {
-                Path path = Paths.get(new URI(uriString));
+                Path path = Paths.get(new File(new URI(uriString)));
                 try {
                     if (exists(path)) {
                         paths.add(path);
@@ -104,14 +104,14 @@ final class BookmarkManagerImpl extends BookmarkManager {
     }
 
     private static String encode(Path path) {
-        return path.fileSystem().scheme() + ":"
+        return ":" // For backward compatibility
                 + Base64.encodeToString(path.toByteArray(), Base64.DEFAULT);
     }
 
     private static Path decode(String encoded) {
         String[] parts = encoded.split(":");
         if (parts.length == 2) {
-            return Paths.get(parts[0], Base64.decode(parts[1], Base64.DEFAULT));
+            return Paths.get(Base64.decode(parts[1], Base64.DEFAULT));
         } else {
             throw new IllegalArgumentException("Invalid bookmark: " + encoded);
         }

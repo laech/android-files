@@ -1,59 +1,37 @@
 package l.files.fs;
 
 import java.io.File;
-import java.net.URI;
-import java.util.Arrays;
+
+import static l.files.fs.Files.UTF_8;
 
 public final class Paths {
 
     private Paths() {
     }
 
-    public static Path get(URI uri) {
-        if (uri.getScheme() == null) {
-            throw new IllegalArgumentException(uri.toString());
-        }
-        for (FileSystem fs : Holder.FILE_SYSTEMS) {
-            if (fs.scheme().equals(uri.getScheme())) {
-                return fs.path(uri);
-            }
-        }
-        throw new IllegalArgumentException(uri.toString());
-    }
-
     public static Path get(File file) {
-        return get(file.toURI());
+        return get(file.getAbsolutePath().getBytes(UTF_8));
     }
 
-    public static Path get(String localPath) {
-        return get(new File(localPath));
+    public static Path get(String path) {
+        return get(new File(path));
     }
 
-    public static Path get(byte[] localPath) {
-        return get("file", localPath);
-    }
-
-    public static Path get(String scheme, byte[] path) {
-        for (FileSystem fs : Holder.FILE_SYSTEMS) {
-            if (fs.scheme().equals(scheme)) {
-                return fs.path(path);
-            }
-        }
-        throw new IllegalArgumentException(Arrays.toString(path));
+    public static Path get(byte[] path) {
+        return Holder.FILE_SYSTEM.path(path);
     }
 
     private static class Holder {
 
-        static FileSystem[] FILE_SYSTEMS;
+        static FileSystem FILE_SYSTEM;
 
         static {
             try {
-                FILE_SYSTEMS = new FileSystem[]{
+                FILE_SYSTEM =
                         (FileSystem) Class
                                 .forName("l.files.fs.local.LocalFileSystem")
                                 .getField("INSTANCE")
-                                .get(null)
-                };
+                                .get(null);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

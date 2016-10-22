@@ -105,19 +105,6 @@ public final class LocalFileSystem extends Native implements FileSystem {
     }
 
     @Override
-    public String scheme() {
-        return "file";
-    }
-
-    @Override
-    public Path path(URI uri) {
-        if (!scheme().equals(uri.getScheme())) {
-            throw new IllegalArgumentException(uri.toString());
-        }
-        return LocalPath.of(uri.getPath());
-    }
-
-    @Override
     public Path path(byte[] path) {
         return LocalPath.of(path);
     }

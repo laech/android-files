@@ -25,11 +25,7 @@ public final class PdfThumbnailer implements Thumbnailer<Path> {
 
     @Override
     public boolean accepts(Path path, String mediaType) {
-        return isLocalFile(path) && mediaType.equals("application/pdf");
-    }
-
-    private boolean isLocalFile(Path path) {
-        return path.fileSystem().scheme().equals("file");
+        return mediaType.equals("application/pdf");
     }
 
     @Override
