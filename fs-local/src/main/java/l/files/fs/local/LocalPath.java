@@ -95,9 +95,7 @@ final class LocalPath implements Path {
         if (name.isEmpty()) {
             return this;
         }
-        return resolve(name instanceof LocalName
-                ? ((LocalName) name).bytes
-                : name.toByteArray());
+        return resolve(name.toByteArray());
     }
 
     @Override

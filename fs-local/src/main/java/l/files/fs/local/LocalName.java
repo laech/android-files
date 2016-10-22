@@ -10,9 +10,9 @@ import static l.files.fs.Files.UTF_8;
 
 final class LocalName implements Name {
 
-    final byte[] bytes;
+    private final byte[] bytes;
 
-    LocalName(byte[] bytes) {
+    private LocalName(byte[] bytes) {
         for (byte b : bytes) {
             if (b == '/') {
                 throw new IllegalArgumentException();
