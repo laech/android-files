@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import l.files.fs.LocalName;
+import l.files.fs.FileName;
 import l.files.fs.Path;
 
 import static l.files.fs.Files.UTF_8;
@@ -98,11 +98,11 @@ public final class LocalPathTest {
 
     @Test
     public void resolve_from_name() throws Exception {
-        assertEquals("/a/b", path("/a").resolve(LocalName.of("b")).toString());
-        assertEquals("/a/b", path("/a/b").resolve(LocalName.of("")).toString());
-        assertEquals("/a///b", path("/a///b/").resolve(LocalName.of("")).toString());
-        assertEquals("/a/b", path("/a/").resolve(LocalName.of("b")).toString());
-        assertEquals("a/b", path("a").resolve(LocalName.of("b")).toString());
+        assertEquals("/a/b", path("/a").resolve(FileName.fromString("b")).toString());
+        assertEquals("/a/b", path("/a/b").resolve(FileName.fromString("")).toString());
+        assertEquals("/a///b", path("/a///b/").resolve(FileName.fromString("")).toString());
+        assertEquals("/a/b", path("/a/").resolve(FileName.fromString("b")).toString());
+        assertEquals("a/b", path("a").resolve(FileName.fromString("b")).toString());
     }
 
     @Test

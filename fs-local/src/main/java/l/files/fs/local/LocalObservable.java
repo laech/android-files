@@ -14,10 +14,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nullable;
 
 import l.files.fs.Event;
+import l.files.fs.FileName;
 import l.files.fs.FileSystem.Consumer;
 import l.files.fs.Files;
 import l.files.fs.LinkOption;
-import l.files.fs.LocalName;
 import l.files.fs.Observation;
 import l.files.fs.Observer;
 import l.files.fs.Path;
@@ -188,7 +188,7 @@ final class LocalObservable extends Native
      * directories name being watched, and it will be updated as directories are
      * being created/deleted.
      */
-    private final ConcurrentBiMap<Integer, LocalName> childDirs = new ConcurrentBiMap<>();
+    private final ConcurrentBiMap<Integer, FileName> childDirs = new ConcurrentBiMap<>();
 
     private final WeakReference<Observer> observerRef;
 
@@ -321,7 +321,7 @@ final class LocalObservable extends Native
 
                         byte[] childPath = child.toByteArray();
                         int wd = inotify.addWatch(fd, childPath, CHILD_DIR_MASK);
-                        childDirs.put(wd, LocalName.wrap(name));
+                        childDirs.put(wd, FileName.fromBytes(name));
 
                     } catch (ErrnoException e) {
                         handleAddChildDirWatchFailure(e);
@@ -538,7 +538,7 @@ final class LocalObservable extends Native
                 onObserverStopped(wd);
 
             } else {
-                LocalName childDirectory = childDirs.get(wd);
+                FileName childDirectory = childDirs.get(wd);
                 if (childDirectory != null) {
                     observer(MODIFY, childDirectory);
                 }
@@ -547,14 +547,14 @@ final class LocalObservable extends Native
     }
 
     private void observer(Event kind, @Nullable byte[] name) {
-        notifyEventOrClose(kind, name == null ? null : LocalName.wrap(name));
+        notifyEventOrClose(kind, name == null ? null : FileName.fromBytes(name));
     }
 
-    private void observer(Event kind, LocalName name) {
+    private void observer(Event kind, FileName name) {
         notifyEventOrClose(kind, name);
     }
 
-    private void notifyEventOrClose(Event kind, @Nullable LocalName name) {
+    private void notifyEventOrClose(Event kind, @Nullable FileName name) {
         Observer observer = observerRef.get();
         if (observer != null) {
             observer.onEvent(kind, name);
@@ -579,7 +579,7 @@ final class LocalObservable extends Native
 
             byte[] path = child.toByteArray();
             int wd = inotify.addWatch(fd, path, CHILD_DIR_MASK);
-            childDirs.put(wd, LocalName.wrap(name));
+            childDirs.put(wd, FileName.fromBytes(name));
 
         } catch (ErrnoException e) {
             handleAddChildDirWatchFailure(e);
@@ -618,7 +618,7 @@ final class LocalObservable extends Native
     }
 
     private void removeChildWatch(byte[] child) {
-        Integer wd = childDirs.remove2(LocalName.wrap(child));
+        Integer wd = childDirs.remove2(FileName.fromBytes(child));
         if (wd != null) {
             try {
                 inotify.removeWatch(fd, wd);

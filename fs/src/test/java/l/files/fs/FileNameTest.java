@@ -5,19 +5,19 @@ import org.junit.Test;
 import static l.files.fs.Files.UTF_8;
 import static org.junit.Assert.assertEquals;
 
-public final class LocalNameTest {
+public final class FileNameTest {
 
     private void testBaseDotExt(String value) {
-        LocalName name = LocalName.wrap(value.getBytes(UTF_8));
+        FileName name = FileName.fromBytes(value.getBytes(UTF_8));
         assertEquals(value, name.base() + name.dotExt());
     }
 
     private void testNameHasBase(String name, String base) {
-        assertEquals(base, LocalName.wrap(name.getBytes(UTF_8)).base());
+        assertEquals(base, FileName.fromBytes(name.getBytes(UTF_8)).base());
     }
 
     private void testNameHasExt(String name, String ext) {
-        assertEquals(ext, LocalName.wrap(name.getBytes(UTF_8)).ext());
+        assertEquals(ext, FileName.fromBytes(name.getBytes(UTF_8)).ext());
     }
 
     @Test

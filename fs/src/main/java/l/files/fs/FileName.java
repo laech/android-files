@@ -6,25 +6,25 @@ import java.util.Arrays;
 
 import static l.files.fs.Files.UTF_8;
 
-public final class LocalName implements Name {
+public final class FileName implements Name {
 
     private final byte[] bytes;
 
-    private LocalName(byte[] bytes) {
-        for (byte b : bytes) {
+    private FileName(byte[] bytes) {
+        this.bytes = bytes.clone();
+        for (byte b : this.bytes) {
             if (b == '/') {
                 throw new IllegalArgumentException();
             }
         }
-        this.bytes = bytes;
     }
 
-    public static LocalName of(String name) {
-        return new LocalName(name.getBytes(UTF_8));
+    public static FileName fromString(String name) {
+        return fromBytes(name.getBytes(UTF_8));
     }
 
-    public static LocalName wrap(byte[] name) {
-        return new LocalName(name);
+    public static FileName fromBytes(byte[] name) {
+        return new FileName(name);
     }
 
     private int indexOfExtSeparator() {
@@ -82,8 +82,8 @@ public final class LocalName implements Name {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof LocalName &&
-                Arrays.equals(bytes, ((LocalName) o).bytes);
+        return o instanceof FileName &&
+                Arrays.equals(bytes, ((FileName) o).bytes);
     }
 
     @Override
@@ -96,16 +96,16 @@ public final class LocalName implements Name {
         dest.writeByteArray(bytes);
     }
 
-    public static final Creator<LocalName> CREATOR = new Creator<LocalName>() {
+    public static final Creator<FileName> CREATOR = new Creator<FileName>() {
 
         @Override
-        public LocalName createFromParcel(Parcel source) {
-            return LocalName.wrap(source.createByteArray());
+        public FileName createFromParcel(Parcel source) {
+            return FileName.fromBytes(source.createByteArray());
         }
 
         @Override
-        public LocalName[] newArray(int size) {
-            return new LocalName[size];
+        public FileName[] newArray(int size) {
+            return new FileName[size];
         }
 
     };

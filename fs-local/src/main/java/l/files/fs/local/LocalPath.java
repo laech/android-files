@@ -5,8 +5,8 @@ import android.os.Parcel;
 import java.io.File;
 import java.util.Arrays;
 
+import l.files.fs.FileName;
 import l.files.fs.FileSystem;
-import l.files.fs.LocalName;
 import l.files.fs.Name;
 import l.files.fs.Path;
 
@@ -162,13 +162,13 @@ final class LocalPath implements Path {
     }
 
     @Override
-    public LocalName name() {
+    public FileName name() {
         int nameEnd = lengthBySkippingPathSeparators(path, path.length);
         int nameStartPos = lengthBySkippingNonPathSeparators(path, nameEnd);
         if (nameStartPos < 0) {
             nameStartPos = 0;
         }
-        return LocalName.wrap(Arrays.copyOfRange(path, nameStartPos, nameEnd));
+        return FileName.fromBytes(Arrays.copyOfRange(path, nameStartPos, nameEnd));
     }
 
     @Override
