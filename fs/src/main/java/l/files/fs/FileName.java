@@ -1,15 +1,12 @@
 package l.files.fs;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.Arrays;
 
 import static l.files.fs.Files.UTF_8;
 
-public final class FileName implements Parcelable {
+public final class FileName {
 
     private final byte[] bytes;
 
@@ -104,29 +101,4 @@ public final class FileName implements Parcelable {
         return o instanceof FileName &&
                 Arrays.equals(bytes, ((FileName) o).bytes);
     }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeByteArray(bytes);
-    }
-
-    public static final Creator<FileName> CREATOR = new Creator<FileName>() {
-
-        @Override
-        public FileName createFromParcel(Parcel source) {
-            return FileName.fromBytes(source.createByteArray());
-        }
-
-        @Override
-        public FileName[] newArray(int size) {
-            return new FileName[size];
-        }
-
-    };
-
 }
