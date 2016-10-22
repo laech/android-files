@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import l.files.fs.Name;
+import l.files.fs.FileName;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 
@@ -34,7 +34,7 @@ final class Files {
         String base;
         String last;
 
-        Name name = source.name();
+        FileName name = source.name();
         Stat stat = stat(source, FOLLOW);
         if (stat.isDirectory()) {
             base = name.toString();

@@ -30,7 +30,7 @@ final class BatchObserverNotifier implements Observer, Observation, Runnable {
             });
 
     private boolean selfChanged;
-    private final Map<Name, Event> childrenChanged;
+    private final Map<FileName, Event> childrenChanged;
     private final BatchObserver batchObserver;
     private final long batchInterval;
     private final long batchIntervalNanos;
@@ -102,7 +102,7 @@ final class BatchObserverNotifier implements Observer, Observation, Runnable {
     }
 
     @Override
-    public void onEvent(Event event, @Nullable Name child) {
+    public void onEvent(Event event, @Nullable FileName child) {
         synchronized (this) {
 
             if (child == null) {
@@ -136,13 +136,13 @@ final class BatchObserverNotifier implements Observer, Observation, Runnable {
         }
 
         boolean snapshotSelfChanged;
-        Map<Name, Event> snapshotChildrenChanged;
+        Map<FileName, Event> snapshotChildrenChanged;
 
         synchronized (this) {
 
             snapshotSelfChanged = selfChanged;
             snapshotChildrenChanged = childrenChanged.isEmpty()
-                    ? Collections.<Name, Event>emptyMap()
+                    ? Collections.<FileName, Event>emptyMap()
                     : Collections.unmodifiableMap(new HashMap<>(childrenChanged));
 
             selfChanged = false;

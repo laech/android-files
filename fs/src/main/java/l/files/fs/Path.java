@@ -31,7 +31,7 @@ public interface Path extends Parcelable {
     /**
      * Gets the name of this file, or empty if this is the root file.
      */
-    Name name();
+    FileName name();
 
     @Nullable
     Path parent();
@@ -43,7 +43,7 @@ public interface Path extends Parcelable {
 
     Path resolve(byte[] path);
 
-    Path resolve(Name name);
+    Path resolve(FileName name);
 
     /**
      * Returns a file with the given parent replaced.

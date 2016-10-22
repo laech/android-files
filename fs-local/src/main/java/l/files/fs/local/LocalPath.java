@@ -7,7 +7,6 @@ import java.util.Arrays;
 
 import l.files.fs.FileName;
 import l.files.fs.FileSystem;
-import l.files.fs.Name;
 import l.files.fs.Path;
 
 import static l.files.base.Objects.requireNonNull;
@@ -92,7 +91,7 @@ final class LocalPath implements Path {
     }
 
     @Override
-    public LocalPath resolve(Name name) {
+    public LocalPath resolve(FileName name) {
         if (name.isEmpty()) {
             return this;
         }

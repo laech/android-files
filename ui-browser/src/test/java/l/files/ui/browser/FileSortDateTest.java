@@ -8,7 +8,7 @@ import java.util.Locale;
 import l.files.fs.FileSystem;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
-import l.files.fs.Name;
+import l.files.fs.FileName;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 
@@ -48,19 +48,17 @@ public final class FileSortDateTest extends FileSortTest {
         return createModified(name, instant, true);
     }
 
-    private Path createModified(String nameStr, Instant instant, boolean dir) throws IOException {
+    private Path createModified(String name, Instant instant, boolean dir) throws IOException {
         FileSystem fs = mock(FileSystem.class);
         Stat stat = mock(Stat.class);
         Path file = mock(Path.class);
-        Name name = mock(Name.class);
-        given(name.toString()).willReturn(nameStr);
         given(stat.lastModifiedTime()).willReturn(instant);
         given(stat.lastModifiedEpochSecond()).willReturn(instant.seconds());
         given(stat.lastModifiedNanoOfSecond()).willReturn(instant.nanos());
         given(stat.isDirectory()).willReturn(dir);
         given(stat.isRegularFile()).willReturn(!dir);
         given(fs.stat(eq(file), any(LinkOption.class))).willReturn(stat);
-        given(file.name()).willReturn(name);
+        given(file.name()).willReturn(FileName.fromString(name));
         given(file.fileSystem()).willReturn(fs);
         return file;
     }

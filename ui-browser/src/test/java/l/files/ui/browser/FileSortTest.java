@@ -7,8 +7,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
+import l.files.fs.FileName;
 import l.files.fs.Files;
-import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.fs.FileInfo;
@@ -33,8 +33,8 @@ abstract class FileSortTest {
         assertEquals(expected, actual);
     }
 
-    private List<Name> names(List<FileInfo> items) {
-        List<Name> names = new ArrayList<>(items.size());
+    private List<FileName> names(List<FileInfo> items) {
+        List<FileName> names = new ArrayList<>(items.size());
         for (FileInfo item : items) {
             names.add(item.selfPath().name());
         }

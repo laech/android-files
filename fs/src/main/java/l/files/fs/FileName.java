@@ -1,12 +1,13 @@
 package l.files.fs;
 
 import android.os.Parcel;
+import android.os.Parcelable;
 
 import java.util.Arrays;
 
 import static l.files.fs.Files.UTF_8;
 
-public final class FileName implements Name {
+public final class FileName implements Parcelable {
 
     private final byte[] bytes;
 
@@ -14,7 +15,8 @@ public final class FileName implements Name {
         this.bytes = bytes.clone();
         for (byte b : this.bytes) {
             if (b == '/') {
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("'/' is not allowed in a file name: "
+                        + new String(bytes, UTF_8));
             }
         }
     }
@@ -35,12 +37,23 @@ public final class FileName implements Name {
         return (i == -1 || i == 0 || i == bytes.length - 1) ? -1 : i;
     }
 
-    @Override
     public byte[] toByteArray() {
         return bytes.clone();
     }
 
-    @Override
+    /**
+     * The name part without extension.
+     * <pre>
+     *  base.ext  ->  base
+     *  base      ->  base
+     *  base.     ->  base.
+     * .base.ext  -> .base
+     * .base      -> .base
+     * .base.     -> .base.
+     * .          -> .
+     * ..         -> ..
+     * </pre>
+     */
     public String base() {
         int i = indexOfExtSeparator();
         return i != -1
@@ -48,7 +61,19 @@ public final class FileName implements Name {
                 : toString();
     }
 
-    @Override
+    /**
+     * The extension part without base name.
+     * <pre>
+     *  base.ext  ->  ext
+     * .base.ext  ->  ext
+     *  base      ->  ""
+     *  base.     ->  ""
+     * .base      ->  ""
+     * .base.     ->  ""
+     * .          ->  ""
+     * ..         ->  ""
+     * </pre>
+     */
     public String ext() {
         int i = indexOfExtSeparator();
         if (i == -1) {
@@ -59,13 +84,14 @@ public final class FileName implements Name {
         return new String(bytes, start, count, UTF_8);
     }
 
-    @Override
+    /**
+     * {@link #ext()} with a leading dot if it's not empty.
+     */
     public String dotExt() {
         String ext = ext();
         return ext.isEmpty() ? ext : "." + ext;
     }
 
-    @Override
     public boolean isEmpty() {
         return bytes.length == 0;
     }
