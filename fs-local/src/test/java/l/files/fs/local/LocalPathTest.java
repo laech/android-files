@@ -2,10 +2,10 @@ package l.files.fs.local;
 
 import org.junit.Test;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import static l.files.fs.Files.UTF_8;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -27,10 +27,9 @@ public final class LocalPathTest {
     }
 
     private void testToByteArray(String path) throws IOException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        byte[] bytes = path.getBytes(UTF_8);
-        assertEquals(bytes.length, path(path).toByteArray(out));
-        assertEquals(new String(bytes, UTF_8), out.toString("UTF-8"));
+        byte[] expected = path.getBytes(UTF_8);
+        byte[] actual = path(path).toByteArray();
+        assertArrayEquals(expected, actual);
     }
 
     @Test

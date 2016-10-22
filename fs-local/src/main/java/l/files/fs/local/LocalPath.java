@@ -2,10 +2,7 @@ package l.files.fs.local;
 
 import android.os.Parcel;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Arrays;
 
 import l.files.fs.FileSystem;
@@ -59,22 +56,7 @@ final class LocalPath implements Path {
 
     @Override
     public byte[] toByteArray() {
-        return path;
-    }
-
-    @Override
-    public int toByteArray(OutputStream out) throws IOException {
-        out.write(path);
-        return path.length;
-    }
-
-    @Override
-    public int toByteArray(ByteArrayOutputStream out) {
-        try {
-            return toByteArray((OutputStream) out);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return path.clone();
     }
 
     @Override
