@@ -1,4 +1,4 @@
-package l.files.fs.local;
+package l.files.fs;
 
 import org.junit.Test;
 

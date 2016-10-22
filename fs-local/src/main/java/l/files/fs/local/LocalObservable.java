@@ -17,6 +17,7 @@ import l.files.fs.Event;
 import l.files.fs.FileSystem.Consumer;
 import l.files.fs.Files;
 import l.files.fs.LinkOption;
+import l.files.fs.LocalName;
 import l.files.fs.Observation;
 import l.files.fs.Observer;
 import l.files.fs.Path;

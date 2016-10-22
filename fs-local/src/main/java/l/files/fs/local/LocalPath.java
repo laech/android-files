@@ -6,6 +6,7 @@ import java.io.File;
 import java.util.Arrays;
 
 import l.files.fs.FileSystem;
+import l.files.fs.LocalName;
 import l.files.fs.Name;
 import l.files.fs.Path;
 

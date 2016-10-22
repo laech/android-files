@@ -1,14 +1,12 @@
-package l.files.fs.local;
+package l.files.fs;
 
 import android.os.Parcel;
 
 import java.util.Arrays;
 
-import l.files.fs.Name;
-
 import static l.files.fs.Files.UTF_8;
 
-final class LocalName implements Name {
+public final class LocalName implements Name {
 
     private final byte[] bytes;
 
@@ -22,10 +20,10 @@ final class LocalName implements Name {
     }
 
     public static LocalName of(String name) {
-        return wrap(name.getBytes(UTF_8));
+        return new LocalName(name.getBytes(UTF_8));
     }
 
-    static LocalName wrap(byte[] name) {
+    public static LocalName wrap(byte[] name) {
         return new LocalName(name);
     }
 
