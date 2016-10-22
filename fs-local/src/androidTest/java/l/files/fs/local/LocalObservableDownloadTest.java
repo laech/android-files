@@ -112,7 +112,7 @@ public final class LocalObservableDownloadTest extends PathBaseTest {
         assertFalse(Files.exists(saveTo, NOFOLLOW));
 
         Uri src = Uri.parse("https://www.google.com");
-        Uri dst = Uri.parse(saveTo.toUri().toString());
+        Uri dst = Uri.fromFile(saveTo.toFile());
         Request request = new Request(src).setDestinationUri(dst);
         long id = downloadManager().enqueue(request);
 

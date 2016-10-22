@@ -6,7 +6,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URI;
 import java.util.Arrays;
 
 import l.files.fs.FileSystem;
@@ -89,8 +88,8 @@ final class LocalPath implements Path {
     }
 
     @Override
-    public URI toUri() {
-        return new java.io.File(toString()).toURI();
+    public File toFile() {
+        return new File(toString());
     }
 
     @Override

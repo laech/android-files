@@ -62,7 +62,7 @@ final class OpenFile extends AsyncTask<Void, Void, Object> {
     private boolean showFile(String media) {
         debug(media);
 
-        Uri uri = Uri.parse(file.toUri().toString());
+        Uri uri = Uri.fromFile(file.toFile());
         try {
             Intent intent = new Intent(ACTION_VIEW);
             intent.setDataAndType(uri, media);

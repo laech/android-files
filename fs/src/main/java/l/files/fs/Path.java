@@ -3,9 +3,9 @@ package l.files.fs;
 import android.os.Parcelable;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URI;
 import java.nio.charset.Charset;
 
 import javax.annotation.Nullable;
@@ -27,7 +27,12 @@ public interface Path extends Parcelable {
     @Override
     String toString();
 
-    URI toUri();
+    /**
+     * Converts this path to a {@link java.io.File},
+     * this method always replaces malformed-input and unmappable-character
+     * sequences with some default replacement string.
+     */
+    File toFile();
 
     /**
      * @return the number of bytes written

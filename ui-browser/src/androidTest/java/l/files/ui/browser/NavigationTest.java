@@ -92,7 +92,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
     public void can_start_from_data_uri() throws Exception {
         Path dir = createDirs(dir().resolve("dir"));
         Path file = createFile(dir.resolve("file"));
-        setActivityIntent(new Intent().setData(Uri.parse(dir.toUri().toString())));
+        setActivityIntent(new Intent().setData(Uri.fromFile(dir.toFile())));
         screen()
                 .assertCurrentDirectory(dir)
                 .assertListViewContains(file, true);

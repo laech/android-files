@@ -105,8 +105,8 @@ public final class ShareAction extends ActionModeItem
         Collection<FileInfo> files = selection.values();
         ArrayList<Uri> uris = new ArrayList<>(files.size());
         for (FileInfo item : files) {
-            Path file = item.linkTargetOrSelfPath();
-            uris.add(Uri.parse(file.toUri().toString()));
+            Path path = item.linkTargetOrSelfPath();
+            uris.add(Uri.fromFile(path.toFile()));
         }
         return uris;
     }
