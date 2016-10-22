@@ -1,49 +1,221 @@
 package l.files.fs;
 
+import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.io.File;
+import java.util.Arrays;
 
 import javax.annotation.Nullable;
 
-public interface Path extends Parcelable {
+import static l.files.base.Objects.requireNonNull;
+import static l.files.fs.Files.UTF_8;
 
-    FileSystem fileSystem();
+public final class Path implements Parcelable {
+
+    /*
+     * Binary representation of this path, normally it's whatever
+     * returned from the native calls, unless when it's created
+     * from java.lang.String.
+     *
+     * Using the original bytes from the OS means the path is
+     * independent of charset encodings, avoiding byte loss when
+     * converting from/to string, resulting certain files inaccessible.
+     *
+     * Currently, java.io.File suffers from the above issue, because
+     * it stores the path as string internally. So it will fail to
+     * handle certain files. For example, if a file whose binary file
+     * name is [-19, -96, -67, -19, -80, -117], java.io.File.list on
+     * the parent will return it, but any operation on that file will
+     * fail.
+     *
+     * This class is free of the above issue.
+     */
+    private final byte[] path;
+
+    private Path(byte[] path) {
+        this.path = requireNonNull(path);
+    }
+
+    public static Path of(File file) {
+        return of(file.getPath());
+    }
+
+    public static Path of(String path) {
+        return of(path.getBytes(UTF_8));
+    }
+
+    public static Path of(byte[] path) {
+        int length = lengthBySkippingPathSeparators(path, path.length);
+        if (length > 0 && length != path.length) {
+            path = Arrays.copyOfRange(path, 0, length);
+        }
+        return new Path(path);
+    }
+
+    public byte[] toByteArray() {
+        return path.clone();
+    }
+
+    public FileSystem fileSystem() {
+        return Paths.Holder.FILE_SYSTEM;
+    }
 
     /**
      * Returns a string representation of this path.
-     * <p/>
+     * <p>
      * This method always replaces malformed-input and unmappable-character
      * sequences with some default replacement string.
      */
     @Override
-    String toString();
+    public String toString() {
+        return new String(path, UTF_8);
+    }
 
     /**
      * Converts this path to a {@link java.io.File},
      * this method always replaces malformed-input and unmappable-character
      * sequences with some default replacement string.
      */
-    File toFile();
+    public File toFile() {
+        return new File(toString());
+    }
 
-    byte[] toByteArray();
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(path);
+    }
 
-    /**
-     * Gets the name of this file, or empty if this is the root file.
-     */
-    FileName name();
-
-    @Nullable
-    Path parent();
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof Path &&
+                Arrays.equals(path, ((Path) o).path);
+    }
 
     /**
      * Resolves the given path relative to this file.
      */
-    Path resolve(String path);
+    public Path resolve(String path) {
+        return resolve(path.getBytes(UTF_8));
+    }
 
-    Path resolve(byte[] path);
+    public Path resolve(FileName name) {
+        if (name.isEmpty()) {
+            return this;
+        }
+        return resolve(name.toByteArray());
+    }
 
-    Path resolve(FileName name);
+    public Path resolve(byte[] path) {
+        int len = lengthBySkippingPathSeparators(path, path.length);
+        if (len <= 0) {
+            return this;
+        }
+        return new Path(concatPaths(this.path, path, 0, len));
+    }
+
+    private static byte[] concatPaths(byte[] base, byte[] add, int addPos, int addLen) {
+        if (addLen == 0) {
+            return base;
+        }
+
+        byte[] joinedPath;
+        if (base.length == 0 || (base[base.length - 1] != '/' && add[addPos] != '/')) {
+            joinedPath = Arrays.copyOf(base, base.length + 1 + addLen);
+            joinedPath[base.length] = '/';
+            System.arraycopy(add, addPos, joinedPath, base.length + 1, addLen);
+
+        } else {
+            joinedPath = Arrays.copyOf(base, base.length + addLen);
+            System.arraycopy(add, addPos, joinedPath, base.length, addLen);
+
+        }
+
+        return joinedPath;
+    }
+
+    @Nullable
+    public Path parent() {
+
+        int parentPathLength = path.length;
+        parentPathLength = lengthBySkippingPathSeparators(path, parentPathLength);
+        parentPathLength = lengthBySkippingNonPathSeparators(path, parentPathLength);
+
+        int parentPathNoEndSeparatorLength = lengthBySkippingPathSeparators(path, parentPathLength);
+        if (parentPathNoEndSeparatorLength > 0) {
+            parentPathLength = parentPathNoEndSeparatorLength;
+        }
+
+        if (parentPathLength > 0) {
+            return new Path(Arrays.copyOfRange(path, 0, parentPathLength));
+        }
+
+        return null;
+    }
+
+    private static int lengthBySkippingPathSeparators(byte[] path, int fromLength) {
+        while (fromLength > 0 && path[fromLength - 1] == '/') {
+            fromLength--;
+        }
+        return fromLength;
+    }
+
+    private static int lengthBySkippingNonPathSeparators(byte[] path, int fromLength) {
+        while (fromLength > 0 && path[fromLength - 1] != '/') {
+            fromLength--;
+        }
+        return fromLength;
+    }
+
+    /**
+     * Gets the name of this file, or empty if this is the root file.
+     */
+    public FileName name() {
+        int nameEnd = lengthBySkippingPathSeparators(path, path.length);
+        int nameStartPos = lengthBySkippingNonPathSeparators(path, nameEnd);
+        if (nameStartPos < 0) {
+            nameStartPos = 0;
+        }
+        return FileName.fromBytes(Arrays.copyOfRange(path, nameStartPos, nameEnd));
+    }
+
+    public boolean isHidden() {
+        int nameStartPos = path.length;
+        nameStartPos = lengthBySkippingPathSeparators(path, nameStartPos);
+        nameStartPos = lengthBySkippingNonPathSeparators(path, nameStartPos);
+        return nameStartPos >= 0 &&
+                nameStartPos < path.length &&
+                path[nameStartPos] == '.';
+    }
+
+    /**
+     * Returns true if the given path is an ancestor of this path,
+     * or equal to this path.
+     */
+    public boolean startsWith(Path p) {
+
+        byte[] thisPath = path;
+        byte[] thatPath = p.path;
+
+        if (thatPath.length == 0 ||
+                thisPath.length < thatPath.length) {
+            return false;
+
+        } else if (thisPath.length > thatPath.length) {
+            if (thisPath[thatPath.length] != '/' &&
+                    thatPath[thatPath.length - 1] != '/') {
+                return false;
+            }
+        }
+
+        for (int i = 0; i < thatPath.length; i++) {
+            if (thisPath[i] != thatPath[i]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     /**
      * Returns a file with the given parent replaced.
@@ -56,13 +228,40 @@ public interface Path extends Parcelable {
      *
      * @throws IllegalArgumentException if {@code !this.startsWith(src)}
      */
-    Path rebase(Path src, Path dst);
+    public Path rebase(Path src, Path dst) {
+        if (!startsWith(src)) {
+            throw new IllegalArgumentException();
+        }
+        byte[] srcBytes = src.toByteArray();
+        return new Path(concatPaths(
+                dst.toByteArray(),
+                path,
+                srcBytes.length,
+                path.length - srcBytes.length));
+    }
 
-    /**
-     * Returns true if the given path is an ancestor of this path,
-     * or equal to this path.
-     */
-    boolean startsWith(Path p);
+    @Override
+    public int describeContents() {
+        return 0;
+    }
 
-    boolean isHidden();
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeByteArray(path);
+    }
+
+    public static final Creator<Path> CREATOR = new Creator<Path>() {
+
+        @Override
+        public Path createFromParcel(Parcel source) {
+            return new Path(source.createByteArray());
+        }
+
+        @Override
+        public Path[] newArray(int size) {
+            return new Path[size];
+        }
+
+    };
+
 }

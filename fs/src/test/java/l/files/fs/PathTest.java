@@ -1,11 +1,8 @@
-package l.files.fs.local;
+package l.files.fs;
 
 import org.junit.Test;
 
 import java.io.IOException;
-
-import l.files.fs.FileName;
-import l.files.fs.Path;
 
 import static l.files.fs.Files.UTF_8;
 import static org.junit.Assert.assertArrayEquals;
@@ -15,7 +12,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-public final class LocalPathTest {
+public final class PathTest {
 
     @Test
     public void toByteArray_returns_correct_byte_representation_of_path() throws Exception {
@@ -192,7 +189,7 @@ public final class LocalPathTest {
     }
 
     private Path path(String path) {
-        return LocalPath.of(bytes(path));
+        return Path.of(bytes(path));
     }
 
     private byte[] bytes(String path) {

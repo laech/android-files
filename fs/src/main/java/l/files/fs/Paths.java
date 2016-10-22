@@ -21,7 +21,7 @@ public final class Paths {
         return Holder.FILE_SYSTEM.path(path);
     }
 
-    private static class Holder {
+    static class Holder {
 
         static FileSystem FILE_SYSTEM;
 
