@@ -42,7 +42,7 @@ final class Files {
             last = "";
         } else {
             base = name.base();
-            last = name.dotExt();
+            last = name.dotExtension();
         }
 
         Path dst;

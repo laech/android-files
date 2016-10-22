@@ -29,7 +29,7 @@ public final class FileName implements Parcelable {
         return new FileName(name);
     }
 
-    private int indexOfExtSeparator() {
+    private int indexOfExtensionSeparator() {
         int i = bytes.length - 1;
         while (i >= 0 && bytes[i] != '.') {
             i--;
@@ -55,7 +55,7 @@ public final class FileName implements Parcelable {
      * </pre>
      */
     public String base() {
-        int i = indexOfExtSeparator();
+        int i = indexOfExtensionSeparator();
         return i != -1
                 ? new String(bytes, 0, i, UTF_8)
                 : toString();
@@ -74,8 +74,8 @@ public final class FileName implements Parcelable {
      * ..         ->  ""
      * </pre>
      */
-    public String ext() {
-        int i = indexOfExtSeparator();
+    public String extension() {
+        int i = indexOfExtensionSeparator();
         if (i == -1) {
             return "";
         }
@@ -85,10 +85,10 @@ public final class FileName implements Parcelable {
     }
 
     /**
-     * {@link #ext()} with a leading dot if it's not empty.
+     * {@link #extension()} with a leading dot if it's not empty.
      */
-    public String dotExt() {
-        String ext = ext();
+    public String dotExtension() {
+        String ext = extension();
         return ext.isEmpty() ? ext : "." + ext;
     }
 

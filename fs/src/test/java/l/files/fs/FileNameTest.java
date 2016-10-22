@@ -7,17 +7,17 @@ import static org.junit.Assert.assertEquals;
 
 public final class FileNameTest {
 
-    private void testBaseDotExt(String value) {
+    private void testBaseDotExtension(String value) {
         FileName name = FileName.fromBytes(value.getBytes(UTF_8));
-        assertEquals(value, name.base() + name.dotExt());
+        assertEquals(value, name.base() + name.dotExtension());
     }
 
     private void testNameHasBase(String name, String base) {
         assertEquals(base, FileName.fromBytes(name.getBytes(UTF_8)).base());
     }
 
-    private void testNameHasExt(String name, String ext) {
-        assertEquals(ext, FileName.fromBytes(name.getBytes(UTF_8)).ext());
+    private void testNameHasExtension(String name, String ext) {
+        assertEquals(ext, FileName.fromBytes(name.getBytes(UTF_8)).extension());
     }
 
     @Test
@@ -30,12 +30,12 @@ public final class FileNameTest {
     }
 
     @Test
-    public void if_name_ends_with_a_dot_then_ext_is_empty() {
-        testNameHasExt("pic.", "");
-        testNameHasExt("pic.png.", "");
-        testNameHasExt("pic.png..", "");
-        testNameHasExt("pic.png...", "");
-        testNameHasExt(" ...", "");
+    public void if_name_ends_with_a_dot_then_extension_is_empty() {
+        testNameHasExtension("pic.", "");
+        testNameHasExtension("pic.png.", "");
+        testNameHasExtension("pic.png..", "");
+        testNameHasExtension("pic.png...", "");
+        testNameHasExtension(" ...", "");
     }
 
     @Test
@@ -46,10 +46,10 @@ public final class FileNameTest {
     }
 
     @Test
-    public void if_name_contains_only_dots_then_ext_is_empty() {
-        testNameHasExt(".", "");
-        testNameHasExt("..", "");
-        testNameHasExt("...", "");
+    public void if_name_contains_only_dots_then_extension_is_empty() {
+        testNameHasExtension(".", "");
+        testNameHasExtension("..", "");
+        testNameHasExtension("...", "");
     }
 
     @Test
@@ -61,11 +61,11 @@ public final class FileNameTest {
     }
 
     @Test
-    public void if_the_only_dot_is_at_start_then_ext_is_empty() {
-        testNameHasExt(".a", "");
-        testNameHasExt(".abc", "");
-        testNameHasExt(". ", "");
-        testNameHasExt(". hello world", "");
+    public void if_the_only_dot_is_at_start_then_extension_is_empty() {
+        testNameHasExtension(".a", "");
+        testNameHasExtension(".abc", "");
+        testNameHasExtension(". ", "");
+        testNameHasExtension(". hello world", "");
     }
 
     @Test
@@ -78,12 +78,12 @@ public final class FileNameTest {
     }
 
     @Test
-    public void if_last_dot_is_not_at_start_or_end_then_ext_is_substring_after_it() {
-        testNameHasExt("pic.png", "png");
-        testNameHasExt("pic.abc.png", "png");
-        testNameHasExt("a.b.c.d.e.f", "f");
-        testNameHasExt(" .png", "png");
-        testNameHasExt("hello world.pdf", "pdf");
+    public void if_last_dot_is_not_at_start_or_end_then_extension_is_substring_after_it() {
+        testNameHasExtension("pic.png", "png");
+        testNameHasExtension("pic.abc.png", "png");
+        testNameHasExtension("a.b.c.d.e.f", "f");
+        testNameHasExtension(" .png", "png");
+        testNameHasExtension("hello world.pdf", "pdf");
     }
 
     @Test
@@ -92,27 +92,27 @@ public final class FileNameTest {
     }
 
     @Test
-    public void if_name_is_empty_ext_is_empty() throws Exception {
-        testNameHasExt("", "");
+    public void if_name_is_empty_extension_is_empty() throws Exception {
+        testNameHasExtension("", "");
     }
 
     @Test
-    public void name_is_made_up_of_base_dot_ext() throws Exception {
-        testBaseDotExt("");
-        testBaseDotExt(".");
-        testBaseDotExt("..");
-        testBaseDotExt(".....");
-        testBaseDotExt("pic");
-        testBaseDotExt(" pic ");
-        testBaseDotExt("pic.png");
-        testBaseDotExt("pic.png");
-        testBaseDotExt("pic. png");
-        testBaseDotExt(" pic. png");
-        testBaseDotExt(" pic . png");
-        testBaseDotExt(".pic.png");
-        testBaseDotExt(". pic.png");
-        testBaseDotExt("pic.abc.png");
-        testBaseDotExt(".pic.abc.png");
+    public void name_is_made_up_of_base_dot_extension() throws Exception {
+        testBaseDotExtension("");
+        testBaseDotExtension(".");
+        testBaseDotExtension("..");
+        testBaseDotExtension(".....");
+        testBaseDotExtension("pic");
+        testBaseDotExtension(" pic ");
+        testBaseDotExtension("pic.png");
+        testBaseDotExtension("pic.png");
+        testBaseDotExtension("pic. png");
+        testBaseDotExtension(" pic. png");
+        testBaseDotExtension(" pic . png");
+        testBaseDotExtension(".pic.png");
+        testBaseDotExtension(". pic.png");
+        testBaseDotExtension("pic.abc.png");
+        testBaseDotExtension(".pic.abc.png");
     }
 
 }
