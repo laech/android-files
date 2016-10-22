@@ -19,8 +19,8 @@ import static l.files.fs.TraversalCallback.Result.CONTINUE;
 
 public abstract class PathBaseTest extends AndroidTestCase {
 
-    private LocalPath dir1;
-    private LocalPath dir2;
+    private Path dir1;
+    private Path dir2;
 
     private File createTempFolder() throws IOException {
         File dir = File.createTempFile(getClass().getSimpleName(), null);
@@ -29,7 +29,7 @@ public abstract class PathBaseTest extends AndroidTestCase {
         return dir;
     }
 
-    protected final LocalPath dir1() {
+    protected final Path dir1() {
         if (dir1 == null) {
             try {
                 dir1 = LocalPath.of(createTempFolder());
@@ -40,7 +40,7 @@ public abstract class PathBaseTest extends AndroidTestCase {
         return dir1;
     }
 
-    protected final LocalPath dir2() {
+    protected final Path dir2() {
         if (dir2 == null) {
             try {
                 dir2 = LocalPath.of(createTempFolder());

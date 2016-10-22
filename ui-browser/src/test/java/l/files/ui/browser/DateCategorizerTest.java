@@ -17,7 +17,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 
 import l.files.fs.Instant;
-import l.files.fs.Name;
+import l.files.fs.FileName;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.fs.FileInfo;
@@ -273,8 +273,7 @@ public final class DateCategorizerTest {
     private FileInfo file(long time) {
         Stat stat = mock(Stat.class);
         Path file = mock(Path.class);
-        Name name = mock(Name.class);
-        given(name.toString()).willReturn(String.valueOf(time));
+        FileName name = FileName.fromString(String.valueOf(time));
         given(file.name()).willReturn(name);
         Instant instant = Instant.ofMillis(time);
         given(stat.lastModifiedTime()).willReturn(instant);

@@ -8,6 +8,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import l.files.fs.Path;
 import linux.ErrnoException;
 import linux.Fcntl;
 import linux.Unistd;
@@ -27,7 +28,7 @@ final class LocalStreams {
     private LocalStreams() {
     }
 
-    static FileInputStream newInputStream(LocalPath path) throws IOException {
+    static FileInputStream newInputStream(Path path) throws IOException {
 
         int fd = newFd(path, O_RDONLY, 0);
         try {
@@ -51,7 +52,7 @@ final class LocalStreams {
         }
     }
 
-    static FileOutputStream newOutputStream(LocalPath path, boolean append) throws IOException {
+    static FileOutputStream newOutputStream(Path path, boolean append) throws IOException {
 
         // Same flags and mode as java.io.FileOutputStream on Android
 
@@ -85,9 +86,9 @@ final class LocalStreams {
         }
     }
 
-    private static int newFd(LocalPath path, int flags, int mode) throws IOException {
+    private static int newFd(Path path, int flags, int mode) throws IOException {
         try {
-            return Fcntl.open(path.path, flags, mode);
+            return Fcntl.open(path.toByteArray(), flags, mode);
         } catch (ErrnoException e) {
             throw ErrnoExceptions.toIOException(e, path);
         }

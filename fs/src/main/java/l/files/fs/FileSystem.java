@@ -10,10 +10,6 @@ import javax.annotation.Nullable;
 
 public interface FileSystem {
 
-    String scheme();
-
-    Path path(URI uri);
-
     Path path(byte[] path);
 
     void setPermissions(Path path, Set<Permission> permissions)

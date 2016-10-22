@@ -2,11 +2,7 @@ package l.files.fs;
 
 import android.os.Parcelable;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.URI;
-import java.nio.charset.Charset;
+import java.io.File;
 
 import javax.annotation.Nullable;
 
@@ -19,32 +15,23 @@ public interface Path extends Parcelable {
      * <p/>
      * This method always replaces malformed-input and unmappable-character
      * sequences with some default replacement string.
-     *
-     * @see String#String(byte[], int, int, Charset)
-     * @see ByteArrayOutputStream#toString(String)
-     * @see #toByteArray(ByteArrayOutputStream)
      */
     @Override
     String toString();
 
-    URI toUri();
-
     /**
-     * @return the number of bytes written
+     * Converts this path to a {@link java.io.File},
+     * this method always replaces malformed-input and unmappable-character
+     * sequences with some default replacement string.
      */
-    int toByteArray(OutputStream out) throws IOException;
+    File toFile();
 
     byte[] toByteArray();
 
     /**
-     * @return the number of bytes written
-     */
-    int toByteArray(ByteArrayOutputStream out);
-
-    /**
      * Gets the name of this file, or empty if this is the root file.
      */
-    Name name();
+    FileName name();
 
     @Nullable
     Path parent();
@@ -56,7 +43,7 @@ public interface Path extends Parcelable {
 
     Path resolve(byte[] path);
 
-    Path resolve(Name name);
+    Path resolve(FileName name);
 
     /**
      * Returns a file with the given parent replaced.

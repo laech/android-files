@@ -4,8 +4,8 @@ import org.junit.Test;
 
 import java.util.Locale;
 
+import l.files.fs.FileName;
 import l.files.fs.FileSystem;
-import l.files.fs.Name;
 import l.files.fs.Path;
 
 import static java.util.Locale.SIMPLIFIED_CHINESE;
@@ -68,12 +68,10 @@ public final class FileSortNameTest extends FileSortTest {
         );
     }
 
-    private Path mockFile(String nameStr) {
+    private Path mockFile(String name) {
         FileSystem fs = mock(FileSystem.class);
         Path file = mock(Path.class);
-        Name name = mock(Name.class);
-        given(name.toString()).willReturn(nameStr);
-        given(file.name()).willReturn(name);
+        given(file.name()).willReturn(FileName.fromString(name));
         given(file.fileSystem()).willReturn(fs);
         return file;
     }

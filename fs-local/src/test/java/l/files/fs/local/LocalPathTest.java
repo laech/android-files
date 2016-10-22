@@ -2,10 +2,13 @@ package l.files.fs.local;
 
 import org.junit.Test;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import l.files.fs.FileName;
+import l.files.fs.Path;
+
 import static l.files.fs.Files.UTF_8;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -27,10 +30,9 @@ public final class LocalPathTest {
     }
 
     private void testToByteArray(String path) throws IOException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        byte[] bytes = path.getBytes(UTF_8);
-        assertEquals(bytes.length, path(path).toByteArray(out));
-        assertEquals(new String(bytes, UTF_8), out.toString("UTF-8"));
+        byte[] expected = path.getBytes(UTF_8);
+        byte[] actual = path(path).toByteArray();
+        assertArrayEquals(expected, actual);
     }
 
     @Test
@@ -51,8 +53,8 @@ public final class LocalPathTest {
 
     @Test
     public void hashCode_are_different_if_bytes_are_different() throws Exception {
-        LocalPath p1 = path("aa");
-        LocalPath p2 = path("ab");
+        Path p1 = path("aa");
+        Path p2 = path("ab");
         assertNotEquals(p1.hashCode(), p2.hashCode());
     }
 
@@ -74,8 +76,8 @@ public final class LocalPathTest {
 
     @Test
     public void equals_return_false_if_bytes_are_not_equal() throws Exception {
-        LocalPath p1 = path("aa");
-        LocalPath p2 = path("ab");
+        Path p1 = path("aa");
+        Path p2 = path("ab");
         assertNotEquals(p1, p2);
     }
 
@@ -96,11 +98,11 @@ public final class LocalPathTest {
 
     @Test
     public void resolve_from_name() throws Exception {
-        assertEquals("/a/b", path("/a").resolve(LocalName.of("b")).toString());
-        assertEquals("/a/b", path("/a/b").resolve(LocalName.of("")).toString());
-        assertEquals("/a///b", path("/a///b/").resolve(LocalName.of("")).toString());
-        assertEquals("/a/b", path("/a/").resolve(LocalName.of("b")).toString());
-        assertEquals("a/b", path("a").resolve(LocalName.of("b")).toString());
+        assertEquals("/a/b", path("/a").resolve(FileName.fromString("b")).toString());
+        assertEquals("/a/b", path("/a/b").resolve(FileName.fromString("")).toString());
+        assertEquals("/a///b", path("/a///b/").resolve(FileName.fromString("")).toString());
+        assertEquals("/a/b", path("/a/").resolve(FileName.fromString("b")).toString());
+        assertEquals("a/b", path("a").resolve(FileName.fromString("b")).toString());
     }
 
     @Test
@@ -189,7 +191,7 @@ public final class LocalPathTest {
         assertEquals(path("/a/b/c"), path("/a/b").rebase(path("/a/b"), path("/a/b/c")));
     }
 
-    private LocalPath path(String path) {
+    private Path path(String path) {
         return LocalPath.of(bytes(path));
     }
 

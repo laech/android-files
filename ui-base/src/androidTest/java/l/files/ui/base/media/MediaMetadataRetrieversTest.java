@@ -64,7 +64,7 @@ public final class MediaMetadataRetrieversTest extends AndroidTestCase {
         try {
             MediaMetadataRetriever retriever = new MediaMetadataRetriever();
             try {
-                Uri uri = Uri.parse(path.toUri().toString());
+                Uri uri = Uri.fromFile(path.toFile());
                 retriever.setDataSource(getContext(), uri);
                 test.accept(retriever);
             } finally {

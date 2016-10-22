@@ -25,7 +25,7 @@ import l.files.fs.FileSystem.Consumer;
 import l.files.fs.Files;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
-import l.files.fs.Name;
+import l.files.fs.FileName;
 import l.files.fs.Observation;
 import l.files.fs.Observer;
 import l.files.fs.Path;
@@ -1060,7 +1060,7 @@ public final class LocalObservableTest extends PathBaseTest {
         }
 
         @Override
-        public void onEvent(Event event, Name child) {
+        public void onEvent(Event event, FileName child) {
             observer.onEvent(event, child);
             Path target = child == null ? root : root.resolve(child);
             actual.add(WatchEvent.create(event, target));

@@ -255,7 +255,7 @@ public final class FilesTest extends PathBaseTest {
         Path expected = dir1().resolve("expected");
         Path actual = dir1().resolve("actual");
 
-        assertTrue(new java.io.File(expected.toUri()).createNewFile());
+        assertTrue(expected.toFile().createNewFile());
         Files.newOutputStream(actual, false).close();
 
         linux.Stat expectedStat = new linux.Stat();

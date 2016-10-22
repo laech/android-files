@@ -5,9 +5,9 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.Locale;
 
+import l.files.fs.FileName;
 import l.files.fs.FileSystem;
 import l.files.fs.LinkOption;
-import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 
@@ -55,29 +55,25 @@ public final class FileSortSizeTest extends FileSortTest {
         testSortMatches(Locale.getDefault(), SIZE.comparator(), a, b);
     }
 
-    protected Path createFile(String nameStr, long size) throws IOException {
+    protected Path createFile(String name, long size) throws IOException {
         FileSystem fs = mock(FileSystem.class);
         Stat stat = mock(Stat.class);
         Path file = mock(Path.class);
-        Name name = mock(Name.class);
-        given(name.toString()).willReturn(nameStr);
         given(stat.size()).willReturn(size);
         given(stat.isRegularFile()).willReturn(true);
         given(fs.stat(eq(file), any(LinkOption.class))).willReturn(stat);
-        given(file.name()).willReturn(name);
+        given(file.name()).willReturn(FileName.fromString(name));
         given(file.fileSystem()).willReturn(fs);
         return file;
     }
 
-    protected Path createDir(String nameStr) throws IOException {
+    protected Path createDir(String name) throws IOException {
         FileSystem fs = mock(FileSystem.class);
         Stat stat = mock(Stat.class);
         Path file = mock(Path.class);
-        Name name = mock(Name.class);
-        given(name.toString()).willReturn(nameStr);
         given(stat.isDirectory()).willReturn(true);
         given(fs.stat(eq(file), any(LinkOption.class))).willReturn(stat);
-        given(file.name()).willReturn(name);
+        given(file.name()).willReturn(FileName.fromString(name));
         given(file.fileSystem()).willReturn(fs);
         return file;
     }

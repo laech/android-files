@@ -10,7 +10,7 @@ import java.util.Collection;
 
 import javax.annotation.Nullable;
 
-import l.files.fs.Name;
+import l.files.fs.FileName;
 import l.files.fs.Path;
 import l.files.ui.base.fs.FileInfo;
 
@@ -18,7 +18,7 @@ public final class InfoMultiFragment extends InfoBaseFragment {
 
     public static InfoMultiFragment create(Path dir, Collection<FileInfo> items) {
 
-        ArrayList<Name> names = new ArrayList<>(items.size());
+        ArrayList<FileName> names = new ArrayList<>(items.size());
         for (FileInfo item : items) {
             names.add(item.selfPath().name());
         }

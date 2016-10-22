@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
+import l.files.fs.Path;
 import l.files.fs.Permission;
 import linux.ErrnoException;
 import linux.Stat;
@@ -86,13 +87,13 @@ final class LocalStat implements l.files.fs.Stat {
         return this.blocks;
     }
 
-    static LocalStat stat(LocalPath path, LinkOption option) throws IOException {
+    static LocalStat stat(Path path, LinkOption option) throws IOException {
         LocalStat stat = new LocalStat();
         stat(path, option, stat);
         return stat;
     }
 
-    static void stat(LocalPath path, LinkOption option, LocalStat buffer) throws IOException {
+    static void stat(Path path, LinkOption option, LocalStat buffer) throws IOException {
         requireNonNull(option, "option");
         requireNonNull(buffer, "buffer");
 
@@ -101,9 +102,9 @@ final class LocalStat implements l.files.fs.Stat {
             try {
 
                 if (option == FOLLOW) {
-                    linux.Stat.stat(path.path, stat);
+                    linux.Stat.stat(path.toByteArray(), stat);
                 } else {
-                    linux.Stat.lstat(path.path, stat);
+                    linux.Stat.lstat(path.toByteArray(), stat);
                 }
                 buffer.set(stat);
                 break;

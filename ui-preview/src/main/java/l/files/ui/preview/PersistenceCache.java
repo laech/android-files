@@ -132,11 +132,11 @@ abstract class PersistenceCache<V> extends MemCache<Path, V> {
             while (true) {
                 try {
 
-                    String scheme = in.readUTF();
+                    in.readUTF(); // For backward compatibility
                     short len = in.readShort();
                     byte[] bytes = new byte[len];
                     in.readFully(bytes);
-                    Path key = Paths.get(scheme, bytes);
+                    Path key = Paths.get(bytes);
                     long time = in.readLong();
                     V value = read(in);
 
@@ -198,7 +198,7 @@ abstract class PersistenceCache<V> extends MemCache<Path, V> {
             for (Map.Entry<Path, Snapshot<V>> entry : snapshot.entrySet()) {
 
                 byte[] bytes = entry.getKey().toByteArray();
-                out.writeUTF(entry.getKey().fileSystem().scheme());
+                out.writeUTF(""); // For backward compatibility
                 out.writeShort(bytes.length);
                 out.write(bytes);
                 out.writeLong(entry.getValue().time());

@@ -2,15 +2,11 @@ package l.files.fs.local;
 
 import android.os.Parcel;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.URI;
 import java.util.Arrays;
 
+import l.files.fs.FileName;
 import l.files.fs.FileSystem;
-import l.files.fs.Name;
 import l.files.fs.Path;
 
 import static l.files.base.Objects.requireNonNull;
@@ -36,7 +32,7 @@ final class LocalPath implements Path {
      *
      * This class is free of the above issue.
      */
-    final byte[] path;
+    private final byte[] path;
 
     private LocalPath(byte[] path) {
         this.path = requireNonNull(path);
@@ -60,22 +56,7 @@ final class LocalPath implements Path {
 
     @Override
     public byte[] toByteArray() {
-        return path;
-    }
-
-    @Override
-    public int toByteArray(OutputStream out) throws IOException {
-        out.write(path);
-        return path.length;
-    }
-
-    @Override
-    public int toByteArray(ByteArrayOutputStream out) {
-        try {
-            return toByteArray((OutputStream) out);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return path.clone();
     }
 
     @Override
@@ -89,8 +70,8 @@ final class LocalPath implements Path {
     }
 
     @Override
-    public URI toUri() {
-        return new java.io.File(toString()).toURI();
+    public File toFile() {
+        return new File(toString());
     }
 
     @Override
@@ -110,13 +91,11 @@ final class LocalPath implements Path {
     }
 
     @Override
-    public LocalPath resolve(Name name) {
+    public LocalPath resolve(FileName name) {
         if (name.isEmpty()) {
             return this;
         }
-        return resolve(name instanceof LocalName
-                ? ((LocalName) name).bytes
-                : name.toByteArray());
+        return resolve(name.toByteArray());
     }
 
     @Override
@@ -182,13 +161,13 @@ final class LocalPath implements Path {
     }
 
     @Override
-    public LocalName name() {
+    public FileName name() {
         int nameEnd = lengthBySkippingPathSeparators(path, path.length);
         int nameStartPos = lengthBySkippingNonPathSeparators(path, nameEnd);
         if (nameStartPos < 0) {
             nameStartPos = 0;
         }
-        return LocalName.wrap(Arrays.copyOfRange(path, nameStartPos, nameEnd));
+        return FileName.fromBytes(Arrays.copyOfRange(path, nameStartPos, nameEnd));
     }
 
     @Override
@@ -229,18 +208,15 @@ final class LocalPath implements Path {
 
     @Override
     public LocalPath rebase(Path src, Path dst) {
-        return rebase(((LocalPath) src), ((LocalPath) dst));
-    }
-
-    LocalPath rebase(LocalPath src, LocalPath dst) {
         if (!startsWith(src)) {
             throw new IllegalArgumentException();
         }
+        byte[] srcBytes = src.toByteArray();
         return new LocalPath(concatPaths(
-                dst.path,
+                dst.toByteArray(),
                 path,
-                src.path.length,
-                path.length - src.path.length));
+                srcBytes.length,
+                path.length - srcBytes.length));
     }
 
     @Override

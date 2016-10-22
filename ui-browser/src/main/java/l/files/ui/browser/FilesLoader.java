@@ -26,7 +26,7 @@ import l.files.fs.BatchObserver;
 import l.files.fs.Event;
 import l.files.fs.FileSystem;
 import l.files.fs.Files;
-import l.files.fs.Name;
+import l.files.fs.FileName;
 import l.files.fs.Observation;
 import l.files.fs.Path;
 import l.files.fs.Stat;
@@ -52,7 +52,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     private static final Handler handler = new Handler(getMainLooper());
 
-    private final ConcurrentMap<Name, FileInfo> data;
+    private final ConcurrentMap<FileName, FileInfo> data;
     private final Path root;
     private final int watchLimit;
 
@@ -77,7 +77,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     private final BatchObserver listener = new BatchObserver() {
 
         @Override
-        public void onLatestEvents(boolean selfChanged, Map<Name, Event> children) {
+        public void onLatestEvents(boolean selfChanged, Map<FileName, Event> children) {
             if (!children.isEmpty()) {
                 updateAll(children, false);
             }
@@ -93,7 +93,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     };
 
     void updateAll(
-            final Map<Name, Event> changedChildren,
+            final Map<FileName, Event> changedChildren,
             final boolean forceReload) {
 
         executor.execute(new Runnable() {
@@ -102,7 +102,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
                 setThreadPriority(THREAD_PRIORITY_BACKGROUND);
 
                 boolean changed = false;
-                for (Entry<Name, Event> entry : changedChildren.entrySet()) {
+                for (Entry<FileName, Event> entry : changedChildren.entrySet()) {
                     changed |= update(entry.getKey(), entry.getValue());
                 }
 
@@ -148,12 +148,12 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     void setSort(FileSort sort) {
         this.sort = requireNonNull(sort, "sort");
-        updateAll(Collections.<Name, Event>emptyMap(), true);
+        updateAll(Collections.<FileName, Event>emptyMap(), true);
     }
 
     void setShowHidden(boolean showHidden) {
         this.showHidden = showHidden;
-        updateAll(Collections.<Name, Event>emptyMap(), true);
+        updateAll(Collections.<FileName, Event>emptyMap(), true);
     }
 
     @Override
@@ -345,7 +345,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
      * Adds the new status of the given path to the data map. Returns true if
      * the data map is changed.
      */
-    private boolean update(Name child, Event event) {
+    private boolean update(FileName child, Event event) {
         return update(root.resolve(child), event);
     }
 
