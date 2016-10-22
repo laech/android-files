@@ -189,7 +189,7 @@ public final class PathTest {
     }
 
     private Path path(String path) {
-        return Path.of(bytes(path));
+        return Path.fromString(path);
     }
 
     private byte[] bytes(String path) {

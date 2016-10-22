@@ -37,15 +37,15 @@ public final class Path implements Parcelable {
         this.path = requireNonNull(path);
     }
 
-    public static Path of(File file) {
-        return of(file.getPath());
+    public static Path fromFile(File file) {
+        return fromString(file.getPath());
     }
 
-    public static Path of(String path) {
-        return of(path.getBytes(UTF_8));
+    public static Path fromString(String path) {
+        return fromByteArray(path.getBytes(UTF_8));
     }
 
-    public static Path of(byte[] path) {
+    public static Path fromByteArray(byte[] path) {
         int length = lengthBySkippingPathSeparators(path, path.length);
         if (length > 0 && length != path.length) {
             path = Arrays.copyOfRange(path, 0, length);
