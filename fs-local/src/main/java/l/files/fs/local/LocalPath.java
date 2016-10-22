@@ -32,7 +32,7 @@ final class LocalPath implements Path {
      *
      * This class is free of the above issue.
      */
-    final byte[] path;
+    private final byte[] path;
 
     private LocalPath(byte[] path) {
         this.path = requireNonNull(path);
@@ -210,18 +210,15 @@ final class LocalPath implements Path {
 
     @Override
     public LocalPath rebase(Path src, Path dst) {
-        return rebase(((LocalPath) src), ((LocalPath) dst));
-    }
-
-    LocalPath rebase(LocalPath src, LocalPath dst) {
         if (!startsWith(src)) {
             throw new IllegalArgumentException();
         }
+        byte[] srcBytes = src.toByteArray();
         return new LocalPath(concatPaths(
-                dst.path,
+                dst.toByteArray(),
                 path,
-                src.path.length,
-                path.length - src.path.length));
+                srcBytes.length,
+                path.length - srcBytes.length));
     }
 
     @Override

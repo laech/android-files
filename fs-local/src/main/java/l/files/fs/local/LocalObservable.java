@@ -174,7 +174,7 @@ final class LocalObservable extends Native
     private volatile int fd = -1;
     private volatile int wd = -1;
 
-    private final LocalPath root;
+    private final Path root;
 
     @Nullable
     private final String tag;
@@ -199,11 +199,11 @@ final class LocalObservable extends Native
     private final AtomicBoolean closed;
     private final AtomicBoolean released;
 
-    LocalObservable(LocalPath root, Observer observer) {
+    LocalObservable(Path root, Observer observer) {
         this(root, observer, null);
     }
 
-    LocalObservable(LocalPath root, Observer observer, @Nullable String tag) {
+    LocalObservable(Path root, Observer observer, @Nullable String tag) {
         this.root = requireNonNull(root);
         this.observerRef = new WeakReference<>(requireNonNull(observer));
         this.thread = new AtomicReference<>(null);
@@ -219,7 +219,7 @@ final class LocalObservable extends Native
         requireNonNull(childrenConsumer);
 
         try {
-            if (!isProcfs(root.path)) {
+            if (!isProcfs(root.toByteArray())) {
                 fd = inotify.init(watchLimit);
                 wd = inotifyAddWatchWillCloseOnError(option);
             } else {
@@ -271,7 +271,7 @@ final class LocalObservable extends Native
         try {
 
             int mask = ROOT_MASK | (opt == NOFOLLOW ? IN_DONT_FOLLOW : 0);
-            return inotify.addWatch(fd, root.path, mask);
+            return inotify.addWatch(fd, root.toByteArray(), mask);
 
         } catch (Throwable e) {
             try {
@@ -296,7 +296,7 @@ final class LocalObservable extends Native
         }
 
         try {
-            DIR dir = Dirent.fdopendir(Fcntl.open(root.path, flags, 0));
+            DIR dir = Dirent.fdopendir(Fcntl.open(root.toByteArray(), flags, 0));
             try {
                 Dirent entry = new Dirent();
                 while ((entry = Dirent.readdir(dir, entry)) != null) {
@@ -306,7 +306,7 @@ final class LocalObservable extends Native
                     }
 
                     byte[] name = Arrays.copyOf(entry.d_name, entry.d_name_len);
-                    LocalPath child = root.resolve(name);
+                    Path child = root.resolve(name);
                     if (!childrenConsumer.accept(child)) {
                         currentThread().interrupt();
                         break;
@@ -318,7 +318,7 @@ final class LocalObservable extends Native
 
                     try {
 
-                        byte[] childPath = child.path;
+                        byte[] childPath = child.toByteArray();
                         int wd = inotify.addWatch(fd, childPath, CHILD_DIR_MASK);
                         childDirs.put(wd, LocalName.wrap(name));
 
@@ -573,10 +573,10 @@ final class LocalObservable extends Native
             return;
         }
 
-        LocalPath child = root.resolve(name);
+        Path child = root.resolve(name);
         try {
 
-            byte[] path = child.path;
+            byte[] path = child.toByteArray();
             int wd = inotify.addWatch(fd, path, CHILD_DIR_MASK);
             childDirs.put(wd, LocalName.wrap(name));
 

@@ -4,6 +4,8 @@ import org.junit.Test;
 
 import java.io.IOException;
 
+import l.files.fs.Path;
+
 import static l.files.fs.Files.UTF_8;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -50,8 +52,8 @@ public final class LocalPathTest {
 
     @Test
     public void hashCode_are_different_if_bytes_are_different() throws Exception {
-        LocalPath p1 = path("aa");
-        LocalPath p2 = path("ab");
+        Path p1 = path("aa");
+        Path p2 = path("ab");
         assertNotEquals(p1.hashCode(), p2.hashCode());
     }
 
@@ -73,8 +75,8 @@ public final class LocalPathTest {
 
     @Test
     public void equals_return_false_if_bytes_are_not_equal() throws Exception {
-        LocalPath p1 = path("aa");
-        LocalPath p2 = path("ab");
+        Path p1 = path("aa");
+        Path p2 = path("ab");
         assertNotEquals(p1, p2);
     }
 
@@ -188,7 +190,7 @@ public final class LocalPathTest {
         assertEquals(path("/a/b/c"), path("/a/b").rebase(path("/a/b"), path("/a/b/c")));
     }
 
-    private LocalPath path(String path) {
+    private Path path(String path) {
         return LocalPath.of(bytes(path));
     }
 
