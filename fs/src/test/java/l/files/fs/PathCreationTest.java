@@ -7,8 +7,10 @@ import org.junit.runners.Parameterized.Parameters;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.HashSet;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
@@ -83,4 +85,16 @@ public final class PathCreationTest {
         String actual = Path.fromFile(new File(sourcePathString)).toString();
         assertEquals(expectedPath, actual);
     }
+
+    @Test
+    public void paths_are_equivalent_when_recreated() throws Exception {
+        Path p1 = Path.fromString(sourcePathString);
+        Path p2 = Path.fromString(p1.toString());
+        Path p3 = Path.fromByteArray(p2.toByteArray());
+        Path p4 = Path.fromFile(new File(sourcePathString));
+        assertEquals(
+                singleton(expectedPath).toString(),
+                new HashSet<>(asList(p1, p2, p3, p4)).toString());
+    }
+
 }
