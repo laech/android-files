@@ -1,8 +1,5 @@
 package l.files.fs;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.Arrays;
@@ -11,7 +8,9 @@ import javax.annotation.Nullable;
 
 import static l.files.fs.Files.UTF_8;
 
-public final class Path implements Parcelable {
+public final class Path {
+
+    private static final byte PATH_SEPARATOR = '/';
 
     /*
      * Binary representation of this path, normally it's whatever
@@ -34,7 +33,7 @@ public final class Path implements Parcelable {
     private final byte[] path;
 
     private Path(byte[] path) {
-        this.path = normalize(path);
+        this.path = normalize(path.clone()); // Too much work here
     }
 
     private static byte[] normalize(byte[] path) {
@@ -50,11 +49,11 @@ public final class Path implements Parcelable {
         boolean skipNextPathSeparator = false;
         for (int i = 0; i < length; i++) {
             byte b = path[i];
-            if (b == '/' && skipNextPathSeparator) {
+            if (b == PATH_SEPARATOR && skipNextPathSeparator) {
                 continue;
             }
             out.write(b);
-            skipNextPathSeparator = (b == '/');
+            skipNextPathSeparator = (b == PATH_SEPARATOR);
         }
         return out.toByteArray();
     }
@@ -99,6 +98,17 @@ public final class Path implements Parcelable {
         return new File(toString());
     }
 
+    public Path toAbsolutePath() {
+        if (isAbsolutePath()) {
+            return this;
+        }
+        return fromString(new File("").getAbsolutePath()).resolve(this);
+    }
+
+    public boolean isAbsolutePath() {
+        return path.length > 0 && path[0] == PATH_SEPARATOR;
+    }
+
     @Override
     public int hashCode() {
         return Arrays.hashCode(path);
@@ -110,18 +120,16 @@ public final class Path implements Parcelable {
                 Arrays.equals(path, ((Path) o).path);
     }
 
+    // TODO call concat instead of resolve
     /**
      * Resolves the given path relative to this file.
      */
-    public Path resolve(String path) {
-        return resolve(path.getBytes(UTF_8));
+    public Path resolve(Path path) {
+        return resolve(path.toByteArray());
     }
 
-    public Path resolve(FileName name) {
-        if (name.isEmpty()) {
-            return this;
-        }
-        return resolve(name.toByteArray());
+    public Path resolve(String path) {
+        return resolve(path.getBytes(UTF_8));
     }
 
     public Path resolve(byte[] path) {
@@ -129,7 +137,7 @@ public final class Path implements Parcelable {
         if (len <= 0) {
             return this;
         }
-        return new Path(concatPaths(this.path, path, 0, len));
+        return fromByteArray(concatPaths(this.path, path, 0, len));
     }
 
     private static byte[] concatPaths(byte[] base, byte[] add, int addPos, int addLen) {
@@ -138,9 +146,9 @@ public final class Path implements Parcelable {
         }
 
         byte[] joinedPath;
-        if (base.length == 0 || (base[base.length - 1] != '/' && add[addPos] != '/')) {
+        if (base.length == 0 || (base[base.length - 1] != PATH_SEPARATOR && add[addPos] != PATH_SEPARATOR)) {
             joinedPath = Arrays.copyOf(base, base.length + 1 + addLen);
-            joinedPath[base.length] = '/';
+            joinedPath[base.length] = PATH_SEPARATOR;
             System.arraycopy(add, addPos, joinedPath, base.length + 1, addLen);
 
         } else {
@@ -165,21 +173,21 @@ public final class Path implements Parcelable {
         }
 
         if (parentPathLength > 0) {
-            return new Path(Arrays.copyOfRange(path, 0, parentPathLength));
+            return fromByteArray(Arrays.copyOfRange(path, 0, parentPathLength));
         }
 
         return null;
     }
 
     private static int lengthBySkippingEndPathSeparators(byte[] path, int fromLength) {
-        while (fromLength > 0 && path[fromLength - 1] == '/') {
+        while (fromLength > 0 && path[fromLength - 1] == PATH_SEPARATOR) {
             fromLength--;
         }
         return fromLength;
     }
 
     private static int lengthBySkippingNonPathSeparators(byte[] path, int fromLength) {
-        while (fromLength > 0 && path[fromLength - 1] != '/') {
+        while (fromLength > 0 && path[fromLength - 1] != PATH_SEPARATOR) {
             fromLength--;
         }
         return fromLength;
@@ -188,13 +196,13 @@ public final class Path implements Parcelable {
     /**
      * Gets the name of this file, or empty if this is the root file.
      */
-    public FileName name() {
+    public Path name() {
         int nameEnd = lengthBySkippingEndPathSeparators(path, path.length);
         int nameStartPos = lengthBySkippingNonPathSeparators(path, nameEnd);
         if (nameStartPos < 0) {
             nameStartPos = 0;
         }
-        return FileName.fromBytes(Arrays.copyOfRange(path, nameStartPos, nameEnd));
+        return fromByteArray(Arrays.copyOfRange(path, nameStartPos, nameEnd));
     }
 
     public boolean isHidden() {
@@ -220,8 +228,8 @@ public final class Path implements Parcelable {
             return false;
 
         } else if (thisPath.length > thatPath.length) {
-            if (thisPath[thatPath.length] != '/' &&
-                    thatPath[thatPath.length - 1] != '/') {
+            if (thisPath[thatPath.length] != PATH_SEPARATOR &&
+                    thatPath[thatPath.length - 1] != PATH_SEPARATOR) {
                 return false;
             }
         }
@@ -251,35 +259,10 @@ public final class Path implements Parcelable {
             throw new IllegalArgumentException();
         }
         byte[] srcBytes = src.toByteArray();
-        return new Path(concatPaths(
+        return fromByteArray(concatPaths(
                 dst.toByteArray(),
                 path,
                 srcBytes.length,
                 path.length - srcBytes.length));
     }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeByteArray(path);
-    }
-
-    public static final Creator<Path> CREATOR = new Creator<Path>() {
-
-        @Override
-        public Path createFromParcel(Parcel source) {
-            return new Path(source.createByteArray());
-        }
-
-        @Override
-        public Path[] newArray(int size) {
-            return new Path[size];
-        }
-
-    };
-
 }

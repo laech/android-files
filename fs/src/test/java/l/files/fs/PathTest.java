@@ -94,12 +94,12 @@ public final class PathTest {
     }
 
     @Test
-    public void resolve_from_name() throws Exception {
-        assertEquals("/a/b", path("/a").resolve(FileName.fromString("b")).toString());
-        assertEquals("/a/b", path("/a/b").resolve(FileName.fromString("")).toString());
-        assertEquals("/a/b", path("/a///b/").resolve(FileName.fromString("")).toString());
-        assertEquals("/a/b", path("/a/").resolve(FileName.fromString("b")).toString());
-        assertEquals("a/b", path("a").resolve(FileName.fromString("b")).toString());
+    public void resolve_from_path() throws Exception {
+        assertEquals("/a/b", path("/a").resolve(path("b")).toString());
+        assertEquals("/a/b", path("/a/b").resolve(path("")).toString());
+        assertEquals("/a/b", path("/a///b/").resolve(path("")).toString());
+        assertEquals("/a/b", path("/a/").resolve(path("b")).toString());
+        assertEquals("a/b", path("a").resolve(path("b")).toString());
     }
 
     @Test

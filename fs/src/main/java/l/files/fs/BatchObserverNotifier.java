@@ -13,8 +13,6 @@ import javax.annotation.Nullable;
 
 import l.files.fs.FileSystem.Consumer;
 
-import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
-import static android.os.Process.setThreadPriority;
 import static java.lang.System.nanoTime;
 import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 import static l.files.base.Throwables.addSuppressed;
@@ -30,7 +28,7 @@ final class BatchObserverNotifier implements Observer, Observation, Runnable {
             });
 
     private boolean selfChanged;
-    private final Map<FileName, Event> childrenChanged;
+    private final Map<Path, Event> childrenChanged;
     private final BatchObserver batchObserver;
     private final long batchInterval;
     private final long batchIntervalNanos;
@@ -102,7 +100,7 @@ final class BatchObserverNotifier implements Observer, Observation, Runnable {
     }
 
     @Override
-    public void onEvent(Event event, @Nullable FileName child) {
+    public void onEvent(Event event, @Nullable Path child) {
         synchronized (this) {
 
             if (child == null) {
@@ -129,20 +127,19 @@ final class BatchObserverNotifier implements Observer, Observation, Runnable {
 
     @Override
     public void run() {
-        setThreadPriority(THREAD_PRIORITY_BACKGROUND);
 
         if (quickNotifyFirstEvent) {
             quickNotifyLastRunNanos = nanoTime();
         }
 
         boolean snapshotSelfChanged;
-        Map<FileName, Event> snapshotChildrenChanged;
+        Map<Path, Event> snapshotChildrenChanged;
 
         synchronized (this) {
 
             snapshotSelfChanged = selfChanged;
             snapshotChildrenChanged = childrenChanged.isEmpty()
-                    ? Collections.<FileName, Event>emptyMap()
+                    ? Collections.<Path, Event>emptyMap()
                     : Collections.unmodifiableMap(new HashMap<>(childrenChanged));
 
             selfChanged = false;

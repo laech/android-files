@@ -5,7 +5,7 @@ import java.util.Map;
 
 public interface BatchObserver {
 
-    void onLatestEvents(boolean selfChanged, Map<FileName, Event> children);
+    void onLatestEvents(boolean selfChanged, Map<Path, Event> children);
 
     void onIncompleteObservation(IOException cause);
 
