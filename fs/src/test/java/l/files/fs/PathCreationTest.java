@@ -58,7 +58,7 @@ public final class PathCreationTest {
     }
 
     @Test
-    public void name_is_as_expected() throws Exception {
+    public void path_is_as_expected() throws Exception {
         String actual = Path.fromString(sourcePathString).toString();
         assertEquals(expectedPath, actual);
     }
