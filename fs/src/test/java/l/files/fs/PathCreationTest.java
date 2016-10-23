@@ -103,4 +103,18 @@ public final class PathCreationTest {
         String actual = Path.fromString(sourcePathString).toAbsolutePath().toString();
         assertEquals(expected, actual);
     }
+
+    @Test
+    public void can_get_parent_path() throws Exception {
+        String expected = String.valueOf(new File(expectedPath).getParent());
+        String actual = String.valueOf(Path.fromString(sourcePathString).parent());
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void can_get_parent_from_absolute_path() throws Exception {
+        String expected = String.valueOf(new File(expectedPath).getAbsoluteFile().getParent());
+        String actual = String.valueOf(Path.fromString(sourcePathString).toAbsolutePath().parent());
+        assertEquals(expected, actual);
+    }
 }

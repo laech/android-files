@@ -8,7 +8,6 @@ import static l.files.fs.Files.UTF_8;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public final class PathTest {
@@ -29,21 +28,6 @@ public final class PathTest {
         byte[] expected = path.getBytes(UTF_8);
         byte[] actual = path(path).toByteArray();
         assertArrayEquals(expected, actual);
-    }
-
-    @Test
-    public void parent_is_not_null_if_path_has_parent_component() throws Exception {
-        assertEquals("/", path("/a").parent().toString());
-        assertEquals("/a", path("/a/b").parent().toString());
-        assertEquals("/a/b", path("/a/b/c").parent().toString());
-        assertEquals("/a/b", path("/a/b/c//").parent().toString());
-    }
-
-    @Test
-    public void parent_is_null_if_path_has_no_parent_component() throws Exception {
-        assertNull(path("").parent());
-        assertNull(path("a").parent());
-        assertNull(path("/").parent());
     }
 
     @Test
