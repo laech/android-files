@@ -1,5 +1,7 @@
 package l.files.fs;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.Arrays;
@@ -159,23 +161,20 @@ public final class Path {
         return joinedPath;
     }
 
+    private boolean isRoot() {
+        return path.length == 1 && path[0] == PATH_SEPARATOR;
+    }
+
     @Nullable
     public Path parent() {
-
-        int parentPathLength = path.length;
-        parentPathLength = lengthBySkippingEndPathSeparators(path, parentPathLength);
-        parentPathLength = lengthBySkippingNonPathSeparators(path, parentPathLength);
-
-        int parentPathNoEndSeparatorLength = lengthBySkippingEndPathSeparators(path, parentPathLength);
-        if (parentPathNoEndSeparatorLength > 0) {
-            parentPathLength = parentPathNoEndSeparatorLength;
+        if (isRoot()) {
+            return null;
         }
-
-        if (parentPathLength > 0) {
-            return fromByteArray(Arrays.copyOfRange(path, 0, parentPathLength));
+        int i = ArrayUtils.lastIndexOf(path, PATH_SEPARATOR);
+        if (i < 0) {
+            return null;
         }
-
-        return null;
+        return fromByteArray(Arrays.copyOfRange(path, 0, i + 1));
     }
 
     private static int lengthBySkippingEndPathSeparators(byte[] path, int fromLength) {
