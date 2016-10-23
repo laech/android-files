@@ -149,7 +149,7 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
         }
 
         private Loader<Existence> newChecker() {
-            final Path file = parent().resolve(getFilename());
+            final Path file = parent().concat(getFilename());
             return new AsyncTaskLoader<Existence>(getActivity()) {
 
                 boolean started;

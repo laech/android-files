@@ -28,7 +28,7 @@ public final class FilesTest {
 
         Path file = mock(Path.class);
         FileSystem fs = mock(FileSystem.class);
-        given(dir.resolve(anyString())).willReturn(file);
+        given(dir.concat(anyString())).willReturn(file);
         given(dir.fileSystem()).willReturn(fs);
         given(file.fileSystem()).willReturn(fs);
     }
@@ -45,7 +45,7 @@ public final class FilesTest {
         given(fs.stat(file, FOLLOW)).willReturn(stat);
         given(fs.exists(file, NOFOLLOW)).willReturn(true);
         given(dir.resolve(name)).willReturn(file);
-        given(dir.resolve(file.name())).willReturn(file);
+        given(dir.concat(file.name())).willReturn(file);
         return file;
     }
 
@@ -99,7 +99,7 @@ public final class FilesTest {
     }
 
     private void testExistent(Path file, String expectedName) throws IOException {
-        Path expected = dir.resolve(expectedName);
+        Path expected = dir.concat(expectedName);
         Path actual = getNonExistentDestinationFile(file, dir);
         assertEquals(expected, actual);
     }

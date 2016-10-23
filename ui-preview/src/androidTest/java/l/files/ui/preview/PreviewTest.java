@@ -28,7 +28,7 @@ import static org.mockito.Mockito.verify;
 public final class PreviewTest extends PathBaseTest {
 
     private Preview newPreview() {
-        return new Preview(getContext(), dir2().resolve(String.valueOf(nanoTime())));
+        return new Preview(getContext(), dir2().concat(String.valueOf(nanoTime())));
     }
 
     public void test_preview_svg() throws Throwable {
@@ -78,7 +78,7 @@ public final class PreviewTest extends PathBaseTest {
     }
 
     private void testPreviewSuccessForTestFile(String testFile, String dstFileName) throws Throwable {
-        Path file = dir1().resolve(dstFileName);
+        Path file = dir1().concat(dstFileName);
         InputStream in = getContext().getAssets().open(testFile);
         try {
             Files.copy(in, file);
@@ -94,8 +94,8 @@ public final class PreviewTest extends PathBaseTest {
     }
 
     public void test_preview_link() throws Throwable {
-        Path file = createFile(dir1().resolve("file"));
-        Path link = createSymbolicLink(dir1().resolve("link"), file);
+        Path file = createFile(dir1().concat("file"));
+        Path link = createSymbolicLink(dir1().concat("link"), file);
         writeUtf8(file, "hi");
         testPreviewSuccess(file);
         testPreviewSuccess(file);
@@ -104,8 +104,8 @@ public final class PreviewTest extends PathBaseTest {
     }
 
     public void test_preview_link_modified_target() throws Throwable {
-        Path file = createFile(dir1().resolve("file"));
-        Path link = createSymbolicLink(dir1().resolve("link"), file);
+        Path file = createFile(dir1().concat("file"));
+        Path link = createSymbolicLink(dir1().concat("link"), file);
         testPreviewFailure(link);
 
         writeUtf8(file, "hi");
@@ -114,7 +114,7 @@ public final class PreviewTest extends PathBaseTest {
     }
 
     private void testPreviewSuccessForContent(String content) throws Throwable {
-        Path file = dir1().resolve(String.valueOf(nanoTime()));
+        Path file = dir1().concat(String.valueOf(nanoTime()));
         writeUtf8(file, content);
         testPreviewSuccess(file);
         testPreviewSuccess(file);

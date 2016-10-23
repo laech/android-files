@@ -57,8 +57,8 @@ public final class DetectorTest extends PathBaseTest {
     }
 
     public void test_fails_on_broken_circular_links() throws Exception {
-        Path link1 = dir1().resolve("link1");
-        Path link2 = dir1().resolve("link2");
+        Path link1 = dir1().concat("link1");
+        Path link2 = dir1().concat("link2");
         Files.createSymbolicLink(link1, link2);
         Files.createSymbolicLink(link2, link1);
         try {
@@ -70,11 +70,11 @@ public final class DetectorTest extends PathBaseTest {
     }
 
     protected Path createDir(String name) throws IOException {
-        return Files.createDir(dir1().resolve(name));
+        return Files.createDir(dir1().concat(name));
     }
 
     protected Path createSymbolicLink(String name, Path target) throws IOException {
-        Path link = dir1().resolve(name);
+        Path link = dir1().concat(name);
         Files.createSymbolicLink(link, target);
         return link;
     }
@@ -84,7 +84,7 @@ public final class DetectorTest extends PathBaseTest {
     }
 
     protected Path createTextFile(String name, String content) throws IOException {
-        Path path = dir1().resolve(name);
+        Path path = dir1().concat(name);
         Files.writeUtf8(path, content);
         return path;
     }

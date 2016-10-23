@@ -186,9 +186,9 @@ public class BaseFilesActivityTest {
          * The bug: "a" gets renamed to "A", instead of displaying only
          * "A", both "a" and "A" are displayed.
          */
-        Path dir = Paths.get(getExternalStorageDirectory()).resolve(name);
-        Path src = dir.resolve("z");
-        Path dst = dir.resolve("Z");
+        Path dir = Paths.get(getExternalStorageDirectory()).concat(name);
+        Path src = dir.concat("z");
+        Path dst = dir.concat("Z");
         try {
 
             Files.deleteRecursiveIfExists(dir);

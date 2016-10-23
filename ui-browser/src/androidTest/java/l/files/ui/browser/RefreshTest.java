@@ -45,7 +45,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
         setActivityIntent(newIntent(dir(), watchLimit));
 
         for (int i = 0; i < watchLimit + 5; i++) {
-            Files.createDir(dir().resolve(String.valueOf(i)));
+            Files.createDir(dir().concat(String.valueOf(i)));
         }
 
         screen()
@@ -67,7 +67,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
                 // unless we explicitly monitor the child dir, but we aren't
                 // doing that because we ran out of watches, so this is a
                 // good operation for testing the manual refresh
-                Files.createFile(childDir.resolve("x"));
+                Files.createFile(childDir.concat("x"));
                 return false;
             }
         });
@@ -86,10 +86,10 @@ public final class RefreshTest extends BaseFilesActivityTest {
     private void testFileCreationDeletionWillStillBeNotifiedInManualMode(Path dir)
             throws IOException {
 
-        createFile(dir.resolve("file-" + nanoTime()));
-        createDir(dir.resolve("dir-" + nanoTime()));
-        move(createFile(dir.resolve("before-move-" + nanoTime())),
-                dir.resolve("after-move-" + nanoTime()));
+        createFile(dir.concat("file-" + nanoTime()));
+        createDir(dir.concat("dir-" + nanoTime()));
+        move(createFile(dir.concat("before-move-" + nanoTime())),
+                dir.concat("after-move-" + nanoTime()));
 
         list(dir, FOLLOW, new FileSystem.Consumer<Path>() {
             @Override
@@ -106,7 +106,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
     public void auto_detect_files_added_and_removed_while_loading() throws Exception {
 
         for (int i = 0; i < 10; i++) {
-            Files.createDir(dir().resolve(String.valueOf(i)));
+            Files.createDir(dir().concat(String.valueOf(i)));
         }
 
         Thread thread = new Thread(new Runnable() {
@@ -148,12 +148,12 @@ public final class RefreshTest extends BaseFilesActivityTest {
     }
 
     private Path randomFile(Path dir) {
-        return dir.resolve(String.valueOf(Math.random()));
+        return dir.concat(String.valueOf(Math.random()));
     }
 
     @Test
     public void auto_show_correct_information_on_large_change_events() throws Exception {
-        createFile(dir().resolve("a"));
+        createFile(dir().concat("a"));
         screen().assertListMatchesFileSystem(dir());
 
         long end = currentTimeMillis() + SECONDS.toMillis(5);
@@ -184,7 +184,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
     }
 
     private void updateDirectory(String name) throws IOException {
-        Path dir = dir().resolve(name);
+        Path dir = dir().concat(name);
         if (Files.exists(dir, NOFOLLOW)) {
             Files.delete(dir);
         } else {
@@ -193,7 +193,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
     }
 
     private void updatePermissions(String name) throws IOException {
-        Path res = createFiles(dir().resolve(name));
+        Path res = createFiles(dir().concat(name));
         if (Files.isReadable(res)) {
             Files.setPermissions(res, Permission.read());
         } else {
@@ -202,13 +202,13 @@ public final class RefreshTest extends BaseFilesActivityTest {
     }
 
     private void updateFileContent(String name) throws IOException {
-        Path file = createFiles(dir().resolve(name));
+        Path file = createFiles(dir().concat(name));
         writeUtf8(file, String.valueOf(new Random().nextLong()));
     }
 
     private void updateDirectoryChild(String name) throws IOException {
-        Path dir = createDirs(dir().resolve(name));
-        Path child = dir.resolve("child");
+        Path dir = createDirs(dir().concat(name));
+        Path child = dir.concat("child");
         if (Files.exists(child, NOFOLLOW)) {
             Files.delete(child);
         } else {
@@ -217,7 +217,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
     }
 
     private void updateLink(String name) throws IOException {
-        Path link = dir().resolve(name);
+        Path link = dir().concat(name);
         if (Files.exists(link, NOFOLLOW)) {
             Files.delete(link);
         }

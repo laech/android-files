@@ -25,9 +25,9 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 public final class CopyTest extends PasteTest {
 
     public void test_copy_reports_summary() throws Exception {
-        Path dstDir = createDir(dir1().resolve("dir"));
-        Path srcDir = createDir(dir1().resolve("a"));
-        Path srcFile = createFile(dir1().resolve("a/file"));
+        Path dstDir = createDir(dir1().concat("dir"));
+        Path srcDir = createDir(dir1().concat("a"));
+        Path srcFile = createFile(dir1().concat("a/file"));
 
         Copy copy = create(singleton(srcDir), dstDir);
         copy.execute();
@@ -46,30 +46,30 @@ public final class CopyTest extends PasteTest {
     }
 
     public void test_preserves_timestamps_for_file() throws Exception {
-        Path src = createFile(dir1().resolve("a"));
-        Path dir = createDir(dir1().resolve("dir"));
+        Path src = createFile(dir1().concat("a"));
+        Path dir = createDir(dir1().concat("dir"));
         testCopyPreservesTimestamp(src, dir);
     }
 
     public void test_preserves_timestamps_for_empty_dir() throws Exception {
-        Path src = createDir(dir1().resolve("dir1"));
-        Path dir = createDir(dir1().resolve("dir2"));
+        Path src = createDir(dir1().concat("dir1"));
+        Path dir = createDir(dir1().concat("dir2"));
         testCopyPreservesTimestamp(src, dir);
     }
 
     public void test_preserves_timestamps_for_full_dir() throws Exception {
-        Path dir = createDir(dir1().resolve("dir2"));
-        Path src = createDir(dir1().resolve("dir1"));
-        createFile(src.resolve("a"));
-        createDir(src.resolve("b"));
-        createSymbolicLink(src.resolve("c"), src);
+        Path dir = createDir(dir1().concat("dir2"));
+        Path src = createDir(dir1().concat("dir1"));
+        createFile(src.concat("a"));
+        createDir(src.concat("b"));
+        createSymbolicLink(src.concat("c"), src);
         testCopyPreservesTimestamp(src, dir);
     }
 
     private void testCopyPreservesTimestamp(
             Path src,
             Path dir) throws IOException, InterruptedException {
-        Path dst = dir.resolve(src.name());
+        Path dst = dir.concat(src.name());
         assertFalse(exists(dst, NOFOLLOW));
 
         Instant mtime = newInstant();
@@ -91,20 +91,20 @@ public final class CopyTest extends PasteTest {
     }
 
     public void test_copies_link() throws Exception {
-        Path target = createFile(dir1().resolve("target"));
-        Path link = createSymbolicLink(dir1().resolve("link"), target);
+        Path target = createFile(dir1().concat("target"));
+        Path link = createSymbolicLink(dir1().concat("link"), target);
 
-        copy(link, createDir(dir1().resolve("copied")));
+        copy(link, createDir(dir1().concat("copied")));
 
-        Path copied = dir1().resolve("copied/link");
+        Path copied = dir1().concat("copied/link");
         assertEquals(target, readSymbolicLink(copied));
     }
 
     public void test_copies_directory() throws Exception {
-        Path srcDir = createDir(dir1().resolve("a"));
-        Path dstDir = createDir(dir1().resolve("dst"));
-        Path srcFile = srcDir.resolve("test.txt");
-        Path dstFile = dstDir.resolve("a/test.txt");
+        Path srcDir = createDir(dir1().concat("a"));
+        Path dstDir = createDir(dir1().concat("dst"));
+        Path srcFile = srcDir.concat("test.txt");
+        Path dstFile = dstDir.concat("a/test.txt");
         writeUtf8(srcFile, "Testing");
 
         copy(srcDir, dstDir);
@@ -113,24 +113,24 @@ public final class CopyTest extends PasteTest {
     }
 
     public void test_copies_empty_directory() throws Exception {
-        Path src = createDir(dir1().resolve("empty"));
-        Path dir = createDir(dir1().resolve("dst"));
+        Path src = createDir(dir1().concat("empty"));
+        Path dir = createDir(dir1().concat("dst"));
         copy(src, dir);
-        assertTrue(exists(dir1().resolve("dst/empty"), NOFOLLOW));
+        assertTrue(exists(dir1().concat("dst/empty"), NOFOLLOW));
     }
 
     public void test_copies_empty_file() throws Exception {
-        Path srcFile = createFile(dir1().resolve("empty"));
-        Path dstDir = createDir(dir1().resolve("dst"));
+        Path srcFile = createFile(dir1().concat("empty"));
+        Path dstDir = createDir(dir1().concat("dst"));
 
         copy(srcFile, dstDir);
-        assertTrue(exists(dir1().resolve("dst/empty"), NOFOLLOW));
+        assertTrue(exists(dir1().concat("dst/empty"), NOFOLLOW));
     }
 
     public void test_copies_file() throws Exception {
-        Path srcFile = createFile(dir1().resolve("test.txt"));
-        Path dstDir = createDir(dir1().resolve("dst"));
-        Path dstFile = dstDir.resolve("test.txt");
+        Path srcFile = createFile(dir1().concat("test.txt"));
+        Path dstDir = createDir(dir1().concat("dst"));
+        Path dstFile = dstDir.concat("test.txt");
         writeUtf8(srcFile, "Testing");
 
         copy(srcFile, dstDir);

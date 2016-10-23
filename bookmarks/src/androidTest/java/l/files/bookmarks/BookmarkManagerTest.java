@@ -35,17 +35,17 @@ public final class BookmarkManagerTest extends PathBaseTest {
     }
 
     public void test_can_add_bookmarks() throws Exception {
-        Path a = Files.createDir(dir1().resolve("a"));
-        Path b = Files.createDir(dir2().resolve("b"));
+        Path a = Files.createDir(dir1().concat("a"));
+        Path b = Files.createDir(dir2().concat("b"));
         manager.addBookmark(a);
         manager.addBookmark(b);
         assertTrue(manager.getBookmarks().containsAll(asList(a, b)));
     }
 
     public void test_can_remove_bookmarks() throws Exception {
-        Path a = Files.createDir(dir1().resolve("a"));
-        Path b = Files.createDir(dir1().resolve("b"));
-        Path c = Files.createDir(dir1().resolve("c"));
+        Path a = Files.createDir(dir1().concat("a"));
+        Path b = Files.createDir(dir1().concat("b"));
+        Path c = Files.createDir(dir1().concat("c"));
         manager.addBookmark(a);
         manager.addBookmark(b);
         manager.addBookmark(c);
@@ -72,9 +72,9 @@ public final class BookmarkManagerTest extends PathBaseTest {
     }
 
     public void test_removes_non_existing_bookmarks() throws Exception {
-        Path file = Files.createFile(dir1().resolve("file"));
-        Path dir = Files.createDir(dir1().resolve("dir"));
-        Path link = Files.createSymbolicLink(dir1().resolve("link"), file);
+        Path file = Files.createFile(dir1().concat("file"));
+        Path dir = Files.createDir(dir1().concat("dir"));
+        Path link = Files.createSymbolicLink(dir1().concat("link"), file);
         manager.addBookmark(file);
         manager.addBookmark(dir);
         manager.addBookmark(link);

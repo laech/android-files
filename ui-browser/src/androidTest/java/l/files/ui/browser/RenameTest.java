@@ -39,8 +39,8 @@ public class RenameTest extends BaseFilesActivityTest {
 
         try {
 
-            Path src = createFile(dir.resolve("file.txt"));
-            Path dst = dir.resolve("file.TXT");
+            Path src = createFile(dir.concat("file.txt"));
+            Path dst = dir.concat("file.TXT");
 
             UiRename ui = rename(src);
             ui.setFilename(dst.name().toString());
@@ -59,7 +59,7 @@ public class RenameTest extends BaseFilesActivityTest {
 
     @Test
     public void shows_error_when_failed_to_rename() throws Exception {
-        Path file = createFile(dir().resolve("a"));
+        Path file = createFile(dir().concat("a"));
         removePermissions(dir(), Permission.write());
         rename(file)
                 .setFilename("abc")
@@ -68,8 +68,8 @@ public class RenameTest extends BaseFilesActivityTest {
 
     @Test
     public void renames_file_to_specified_name() throws Throwable {
-        final Path from = createFile(dir().resolve("a"));
-        final Path to = dir().resolve("abc");
+        final Path from = createFile(dir().concat("a"));
+        final Path to = dir().concat("abc");
 
         rename(from).setFilename(to.name().toString()).ok();
 
@@ -84,28 +84,28 @@ public class RenameTest extends BaseFilesActivityTest {
 
     @Test
     public void highlights_file_base_name_in_dialog() throws Exception {
-        Path file = createFile(dir().resolve("abc.txt"));
+        Path file = createFile(dir().concat("abc.txt"));
         rename(file).assertSelection("abc");
     }
 
     @Test
     public void uses_filename_as_default_text() throws Exception {
-        Path file = createFile(dir().resolve("a"));
+        Path file = createFile(dir().concat("a"));
         rename(file).assertFilename(file.name().toString());
     }
 
     @Test
     public void disables_ok_button_with_no_error_initially_because_we_use_source_filename_as_suggestion()
             throws Exception {
-        rename(createDir(dir().resolve("a")))
+        rename(createDir(dir().concat("a")))
                 .assertOkButtonEnabled(false)
                 .assertHasNoError();
     }
 
     @Test
     public void cannot_rename_if_new_name_exists() throws Exception {
-        createFile(dir().resolve("abc"));
-        rename(createFile(dir().resolve("a")))
+        createFile(dir().concat("abc"));
+        rename(createFile(dir().concat("a")))
 
                 .setFilename("abc")
                 .assertOkButtonEnabled(false)
@@ -120,8 +120,8 @@ public class RenameTest extends BaseFilesActivityTest {
     public void rename_button_is_disable_if_there_are_more_than_one_file_checked()
             throws Exception {
 
-        Path f1 = createDir(dir().resolve("dir"));
-        Path f2 = createFile(dir().resolve("a"));
+        Path f1 = createDir(dir().concat("dir"));
+        Path f2 = createFile(dir().concat("a"));
 
         screen()
                 .longClick(f1)

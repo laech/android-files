@@ -70,8 +70,8 @@ public final class LocalObservableTest extends PathBaseTest {
     public void test_able_to_continue_observing_existing_dirs_when_new_dir_added_is_not_observable()
             throws Exception {
 
-        Path readableDir = dir1().resolve("readable");
-        Path unreadableDir = dir1().resolve("unreadable");
+        Path readableDir = dir1().concat("readable");
+        Path unreadableDir = dir1().concat("unreadable");
 
         Files.createDir(readableDir);
         Recorder recorder = observe(dir1(), FOLLOW);
@@ -80,7 +80,7 @@ public final class LocalObservableTest extends PathBaseTest {
             recorder.await(CREATE, unreadableDir, newCreateDir(
                     unreadableDir, EnumSet.of(OWNER_EXECUTE, OWNER_WRITE)));
 
-            recorder.awaitNoEvent(newCreateFile(unreadableDir.resolve("zz")));
+            recorder.awaitNoEvent(newCreateFile(unreadableDir.concat("zz")));
             recorder.awaitModifyByCreateFile(readableDir, "ab");
         } finally {
             recorder.close();
@@ -94,7 +94,7 @@ public final class LocalObservableTest extends PathBaseTest {
         observables.add(createRandomChildDir(dir1()));
         observables.add(createRandomChildDir(dir1()));
 
-        Path unobservable = Files.createDir(dir1().resolve("unobservable"));
+        Path unobservable = Files.createDir(dir1().concat("unobservable"));
         Files.removePermissions(unobservable, Permission.read());
 
         observables.add(createRandomChildDir(dir1()));
@@ -102,11 +102,11 @@ public final class LocalObservableTest extends PathBaseTest {
 
         Recorder recorder = observe(dir1(), FOLLOW);
         try {
-            recorder.awaitCreateFile(dir1().resolve("1"));
+            recorder.awaitCreateFile(dir1().concat("1"));
             for (Path observable : observables) {
                 recorder.awaitModifyByCreateFile(observable, "1");
             }
-            recorder.awaitNoEvent(newCreateFile(unobservable.resolve("1")));
+            recorder.awaitNoEvent(newCreateFile(unobservable.concat("1")));
         } finally {
             recorder.close();
         }
@@ -132,7 +132,7 @@ public final class LocalObservableTest extends PathBaseTest {
     }
 
     public void test_observe_on_regular_file() throws Exception {
-        Path file = Files.createFile(dir1().resolve("file"));
+        Path file = Files.createFile(dir1().concat("file"));
         Recorder observer = observe(file, NOFOLLOW);
         try {
             observer.awaitModifyByAppend(file, "hello");
@@ -142,7 +142,7 @@ public final class LocalObservableTest extends PathBaseTest {
     }
 
     public void test_observe_on_link() throws Exception {
-        Path file = Files.createSymbolicLink(dir1().resolve("link"), dir2());
+        Path file = Files.createSymbolicLink(dir1().concat("link"), dir2());
         Recorder observer = observe(file, NOFOLLOW);
         try {
             observer.awaitModifyBySetLastModifiedTime(file, EPOCH);
@@ -153,16 +153,16 @@ public final class LocalObservableTest extends PathBaseTest {
 
     public void test_release_watch_when_dir_moves_out() throws Exception {
 
-        Path src = Files.createDir(dir1().resolve("src"));
-        Path dst = dir2().resolve("dst");
+        Path src = Files.createDir(dir1().concat("src"));
+        Path dst = dir2().concat("dst");
 
         Tracker tracker = registerMockTracker();
         try {
             Recorder observer = observe(dir1(), NOFOLLOW);
             try {
-                observer.awaitModify(src, newCreateFile(src.resolve("b")));
+                observer.awaitModify(src, newCreateFile(src.concat("b")));
                 observer.awaitMove(src, dst);
-                observer.awaitNoEvent(newCreateFile(dst.resolve("c")));
+                observer.awaitNoEvent(newCreateFile(dst.concat("c")));
 
                 ArgumentCaptor<Integer> fd = ArgumentCaptor.forClass(Integer.class);
                 ArgumentCaptor<Integer> wd = ArgumentCaptor.forClass(Integer.class);
@@ -182,7 +182,7 @@ public final class LocalObservableTest extends PathBaseTest {
         try {
 
             for (int i = 1; i < maxUserInstances + 10; i++) {
-                Path child = Files.createFile(dir1().resolve(String.valueOf(i)));
+                Path child = Files.createFile(dir1().concat(String.valueOf(i)));
                 Observer observer = mock(Observer.class);
                 Observation observation = Files.observe(child, NOFOLLOW, observer);
                 observations.add(observation);
@@ -272,7 +272,7 @@ public final class LocalObservableTest extends PathBaseTest {
     private Path createRandomChildDir(Path dir) throws IOException {
         while (true) {
             try {
-                return Files.createDir(dir.resolve(String.valueOf(random())));
+                return Files.createDir(dir.concat(String.valueOf(random())));
             } catch (AlreadyExist ignore) {
             }
         }
@@ -322,8 +322,8 @@ public final class LocalObservableTest extends PathBaseTest {
 
     public void test_releases_all_watches_on_close() throws Exception {
 
-        Path a = Files.createDir(dir1().resolve("a"));
-        Path b = Files.createDir(dir1().resolve("b"));
+        Path a = Files.createDir(dir1().concat("a"));
+        Path b = Files.createDir(dir1().concat("b"));
         Tracker tracker = registerMockTracker();
         try {
 
@@ -372,9 +372,9 @@ public final class LocalObservableTest extends PathBaseTest {
 
     public void test_observe_on_link_no_follow() throws Exception {
 
-        Path dir = Files.createDir(dir1().resolve("dir"));
-        Path link = Files.createSymbolicLink(dir1().resolve("link"), dir);
-        Path file = link.resolve("file");
+        Path dir = Files.createDir(dir1().concat("dir"));
+        Path link = Files.createSymbolicLink(dir1().concat("link"), dir);
+        Path file = link.concat("file");
         Recorder observer = observe(link, NOFOLLOW);
         try {
             // No follow, can observe the link
@@ -394,9 +394,9 @@ public final class LocalObservableTest extends PathBaseTest {
 
     public void test_observe_on_link_follow() throws Exception {
 
-        Path dir = Files.createDir(dir1().resolve("dir"));
-        Path link = Files.createSymbolicLink(dir1().resolve("link"), dir);
-        Path child = Files.createDir(link.resolve("dir"));
+        Path dir = Files.createDir(dir1().concat("dir"));
+        Path link = Files.createSymbolicLink(dir1().concat("link"), dir);
+        Path child = Files.createDir(link.concat("dir"));
         Recorder observer = observe(link, FOLLOW);
         try {
             observer.awaitModifyByCreateFile(child, "a");
@@ -421,8 +421,8 @@ public final class LocalObservableTest extends PathBaseTest {
     }
 
     public void test_rename_dir() throws Exception {
-        Path src = Files.createDir(dir1().resolve("a"));
-        Path dst = dir1().resolve("b");
+        Path src = Files.createDir(dir1().concat("a"));
+        Path dst = dir1().concat("b");
         Recorder observer = observe(dir1());
         try {
             observer.awaitModifyByCreateFile(src, "1");
@@ -445,15 +445,15 @@ public final class LocalObservableTest extends PathBaseTest {
     }
 
     public void test_move_dir_in_then_move_file_into_it() throws Exception {
-        Path extra = Files.createFile(dir2().resolve("hello"));
+        Path extra = Files.createFile(dir2().concat("hello"));
         testMoveDirIn(new PostActions().awaitMoveIn(extra));
     }
 
     public void test_move_dir_in_then_move_file_out_of_it() throws Exception {
 
-        Path src = Files.createDir(dir2().resolve("a"));
-        Path dir = dir1().resolve("a");
-        Path child = dir.resolve("b");
+        Path src = Files.createDir(dir2().concat("a"));
+        Path dir = dir1().concat("a");
+        Path child = dir.concat("b");
         Recorder observer = observe(dir1());
         try {
             observer.awaitMove(src, dir);
@@ -464,7 +464,7 @@ public final class LocalObservableTest extends PathBaseTest {
                     ),
                     compose(
                             newCreateFile(child),
-                            newMove(child, dir2().resolve("b"))
+                            newMove(child, dir2().concat("b"))
                     ));
         } finally {
             observer.close();
@@ -473,8 +473,8 @@ public final class LocalObservableTest extends PathBaseTest {
 
     public void test_move_file_in() throws Exception {
 
-        Path src = Files.createFile(dir2().resolve("a"));
-        Path dst = dir1().resolve("b");
+        Path src = Files.createFile(dir2().concat("a"));
+        Path dst = dir1().concat("b");
         Recorder observer = observe(dir1());
         try {
             observer.awaitMove(src, dst);
@@ -485,20 +485,20 @@ public final class LocalObservableTest extends PathBaseTest {
 
     public void test_move_file_out() throws Exception {
 
-        Path file = Files.createFile(dir1().resolve("a"));
+        Path file = Files.createFile(dir1().concat("a"));
         Recorder observer = observe(dir1());
         try {
-            observer.awaitMove(file, dir2().resolve("a"));
+            observer.awaitMove(file, dir2().concat("a"));
         } finally {
             observer.close();
         }
     }
 
     public void test_move_self_out() throws Exception {
-        Path file = Files.createFile(dir1().resolve("file"));
-        Path dir = Files.createDir(dir1().resolve("dir"));
-        testMoveSelfOut(file, dir2().resolve("a"));
-        testMoveSelfOut(dir, dir2().resolve("b"));
+        Path file = Files.createFile(dir1().concat("file"));
+        Path dir = Files.createDir(dir1().concat("dir"));
+        testMoveSelfOut(file, dir2().concat("a"));
+        testMoveSelfOut(dir, dir2().concat("b"));
     }
 
     private static void testMoveSelfOut(
@@ -514,7 +514,7 @@ public final class LocalObservableTest extends PathBaseTest {
     }
 
     public void test_modify_file_content() throws Exception {
-        Path file = Files.createFile(dir1().resolve("a"));
+        Path file = Files.createFile(dir1().concat("a"));
         testModifyFileContent(file, file);
         testModifyFileContent(file, dir1());
     }
@@ -532,8 +532,8 @@ public final class LocalObservableTest extends PathBaseTest {
     }
 
     public void test_modify_permissions() throws Exception {
-        Path file = Files.createFile(dir1().resolve("file"));
-        Path dir = Files.createDir(dir1().resolve("dir"));
+        Path file = Files.createFile(dir1().concat("file"));
+        Path dir = Files.createDir(dir1().concat("dir"));
         testModifyPermission(file, file);
         testModifyPermission(file, dir1());
         testModifyPermission(dir, dir);
@@ -564,8 +564,8 @@ public final class LocalObservableTest extends PathBaseTest {
     }
 
     public void test_modify_mtime() throws Exception {
-        Path file = Files.createFile(dir1().resolve("file"));
-        Path dir = Files.createDir(dir1().resolve("dir"));
+        Path file = Files.createFile(dir1().concat("file"));
+        Path dir = Files.createDir(dir1().concat("dir"));
         testModifyLastModifiedTime(file, file);
         testModifyLastModifiedTime(file, dir1());
         testModifyLastModifiedTime(dir, dir);
@@ -587,8 +587,8 @@ public final class LocalObservableTest extends PathBaseTest {
     }
 
     public void test_delete() throws Exception {
-        Path file = dir1().resolve("file");
-        Path dir = dir1().resolve("dir");
+        Path file = dir1().concat("file");
+        Path dir = dir1().concat("dir");
         testDelete(Files.createFile(file), file);
         testDelete(Files.createFile(file), dir1());
         testDelete(Files.createDir(dir), dir);
@@ -613,8 +613,8 @@ public final class LocalObservableTest extends PathBaseTest {
     }
 
     public void test_delete_recreate_dir_will_be_observed() throws Exception {
-        Path dir = dir1().resolve("dir");
-        Path file = dir.resolve("file");
+        Path dir = dir1().concat("dir");
+        Path file = dir.concat("file");
         Recorder observer = observe(dir1());
         try {
             for (int i = 0; i < 10; i++) {
@@ -637,9 +637,9 @@ public final class LocalObservableTest extends PathBaseTest {
     }
 
     public void test_create() throws Exception {
-        Path file = dir1().resolve("file");
-        Path dir = dir1().resolve("dir");
-        Path link = dir1().resolve("link");
+        Path file = dir1().concat("file");
+        Path dir = dir1().concat("dir");
+        Path link = dir1().concat("link");
         testCreateFile(file, dir1());
         testCreateDir(dir, dir1());
         testCreateSymbolicLink(link, dir1(), dir1());
@@ -685,19 +685,19 @@ public final class LocalObservableTest extends PathBaseTest {
     public void test_observe_unreadable_child_dir_will_notify_incomplete_observation()
             throws Exception {
 
-        Path dir = Files.createDir(dir1().resolve("dir"));
+        Path dir = Files.createDir(dir1().concat("dir"));
         Files.removePermissions(dir, Permission.read());
         Recorder observer = observe(dir1());
         try {
             observer.awaitOnIncompleteObservation();
-            observer.awaitCreateFile(dir1().resolve("parent watch still works"));
+            observer.awaitCreateFile(dir1().concat("parent watch still works"));
         } finally {
             observer.close();
         }
     }
 
     public void test_create_dir_then_make_it_unreadable() throws Exception {
-        Path dir = dir1().resolve("dir");
+        Path dir = dir1().concat("dir");
         Recorder observer = observe(dir1());
         try {
             observer.awaitCreateDir(dir);
@@ -711,7 +711,7 @@ public final class LocalObservableTest extends PathBaseTest {
     }
 
     public void test_create_dir_then_create_items_into_it() throws Exception {
-        Path dir = dir1().resolve("dir");
+        Path dir = dir1().concat("dir");
         Recorder observer = observe(dir1());
         try {
             observer.awaitCreateDir(dir);
@@ -722,9 +722,9 @@ public final class LocalObservableTest extends PathBaseTest {
                             event(MODIFY, dir)
                     ),
                     compose(
-                            newCreateFile(dir.resolve("file")),
-                            newCreateDir(dir.resolve("dir2()")),
-                            newCreateSymbolicLink(dir.resolve("link"), dir1())
+                            newCreateFile(dir.concat("file")),
+                            newCreateDir(dir.concat("dir2()")),
+                            newCreateSymbolicLink(dir.concat("link"), dir1())
                     ));
         } finally {
             observer.close();
@@ -732,9 +732,9 @@ public final class LocalObservableTest extends PathBaseTest {
     }
 
     public void test_create_dir_then_delete_items_from_it() throws Exception {
-        Path parent = dir1().resolve("parent");
-        Path file = parent.resolve("file");
-        Path dir = parent.resolve("dir");
+        Path parent = dir1().concat("parent");
+        Path file = parent.concat("file");
+        Path dir = parent.concat("dir");
         Recorder observer = observe(dir1());
         try {
             observer.awaitCreateDir(parent);
@@ -757,9 +757,9 @@ public final class LocalObservableTest extends PathBaseTest {
     }
 
     public void test_create_dir_then_move_items_out_of_it() throws Exception {
-        Path parent = dir1().resolve("parent");
-        Path file = parent.resolve("file");
-        Path dir = parent.resolve("dir");
+        Path parent = dir1().concat("parent");
+        Path file = parent.concat("file");
+        Path dir = parent.concat("dir");
         Recorder observer = observe(dir1());
         try {
             observer.awaitCreateDir(parent);
@@ -773,8 +773,8 @@ public final class LocalObservableTest extends PathBaseTest {
                     compose(
                             newCreateFile(file),
                             newCreateDir(dir),
-                            newMove(file, dir2().resolve("file")),
-                            newMove(dir, dir2().resolve("dir"))
+                            newMove(file, dir2().concat("file")),
+                            newMove(dir, dir2().concat("dir"))
                     ));
         } finally {
             observer.close();
@@ -782,9 +782,9 @@ public final class LocalObservableTest extends PathBaseTest {
     }
 
     public void test_create_dir_then_move_file_into_it() throws Exception {
-        Path parent = dir1().resolve("parent");
-        Path file = Files.createFile(dir2().resolve("file"));
-        Path dir = Files.createDir(dir2().resolve("dir"));
+        Path parent = dir1().concat("parent");
+        Path file = Files.createFile(dir2().concat("file"));
+        Path dir = Files.createDir(dir2().concat("dir"));
         Recorder observer = observe(dir1());
         try {
             observer.awaitCreateDir(parent);
@@ -794,8 +794,8 @@ public final class LocalObservableTest extends PathBaseTest {
                             event(MODIFY, parent)
                     ),
                     compose(
-                            newMove(file, parent.resolve("file")),
-                            newMove(dir, parent.resolve("dir"))
+                            newMove(file, parent.concat("file")),
+                            newMove(dir, parent.concat("dir"))
                     ));
         } finally {
             observer.close();
@@ -803,17 +803,17 @@ public final class LocalObservableTest extends PathBaseTest {
     }
 
     public void test_multiple_operations() throws Exception {
-        Path a = dir1().resolve("a");
-        Path b = dir1().resolve("b");
-        Path c = dir1().resolve("c");
-        Path d = dir1().resolve("d");
+        Path a = dir1().concat("a");
+        Path b = dir1().concat("b");
+        Path c = dir1().concat("c");
+        Path d = dir1().concat("d");
         Recorder observer = observe(dir1());
         try {
             observer.awaitCreateDir(a);
             observer.awaitCreateDir(b);
-            observer.awaitModify(a, newCreateFile(a.resolve("1")));
-            observer.awaitMove(Files.createFile(dir2().resolve("c")), c);
-            observer.awaitMove(c, dir2().resolve("2"));
+            observer.awaitModify(a, newCreateFile(a.concat("1")));
+            observer.awaitMove(Files.createFile(dir2().concat("c")), c);
+            observer.awaitMove(c, dir2().concat("2"));
             observer.awaitDelete(b);
             observer.awaitCreateFile(d);
         } finally {
@@ -1272,11 +1272,11 @@ public final class LocalObservableTest extends PathBaseTest {
         }
 
         void awaitModifyByCreateFile(Path target, String child) throws Exception {
-            awaitModify(target, newCreateFile(target.resolve(child)));
+            awaitModify(target, newCreateFile(target.concat(child)));
         }
 
         void awaitModifyByCreateDir(Path target, String child) throws Exception {
-            awaitModify(target, newCreateDir(target.resolve(child)));
+            awaitModify(target, newCreateDir(target.concat(child)));
         }
 
         void awaitModifyBySetPermissions(Path target, Set<Permission> perms) throws Exception {
@@ -1284,7 +1284,7 @@ public final class LocalObservableTest extends PathBaseTest {
         }
 
         void awaitModifyByDelete(Path target, String child) throws Exception {
-            awaitModify(target, newDelete(target.resolve(child)));
+            awaitModify(target, newDelete(target.concat(child)));
         }
 
         void awaitModifyBySetLastModifiedTime(Path target, Instant time) throws Exception {
@@ -1419,7 +1419,7 @@ public final class LocalObservableTest extends PathBaseTest {
             return add(new PreAction() {
                 @Override
                 public void action(Path src) throws Exception {
-                    Files.createFile(src.resolve(name));
+                    Files.createFile(src.concat(name));
                 }
             });
         }
@@ -1446,7 +1446,7 @@ public final class LocalObservableTest extends PathBaseTest {
             return add(new PostAction() {
                 @Override
                 public void action(Path dst, Recorder observer) throws Exception {
-                    observer.awaitCreateFile(dst.parent().resolve(name));
+                    observer.awaitCreateFile(dst.parent().concat(name));
                 }
             });
         }
@@ -1482,7 +1482,7 @@ public final class LocalObservableTest extends PathBaseTest {
             return add(new PostAction() {
                 @Override
                 public void action(Path dst, Recorder observer) throws Exception {
-                    observer.awaitMove(src, dst.resolve(src.name()));
+                    observer.awaitMove(src, dst.concat(src.name()));
                 }
             });
         }
@@ -1503,8 +1503,8 @@ public final class LocalObservableTest extends PathBaseTest {
     }
 
     private void testMoveDirIn(PreAction pre, PostAction post) throws Exception {
-        Path dst = dir1().resolve("a");
-        Path src = Files.createDir(dir2().resolve("a"));
+        Path dst = dir1().concat("a");
+        Path src = Files.createDir(dir2().concat("a"));
         pre.action(src);
         Recorder observer = observe(dir1());
         try {

@@ -17,28 +17,28 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 public final class MoveTest extends PasteTest {
 
     public void test_movedCountInitialZero() throws Exception {
-        Path src = createFile(dir1().resolve("a"));
-        Path dstDir = createDir(dir1().resolve("b"));
+        Path src = createFile(dir1().concat("a"));
+        Path dstDir = createDir(dir1().concat("b"));
         Move move = create(src, dstDir);
         assertEquals(move.getMovedItemCount(), 0);
     }
 
     public void test_movesSymlink() throws Exception {
-        Path target = createFile(dir1().resolve("target"));
-        Path link = createSymbolicLink(dir1().resolve("link"), target);
+        Path target = createFile(dir1().concat("target"));
+        Path link = createSymbolicLink(dir1().concat("link"), target);
 
-        Move move = create(link, createDir(dir1().resolve("moved")));
+        Move move = create(link, createDir(dir1().concat("moved")));
         move.execute();
 
-        Path actual = readSymbolicLink(dir1().resolve("moved/link"));
+        Path actual = readSymbolicLink(dir1().concat("moved/link"));
         assertEquals(target, actual);
         assertEquals(1, move.getMovedItemCount());
     }
 
     public void test_movesFile() throws Exception {
-        Path srcFile = createFile(dir1().resolve("a.txt"));
-        Path dstDir = createDir(dir1().resolve("dst"));
-        Path dstFile = dstDir.resolve("a.txt");
+        Path srcFile = createFile(dir1().concat("a.txt"));
+        Path dstDir = createDir(dir1().concat("dst"));
+        Path dstFile = dstDir.concat("a.txt");
         writeUtf8(srcFile, "Test");
 
         Move move = create(srcFile, dstDir);
@@ -50,10 +50,10 @@ public final class MoveTest extends PasteTest {
     }
 
     public void test_movesDirectory() throws Exception {
-        Path srcDir = createDir(dir1().resolve("a"));
-        Path dstDir = createDir(dir1().resolve("dst"));
-        Path srcFile = srcDir.resolve("test.txt");
-        Path dstFile = dstDir.resolve("a/test.txt");
+        Path srcDir = createDir(dir1().concat("a"));
+        Path dstDir = createDir(dir1().concat("dst"));
+        Path srcFile = srcDir.concat("test.txt");
+        Path dstFile = dstDir.concat("a/test.txt");
         writeUtf8(srcFile, "Test");
 
         Move move = create(srcDir, dstDir);

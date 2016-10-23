@@ -66,7 +66,7 @@ final class ThumbnailDiskCache extends Cache<ScaledBitmap> {
     final Path cacheDir;
 
     ThumbnailDiskCache(Path cacheDir) {
-        this.cacheDir = cacheDir.resolve("thumbnails");
+        this.cacheDir = cacheDir.concat("thumbnails");
     }
 
     public void cleanupAsync() {
@@ -125,7 +125,7 @@ final class ThumbnailDiskCache extends Cache<ScaledBitmap> {
     }
 
     private Path cacheDir(Path path, Rect constraint) {
-        return cacheDir.resolve(path
+        return cacheDir.concat(path
                 + "_" + constraint.width()
                 + "_" + constraint.height());
     }
@@ -143,7 +143,7 @@ final class ThumbnailDiskCache extends Cache<ScaledBitmap> {
             return result[0];
         }
         Instant time = stat.lastModifiedTime();
-        return cacheDir(path, constraint).resolve(
+        return cacheDir(path, constraint).concat(
                 time.seconds() + "-" + time.nanos());
     }
 
@@ -205,7 +205,7 @@ final class ThumbnailDiskCache extends Cache<ScaledBitmap> {
         assert parent != null;
         Files.createDirs(parent);
 
-        Path tmp = parent.resolve(cache.name() + "-" + nanoTime());
+        Path tmp = parent.concat(cache.name() + "-" + nanoTime());
         DataOutputStream out = newBufferedDataOutputStream(tmp);
         try {
 

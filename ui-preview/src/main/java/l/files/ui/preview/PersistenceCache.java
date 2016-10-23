@@ -87,7 +87,7 @@ abstract class PersistenceCache<V> extends MemCache<Path, V> {
     }
 
     private Path cacheFile() {
-        return cacheDir.resolve(cacheFileName());
+        return cacheDir.concat(cacheFileName());
     }
 
     abstract String cacheFileName();
@@ -187,7 +187,7 @@ abstract class PersistenceCache<V> extends MemCache<Path, V> {
         assert parent != null;
         Files.createDirs(parent);
 
-        Path tmp = parent.resolve(file.name() + "-" + nanoTime());
+        Path tmp = parent.concat(file.name() + "-" + nanoTime());
         DataOutputStream out = newBufferedDataOutputStream(tmp);
         try {
 

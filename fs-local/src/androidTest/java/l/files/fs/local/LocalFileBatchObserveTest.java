@@ -67,13 +67,13 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
 
     public void test_notifies_children_change() throws Exception {
 
-        final Path b = Files.createDir(dir1().resolve("b"));
-        final Path a = Files.createFile(dir1().resolve("a"));
-        final Path c = Files.createDir(dir1().resolve("c"));
-        final Path d = dir1().resolve("d");
+        final Path b = Files.createDir(dir1().concat("b"));
+        final Path a = Files.createFile(dir1().concat("a"));
+        final Path c = Files.createDir(dir1().concat("c"));
+        final Path d = dir1().concat("d");
 
-        Files.createFile(dir1().resolve("e"));
-        Files.createDir(dir1().resolve("f"));
+        Files.createFile(dir1().concat("e"));
+        Files.createDir(dir1().concat("f"));
 
         Observation observation = Files.observe(
                 dir1(),
@@ -112,7 +112,7 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
 
     public void test_notifies_latest_event() throws Exception {
 
-        final Path file = Files.createFile(dir1().resolve("file"));
+        final Path file = Files.createFile(dir1().concat("file"));
         final Observation observation = Files.observe(
                 dir1(),
                 NOFOLLOW,
@@ -144,7 +144,7 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
 
     public void test_notifies_self_and_children_change() throws Exception {
 
-        final Path child = Files.createFile(dir1().resolve("a"));
+        final Path child = Files.createFile(dir1().concat("a"));
         final Observation observation = Files.observe(
                 dir1(),
                 NOFOLLOW,

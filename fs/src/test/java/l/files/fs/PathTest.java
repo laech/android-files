@@ -95,27 +95,27 @@ public final class PathTest {
 
     @Test
     public void resolve_from_path() throws Exception {
-        assertEquals("/a/b", path("/a").resolve(path("b")).toString());
-        assertEquals("/a/b", path("/a/b").resolve(path("")).toString());
-        assertEquals("/a/b", path("/a///b/").resolve(path("")).toString());
-        assertEquals("/a/b", path("/a/").resolve(path("b")).toString());
-        assertEquals("a/b", path("a").resolve(path("b")).toString());
+        assertEquals("/a/b", path("/a").concat(path("b")).toString());
+        assertEquals("/a/b", path("/a/b").concat(path("")).toString());
+        assertEquals("/a/b", path("/a///b/").concat(path("")).toString());
+        assertEquals("/a/b", path("/a/").concat(path("b")).toString());
+        assertEquals("a/b", path("a").concat(path("b")).toString());
     }
 
     @Test
     public void resolve_from_byte_paths() throws Exception {
-        assertEquals("/a/b", path("/a").resolve(bytes("b")).toString());
-        assertEquals("/a/b", path("/a").resolve(bytes("b///")).toString());
-        assertEquals("/a/b", path("////a").resolve(bytes("b///")).toString());
-        assertEquals("/a/b", path("/a/b").resolve(bytes("")).toString());
-        assertEquals("/a/b", path("/a///b/").resolve(bytes("")).toString());
-        assertEquals("/a/b", path("/a/").resolve(bytes("b")).toString());
-        assertEquals("/a/b", path("///a//").resolve(bytes("b/")).toString());
-        assertEquals("a/b", path("a").resolve(bytes("b")).toString());
-        assertEquals("a/b", path("a").resolve(bytes("/b")).toString());
-        assertEquals("a/b", path("a").resolve(bytes("/b/")).toString());
-        assertEquals("a/b", path("a").resolve(bytes("///b///")).toString());
-        assertEquals("/a/b", path("/a").resolve(bytes("/b")).toString());
+        assertEquals("/a/b", path("/a").concat(bytes("b")).toString());
+        assertEquals("/a/b", path("/a").concat(bytes("b///")).toString());
+        assertEquals("/a/b", path("////a").concat(bytes("b///")).toString());
+        assertEquals("/a/b", path("/a/b").concat(bytes("")).toString());
+        assertEquals("/a/b", path("/a///b/").concat(bytes("")).toString());
+        assertEquals("/a/b", path("/a/").concat(bytes("b")).toString());
+        assertEquals("/a/b", path("///a//").concat(bytes("b/")).toString());
+        assertEquals("a/b", path("a").concat(bytes("b")).toString());
+        assertEquals("a/b", path("a").concat(bytes("/b")).toString());
+        assertEquals("a/b", path("a").concat(bytes("/b/")).toString());
+        assertEquals("a/b", path("a").concat(bytes("///b///")).toString());
+        assertEquals("/a/b", path("/a").concat(bytes("/b")).toString());
     }
 
     @Test

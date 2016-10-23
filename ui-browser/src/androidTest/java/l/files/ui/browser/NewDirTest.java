@@ -34,7 +34,7 @@ public final class NewDirTest extends BaseFilesActivityTest {
                 .newFolder()
                 .setFilename("a")
                 .ok()
-                .clickInto(dir().resolve("a"));
+                .clickInto(dir().concat("a"));
     }
 
     @Test
@@ -48,8 +48,8 @@ public final class NewDirTest extends BaseFilesActivityTest {
     public void name_field_has_new_name_suggestion_if_initial_names_are_taken()
             throws Exception {
 
-        createFile(dir().resolve(string(R.string.untitled_dir)));
-        createFile(dir().resolve(string(R.string.untitled_dir) + " " + 2));
+        createFile(dir().concat(string(R.string.untitled_dir)));
+        createFile(dir().concat(string(R.string.untitled_dir) + " " + 2));
 
         screen()
                 .newFolder()
@@ -60,7 +60,7 @@ public final class NewDirTest extends BaseFilesActivityTest {
     public void can_not_create_if_folder_with_specified_name_already_exists()
             throws Exception {
 
-        createFile(dir().resolve("a"));
+        createFile(dir().concat("a"));
         screen()
                 .newFolder()
                 .setFilename("a")

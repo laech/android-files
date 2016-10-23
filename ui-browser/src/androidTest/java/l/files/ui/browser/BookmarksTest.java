@@ -14,7 +14,7 @@ public final class BookmarksTest extends BaseFilesActivityTest {
     @Test
     public void clears_selection_on_finish_of_action_mode() throws Exception {
 
-        Path a = Files.createDir(dir().resolve("a"));
+        Path a = Files.createDir(dir().concat("a"));
         screen()
                 .clickInto(a)
                 .bookmark()
@@ -36,8 +36,8 @@ public final class BookmarksTest extends BaseFilesActivityTest {
     @Test
     public void click_on_bookmark_opens_directory() throws Exception {
 
-        Path a = Files.createDir(dir().resolve("a"));
-        Path b = Files.createDir(dir().resolve("b"));
+        Path a = Files.createDir(dir().concat("a"));
+        Path b = Files.createDir(dir().concat("b"));
         screen()
                 .clickInto(a)
                 .assertCurrentDirectory(a)
@@ -59,9 +59,9 @@ public final class BookmarksTest extends BaseFilesActivityTest {
     @Test
     public void sidebar_displays_up_to_date_bookmarks() throws Exception {
 
-        Path a = Files.createDir(dir().resolve("a"));
-        Path b = Files.createDir(dir().resolve("b"));
-        Path c = Files.createDir(dir().resolve("c"));
+        Path a = Files.createDir(dir().concat("a"));
+        Path b = Files.createDir(dir().concat("b"));
+        Path c = Files.createDir(dir().concat("c"));
 
         screen()
 

@@ -151,7 +151,7 @@ public final class RenameFragment extends FileCreationFragment {
     }
 
     private void rename() {
-        Path dst = parent().resolve(getFilename());
+        Path dst = parent().concat(getFilename());
         rename = new Rename(path(), dst)
                 .executeOnExecutor(THREAD_POOL_EXECUTOR);
 

@@ -83,7 +83,7 @@ public final class LocalObservableDownloadTest extends PathBaseTest {
 //                SDK_INT != N); // TODO Change to 'N' after upgrade to API 24
 
         Path downloadDir = downloadsDir();
-        Path downloadFile = downloadDir.resolve(
+        Path downloadFile = downloadDir.concat(
                 "test_notifies_files_downloaded_by_download_manager-" +
                         currentTimeMillis());
         try {

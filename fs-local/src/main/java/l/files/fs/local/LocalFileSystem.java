@@ -335,7 +335,7 @@ public final class LocalFileSystem extends Native implements FileSystem {
                         continue;
                     }
                     byte[] name = Arrays.copyOfRange(entry.d_name, 0, entry.d_name_len);
-                    if (!consumer.accept(path.resolve(name))) {
+                    if (!consumer.accept(path.concat(name))) {
                         break;
                     }
                 }

@@ -307,7 +307,7 @@ final class LocalObservable extends Native
                     }
 
                     byte[] name = Arrays.copyOf(entry.d_name, entry.d_name_len);
-                    Path child = root.resolve(name);
+                    Path child = root.concat(name);
                     if (!childrenConsumer.accept(child)) {
                         currentThread().interrupt();
                         break;
@@ -574,7 +574,7 @@ final class LocalObservable extends Native
             return;
         }
 
-        Path child = root.resolve(name);
+        Path child = root.concat(name);
         try {
 
             byte[] path = child.toByteArray();
@@ -693,7 +693,7 @@ final class LocalObservable extends Native
 //        } else {
 //            LocalName name = childDirs.get(wd);
 //            if (name != null) {
-//                path = root.resolve(name);
+//                path = root.concat(name);
 //            }
 //        }
 //

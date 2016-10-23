@@ -58,7 +58,7 @@ public final class NewDirFragment extends FileCreationFragment {
 
     private void suggestName() {
         String name = getString(R.string.untitled_dir);
-        Path base = parent().resolve(name);
+        Path base = parent().concat(name);
         suggestion = new SuggestName().executeOnExecutor(THREAD_POOL_EXECUTOR, base);
     }
 
@@ -77,7 +77,7 @@ public final class NewDirFragment extends FileCreationFragment {
                     if (isCancelled()) {
                         return null;
                     }
-                    file = parent.resolve(baseName + " " + i);
+                    file = parent.concat(baseName + " " + i);
                 }
                 return file;
             } catch (IOException e) {
@@ -107,7 +107,7 @@ public final class NewDirFragment extends FileCreationFragment {
 
     @Override
     public void onClick(DialogInterface dialog, int which) {
-        createDir(parent().resolve(getFilename()));
+        createDir(parent().concat(getFilename()));
     }
 
     private void createDir(Path dir) {

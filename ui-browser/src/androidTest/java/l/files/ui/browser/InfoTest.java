@@ -28,9 +28,9 @@ public final class InfoTest extends BaseFilesActivityTest {
     @Test
     public void gets_info_of_multiple_files() throws Exception {
 
-        Path child1 = createFile(dir().resolve("1"));
-        Path child2 = createDir(dir().resolve("2"));
-        Path child3 = createSymbolicLink(dir().resolve("3"), child2);
+        Path child1 = createFile(dir().concat("1"));
+        Path child2 = createDir(dir().concat("2"));
+        Path child3 = createSymbolicLink(dir().concat("3"), child2);
 
         Stat st1 = stat(child1, NOFOLLOW);
         Stat st2 = stat(child2, NOFOLLOW);
@@ -55,7 +55,7 @@ public final class InfoTest extends BaseFilesActivityTest {
     @Test
     public void gets_info_of_file() throws Exception {
 
-        Path path = dir().resolve("test.txt");
+        Path path = dir().concat("test.txt");
         writeUtf8(path, "hello world");
         Stat stat = stat(path, NOFOLLOW);
 
@@ -72,7 +72,7 @@ public final class InfoTest extends BaseFilesActivityTest {
     public void gets_info_of_link() throws Exception {
 
         setLastModifiedTime(dir(), NOFOLLOW, EPOCH);
-        Path path = createSymbolicLink(dir().resolve("link"), dir());
+        Path path = createSymbolicLink(dir().concat("link"), dir());
         Stat stat = stat(path, NOFOLLOW);
 
         screen()
@@ -87,7 +87,7 @@ public final class InfoTest extends BaseFilesActivityTest {
     @Test
     public void gets_info_of_empty_dir() throws Exception {
 
-        Path dir = createDir(dir().resolve("dir"));
+        Path dir = createDir(dir().concat("dir"));
         Stat stat = stat(dir, NOFOLLOW);
 
         screen()
@@ -102,10 +102,10 @@ public final class InfoTest extends BaseFilesActivityTest {
     @Test
     public void gets_info_of_non_empty_dir() throws Exception {
 
-        Path dir = createDir(dir().resolve("dir"));
-        Path child1 = createDir(dir.resolve("dir"));
-        Path child2 = createFile(dir.resolve("file"));
-        Path child3 = createSymbolicLink(dir.resolve("link"), dir);
+        Path dir = createDir(dir().concat("dir"));
+        Path child1 = createDir(dir.concat("dir"));
+        Path child2 = createFile(dir.concat("file"));
+        Path child3 = createSymbolicLink(dir.concat("link"), dir);
 
         Stat stat = stat(dir, NOFOLLOW);
         Stat childStat1 = stat(child1, NOFOLLOW);

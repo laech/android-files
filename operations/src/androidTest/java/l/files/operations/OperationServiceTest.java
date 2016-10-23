@@ -68,8 +68,8 @@ public final class OperationServiceTest extends PathBaseTest {
 
     public void test_moves_file() throws Exception {
 
-        Path src = createFile(dir1().resolve("a"));
-        Path dst = createDir(dir1().resolve("dst"));
+        Path src = createFile(dir1().concat("a"));
+        Path dst = createDir(dir1().concat("dst"));
         CountDownListener listener = new CountDownListener(MOVE);
         service.listener = listener;
         service.onCreate();
@@ -78,13 +78,13 @@ public final class OperationServiceTest extends PathBaseTest {
 
         listener.await();
         assertFalse(exists(src, NOFOLLOW));
-        assertTrue(exists(dst.resolve(src.name()), NOFOLLOW));
+        assertTrue(exists(dst.concat(src.name()), NOFOLLOW));
     }
 
     public void test_copies_file() throws Exception {
 
-        Path src = createFile(dir1().resolve("a"));
-        Path dst = createDir(dir1().resolve("dst"));
+        Path src = createFile(dir1().concat("a"));
+        Path dst = createDir(dir1().concat("dst"));
         CountDownListener listener = new CountDownListener(COPY);
         service.listener = listener;
         service.onCreate();
@@ -93,13 +93,13 @@ public final class OperationServiceTest extends PathBaseTest {
 
         listener.await();
         assertTrue(exists(src, NOFOLLOW));
-        assertTrue(exists(dst.resolve(src.name()), NOFOLLOW));
+        assertTrue(exists(dst.concat(src.name()), NOFOLLOW));
     }
 
     public void test_deletes_files() throws Exception {
 
-        Path a = createFiles(dir1().resolve("a"));
-        Path b = createFiles(dir1().resolve("b/c"));
+        Path a = createFiles(dir1().concat("a"));
+        Path b = createFiles(dir1().concat("b/c"));
         CountDownListener listener = new CountDownListener(DELETE);
         service.listener = listener;
         service.onCreate();
@@ -113,8 +113,8 @@ public final class OperationServiceTest extends PathBaseTest {
 
     public void test_task_start_time_is_correct() throws Exception {
 
-        Path file1 = createFile(dir1().resolve("a"));
-        Path file2 = createFile(dir1().resolve("b"));
+        Path file1 = createFile(dir1().concat("a"));
+        Path file2 = createFile(dir1().concat("b"));
         CountDownListener listener = new CountDownListener(DELETE);
         service.listener = listener;
         service.onCreate();

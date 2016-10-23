@@ -46,7 +46,7 @@ final class Files {
         }
 
         Path dst;
-        while (exists((dst = dstDir.resolve(base + last)), NOFOLLOW)) {
+        while (exists((dst = dstDir.concat(base + last)), NOFOLLOW)) {
             base = increment(base);
         }
 

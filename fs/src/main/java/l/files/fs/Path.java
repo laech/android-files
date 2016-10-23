@@ -102,7 +102,7 @@ public final class Path {
         if (isAbsolutePath()) {
             return this;
         }
-        return fromString(new File("").getAbsolutePath()).resolve(this);
+        return fromString(new File("").getAbsolutePath()).concat(this);
     }
 
     public boolean isAbsolutePath() {
@@ -120,19 +120,18 @@ public final class Path {
                 Arrays.equals(path, ((Path) o).path);
     }
 
-    // TODO call concat instead of resolve
     /**
      * Resolves the given path relative to this file.
      */
-    public Path resolve(Path path) {
-        return resolve(path.toByteArray());
+    public Path concat(Path path) {
+        return concat(path.toByteArray());
     }
 
-    public Path resolve(String path) {
-        return resolve(path.getBytes(UTF_8));
+    public Path concat(String path) {
+        return concat(path.getBytes(UTF_8));
     }
 
-    public Path resolve(byte[] path) {
+    public Path concat(byte[] path) {
         int len = lengthBySkippingEndPathSeparators(path, path.length);
         if (len <= 0) {
             return this;
@@ -248,7 +247,7 @@ public final class Path {
      * <p/>
      * e.g.
      * <pre>
-     * File("/a/b").resolve(File("/a"), File("/c")) =
+     * File("/a/b").concat(File("/a"), File("/c")) =
      * File("/c/b")
      * </pre>
      *

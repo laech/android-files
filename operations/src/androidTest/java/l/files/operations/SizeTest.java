@@ -12,10 +12,10 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 public final class SizeTest extends PathBaseTest {
 
     public void teset_size() throws Exception {
-        Path a = createDir(dir1().resolve("a"));
-        Path b = createFile(dir1().resolve("a/b"));
-        Path c = createFile(dir1().resolve("c"));
-        Path d = createDir(dir1().resolve("d"));
+        Path a = createDir(dir1().concat("a"));
+        Path b = createFile(dir1().concat("a/b"));
+        Path c = createFile(dir1().concat("c"));
+        Path d = createDir(dir1().concat("d"));
 
         Size size = new Size(asList(a, b, c, d));
         size.execute();
