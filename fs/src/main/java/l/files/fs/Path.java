@@ -195,12 +195,8 @@ public final class Path {
      * Gets the name of this file, or empty if this is the root file.
      */
     public Path name() {
-        int nameEnd = lengthBySkippingEndPathSeparators(path, path.length);
-        int nameStartPos = lengthBySkippingNonPathSeparators(path, nameEnd);
-        if (nameStartPos < 0) {
-            nameStartPos = 0;
-        }
-        return fromByteArray(Arrays.copyOfRange(path, nameStartPos, nameEnd));
+        int i = ArrayUtils.lastIndexOf(path, PATH_SEPARATOR);
+        return fromByteArray(Arrays.copyOfRange(path, i + 1, path.length));
     }
 
     public boolean isHidden() {
