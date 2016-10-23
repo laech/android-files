@@ -3,12 +3,12 @@ package l.files.fs;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.Arrays;
 
 import javax.annotation.Nullable;
 
-import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.Files.UTF_8;
 
 public final class Path implements Parcelable {
@@ -34,7 +34,29 @@ public final class Path implements Parcelable {
     private final byte[] path;
 
     private Path(byte[] path) {
-        this.path = requireNonNull(path);
+        this.path = normalize(path);
+    }
+
+    private static byte[] normalize(byte[] path) {
+        int length = lengthBySkippingEndPathSeparators(path, path.length);
+        if (length == 0) {
+            length = path.length;
+        }
+        return removeDuplicatePathSeparators(path, length);
+    }
+
+    private static byte[] removeDuplicatePathSeparators(byte[] path, int length) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream(length);
+        boolean skipNextPathSeparator = false;
+        for (int i = 0; i < length; i++) {
+            byte b = path[i];
+            if (b == '/' && skipNextPathSeparator) {
+                continue;
+            }
+            out.write(b);
+            skipNextPathSeparator = (b == '/');
+        }
+        return out.toByteArray();
     }
 
     public static Path fromFile(File file) {
@@ -46,10 +68,6 @@ public final class Path implements Parcelable {
     }
 
     public static Path fromByteArray(byte[] path) {
-        int length = lengthBySkippingPathSeparators(path, path.length);
-        if (length > 0 && length != path.length) {
-            path = Arrays.copyOfRange(path, 0, length);
-        }
         return new Path(path);
     }
 
@@ -107,7 +125,7 @@ public final class Path implements Parcelable {
     }
 
     public Path resolve(byte[] path) {
-        int len = lengthBySkippingPathSeparators(path, path.length);
+        int len = lengthBySkippingEndPathSeparators(path, path.length);
         if (len <= 0) {
             return this;
         }
@@ -138,10 +156,10 @@ public final class Path implements Parcelable {
     public Path parent() {
 
         int parentPathLength = path.length;
-        parentPathLength = lengthBySkippingPathSeparators(path, parentPathLength);
+        parentPathLength = lengthBySkippingEndPathSeparators(path, parentPathLength);
         parentPathLength = lengthBySkippingNonPathSeparators(path, parentPathLength);
 
-        int parentPathNoEndSeparatorLength = lengthBySkippingPathSeparators(path, parentPathLength);
+        int parentPathNoEndSeparatorLength = lengthBySkippingEndPathSeparators(path, parentPathLength);
         if (parentPathNoEndSeparatorLength > 0) {
             parentPathLength = parentPathNoEndSeparatorLength;
         }
@@ -153,7 +171,7 @@ public final class Path implements Parcelable {
         return null;
     }
 
-    private static int lengthBySkippingPathSeparators(byte[] path, int fromLength) {
+    private static int lengthBySkippingEndPathSeparators(byte[] path, int fromLength) {
         while (fromLength > 0 && path[fromLength - 1] == '/') {
             fromLength--;
         }
@@ -171,7 +189,7 @@ public final class Path implements Parcelable {
      * Gets the name of this file, or empty if this is the root file.
      */
     public FileName name() {
-        int nameEnd = lengthBySkippingPathSeparators(path, path.length);
+        int nameEnd = lengthBySkippingEndPathSeparators(path, path.length);
         int nameStartPos = lengthBySkippingNonPathSeparators(path, nameEnd);
         if (nameStartPos < 0) {
             nameStartPos = 0;
@@ -181,7 +199,7 @@ public final class Path implements Parcelable {
 
     public boolean isHidden() {
         int nameStartPos = path.length;
-        nameStartPos = lengthBySkippingPathSeparators(path, nameStartPos);
+        nameStartPos = lengthBySkippingEndPathSeparators(path, nameStartPos);
         nameStartPos = lengthBySkippingNonPathSeparators(path, nameStartPos);
         return nameStartPos >= 0 &&
                 nameStartPos < path.length &&
