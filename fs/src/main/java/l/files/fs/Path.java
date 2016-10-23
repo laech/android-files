@@ -184,13 +184,6 @@ public final class Path {
         return fromLength;
     }
 
-    private static int lengthBySkippingNonPathSeparators(byte[] path, int fromLength) {
-        while (fromLength > 0 && path[fromLength - 1] != PATH_SEPARATOR) {
-            fromLength--;
-        }
-        return fromLength;
-    }
-
     /**
      * Gets the name of this file, or empty if this is the root file.
      */
@@ -200,12 +193,8 @@ public final class Path {
     }
 
     public boolean isHidden() {
-        int nameStartPos = path.length;
-        nameStartPos = lengthBySkippingEndPathSeparators(path, nameStartPos);
-        nameStartPos = lengthBySkippingNonPathSeparators(path, nameStartPos);
-        return nameStartPos >= 0 &&
-                nameStartPos < path.length &&
-                path[nameStartPos] == '.';
+        int i = ArrayUtils.lastIndexOf(path, PATH_SEPARATOR);
+        return path[i + 1] == '.';
     }
 
     /**
