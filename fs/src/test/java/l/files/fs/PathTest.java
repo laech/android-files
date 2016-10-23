@@ -8,7 +8,6 @@ import static l.files.fs.Files.UTF_8;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -33,92 +32,6 @@ public final class PathTest {
     }
 
     @Test
-    public void hashCode_are_the_same_if_bytes_are_the_same() throws Exception {
-        assertEquals(path("aa").hashCode(), path("aa").hashCode());
-        assertEquals(path("a/").hashCode(), path("a/").hashCode());
-        assertEquals(path("/a").hashCode(), path("/a").hashCode());
-        assertEquals(path("/a/b").hashCode(), path("/a/b").hashCode());
-        assertEquals(path("/a/b/").hashCode(), path("/a/b/").hashCode());
-        assertEquals(path("a/b/").hashCode(), path("a/b/").hashCode());
-        assertEquals(path("a/./").hashCode(), path("a/./").hashCode());
-        assertEquals(path("a/.").hashCode(), path("a/.").hashCode());
-        assertEquals(path("a/../").hashCode(), path("a/../").hashCode());
-        assertEquals(path("a/..").hashCode(), path("a/..").hashCode());
-        assertEquals(path("/").hashCode(), path("/").hashCode());
-        assertEquals(path("").hashCode(), path("").hashCode());
-    }
-
-    @Test
-    public void hashCode_are_different_if_bytes_are_different() throws Exception {
-        Path p1 = path("aa");
-        Path p2 = path("ab");
-        assertNotEquals(p1.hashCode(), p2.hashCode());
-    }
-
-    @Test
-    public void equals_if_bytes_are_equal() throws Exception {
-        assertEquals(path("aa"), path("aa"));
-        assertEquals(path("a/"), path("a/"));
-        assertEquals(path("/a"), path("/a"));
-        assertEquals(path("/a/b"), path("/a/b"));
-        assertEquals(path("/a/b/"), path("/a/b/"));
-        assertEquals(path("a/b/"), path("a/b/"));
-        assertEquals(path("a/./"), path("a/./"));
-        assertEquals(path("a/."), path("a/."));
-        assertEquals(path("a/../"), path("a/../"));
-        assertEquals(path("a/.."), path("a/.."));
-        assertEquals(path("/"), path("/"));
-        assertEquals(path(""), path(""));
-    }
-
-    @Test
-    public void equals_return_false_if_bytes_are_not_equal() throws Exception {
-        Path p1 = path("aa");
-        Path p2 = path("ab");
-        assertNotEquals(p1, p2);
-    }
-
-    @Test
-    public void toString_returns_string_representation() throws Exception {
-        assertEquals("c", path("c").toString());
-        assertEquals("c", path("c/").toString());
-        assertEquals("c", path("c///").toString());
-        assertEquals("/c", path("/c").toString());
-        assertEquals("/c", path("/c/").toString());
-        assertEquals("/c", path("/c///").toString());
-        assertEquals("/", path("/").toString());
-        assertEquals("", path("").toString());
-        assertEquals("/a/b/c", path("/a/b/c").toString());
-        assertEquals("/a/b/c", path("///a///b///c").toString());
-        assertEquals("/a/./c", path("///a///.///c//").toString());
-    }
-
-    @Test
-    public void resolve_from_path() throws Exception {
-        assertEquals("/a/b", path("/a").concat(path("b")).toString());
-        assertEquals("/a/b", path("/a/b").concat(path("")).toString());
-        assertEquals("/a/b", path("/a///b/").concat(path("")).toString());
-        assertEquals("/a/b", path("/a/").concat(path("b")).toString());
-        assertEquals("a/b", path("a").concat(path("b")).toString());
-    }
-
-    @Test
-    public void resolve_from_byte_paths() throws Exception {
-        assertEquals("/a/b", path("/a").concat(bytes("b")).toString());
-        assertEquals("/a/b", path("/a").concat(bytes("b///")).toString());
-        assertEquals("/a/b", path("////a").concat(bytes("b///")).toString());
-        assertEquals("/a/b", path("/a/b").concat(bytes("")).toString());
-        assertEquals("/a/b", path("/a///b/").concat(bytes("")).toString());
-        assertEquals("/a/b", path("/a/").concat(bytes("b")).toString());
-        assertEquals("/a/b", path("///a//").concat(bytes("b/")).toString());
-        assertEquals("a/b", path("a").concat(bytes("b")).toString());
-        assertEquals("a/b", path("a").concat(bytes("/b")).toString());
-        assertEquals("a/b", path("a").concat(bytes("/b/")).toString());
-        assertEquals("a/b", path("a").concat(bytes("///b///")).toString());
-        assertEquals("/a/b", path("/a").concat(bytes("/b")).toString());
-    }
-
-    @Test
     public void parent_is_not_null_if_path_has_parent_component() throws Exception {
         assertEquals("/", path("/a").parent().toString());
         assertEquals("/a", path("/a/b").parent().toString());
@@ -131,16 +44,6 @@ public final class PathTest {
         assertNull(path("").parent());
         assertNull(path("a").parent());
         assertNull(path("/").parent());
-    }
-
-    @Test
-    public void name_returns_last_non_empty_path_component() throws Exception {
-        assertEquals("b", path("/a/b").name().toString());
-        assertEquals("b", path("/a/b/").name().toString());
-        assertEquals("b", path("/a//b//").name().toString());
-        assertEquals("b", path("b").name().toString());
-        assertEquals("b", path("/b").name().toString());
-        assertEquals("b", path("b/").name().toString());
     }
 
     @Test
@@ -190,10 +93,6 @@ public final class PathTest {
 
     private Path path(String path) {
         return Path.fromString(path);
-    }
-
-    private byte[] bytes(String path) {
-        return path.getBytes(UTF_8);
     }
 
 }
