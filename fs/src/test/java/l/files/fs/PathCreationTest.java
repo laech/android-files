@@ -97,4 +97,10 @@ public final class PathCreationTest {
                 new HashSet<>(asList(p1, p2, p3, p4)).toString());
     }
 
+    @Test
+    public void can_convert_to_absolute_path() throws Exception {
+        String expected = new File(expectedPath).getAbsolutePath();
+        String actual = Path.fromString(sourcePathString).toAbsolutePath().toString();
+        assertEquals(expected, actual);
+    }
 }
