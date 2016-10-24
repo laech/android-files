@@ -2,12 +2,29 @@ package l.files.fs;
 
 import com.google.common.primitives.Bytes;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 
 import static com.google.common.base.Charsets.UTF_8;
 
 final class Name {
 
+    /*
+     * Binary representation of file name, normally it's whatever
+     * stored on the OS, unless when it's created
+     * from java.lang.String.
+     *
+     * Using the original bytes from the OS means the path is
+     * independent of charset encodings, avoiding byte loss when
+     * converting from/to string, resulting certain files inaccessible.
+     *
+     * Currently, java.io.File suffers from the above issue, because
+     * it stores the path as string internally. So it will fail to
+     * handle certain files. For example, if a file whose binary file
+     * name is [-19, -96, -67, -19, -80, -117], java.io.File.list on
+     * the parent will return it, but any operation on that file will
+     * fail.
+     */
     private final byte[] bytes;
 
     /**
@@ -69,5 +86,9 @@ final class Name {
 
     public boolean isHidden() {
         return bytes[0] == '.';
+    }
+
+    public void appendTo(ByteArrayOutputStream out) {
+        out.write(bytes, 0, bytes.length);
     }
 }

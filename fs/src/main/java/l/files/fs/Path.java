@@ -1,45 +1,15 @@
 package l.files.fs;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.UnmodifiableIterator;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
 
 import javax.annotation.Nullable;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.Math.min;
 import static l.files.fs.Files.UTF_8;
 
-public class Path {
-
-    /*
-     * Binary representation of this path, normally it's whatever
-     * returned from the native calls, unless when it's created
-     * from java.lang.String.
-     *
-     * Using the original bytes from the OS means the path is
-     * independent of charset encodings, avoiding byte loss when
-     * converting from/to string, resulting certain files inaccessible.
-     *
-     * Currently, java.io.File suffers from the above issue, because
-     * it stores the path as string internally. So it will fail to
-     * handle certain files. For example, if a file whose binary file
-     * name is [-19, -96, -67, -19, -80, -117], java.io.File.list on
-     * the parent will return it, but any operation on that file will
-     * fail.
-     */
-    private final ImmutableList<Name> names;
-
-    private final boolean absolute;
-
-    Path(boolean absolute, ImmutableList<Name> names) {
-        this.absolute = absolute;
-        this.names = checkNotNull(names);
-    }
+public abstract class Path {
 
     public static Path fromFile(File file) {
         return fromString(file.getPath());
@@ -64,34 +34,22 @@ public class Path {
             names.add(new Name(out.toByteArray()));
         }
         boolean absolute = path.length > 0 && path[0] == '/';
-        return new Path(absolute, names.build());
+        RelativePath result = new RelativePath(names.build());
+        if (absolute) {
+            return new AbsolutePath(result);
+        }
+        return result;
+    }
+
+    public FileSystem fileSystem() {
+        return Paths.Holder.FILE_SYSTEM;
     }
 
     public byte[] toByteArray() {
         return toByteArray(new ByteArrayOutputStream()).toByteArray();
     }
 
-    ByteArrayOutputStream toByteArray(ByteArrayOutputStream out) {
-        if (absolute) {
-            out.write('/');
-        }
-        UnmodifiableIterator<Name> iterator = names.iterator();
-        while (iterator.hasNext()) {
-            try {
-                out.write(iterator.next().toByteArray());
-            } catch (IOException e) {
-                throw new AssertionError(e);
-            }
-            if (iterator.hasNext()) {
-                out.write('/');
-            }
-        }
-        return out;
-    }
-
-    public FileSystem fileSystem() {
-        return Paths.Holder.FILE_SYSTEM;
-    }
+    abstract ByteArrayOutputStream toByteArray(ByteArrayOutputStream out);
 
     /**
      * Returns a string representation of this path.
@@ -104,13 +62,7 @@ public class Path {
         return toString(new StringBuilder()).toString();
     }
 
-    StringBuilder toString(StringBuilder builder) {
-        if (absolute) {
-            builder.append('/');
-        }
-        Joiner.on('/').appendTo(builder, names);
-        return builder;
-    }
+    abstract StringBuilder toString(StringBuilder builder);
 
     /**
      * Converts this path to a {@link java.io.File},
@@ -121,36 +73,30 @@ public class Path {
         return new File(toString());
     }
 
-    public Path toAbsolutePath() {
-        if (absolute) {
-            return this;
-        }
-        return fromString(new File("").getAbsolutePath()).concat(this);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = names.hashCode();
-        result = 31 * result + (absolute ? 1 : 0);
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        return o instanceof Path &&
-                absolute == ((Path) o).absolute &&
-                names.equals(((Path) o).names);
-    }
+    /**
+     * If this is a relative path, converts it to an absolute path by
+     * concatenating the current working directory with this path.
+     * If this path is already an absolute path returns this.
+     */
+    abstract AbsolutePath toAbsolutePath();
 
     /**
-     * Resolves the given path relative to this file.
+     * If this is an absolute path, converts it to a relative path by
+     * simply dropping the leading path separator. If this path is
+     * already a relative path, returns this.
      */
-    public Path concat(Path path) {
-        return new Path(absolute, ImmutableList.<Name>builder()
-                .addAll(names)
-                .addAll(path.names)
-                .build());
-    }
+    abstract RelativePath toRelativePath();
+
+    @Override
+    public abstract int hashCode();
+
+    @Override
+    public abstract boolean equals(Object o);
+
+    /**
+     * Concatenates {@code path} onto the end of this path.
+     */
+    public abstract Path concat(Path path);
 
     public Path concat(String path) {
         return concat(fromString(path));
@@ -160,60 +106,39 @@ public class Path {
         return concat(fromByteArray(path));
     }
 
+    /**
+     * Returns the parent file, if any. For example:
+     * <pre>
+     *     "/a/b" ->  "/a"
+     *     "/a"   ->  "/"   (root path, absolute)
+     *     "/"    ->  null
+     *     "a"    ->  ""    (current working directory, relative)
+     *     ""     ->  null
+     * </pre>
+     */
     @Nullable
-    public Path parent() {
-        if (names.isEmpty()) {
-            return null;
-        }
-        if (names.size() == 1 && !absolute) {
-            return null;
-        }
-        return new Path(absolute, names.subList(0, names.size() - 1));
-    }
+    public abstract Path parent();
 
     /**
-     * Gets the name of this file, or empty if this is the root file.
+     * Gets the name of this file, maybe empty but never null.
      */
-    public Path name() {
-        return new Path(false, names.reverse().subList(0, min(1, names.size())));
-    }
+    public abstract Path name();
 
-    public boolean isHidden() {
-        return !names.isEmpty() && names.get(names.size() - 1).isHidden();
-    }
+    public abstract boolean isHidden();
 
     /**
      * Returns true if the given path is an ancestor of this path,
      * or equal to this path.
      */
-    public boolean startsWith(Path that) {
-        if (absolute != that.absolute) {
-            return false;
-        }
-        if (that.names.size() > names.size()) {
-            return false;
-        }
-        if (!absolute && that.names.isEmpty() != names.isEmpty()) {
-            return false;
-        }
-        return names.subList(0, that.names.size()).equals(that.names);
-    }
+    public abstract boolean startsWith(Path that);
 
     /**
-     * Returns a file with the given parent replaced.
-     * <p/>
-     * e.g.
+     * Returns a path by replace the prefix {@code src} with {@code dst}. For example
      * <pre>
-     * File("/a/b").concat(File("/a"), File("/c")) =
-     * File("/c/b")
+     * "/a/b".rebase("/a", "/hello") -> "/hello/b"
      * </pre>
      *
      * @throws IllegalArgumentException if {@code !this.startsWith(src)}
      */
-    public Path rebase(Path src, Path dst) {
-        if (!startsWith(src)) {
-            throw new IllegalArgumentException();
-        }
-        return dst.concat(new Path(absolute, names.subList(src.names.size(), names.size())));
-    }
+    public abstract Path rebase(Path src, Path dst);
 }
