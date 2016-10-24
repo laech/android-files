@@ -27,7 +27,7 @@ public final class PathConcatTest {
         this.expectedPath = expectedPath;
     }
 
-    @Parameters(name = "\"{0}\"")
+    @Parameters(name = "\"{0}\".concat(\"{1}\") -> \"{2}\"")
     public static Collection<Object[]> paths() {
         return asList(new Object[][]{
                 {"", "", ""},
