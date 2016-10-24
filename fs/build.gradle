@@ -5,6 +5,6 @@ targetCompatibility = 1.7
 
 dependencies {
     compile project(':base')
-    compile 'org.apache.commons:commons-lang3:3.5'
+    compile "com.google.guava:guava:$guavaVersion"
     testCompile 'junit:junit:4.12'
 }

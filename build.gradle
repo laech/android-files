@@ -16,6 +16,7 @@ buildscript {
     ext.buildToolsVersion = '24.0.3'
     ext.supportLibVersion = '24.2.1'
     ext.firebaseVersion = '9.4.0'
+    ext.guavaVersion = '19.0'
 
 }
 

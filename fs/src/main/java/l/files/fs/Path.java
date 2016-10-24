@@ -1,18 +1,20 @@
 package l.files.fs;
 
-import org.apache.commons.lang3.ArrayUtils;
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.UnmodifiableIterator;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.util.Arrays;
+import java.io.IOException;
 
 import javax.annotation.Nullable;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.Math.min;
 import static l.files.fs.Files.UTF_8;
 
-public final class Path {
-
-    private static final byte PATH_SEPARATOR = '/';
+public class Path {
 
     /*
      * Binary representation of this path, normally it's whatever
@@ -29,35 +31,14 @@ public final class Path {
      * name is [-19, -96, -67, -19, -80, -117], java.io.File.list on
      * the parent will return it, but any operation on that file will
      * fail.
-     *
-     * This class is free of the above issue.
      */
-    private final byte[] path;
+    private final ImmutableList<Name> names;
 
-    private Path(byte[] path) {
-        this.path = normalize(path.clone()); // Too much work here
-    }
+    private final boolean absolute;
 
-    private static byte[] normalize(byte[] path) {
-        int length = lengthBySkippingEndPathSeparators(path, path.length);
-        if (length == 0) {
-            length = path.length;
-        }
-        return removeDuplicatePathSeparators(path, length);
-    }
-
-    private static byte[] removeDuplicatePathSeparators(byte[] path, int length) {
-        ByteArrayOutputStream out = new ByteArrayOutputStream(length);
-        boolean skipNextPathSeparator = false;
-        for (int i = 0; i < length; i++) {
-            byte b = path[i];
-            if (b == PATH_SEPARATOR && skipNextPathSeparator) {
-                continue;
-            }
-            out.write(b);
-            skipNextPathSeparator = (b == PATH_SEPARATOR);
-        }
-        return out.toByteArray();
+    Path(boolean absolute, ImmutableList<Name> names) {
+        this.absolute = absolute;
+        this.names = checkNotNull(names);
     }
 
     public static Path fromFile(File file) {
@@ -69,11 +50,43 @@ public final class Path {
     }
 
     public static Path fromByteArray(byte[] path) {
-        return new Path(path);
+        ImmutableList.Builder<Name> names = ImmutableList.builder();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        for (byte b : path) {
+            if (b != '/') {
+                out.write(b);
+            } else if (out.size() > 0) {
+                names.add(new Name(out.toByteArray()));
+                out.reset();
+            }
+        }
+        if (out.size() > 0) {
+            names.add(new Name(out.toByteArray()));
+        }
+        boolean absolute = path.length > 0 && path[0] == '/';
+        return new Path(absolute, names.build());
     }
 
     public byte[] toByteArray() {
-        return path.clone();
+        return toByteArray(new ByteArrayOutputStream()).toByteArray();
+    }
+
+    ByteArrayOutputStream toByteArray(ByteArrayOutputStream out) {
+        if (absolute) {
+            out.write('/');
+        }
+        UnmodifiableIterator<Name> iterator = names.iterator();
+        while (iterator.hasNext()) {
+            try {
+                out.write(iterator.next().toByteArray());
+            } catch (IOException e) {
+                throw new AssertionError(e);
+            }
+            if (iterator.hasNext()) {
+                out.write('/');
+            }
+        }
+        return out;
     }
 
     public FileSystem fileSystem() {
@@ -88,7 +101,15 @@ public final class Path {
      */
     @Override
     public String toString() {
-        return new String(path, UTF_8);
+        return toString(new StringBuilder()).toString();
+    }
+
+    StringBuilder toString(StringBuilder builder) {
+        if (absolute) {
+            builder.append('/');
+        }
+        Joiner.on('/').appendTo(builder, names);
+        return builder;
     }
 
     /**
@@ -101,104 +122,64 @@ public final class Path {
     }
 
     public Path toAbsolutePath() {
-        if (isAbsolutePath()) {
+        if (absolute) {
             return this;
         }
         return fromString(new File("").getAbsolutePath()).concat(this);
     }
 
-    public boolean isEmpty() {
-        return path.length == 0;
-    }
-
-    public boolean isAbsolutePath() {
-        return path.length > 0 && path[0] == PATH_SEPARATOR;
-    }
-
     @Override
     public int hashCode() {
-        return Arrays.hashCode(path);
+        int result = names.hashCode();
+        result = 31 * result + (absolute ? 1 : 0);
+        return result;
     }
 
     @Override
     public boolean equals(Object o) {
         return o instanceof Path &&
-                Arrays.equals(path, ((Path) o).path);
+                absolute == ((Path) o).absolute &&
+                names.equals(((Path) o).names);
     }
 
     /**
      * Resolves the given path relative to this file.
      */
     public Path concat(Path path) {
-        return concat(path.toByteArray());
+        return new Path(absolute, ImmutableList.<Name>builder()
+                .addAll(names)
+                .addAll(path.names)
+                .build());
     }
 
     public Path concat(String path) {
-        return concat(path.getBytes(UTF_8));
+        return concat(fromString(path));
     }
 
     public Path concat(byte[] path) {
-        int len = lengthBySkippingEndPathSeparators(path, path.length);
-        if (len <= 0) {
-            return this;
-        }
-        return fromByteArray(concatPaths(this.path, path, 0, len));
-    }
-
-    private static byte[] concatPaths(byte[] base, byte[] add, int addPos, int addLen) {
-        if (addLen == 0) {
-            return base;
-        }
-
-        byte[] joinedPath;
-        if (base.length == 0 || (base[base.length - 1] != PATH_SEPARATOR && add[addPos] != PATH_SEPARATOR)) {
-            joinedPath = Arrays.copyOf(base, base.length + 1 + addLen);
-            joinedPath[base.length] = PATH_SEPARATOR;
-            System.arraycopy(add, addPos, joinedPath, base.length + 1, addLen);
-
-        } else {
-            joinedPath = Arrays.copyOf(base, base.length + addLen);
-            System.arraycopy(add, addPos, joinedPath, base.length, addLen);
-
-        }
-
-        return joinedPath;
-    }
-
-    private boolean isRoot() {
-        return path.length == 1 && path[0] == PATH_SEPARATOR;
+        return concat(fromByteArray(path));
     }
 
     @Nullable
     public Path parent() {
-        if (isRoot()) {
+        if (names.isEmpty()) {
             return null;
         }
-        int i = ArrayUtils.lastIndexOf(path, PATH_SEPARATOR);
-        if (i < 0) {
+        if (names.size() == 1 && !absolute) {
             return null;
         }
-        return fromByteArray(Arrays.copyOfRange(path, 0, i + 1));
-    }
-
-    private static int lengthBySkippingEndPathSeparators(byte[] path, int fromLength) {
-        while (fromLength > 0 && path[fromLength - 1] == PATH_SEPARATOR) {
-            fromLength--;
-        }
-        return fromLength;
+        return new Path(absolute, names.subList(0, names.size() - 1));
     }
 
     /**
      * Gets the name of this file, or empty if this is the root file.
      */
     public Path name() {
-        int i = ArrayUtils.lastIndexOf(path, PATH_SEPARATOR);
-        return fromByteArray(Arrays.copyOfRange(path, i + 1, path.length));
+        return new Path(false, names.reverse().subList(0, min(1, names.size())));
     }
 
     public boolean isHidden() {
-        int i = ArrayUtils.lastIndexOf(path, PATH_SEPARATOR);
-        return path[i + 1] == '.';
+        return !names.isEmpty() && names.get(names.size() - 1).isHidden();
     }
 
     /**
@@ -206,20 +187,16 @@ public final class Path {
      * or equal to this path.
      */
     public boolean startsWith(Path that) {
-        if (that.path.length > path.length) {
+        if (absolute != that.absolute) {
             return false;
         }
-        if (that.isEmpty() != isEmpty()) {
+        if (that.names.size() > names.size()) {
             return false;
         }
-        for (int i = 0; i < that.path.length; i++) {
-            if (path[i] != that.path[i]) {
-                return false;
-            }
+        if (!absolute && that.names.isEmpty() != names.isEmpty()) {
+            return false;
         }
-        return path.length == that.path.length ||
-                that.path[that.path.length - 1] == PATH_SEPARATOR ||
-                path[that.path.length] == PATH_SEPARATOR;
+        return names.subList(0, that.names.size()).equals(that.names);
     }
 
     /**
@@ -237,11 +214,6 @@ public final class Path {
         if (!startsWith(src)) {
             throw new IllegalArgumentException();
         }
-        byte[] srcBytes = src.toByteArray();
-        return fromByteArray(concatPaths(
-                dst.toByteArray(),
-                path,
-                srcBytes.length,
-                path.length - srcBytes.length));
+        return dst.concat(new Path(absolute, names.subList(src.names.size(), names.size())));
     }
 }
