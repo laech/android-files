@@ -107,6 +107,10 @@ public final class Path {
         return fromString(new File("").getAbsolutePath()).concat(this);
     }
 
+    public boolean isEmpty() {
+        return path.length == 0;
+    }
+
     public boolean isAbsolutePath() {
         return path.length > 0 && path[0] == PATH_SEPARATOR;
     }
@@ -201,29 +205,21 @@ public final class Path {
      * Returns true if the given path is an ancestor of this path,
      * or equal to this path.
      */
-    public boolean startsWith(Path p) {
-
-        byte[] thisPath = path;
-        byte[] thatPath = p.path;
-
-        if (thatPath.length == 0 ||
-                thisPath.length < thatPath.length) {
+    public boolean startsWith(Path that) {
+        if (that.path.length > path.length) {
             return false;
-
-        } else if (thisPath.length > thatPath.length) {
-            if (thisPath[thatPath.length] != PATH_SEPARATOR &&
-                    thatPath[thatPath.length - 1] != PATH_SEPARATOR) {
+        }
+        if (that.isEmpty() != isEmpty()) {
+            return false;
+        }
+        for (int i = 0; i < that.path.length; i++) {
+            if (path[i] != that.path[i]) {
                 return false;
             }
         }
-
-        for (int i = 0; i < thatPath.length; i++) {
-            if (thisPath[i] != thatPath[i]) {
-                return false;
-            }
-        }
-
-        return true;
+        return path.length == that.path.length ||
+                that.path[that.path.length - 1] == PATH_SEPARATOR ||
+                path[that.path.length] == PATH_SEPARATOR;
     }
 
     /**

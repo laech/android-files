@@ -44,24 +44,6 @@ public final class PathTest {
     }
 
     @Test
-    public void startsWith_returns_true_for_ancestors() throws Exception {
-        assertTrue(path("/a/b").startsWith(path("/a")));
-        assertTrue(path("/a/b").startsWith(path("/")));
-    }
-
-    @Test
-    public void startsWith_returns_true_for_self() throws Exception {
-        assertTrue(path("/a/b").startsWith(path("/a/b")));
-    }
-
-    @Test
-    public void startsWith_returns_false_for_non_ancestor_non_self_paths() throws Exception {
-        assertFalse(path("/a/b").startsWith(path("/b")));
-        assertFalse(path("/aa/b").startsWith(path("/a")));
-        assertFalse(path("/aa/b").startsWith(path("")));
-    }
-
-    @Test
     public void rebase_self_to_new_ancestor() throws Exception {
         assertEquals(path("/a/b/c"), path("/c").rebase(path("/"), path("/a/b")));
         assertEquals(path("/a/b/c"), path("/c").rebase(path("/"), path("/a/b")));
