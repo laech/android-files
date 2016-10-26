@@ -42,10 +42,6 @@ public abstract class Path {
         return result;
     }
 
-    public FileSystem fileSystem() {
-        return Paths.Holder.FILE_SYSTEM;
-    }
-
     public byte[] toByteArray() {
         return toByteArray(new ByteArrayOutputStream()).toByteArray();
     }
