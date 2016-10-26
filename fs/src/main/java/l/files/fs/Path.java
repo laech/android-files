@@ -2,6 +2,8 @@ package l.files.fs;
 
 import com.google.common.collect.ImmutableList;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 
@@ -20,22 +22,21 @@ public abstract class Path {
     }
 
     public static Path fromByteArray(byte[] path) {
+
         ImmutableList.Builder<Name> names = ImmutableList.builder();
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        for (byte b : path) {
-            if (b != '/') {
-                out.write(b);
-            } else if (out.size() > 0) {
-                names.add(new Name(out.toByteArray()));
-                out.reset();
+
+        for (int start = 0, end; start < path.length; start = end + 1) {
+            end = ArrayUtils.indexOf(path, (byte) '/', start);
+            if (end == -1) {
+                end = path.length;
+            }
+            if (end > start) {
+                names.add(new Name(path, start, end));
             }
         }
-        if (out.size() > 0) {
-            names.add(new Name(out.toByteArray()));
-        }
-        boolean absolute = path.length > 0 && path[0] == '/';
+
         RelativePath result = new RelativePath(names.build());
-        if (absolute) {
+        if (path.length > 0 && path[0] == '/') {
             return new AbsolutePath(result);
         }
         return result;

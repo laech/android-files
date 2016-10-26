@@ -30,8 +30,8 @@ final class Name {
     /**
      * @throws IllegalArgumentException if name is empty, or contains '/', or contains '\0'
      */
-    Name(byte[] bytes) {
-        this.bytes = validateName(bytes.clone());
+    Name(byte[] bytes, int start, int end) {
+        this.bytes = validateName(Arrays.copyOfRange(bytes, start, end));
     }
 
     private static byte[] validateName(byte[] bytes) {
