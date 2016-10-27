@@ -46,7 +46,7 @@ public abstract class Path {
         throw new RuntimeException("TODO");
     }
 
-    public byte[] toByteArray() {
+    public final byte[] toByteArray() {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         toByteArray(out);
         return out.toByteArray();
@@ -61,7 +61,7 @@ public abstract class Path {
      * sequences with some default replacement string.
      */
     @Override
-    public String toString() {
+    public final String toString() {
         StringBuilder builder = new StringBuilder();
         toString(builder);
         return builder.toString();
@@ -74,7 +74,7 @@ public abstract class Path {
      * this method always replaces malformed-input and unmappable-character
      * sequences with some default replacement string.
      */
-    public File toFile() {
+    public final File toFile() {
         return new File(toString());
     }
 
@@ -103,11 +103,11 @@ public abstract class Path {
      */
     public abstract Path concat(Path path);
 
-    public Path concat(String path) {
+    public final Path concat(String path) {
         return concat(fromString(path));
     }
 
-    public Path concat(byte[] path) {
+    public final Path concat(byte[] path) {
         return concat(fromByteArray(path));
     }
 
