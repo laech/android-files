@@ -21,12 +21,7 @@ final class RelativePath extends Path {
     }
 
     @Override
-    public byte[] toByteArray() {
-        return toByteArray(new ByteArrayOutputStream()).toByteArray();
-    }
-
-    @Override
-    ByteArrayOutputStream toByteArray(ByteArrayOutputStream out) {
+    void toByteArray(ByteArrayOutputStream out) {
         UnmodifiableIterator<Name> iterator = names.iterator();
         while (iterator.hasNext()) {
             iterator.next().appendTo(out);
@@ -34,13 +29,11 @@ final class RelativePath extends Path {
                 out.write('/');
             }
         }
-        return out;
     }
 
     @Override
-    StringBuilder toString(StringBuilder builder) {
+    void toString(StringBuilder builder) {
         Joiner.on('/').appendTo(builder, names);
-        return builder;
     }
 
     @Override

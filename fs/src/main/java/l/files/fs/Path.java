@@ -43,10 +43,12 @@ public abstract class Path {
     }
 
     public byte[] toByteArray() {
-        return toByteArray(new ByteArrayOutputStream()).toByteArray();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        toByteArray(out);
+        return out.toByteArray();
     }
 
-    abstract ByteArrayOutputStream toByteArray(ByteArrayOutputStream out);
+    abstract void toByteArray(ByteArrayOutputStream out);
 
     /**
      * Returns a string representation of this path.
@@ -56,10 +58,12 @@ public abstract class Path {
      */
     @Override
     public String toString() {
-        return toString(new StringBuilder()).toString();
+        StringBuilder builder = new StringBuilder();
+        toString(builder);
+        return builder.toString();
     }
 
-    abstract StringBuilder toString(StringBuilder builder);
+    abstract void toString(StringBuilder builder);
 
     /**
      * Converts this path to a {@link java.io.File},

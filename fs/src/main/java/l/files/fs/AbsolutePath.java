@@ -17,15 +17,15 @@ final class AbsolutePath extends Path {
     }
 
     @Override
-    ByteArrayOutputStream toByteArray(ByteArrayOutputStream out) {
+    void toByteArray(ByteArrayOutputStream out) {
         out.write('/');
-        return path.toByteArray(out);
+        path.toByteArray(out);
     }
 
     @Override
-    StringBuilder toString(StringBuilder builder) {
+    void toString(StringBuilder builder) {
         builder.append('/');
-        return path.toString(builder);
+        path.toString(builder);
     }
 
     @Override
