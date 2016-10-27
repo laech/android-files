@@ -42,6 +42,10 @@ public abstract class Path {
         return result;
     }
 
+    FileSystem fileSystem() {
+        throw new RuntimeException("TODO");
+    }
+
     public byte[] toByteArray() {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         toByteArray(out);
