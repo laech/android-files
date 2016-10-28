@@ -13,12 +13,12 @@ import static org.junit.Assert.assertEquals;
 @RunWith(Parameterized.class)
 public final class PathParentTest {
 
-    private final String path;
-    private final String parent;
+    private final Path path;
+    private final String expectedParent;
 
-    public PathParentTest(String path, String parent) {
-        this.path = path;
-        this.parent = parent;
+    public PathParentTest(String path, String expectedParent) {
+        this.path = Path.fromString(path);
+        this.expectedParent = expectedParent;
     }
 
     @Parameters(name = "\"{0}\".parent() == \"{1}\"")
@@ -53,8 +53,8 @@ public final class PathParentTest {
 
     @Test
     public void test() throws Exception {
-        String expected = String.valueOf(parent);
-        String actual = String.valueOf(Path.fromString(path).parent());
+        String expected = String.valueOf(expectedParent);
+        String actual = String.valueOf(path.parent());
         assertEquals(expected, actual);
     }
 }
