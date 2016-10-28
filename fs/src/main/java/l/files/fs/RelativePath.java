@@ -38,7 +38,8 @@ final class RelativePath extends Path {
 
     @Override
     public AbsolutePath toAbsolutePath() {
-        return fromString(new File("").getAbsolutePath()).concat(this).toAbsolutePath();
+        Path workingDirectory = fromString(new File("").getAbsolutePath());
+        return workingDirectory.concat(this).toAbsolutePath();
     }
 
     @Override
@@ -80,18 +81,18 @@ final class RelativePath extends Path {
     }
 
     public boolean isHidden() {
-        return !names.isEmpty() && names.get(names.size() - 1).isHidden();
+        return !names.isEmpty() &&
+                names.get(names.size() - 1).isHidden();
     }
 
     @Override
-    public boolean startsWith(Path that) {
-        if (!(that instanceof RelativePath)) {
+    public boolean startsWith(Path prefix) {
+        if (!(prefix instanceof RelativePath)) {
             return false;
         }
-        if (((RelativePath) that).names.size() > names.size()) {
-            return false;
-        }
-        return names.subList(0, ((RelativePath) that).names.size()).equals(((RelativePath) that).names);
+        ImmutableList<Name> prefixNames = ((RelativePath) prefix).names;
+        return prefixNames.size() <= names.size() &&
+                prefixNames.equals(names.subList(0, prefixNames.size()));
     }
 
     @Override
@@ -100,6 +101,7 @@ final class RelativePath extends Path {
             throw new IllegalArgumentException(
                     "\"" + this + "\" does not start with \"" + src + "\"");
         }
-        return dst.concat(new RelativePath(names.subList(((RelativePath) src).names.size(), names.size())));
+        int prefixSize = ((RelativePath) src).names.size();
+        return dst.concat(new RelativePath(names.subList(prefixSize, names.size())));
     }
 }
