@@ -117,11 +117,11 @@ final class RelativePath extends Path {
 
     @Override
     public Path rebase(Path oldPrefix, Path newPrefix) {
-        ensureIsValidPrefix(oldPrefix);
+        ensurePrefixIsValid(oldPrefix);
         return newPrefix.concat(pathFromLengthOf(oldPrefix));
     }
 
-    private void ensureIsValidPrefix(Path prefix) {
+    private void ensurePrefixIsValid(Path prefix) {
         if (!startsWith(prefix)) {
             throw new IllegalArgumentException(
                     "\"" + this + "\" does not start with " +

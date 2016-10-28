@@ -64,10 +64,7 @@ final class AbsolutePath extends Path {
     @Override
     public Path parent() {
         RelativePath parent = path.parent();
-        if (parent != null) {
-            return new AbsolutePath(parent);
-        }
-        return null;
+        return parent == null ? null : new AbsolutePath(parent);
     }
 
     @Override
@@ -88,15 +85,19 @@ final class AbsolutePath extends Path {
 
     @Override
     public Path rebase(Path oldPrefix, Path newPrefix) {
-        if (!(oldPrefix instanceof AbsolutePath)) {
-            throw new IllegalArgumentException(
-                    "\"" + this + "\" does not start with \"" + oldPrefix + "\"");
-        }
+        ensurePrefixIsAbsolute(oldPrefix);
         try {
             return path.rebase(((AbsolutePath) oldPrefix).path, newPrefix);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException(
                     "\"" + this + "\" does not start with \"" + oldPrefix + "\"", e);
+        }
+    }
+
+    private void ensurePrefixIsAbsolute(Path oldPrefix) {
+        if (!(oldPrefix instanceof AbsolutePath)) {
+            throw new IllegalArgumentException(
+                    "\"" + this + "\" does not start with \"" + oldPrefix + "\"");
         }
     }
 }
