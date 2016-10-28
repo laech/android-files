@@ -56,6 +56,7 @@ public final class PathRebaseTest {
                 {"/a", "/", "b", "b/a"},
                 {"/a", "/a", "b", "b"},
                 {"a/b", "a", "/abc", "/abc/b"},
+                {"a/b", "a/b", "/abc", "/abc"},
                 {"a/b", "a/", "c", "c/b"},
                 {"a/b", "a///", "c", "c/b"},
                 {"//a", "/a", "", ""},
