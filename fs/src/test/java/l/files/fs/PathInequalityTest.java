@@ -15,15 +15,15 @@ import static org.junit.Assert.assertEquals;
 @RunWith(Parameterized.class)
 public final class PathInequalityTest {
 
-    private final String path1;
-    private final String path2;
+    private final Path path1;
+    private final Path path2;
 
     public PathInequalityTest(String path1, String path2) {
-        this.path1 = path1;
-        this.path2 = path2;
+        this.path1 = Path.fromString(path1);
+        this.path2 = Path.fromString(path2);
     }
 
-    @Parameters(name = "\"{0}\"")
+    @Parameters(name = "!\"{0}\".equals(\"{1}\")")
     public static Collection<Object[]> paths() {
         return asList(new Object[][]{
                 {"", " "},
@@ -39,10 +39,8 @@ public final class PathInequalityTest {
     }
 
     @Test
-    public void paths_are_not_equivalent() throws Exception {
-        Set<Path> paths = new HashSet<>();
-        paths.add(Path.fromString(path1));
-        paths.add(Path.fromString(path2));
+    public void test() throws Exception {
+        Set<Path> paths = new HashSet<>(asList(path1, path2));
         assertEquals(2, paths.size());
     }
 
