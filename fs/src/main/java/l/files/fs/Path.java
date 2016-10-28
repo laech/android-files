@@ -22,9 +22,13 @@ public abstract class Path {
     }
 
     public static Path fromByteArray(byte[] path) {
+        RelativePath result = new RelativePath(getNames(path));
+        boolean absolute = path.length > 0 && path[0] == '/';
+        return absolute ? new AbsolutePath(result) : result;
+    }
 
+    private static ImmutableList<Name> getNames(byte[] path) {
         ImmutableList.Builder<Name> names = ImmutableList.builder();
-
         for (int start = 0, end; start < path.length; start = end + 1) {
             end = ArrayUtils.indexOf(path, (byte) '/', start);
             if (end == -1) {
@@ -34,12 +38,7 @@ public abstract class Path {
                 names.add(new Name(path, start, end));
             }
         }
-
-        RelativePath result = new RelativePath(names.build());
-        if (path.length > 0 && path[0] == '/') {
-            return new AbsolutePath(result);
-        }
-        return result;
+        return names.build();
     }
 
     FileSystem fileSystem() {
