@@ -13,15 +13,15 @@ import static org.junit.Assert.assertEquals;
 @RunWith(Parameterized.class)
 public final class PathNameTest {
 
-    private final String path;
-    private final String name;
+    private final Path path;
+    private final String expectedName;
 
-    public PathNameTest(String path, String name) {
-        this.path = path;
-        this.name = name;
+    public PathNameTest(String path, String expectedName) {
+        this.path = Path.fromString(path);
+        this.expectedName = expectedName;
     }
 
-    @Parameters(name = "\"{0}\"")
+    @Parameters(name = "\"{0}\".name() == \"{1}\"")
     public static Collection<Object[]> paths() {
         return asList(new Object[][]{
 
@@ -58,8 +58,8 @@ public final class PathNameTest {
     }
 
     @Test
-    public void name_is_as_expected() throws Exception {
-        String actual = Path.fromString(path).name().toString();
-        assertEquals(name, actual);
+    public void test() throws Exception {
+        String actual = path.name().toString();
+        assertEquals(expectedName, actual);
     }
 }
