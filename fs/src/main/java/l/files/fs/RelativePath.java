@@ -10,7 +10,7 @@ import java.io.File;
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.Math.min;
+import static java.lang.Math.max;
 
 final class RelativePath extends Path {
 
@@ -38,8 +38,11 @@ final class RelativePath extends Path {
 
     @Override
     public Path toAbsolutePath() {
-        Path workingDirectory = fromString(new File("").getAbsolutePath());
-        return workingDirectory.concat(this);
+        return workingDirectoryPath().concat(this);
+    }
+
+    private Path workingDirectoryPath() {
+        return fromString(new File("").getAbsolutePath());
     }
 
     @Override
@@ -77,33 +80,60 @@ final class RelativePath extends Path {
         if (names.isEmpty()) {
             return null;
         }
-        return new RelativePath(names.subList(0, names.size() - 1));
+        return new RelativePath(parentNames());
+    }
+
+    private ImmutableList<Name> parentNames() {
+        return names.subList(0, names.size() - 1);
     }
 
     @Override
     public RelativePath name() {
-        return new RelativePath(names.reverse().subList(0, min(1, names.size())));
+        return new RelativePath(lastNameAsListOrEmpty());
+    }
+
+    private ImmutableList<Name> lastNameAsListOrEmpty() {
+        return names.subList(max(0, names.size() - 1), names.size());
     }
 
     public boolean isHidden() {
-        return !names.isEmpty() &&
-                names.get(names.size() - 1).isHidden();
+        return !names.isEmpty() && lastName().isHidden();
+    }
+
+    private Name lastName() {
+        return names.get(names.size() - 1);
     }
 
     @Override
     public boolean startsWith(Path prefix) {
         return prefix instanceof RelativePath &&
                 prefix.names().size() <= names.size() &&
-                prefix.names().equals(names.subList(0, prefix.names().size()));
+                prefix.names().equals(namesToLengthOf(prefix));
+    }
+
+    private ImmutableList<Name> namesToLengthOf(Path prefix) {
+        return names.subList(0, prefix.names().size());
     }
 
     @Override
     public Path rebase(Path oldPrefix, Path newPrefix) {
-        if (!startsWith(oldPrefix)) {
+        ensureIsValidPrefix(oldPrefix);
+        return newPrefix.concat(pathFromLengthOf(oldPrefix));
+    }
+
+    private void ensureIsValidPrefix(Path prefix) {
+        if (!startsWith(prefix)) {
             throw new IllegalArgumentException(
-                    "\"" + this + "\" does not start with \"" + oldPrefix + "\"");
+                    "\"" + this + "\" does not start with " +
+                            "\"" + prefix + "\"");
         }
-        int prefixSize = oldPrefix.names().size();
-        return newPrefix.concat(new RelativePath(names.subList(prefixSize, names.size())));
+    }
+
+    private RelativePath pathFromLengthOf(Path prefix) {
+        return new RelativePath(namesFromLengthOf(prefix));
+    }
+
+    private ImmutableList<Name> namesFromLengthOf(Path prefix) {
+        return names.subList(prefix.names().size(), names.size());
     }
 }
