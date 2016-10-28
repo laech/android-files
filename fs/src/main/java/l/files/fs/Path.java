@@ -134,18 +134,18 @@ public abstract class Path {
     public abstract boolean isHidden();
 
     /**
-     * Returns true if the given path is an ancestor of this path,
+     * Returns true if the {@code prefix} is an ancestor of this path,
      * or equal to this path.
      */
-    public abstract boolean startsWith(Path that);
+    public abstract boolean startsWith(Path prefix);
 
     /**
-     * Returns a path by replace the prefix {@code src} with {@code dst}. For example
+     * Returns a path by replace the prefix {@code oldPrefix} with {@code newPrefix}. For example
      * <pre>
      * "/a/b".rebase("/a", "/hello") -> "/hello/b"
      * </pre>
      *
-     * @throws IllegalArgumentException if {@code !this.startsWith(src)}
+     * @throws IllegalArgumentException if {@code !this.startsWith(oldPrefix)}
      */
-    public abstract Path rebase(Path src, Path dst);
+    public abstract Path rebase(Path oldPrefix, Path newPrefix);
 }

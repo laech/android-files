@@ -81,22 +81,22 @@ final class AbsolutePath extends Path {
     }
 
     @Override
-    public boolean startsWith(Path that) {
-        return that instanceof AbsolutePath &&
-                path.startsWith(((AbsolutePath) that).path);
+    public boolean startsWith(Path prefix) {
+        return prefix instanceof AbsolutePath &&
+                path.startsWith(((AbsolutePath) prefix).path);
     }
 
     @Override
-    public Path rebase(Path src, Path dst) {
-        if (!(src instanceof AbsolutePath)) {
+    public Path rebase(Path oldPrefix, Path newPrefix) {
+        if (!(oldPrefix instanceof AbsolutePath)) {
             throw new IllegalArgumentException(
-                    "\"" + this + "\" does not start with \"" + src + "\"");
+                    "\"" + this + "\" does not start with \"" + oldPrefix + "\"");
         }
         try {
-            return path.rebase(((AbsolutePath) src).path, dst);
+            return path.rebase(((AbsolutePath) oldPrefix).path, newPrefix);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException(
-                    "\"" + this + "\" does not start with \"" + src + "\"", e);
+                    "\"" + this + "\" does not start with \"" + oldPrefix + "\"", e);
         }
     }
 }

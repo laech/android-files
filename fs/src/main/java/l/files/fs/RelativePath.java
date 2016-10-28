@@ -98,12 +98,12 @@ final class RelativePath extends Path {
     }
 
     @Override
-    public Path rebase(Path src, Path dst) {
-        if (!startsWith(src)) {
+    public Path rebase(Path oldPrefix, Path newPrefix) {
+        if (!startsWith(oldPrefix)) {
             throw new IllegalArgumentException(
-                    "\"" + this + "\" does not start with \"" + src + "\"");
+                    "\"" + this + "\" does not start with \"" + oldPrefix + "\"");
         }
-        int prefixSize = src.names().size();
-        return dst.concat(new RelativePath(names.subList(prefixSize, names.size())));
+        int prefixSize = oldPrefix.names().size();
+        return newPrefix.concat(new RelativePath(names.subList(prefixSize, names.size())));
     }
 }
