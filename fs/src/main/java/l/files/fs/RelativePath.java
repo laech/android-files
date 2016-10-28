@@ -97,7 +97,8 @@ final class RelativePath extends Path {
     @Override
     public Path rebase(Path src, Path dst) {
         if (!startsWith(src)) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(
+                    "\"" + this + "\" does not start with \"" + src + "\"");
         }
         return dst.concat(new RelativePath(names.subList(((RelativePath) src).names.size(), names.size())));
     }

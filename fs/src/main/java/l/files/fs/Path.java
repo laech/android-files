@@ -24,10 +24,7 @@ public abstract class Path {
     public static Path fromByteArray(byte[] path) {
         RelativePath result = new RelativePath(getNames(path));
         boolean absolute = path.length > 0 && path[0] == '/';
-        if (absolute) {
-            return new AbsolutePath(result);
-        }
-        return result;
+        return absolute ? new AbsolutePath(result) : result;
     }
 
     private static ImmutableList<Name> getNames(byte[] path) {

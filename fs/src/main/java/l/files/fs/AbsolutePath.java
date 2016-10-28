@@ -83,8 +83,14 @@ final class AbsolutePath extends Path {
     @Override
     public Path rebase(Path src, Path dst) {
         if (!(src instanceof AbsolutePath)) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(
+                    "\"" + this + "\" does not start with \"" + src + "\"");
         }
-        return path.rebase(((AbsolutePath) src).path, dst);
+        try {
+            return path.rebase(((AbsolutePath) src).path, dst);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(
+                    "\"" + this + "\" does not start with \"" + src + "\"", e);
+        }
     }
 }

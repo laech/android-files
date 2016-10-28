@@ -8,9 +8,9 @@ import org.junit.runners.Parameterized.Parameters;
 import java.io.File;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.singleton;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
@@ -82,7 +82,8 @@ public final class PathCreationTest {
 
     @Test
     public void can_recreate_from_file() throws Exception {
-        String actual = Path.fromFile(new File(sourcePathString)).toString();
+        File file = Path.fromString(sourcePathString).toFile();
+        String actual = Path.fromFile(file).toString();
         assertEquals(expectedPath, actual);
     }
 
@@ -93,8 +94,8 @@ public final class PathCreationTest {
         Path p3 = Path.fromByteArray(p2.toByteArray());
         Path p4 = Path.fromFile(new File(sourcePathString));
         assertEquals(
-                singleton(expectedPath).toString(),
-                new HashSet<>(asList(p1, p2, p3, p4)).toString());
+                toSet(expectedPath).toString(),
+                toSet(p1, p2, p3, p4).toString());
     }
 
     @Test
@@ -102,6 +103,11 @@ public final class PathCreationTest {
         String expected = new File(expectedPath).getAbsolutePath();
         String actual = Path.fromString(sourcePathString).toAbsolutePath().toString();
         assertEquals(expected, actual);
+    }
+
+    @SafeVarargs
+    private static <T> Set<T> toSet(T... items) {
+        return new HashSet<>(asList(items));
     }
 
 }
