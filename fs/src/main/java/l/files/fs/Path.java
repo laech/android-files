@@ -82,14 +82,17 @@ public abstract class Path {
      * concatenating the current working directory with this path.
      * If this path is already an absolute path returns this.
      */
-    abstract AbsolutePath toAbsolutePath();
+    public abstract Path toAbsolutePath();
+
+    public abstract boolean isAbsolute();
 
     /**
-     * If this is an absolute path, converts it to a relative path by
-     * simply dropping the leading path separator. If this path is
-     * already a relative path, returns this.
+     * Gets all the file names of this path. For example:
+     * <pre>
+     *     "/a/b/c" -> ["a", "b", "c"]
+     * </pre>
      */
-    abstract RelativePath toRelativePath();
+    abstract ImmutableList<Name> names();
 
     @Override
     public abstract int hashCode();

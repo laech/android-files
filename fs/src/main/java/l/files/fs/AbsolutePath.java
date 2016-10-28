@@ -1,6 +1,7 @@
 package l.files.fs;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableList;
 
 import java.io.ByteArrayOutputStream;
 
@@ -29,13 +30,18 @@ final class AbsolutePath extends Path {
     }
 
     @Override
-    AbsolutePath toAbsolutePath() {
+    public Path toAbsolutePath() {
         return this;
     }
 
     @Override
-    RelativePath toRelativePath() {
-        return path;
+    public boolean isAbsolute() {
+        return true;
+    }
+
+    @Override
+    ImmutableList<Name> names() {
+        return path.names();
     }
 
     @Override
