@@ -13,11 +13,11 @@ import static org.junit.Assert.assertEquals;
 @RunWith(Parameterized.class)
 public final class PathIsHiddenTest {
 
-    private final String path;
+    private final Path path;
     private final boolean hidden;
 
     public PathIsHiddenTest(String path, boolean hidden) {
-        this.path = path;
+        this.path = Path.fromString(path);
         this.hidden = hidden;
     }
 
@@ -51,7 +51,7 @@ public final class PathIsHiddenTest {
     }
 
     @Test
-    public void name_is_as_expected() throws Exception {
-        assertEquals(hidden, Path.fromString(path).isHidden());
+    public void test() throws Exception {
+        assertEquals(hidden, path.isHidden());
     }
 }
