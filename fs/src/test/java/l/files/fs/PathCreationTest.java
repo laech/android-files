@@ -82,7 +82,8 @@ public final class PathCreationTest {
 
     @Test
     public void can_recreate_from_file() throws Exception {
-        String actual = Path.fromFile(new File(sourcePathString)).toString();
+        File file = Path.fromString(sourcePathString).toFile();
+        String actual = Path.fromFile(file).toString();
         assertEquals(expectedPath, actual);
     }
 
