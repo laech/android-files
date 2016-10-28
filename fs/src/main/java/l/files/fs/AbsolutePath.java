@@ -87,17 +87,21 @@ final class AbsolutePath extends Path {
     public Path rebase(Path oldPrefix, Path newPrefix) {
         ensurePrefixIsAbsolute(oldPrefix);
         try {
+
             return path.rebase(((AbsolutePath) oldPrefix).path, newPrefix);
+
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException(
-                    "\"" + this + "\" does not start with \"" + oldPrefix + "\"", e);
+                    "\"" + this + "\" does not start with " +
+                            "\"" + oldPrefix + "\"", e);
         }
     }
 
     private void ensurePrefixIsAbsolute(Path oldPrefix) {
         if (!(oldPrefix instanceof AbsolutePath)) {
             throw new IllegalArgumentException(
-                    "\"" + this + "\" does not start with \"" + oldPrefix + "\"");
+                    "\"" + this + "\" does not start with " +
+                            "\"" + oldPrefix + "\"");
         }
     }
 }

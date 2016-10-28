@@ -77,10 +77,7 @@ final class RelativePath extends Path {
     @Nullable
     @Override
     public RelativePath parent() {
-        if (names.isEmpty()) {
-            return null;
-        }
-        return new RelativePath(parentNames());
+        return names.isEmpty() ? null : new RelativePath(parentNames());
     }
 
     private ImmutableList<Name> parentNames() {
