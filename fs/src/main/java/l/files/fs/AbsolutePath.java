@@ -24,12 +24,6 @@ final class AbsolutePath extends Path {
     }
 
     @Override
-    void toString(StringBuilder builder) {
-        builder.append('/');
-        path.toString(builder);
-    }
-
-    @Override
     public Path toAbsolutePath() {
         return this;
     }

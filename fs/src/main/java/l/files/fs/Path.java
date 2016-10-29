@@ -6,6 +6,7 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 
 import javax.annotation.Nullable;
 
@@ -61,12 +62,14 @@ public abstract class Path {
      */
     @Override
     public final String toString() {
-        StringBuilder builder = new StringBuilder();
-        toString(builder);
-        return builder.toString();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        toByteArray(out);
+        try {
+            return out.toString("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new AssertionError(e);
+        }
     }
-
-    abstract void toString(StringBuilder builder);
 
     /**
      * Converts this path to a {@link java.io.File},

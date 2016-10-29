@@ -1,6 +1,5 @@
 package l.files.fs;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.UnmodifiableIterator;
 
@@ -29,11 +28,6 @@ final class RelativePath extends Path {
                 out.write('/');
             }
         }
-    }
-
-    @Override
-    void toString(StringBuilder builder) {
-        Joiner.on('/').appendTo(builder, names);
     }
 
     @Override
