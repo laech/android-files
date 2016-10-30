@@ -5,8 +5,6 @@ import com.google.common.primitives.Bytes;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 
-import static com.google.common.base.Charsets.UTF_8;
-
 final class Name {
 
     /*
@@ -51,7 +49,7 @@ final class Name {
         if (Bytes.indexOf(name, (byte) '/') >= 0) {
             throw new IllegalArgumentException(
                     "Path separator '/' is not allowed in file name: " +
-                            new String(name, UTF_8));
+                            new String(name, Path.stringEncoding));
         }
     }
 
@@ -60,7 +58,7 @@ final class Name {
         if (i >= 0) {
             throw new IllegalArgumentException(
                     "Null character (index=" + i + ") is not allowed in file name: " +
-                            new String(name, UTF_8));
+                            new String(name, Path.stringEncoding));
         }
     }
 
@@ -77,7 +75,7 @@ final class Name {
 
     @Override
     public String toString() {
-        return new String(bytes, UTF_8);
+        return new String(bytes, Path.stringEncoding);
     }
 
     public byte[] toByteArray() {

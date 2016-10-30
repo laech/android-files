@@ -7,19 +7,21 @@ import org.apache.commons.lang3.ArrayUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 
 import javax.annotation.Nullable;
 
-import static l.files.fs.Files.UTF_8;
-
 public abstract class Path {
+
+    static final Charset stringEncoding =
+            Charset.forName(System.getProperty("sun.jnu.encoding"));
 
     public static Path fromFile(File file) {
         return fromString(file.getPath());
     }
 
     public static Path fromString(String path) {
-        return fromByteArray(path.getBytes(UTF_8));
+        return fromByteArray(path.getBytes(stringEncoding));
     }
 
     public static Path fromByteArray(byte[] path) {
@@ -65,7 +67,7 @@ public abstract class Path {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         toByteArray(out);
         try {
-            return out.toString("UTF-8");
+            return out.toString(stringEncoding.name());
         } catch (UnsupportedEncodingException e) {
             throw new AssertionError(e);
         }
