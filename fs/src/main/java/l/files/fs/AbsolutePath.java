@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-final class AbsolutePath extends Path {
+public final class AbsolutePath extends Path {
 
     private final RelativePath path;
 
@@ -24,13 +24,8 @@ final class AbsolutePath extends Path {
     }
 
     @Override
-    public Path toAbsolutePath() {
+    public AbsolutePath toAbsolutePath() {
         return this;
-    }
-
-    @Override
-    public boolean isAbsolute() {
-        return true;
     }
 
     @Override
@@ -50,13 +45,13 @@ final class AbsolutePath extends Path {
     }
 
     @Override
-    public Path concat(Path path) {
+    public AbsolutePath concat(Path path) {
         return new AbsolutePath(this.path.concat(path));
     }
 
     @Nullable
     @Override
-    public Path parent() {
+    public AbsolutePath parent() {
         RelativePath parent = path.parent();
         return parent == null ? null : new AbsolutePath(parent);
     }

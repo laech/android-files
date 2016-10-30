@@ -61,7 +61,7 @@ public final class PathCreationTest {
     }
 
     private void assertAbsoluteness(Path path) {
-        assertEquals(expectedPath.startsWith("/"), path.isAbsolute());
+        assertEquals(expectedPath.startsWith("/"), path instanceof AbsolutePath);
     }
 
     @Test
@@ -106,9 +106,8 @@ public final class PathCreationTest {
     @Test
     public void can_convert_to_absolute_path() throws Exception {
         String expected = new File(expectedPath).getAbsolutePath();
-        Path actual = Path.fromString(sourcePathString).toAbsolutePath();
+        AbsolutePath actual = Path.fromString(sourcePathString).toAbsolutePath();
         assertEquals(expected, actual.toString());
-        assertEquals(true, actual.isAbsolute());
     }
 
     @SafeVarargs

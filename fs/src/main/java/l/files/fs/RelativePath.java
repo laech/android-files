@@ -30,17 +30,12 @@ final class RelativePath extends Path {
     }
 
     @Override
-    public Path toAbsolutePath() {
+    public AbsolutePath toAbsolutePath() {
         return workingDirectoryPath().concat(this);
     }
 
-    private Path workingDirectoryPath() {
-        return fromString(new File("").getAbsolutePath());
-    }
-
-    @Override
-    public boolean isAbsolute() {
-        return false;
+    private AbsolutePath workingDirectoryPath() {
+        return (AbsolutePath) fromString(new File("").getAbsolutePath());
     }
 
     @Override

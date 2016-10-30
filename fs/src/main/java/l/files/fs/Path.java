@@ -87,9 +87,7 @@ public abstract class Path {
      * concatenating the current working directory with this path.
      * If this path is already an absolute path returns this.
      */
-    public abstract Path toAbsolutePath();
-
-    public abstract boolean isAbsolute();
+    public abstract AbsolutePath toAbsolutePath();
 
     /**
      * Gets all the file names of this path. For example:
