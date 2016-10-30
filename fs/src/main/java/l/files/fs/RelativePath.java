@@ -74,7 +74,7 @@ final class RelativePath extends Path {
 
     @Override
     public Name name() {
-        return names.isEmpty() ? null : names.get(names.size() - 1);
+        return !names.isEmpty() ? lastName() : null;
     }
 
     public boolean isHidden() {
