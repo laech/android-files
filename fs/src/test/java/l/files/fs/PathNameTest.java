@@ -7,6 +7,8 @@ import org.junit.runners.Parameterized.Parameters;
 
 import java.util.Collection;
 
+import javax.annotation.Nullable;
+
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 
@@ -14,9 +16,11 @@ import static org.junit.Assert.assertEquals;
 public final class PathNameTest {
 
     private final Path path;
+
+    @Nullable
     private final String expectedName;
 
-    public PathNameTest(String path, String expectedName) {
+    public PathNameTest(String path, @Nullable String expectedName) {
         this.path = Path.fromString(path);
         this.expectedName = expectedName;
     }
@@ -25,13 +29,13 @@ public final class PathNameTest {
     public static Collection<Object[]> paths() {
         return asList(new Object[][]{
 
-                {"", ""},
+                {"", null},
                 {" ", " "},
                 {"\t", "\t"},
                 {"\n", "\n"},
 
-                {"/", ""},
-                {"//", ""},
+                {"/", null},
+                {"//", null},
 
                 {".", "."},
                 {"./.", "."},
@@ -59,7 +63,7 @@ public final class PathNameTest {
 
     @Test
     public void test() throws Exception {
-        String actual = path.name().toString();
-        assertEquals(expectedName, actual);
+        Name actual = path.name();
+        assertEquals(expectedName, actual == null ? null : actual.toString());
     }
 }

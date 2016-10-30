@@ -5,7 +5,7 @@ import com.google.common.primitives.Bytes;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 
-final class Name {
+public final class Name {
 
     /*
      * Binary representation of file name, normally it's whatever

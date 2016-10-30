@@ -132,9 +132,17 @@ public abstract class Path {
     public abstract Path parent();
 
     /**
-     * Gets the name of this file, maybe empty but never null.
+     * Gets the name of this file, if any. For example:
+     * <pre>
+     *     "/a/b" ->  "b"
+     *     "/a"   ->  "a"
+     *     "/"    ->  null
+     *     "a"    ->  "a"
+     *     ""     ->  null
+     * </pre>
      */
-    public abstract Path name();
+    @Nullable
+    public abstract Name name();
 
     public abstract boolean isHidden();
 

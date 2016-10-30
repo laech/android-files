@@ -9,7 +9,6 @@ import java.io.File;
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.Math.max;
 
 final class RelativePath extends Path {
 
@@ -79,12 +78,8 @@ final class RelativePath extends Path {
     }
 
     @Override
-    public RelativePath name() {
-        return new RelativePath(lastNameAsListOrEmpty());
-    }
-
-    private ImmutableList<Name> lastNameAsListOrEmpty() {
-        return names.subList(max(0, names.size() - 1), names.size());
+    public Name name() {
+        return names.isEmpty() ? null : names.get(names.size() - 1);
     }
 
     public boolean isHidden() {

@@ -62,7 +62,7 @@ final class AbsolutePath extends Path {
     }
 
     @Override
-    public Path name() {
+    public Name name() {
         return path.name();
     }
 
