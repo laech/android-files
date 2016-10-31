@@ -10,7 +10,7 @@ import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-final class RelativePath extends Path {
+public final class RelativePath extends Path {
 
     private final ImmutableList<Name> names;
 

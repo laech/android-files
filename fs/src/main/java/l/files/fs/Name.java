@@ -1,5 +1,6 @@
 package l.files.fs;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.Bytes;
 
 import java.io.ByteArrayOutputStream;
@@ -80,6 +81,10 @@ public final class Name {
 
     public byte[] toByteArray() {
         return bytes.clone();
+    }
+
+    public RelativePath toPath() {
+        return new RelativePath(ImmutableList.of(this));
     }
 
     public boolean isHidden() {
