@@ -104,11 +104,6 @@ public final class LocalFileSystem extends Native implements FileSystem {
     }
 
     @Override
-    public Path path(byte[] path) {
-        return LocalPath.of(path);
-    }
-
-    @Override
     public void setPermissions(Path path, Set<Permission> permissions)
             throws IOException {
 

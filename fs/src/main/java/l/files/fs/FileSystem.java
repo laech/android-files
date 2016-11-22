@@ -10,8 +10,6 @@ import javax.annotation.Nullable;
 
 public interface FileSystem {
 
-    Path path(byte[] path);
-
     void setPermissions(Path path, Set<Permission> permissions)
             throws IOException;
 
