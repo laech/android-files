@@ -15,11 +15,11 @@ import javax.annotation.Nullable;
 import l.files.fs.FileSystem;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
-import l.files.fs.event.Observation;
-import l.files.fs.event.Observer;
 import l.files.fs.Path;
 import l.files.fs.Permission;
 import l.files.fs.Stat;
+import l.files.fs.event.Observation;
+import l.files.fs.event.Observer;
 import linux.Dirent;
 import linux.Dirent.DIR;
 import linux.ErrnoException;
@@ -202,7 +202,7 @@ public final class LocalFileSystem extends Native implements FileSystem {
     public Path readSymbolicLink(Path path) throws IOException {
         try {
             byte[] link = Unistd.readlink(path.toByteArray());
-            return LocalPath.of(link);
+            return Path.fromByteArray(link);
         } catch (ErrnoException e) {
             throw ErrnoExceptions.toIOException(e, path);
         }
