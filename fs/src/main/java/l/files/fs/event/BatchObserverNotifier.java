@@ -1,4 +1,4 @@
-package l.files.fs;
+package l.files.fs.event;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -12,12 +12,15 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 
 import l.files.fs.FileSystem.Consumer;
+import l.files.fs.Files;
+import l.files.fs.LinkOption;
+import l.files.fs.Path;
 
 import static java.lang.System.nanoTime;
 import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 import static l.files.base.Throwables.addSuppressed;
 
-final class BatchObserverNotifier implements Observer, Observation, Runnable {
+public final class BatchObserverNotifier implements Observer, Observation, Runnable {
 
     private static final ScheduledExecutorService service =
             newSingleThreadScheduledExecutor(new ThreadFactory() {
@@ -51,7 +54,7 @@ final class BatchObserverNotifier implements Observer, Observation, Runnable {
     private final String tag;
     private final int watchLimit;
 
-    BatchObserverNotifier(
+    public BatchObserverNotifier(
             BatchObserver batchObserver,
             long batchInterval,
             TimeUnit batchInternalUnit,
@@ -68,7 +71,7 @@ final class BatchObserverNotifier implements Observer, Observation, Runnable {
         this.watchLimit = watchLimit;
     }
 
-    Observation start(
+    public Observation start(
             Path path,
             LinkOption option,
             Consumer<? super Path> childrenConsumer) throws IOException, InterruptedException {

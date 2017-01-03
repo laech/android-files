@@ -3,19 +3,19 @@ package l.files.fs.local;
 import java.util.Collections;
 import java.util.HashMap;
 
-import l.files.fs.BatchObserver;
-import l.files.fs.Event;
+import l.files.fs.event.BatchObserver;
+import l.files.fs.event.Event;
 import l.files.fs.FileSystem.Consumer;
 import l.files.fs.Files;
 import l.files.fs.Instant;
 import l.files.fs.FileName;
-import l.files.fs.Observation;
+import l.files.fs.event.Observation;
 import l.files.fs.Path;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static l.files.fs.Event.CREATE;
-import static l.files.fs.Event.DELETE;
-import static l.files.fs.Event.MODIFY;
+import static l.files.fs.event.Event.CREATE;
+import static l.files.fs.event.Event.DELETE;
+import static l.files.fs.event.Event.MODIFY;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;

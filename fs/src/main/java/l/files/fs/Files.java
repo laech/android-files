@@ -24,6 +24,10 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 
 import l.files.fs.FileSystem.Consumer;
+import l.files.fs.event.BatchObserver;
+import l.files.fs.event.BatchObserverNotifier;
+import l.files.fs.event.Observation;
+import l.files.fs.event.Observer;
 
 import static java.util.Collections.reverse;
 import static java.util.Collections.unmodifiableList;

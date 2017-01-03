@@ -33,7 +33,7 @@ import static android.os.Environment.DIRECTORY_DOWNLOADS;
 import static android.os.Environment.getExternalStoragePublicDirectory;
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static l.files.fs.Event.CREATE;
+import static l.files.fs.event.Event.CREATE;
 import static l.files.fs.Files.deleteIfExists;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.local.LocalObservableTest.Recorder.observe;

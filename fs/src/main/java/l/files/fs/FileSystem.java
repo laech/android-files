@@ -3,10 +3,12 @@ package l.files.fs;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URI;
 import java.util.Set;
 
 import javax.annotation.Nullable;
+
+import l.files.fs.event.Observation;
+import l.files.fs.event.Observer;
 
 public interface FileSystem {
 

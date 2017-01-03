@@ -1,4 +1,4 @@
-package l.files.fs;
+package l.files.fs.event;
 
 public enum Event {
     CREATE,

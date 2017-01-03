@@ -22,12 +22,12 @@ import java.util.concurrent.ExecutorService;
 
 import javax.annotation.Nullable;
 
-import l.files.fs.BatchObserver;
-import l.files.fs.Event;
+import l.files.fs.event.BatchObserver;
+import l.files.fs.event.Event;
 import l.files.fs.FileSystem;
 import l.files.fs.Files;
 import l.files.fs.FileName;
-import l.files.fs.Observation;
+import l.files.fs.event.Observation;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.fs.FileInfo;
@@ -41,7 +41,7 @@ import static java.util.Collections.unmodifiableList;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.base.Objects.requireNonNull;
-import static l.files.fs.Event.DELETE;
+import static l.files.fs.event.Event.DELETE;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.ui.base.content.Contexts.isDebugBuild;

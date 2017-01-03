@@ -1,8 +1,10 @@
-package l.files.fs;
+package l.files.fs.event;
 
 import java.io.IOException;
 
 import javax.annotation.Nullable;
+
+import l.files.fs.Path;
 
 public interface Observer {
 

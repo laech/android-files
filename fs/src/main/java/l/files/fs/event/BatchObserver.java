@@ -1,7 +1,9 @@
-package l.files.fs;
+package l.files.fs.event;
 
 import java.io.IOException;
 import java.util.Map;
+
+import l.files.fs.Path;
 
 public interface BatchObserver {
 
