@@ -32,7 +32,7 @@ public abstract class PathBaseTest extends AndroidTestCase {
     protected final Path dir1() {
         if (dir1 == null) {
             try {
-                dir1 = LocalPath.of(createTempFolder());
+                dir1 = Path.fromFile(createTempFolder());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -43,7 +43,7 @@ public abstract class PathBaseTest extends AndroidTestCase {
     protected final Path dir2() {
         if (dir2 == null) {
             try {
-                dir2 = LocalPath.of(createTempFolder());
+                dir2 = Path.fromFile(createTempFolder());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

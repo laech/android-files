@@ -33,6 +33,10 @@ public final class Name {
         this.bytes = validateName(Arrays.copyOfRange(bytes, start, end));
     }
 
+    public static Name fromByteArray(byte[] bytes) {
+        return new Name(bytes, 0, bytes.length);
+    }
+
     private static byte[] validateName(byte[] bytes) {
         ensureNotEmpty(bytes);
         ensureContainsNoPathSeparator(bytes);

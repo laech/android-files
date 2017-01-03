@@ -23,7 +23,6 @@ import l.files.fs.Files;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
 import l.files.fs.Path;
-import l.files.fs.Paths;
 import l.files.fs.Permission;
 import l.files.fs.Stat;
 
@@ -129,16 +128,16 @@ public final class FilesTest extends PathBaseTest {
     }
 
     public void test_getHierarchy_single() throws Exception {
-        Path a = Paths.get("/");
+        Path a = Path.fromString("/");
         assertEquals(singletonList(a), Files.hierarchy(a));
     }
 
     public void test_getHierarchy_multi() throws Exception {
-        Path a = Paths.get("/a/b");
+        Path a = Path.fromString("/a/b");
         List<Path> expected = asList(
-                Paths.get("/"),
-                Paths.get("/a"),
-                Paths.get("/a/b")
+                Path.fromString("/"),
+                Path.fromString("/a"),
+                Path.fromString("/a/b")
         );
         assertEquals(expected, Files.hierarchy(a));
     }

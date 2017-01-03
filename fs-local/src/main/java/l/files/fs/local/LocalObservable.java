@@ -13,14 +13,14 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nullable;
 
-import l.files.fs.event.Event;
-import l.files.fs.FileName;
 import l.files.fs.FileSystem.Consumer;
 import l.files.fs.Files;
 import l.files.fs.LinkOption;
+import l.files.fs.Name;
+import l.files.fs.Path;
+import l.files.fs.event.Event;
 import l.files.fs.event.Observation;
 import l.files.fs.event.Observer;
-import l.files.fs.Path;
 import linux.Dirent;
 import linux.Dirent.DIR;
 import linux.ErrnoException;
@@ -33,11 +33,11 @@ import static android.os.Process.setThreadPriority;
 import static java.lang.Thread.currentThread;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.base.Throwables.addSuppressed;
+import static l.files.fs.Files.UTF_8;
+import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.event.Event.CREATE;
 import static l.files.fs.event.Event.DELETE;
 import static l.files.fs.event.Event.MODIFY;
-import static l.files.fs.Files.UTF_8;
-import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.local.ErrnoExceptions.toIOException;
 import static l.files.fs.local.LocalFileSystem.isSelfOrParent;
 import static linux.Errno.EACCES;
@@ -188,7 +188,7 @@ final class LocalObservable extends Native
      * directories name being watched, and it will be updated as directories are
      * being created/deleted.
      */
-    private final ConcurrentBiMap<Integer, FileName> childDirs = new ConcurrentBiMap<>();
+    private final ConcurrentBiMap<Integer, Name> childDirs = new ConcurrentBiMap<>();
 
     private final WeakReference<Observer> observerRef;
 
@@ -321,7 +321,7 @@ final class LocalObservable extends Native
 
                         byte[] childPath = child.toByteArray();
                         int wd = inotify.addWatch(fd, childPath, CHILD_DIR_MASK);
-                        childDirs.put(wd, FileName.fromBytes(name));
+                        childDirs.put(wd, Name.fromByteArray(name));
 
                     } catch (ErrnoException e) {
                         handleAddChildDirWatchFailure(e);
@@ -538,7 +538,7 @@ final class LocalObservable extends Native
                 onObserverStopped(wd);
 
             } else {
-                FileName childDirectory = childDirs.get(wd);
+                Name childDirectory = childDirs.get(wd);
                 if (childDirectory != null) {
                     observer(MODIFY, childDirectory);
                 }
@@ -547,14 +547,14 @@ final class LocalObservable extends Native
     }
 
     private void observer(Event kind, @Nullable byte[] name) {
-        notifyEventOrClose(kind, name == null ? null : FileName.fromBytes(name));
+        notifyEventOrClose(kind, name == null ? null : Name.fromByteArray(name));
     }
 
-    private void observer(Event kind, FileName name) {
+    private void observer(Event kind, Name name) {
         notifyEventOrClose(kind, name);
     }
 
-    private void notifyEventOrClose(Event kind, @Nullable FileName name) {
+    private void notifyEventOrClose(Event kind, @Nullable Name name) {
         Observer observer = observerRef.get();
         if (observer != null) {
             observer.onEvent(kind, name);
@@ -579,7 +579,7 @@ final class LocalObservable extends Native
 
             byte[] path = child.toByteArray();
             int wd = inotify.addWatch(fd, path, CHILD_DIR_MASK);
-            childDirs.put(wd, FileName.fromBytes(name));
+            childDirs.put(wd, Name.fromByteArray(name));
 
         } catch (ErrnoException e) {
             handleAddChildDirWatchFailure(e);
@@ -618,7 +618,7 @@ final class LocalObservable extends Native
     }
 
     private void removeChildWatch(byte[] child) {
-        Integer wd = childDirs.remove2(FileName.fromBytes(child));
+        Integer wd = childDirs.remove2(Name.fromByteArray(child));
         if (wd != null) {
             try {
                 inotify.removeWatch(fd, wd);

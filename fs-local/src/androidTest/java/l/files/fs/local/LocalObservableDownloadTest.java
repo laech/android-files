@@ -18,7 +18,6 @@ import java.util.concurrent.Callable;
 
 import l.files.fs.Files;
 import l.files.fs.Path;
-import l.files.fs.Paths;
 import l.files.fs.local.LocalObservableTest.Recorder;
 import l.files.testing.Executable;
 import l.files.testing.Tests;
@@ -33,9 +32,9 @@ import static android.os.Environment.DIRECTORY_DOWNLOADS;
 import static android.os.Environment.getExternalStoragePublicDirectory;
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static l.files.fs.event.Event.CREATE;
 import static l.files.fs.Files.deleteIfExists;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static l.files.fs.event.Event.CREATE;
 import static l.files.fs.local.LocalObservableTest.Recorder.observe;
 import static org.junit.Assume.assumeTrue;
 
@@ -158,7 +157,7 @@ public final class LocalObservableDownloadTest extends PathBaseTest {
     }
 
     private Path downloadsDir() {
-        return Paths.get(getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS));
+        return Path.fromFile(getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS));
     }
 
 }

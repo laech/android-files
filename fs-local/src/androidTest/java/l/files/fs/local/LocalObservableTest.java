@@ -20,16 +20,15 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.CountDownLatch;
 
 import l.files.fs.AlreadyExist;
+import l.files.fs.Name;
 import l.files.fs.event.Event;
 import l.files.fs.FileSystem.Consumer;
 import l.files.fs.Files;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
-import l.files.fs.FileName;
 import l.files.fs.event.Observation;
 import l.files.fs.event.Observer;
 import l.files.fs.Path;
-import l.files.fs.Paths;
 import l.files.fs.Permission;
 
 import static java.lang.Integer.parseInt;
@@ -117,7 +116,7 @@ public final class LocalObservableTest extends PathBaseTest {
         Tracker tracker = registerMockTracker();
         try {
             Recorder observer = observe(
-                    Paths.get("/proc/self"),
+                    Path.fromString("/proc/self"),
                     FOLLOW,
                     false);
             try {
@@ -366,7 +365,7 @@ public final class LocalObservableTest extends PathBaseTest {
     }
 
     private int maxUserInstances() throws IOException {
-        Path limitFile = Paths.get("/proc/sys/fs/inotify/max_user_instances");
+        Path limitFile = Path.fromString("/proc/sys/fs/inotify/max_user_instances");
         return parseInt(Files.readAllUtf8(limitFile).trim());
     }
 
@@ -1036,7 +1035,7 @@ public final class LocalObservableTest extends PathBaseTest {
         public void onWatchAdded(int fd, byte[] path, int mask, int wd) {
             super.onWatchAdded(fd, path, mask, wd);
             if (this.fd == fd) {
-                this.allChildWds.put(Paths.get(path), wd);
+                this.allChildWds.put(Path.fromByteArray(path), wd);
                 this.validChildWds.add(wd);
             }
         }
@@ -1060,9 +1059,9 @@ public final class LocalObservableTest extends PathBaseTest {
         }
 
         @Override
-        public void onEvent(Event event, FileName child) {
+        public void onEvent(Event event, Name child) {
             observer.onEvent(event, child);
-            Path target = child == null ? root : root.resolve(child);
+            Path target = child == null ? root : root.concat(child.toPath());
             actual.add(WatchEvent.create(event, target));
             if (expected.equals(actual)) {
                 success.countDown();
@@ -1482,7 +1481,7 @@ public final class LocalObservableTest extends PathBaseTest {
             return add(new PostAction() {
                 @Override
                 public void action(Path dst, Recorder observer) throws Exception {
-                    observer.awaitMove(src, dst.concat(src.name()));
+                    observer.awaitMove(src, dst.concat(src.name().toPath()));
                 }
             });
         }

@@ -14,6 +14,7 @@ import javax.annotation.Nullable;
 import l.files.fs.FileSystem.Consumer;
 import l.files.fs.Files;
 import l.files.fs.LinkOption;
+import l.files.fs.Name;
 import l.files.fs.Path;
 
 import static java.lang.System.nanoTime;
@@ -31,7 +32,7 @@ public final class BatchObserverNotifier implements Observer, Observation, Runna
             });
 
     private boolean selfChanged;
-    private final Map<Path, Event> childrenChanged;
+    private final Map<Name, Event> childrenChanged;
     private final BatchObserver batchObserver;
     private final long batchInterval;
     private final long batchIntervalNanos;
@@ -103,7 +104,7 @@ public final class BatchObserverNotifier implements Observer, Observation, Runna
     }
 
     @Override
-    public void onEvent(Event event, @Nullable Path child) {
+    public void onEvent(Event event, @Nullable Name child) {
         synchronized (this) {
 
             if (child == null) {
@@ -136,13 +137,13 @@ public final class BatchObserverNotifier implements Observer, Observation, Runna
         }
 
         boolean snapshotSelfChanged;
-        Map<Path, Event> snapshotChildrenChanged;
+        Map<Name, Event> snapshotChildrenChanged;
 
         synchronized (this) {
 
             snapshotSelfChanged = selfChanged;
             snapshotChildrenChanged = childrenChanged.isEmpty()
-                    ? Collections.<Path, Event>emptyMap()
+                    ? Collections.<Name, Event>emptyMap()
                     : Collections.unmodifiableMap(new HashMap<>(childrenChanged));
 
             selfChanged = false;
