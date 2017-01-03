@@ -52,14 +52,6 @@ public final class Files {
         return unmodifiableList(hierarchy);
     }
 
-    public static Stat newEmptyStat(Path path) {
-        return path.fileSystem().newEmptyStat();
-    }
-
-    public static void stat(Path path, LinkOption option, Stat buffer) throws IOException {
-        path.fileSystem().stat(path, option, buffer);
-    }
-
     public static Stat stat(Path path, LinkOption option) throws IOException {
         return path.fileSystem().stat(path, option);
     }

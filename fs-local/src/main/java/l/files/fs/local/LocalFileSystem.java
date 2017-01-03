@@ -17,7 +17,6 @@ import l.files.fs.Instant;
 import l.files.fs.LinkOption;
 import l.files.fs.Path;
 import l.files.fs.Permission;
-import l.files.fs.Stat;
 import l.files.fs.event.Observation;
 import l.files.fs.event.Observer;
 import linux.Dirent;
@@ -137,18 +136,8 @@ public final class LocalFileSystem extends Native implements FileSystem {
             boolean followLink) throws ErrnoException;
 
     @Override
-    public void stat(Path path, LinkOption option, Stat buffer) throws IOException {
-        LocalStat.stat(path, option, (LocalStat) buffer);
-    }
-
-    @Override
     public LocalStat stat(Path path, LinkOption option) throws IOException {
         return LocalStat.stat(path, option);
-    }
-
-    @Override
-    public LocalStat newEmptyStat() {
-        return new LocalStat();
     }
 
     @Override

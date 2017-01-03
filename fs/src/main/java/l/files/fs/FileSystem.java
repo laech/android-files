@@ -18,11 +18,7 @@ public interface FileSystem {
     void setLastModifiedTime(Path path, LinkOption option, Instant instant)
             throws IOException;
 
-    void stat(Path path, LinkOption option, Stat buffer) throws IOException;
-
     Stat stat(Path path, LinkOption option) throws IOException;
-
-    Stat newEmptyStat();
 
     void createDir(Path path) throws IOException;
 
