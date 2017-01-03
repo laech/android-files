@@ -1,6 +1,7 @@
 package l.files.fs.local;
 
 import android.os.Parcel;
+import android.os.Parcelable;
 
 import java.io.IOException;
 import java.util.Set;
@@ -26,7 +27,7 @@ import static linux.Stat.S_ISLNK;
 import static linux.Stat.S_ISREG;
 import static linux.Stat.S_ISSOCK;
 
-final class LocalStat implements l.files.fs.Stat {
+final class LocalStat implements l.files.fs.Stat, Parcelable {
 
     private static final ThreadLocal<Stat> buffers = new ThreadLocal<Stat>() {
         @Override
