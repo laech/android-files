@@ -101,7 +101,7 @@ public final class InfoFragment
         root = find(R.id.root, this);
         image = find(R.id.image, this);
 
-        Path file = getDirectory().resolve(getChildren().get(0));
+        Path file = getDirectory().concat(getChildren().get(0).toPath());
         Stat stat = getArguments().getParcelable(ARG_STAT);
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         constraint = Rect.of((int) (metrics.widthPixels * 0.75), metrics.heightPixels);

@@ -23,7 +23,6 @@ import java.util.List;
 
 import l.files.fs.Files;
 import l.files.fs.Path;
-import l.files.fs.Paths;
 import l.files.fs.Stat;
 import l.files.premium.PremiumLock;
 import l.files.ui.base.app.BaseActivity;
@@ -176,7 +175,7 @@ public final class FilesActivity extends BaseActivity implements
                 && getIntent().getData() != null
                 && getIntent().getData().getScheme() != null
                 && getIntent().getData().getScheme().equals(SCHEME_FILE)) {
-            dir = Paths.get(getIntent().getData().getPath());
+            dir = Path.fromString(getIntent().getData().getPath());
         }
         return dir == null ? DIR_HOME : dir;
     }
