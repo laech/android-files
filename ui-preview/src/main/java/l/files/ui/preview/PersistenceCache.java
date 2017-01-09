@@ -19,7 +19,6 @@ import javax.annotation.Nullable;
 
 import l.files.fs.Files;
 import l.files.fs.Path;
-import l.files.fs.Paths;
 import l.files.fs.Stat;
 import l.files.ui.base.graphics.Rect;
 
@@ -136,7 +135,7 @@ abstract class PersistenceCache<V> extends MemCache<Path, V> {
                     short len = in.readShort();
                     byte[] bytes = new byte[len];
                     in.readFully(bytes);
-                    Path key = Paths.get(bytes);
+                    Path key = Path.fromByteArray(bytes);
                     long time = in.readLong();
                     V value = read(in);
 

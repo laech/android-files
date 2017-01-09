@@ -10,7 +10,7 @@ import java.util.Collection;
 import javax.annotation.Nullable;
 
 import l.files.fs.Files;
-import l.files.fs.FileName;
+import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.fs.TraversalCallback;
@@ -32,13 +32,11 @@ final class CalculateSizeLoader
     private volatile Size result;
 
     private final Path dir;
-    private final Stat statBuffer;
-    private final Collection<FileName> children;
+    private final Collection<Name> children;
 
-    CalculateSizeLoader(Context context, Path dir, Collection<FileName> children) {
+    CalculateSizeLoader(Context context, Path dir, Collection<Name> children) {
         super(context);
         this.dir = requireNonNull(dir);
-        this.statBuffer = Files.newEmptyStat(dir);
         this.children = requireNonNull(children);
     }
 
@@ -58,8 +56,8 @@ final class CalculateSizeLoader
         currentSize = 0;
         currentSizeOnDisk = 0;
 
-        for (FileName child : children) {
-            Path path = dir.resolve(child);
+        for (Name child : children) {
+            Path path = dir.concat(child.toPath());
             try {
                 Files.traverse(path, NOFOLLOW, this);
             } catch (IOException e) {
@@ -85,11 +83,11 @@ final class CalculateSizeLoader
             return Result.TERMINATE;
         }
 
-        Files.stat(path, NOFOLLOW, statBuffer);
+        Stat stat = Files.stat(path, NOFOLLOW);
 
         currentCount++;
-        currentSize += statBuffer.size();
-        currentSizeOnDisk += statBuffer.sizeOnDisk();
+        currentSize += stat.size();
+        currentSizeOnDisk += stat.sizeOnDisk();
 
         return Result.CONTINUE;
     }

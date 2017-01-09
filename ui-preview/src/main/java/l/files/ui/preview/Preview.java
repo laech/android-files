@@ -11,7 +11,6 @@ import javax.annotation.Nullable;
 
 import l.files.fs.Files;
 import l.files.fs.Path;
-import l.files.fs.Paths;
 import l.files.fs.Stat;
 import l.files.ui.base.graphics.Rect;
 import l.files.ui.base.graphics.ScaledBitmap;
@@ -31,7 +30,7 @@ public final class Preview {
                 if (dir == null) {
                     dir = context.getCacheDir();
                 }
-                Path cacheDir = Paths.get(dir);
+                Path cacheDir = Path.fromFile(dir);
                 instance = new Preview(context.getApplicationContext(), cacheDir);
                 instance.cleanupAsync();
             }

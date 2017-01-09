@@ -12,7 +12,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import l.files.fs.FileName;
+import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.ui.info.CalculateSizeLoader.Size;
 
@@ -36,7 +36,7 @@ public abstract class InfoBaseFragment
     private Path dir;
 
     @Nullable
-    private List<FileName> children;
+    private List<Name> children;
 
     @Nullable
     private TextView size;
@@ -52,7 +52,7 @@ public abstract class InfoBaseFragment
         return dir;
     }
 
-    public List<FileName> getChildren() {
+    public List<Name> getChildren() {
         assert children != null;
         return children;
     }

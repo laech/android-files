@@ -8,7 +8,6 @@ import java.io.IOException;
 import javax.annotation.Nullable;
 
 import l.files.fs.Path;
-import l.files.fs.Paths;
 
 import static l.files.fs.Files.deleteRecursiveIfExists;
 
@@ -34,7 +33,7 @@ public abstract class PathBaseTest extends AndroidTestCase {
     protected Path dir1() {
         if (dir1 == null) {
             try {
-                dir1 = Paths.get(createTempFolder());
+                dir1 = Path.fromFile(createTempFolder());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -45,7 +44,7 @@ public abstract class PathBaseTest extends AndroidTestCase {
     protected Path dir2() {
         if (dir2 == null) {
             try {
-                dir2 = Paths.get(createTempFolder());
+                dir2 = Path.fromFile(createTempFolder());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
