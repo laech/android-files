@@ -26,7 +26,7 @@ import static linux.Stat.S_ISLNK;
 import static linux.Stat.S_ISREG;
 import static linux.Stat.S_ISSOCK;
 
-final class LocalStat implements l.files.fs.Stat, Parcelable {
+final class LocalStat implements l.files.fs.Stat {
 
     private final int mode;
     private final long size;
