@@ -78,7 +78,7 @@ public final class OperationServiceTest extends PathBaseTest {
 
         listener.await();
         assertFalse(exists(src, NOFOLLOW));
-        assertTrue(exists(dst.concat(src.name()), NOFOLLOW));
+        assertTrue(exists(dst.concat(src.name().toPath()), NOFOLLOW));
     }
 
     public void test_copies_file() throws Exception {
@@ -93,7 +93,7 @@ public final class OperationServiceTest extends PathBaseTest {
 
         listener.await();
         assertTrue(exists(src, NOFOLLOW));
-        assertTrue(exists(dst.concat(src.name()), NOFOLLOW));
+        assertTrue(exists(dst.concat(src.name().toPath()), NOFOLLOW));
     }
 
     public void test_deletes_files() throws Exception {

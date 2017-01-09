@@ -69,7 +69,7 @@ public final class CopyTest extends PasteTest {
     private void testCopyPreservesTimestamp(
             Path src,
             Path dir) throws IOException, InterruptedException {
-        Path dst = dir.concat(src.name());
+        Path dst = dir.concat(src.name().toPath());
         assertFalse(exists(dst, NOFOLLOW));
 
         Instant mtime = newInstant();
