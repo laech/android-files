@@ -1,5 +1,8 @@
 package l.files.fs;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.common.collect.ImmutableList;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -11,7 +14,7 @@ import java.nio.charset.Charset;
 
 import javax.annotation.Nullable;
 
-public abstract class Path {
+public abstract class Path implements Parcelable {
 
     static final Charset stringEncoding =
             Charset.forName(System.getProperty("sun.jnu.encoding"));
@@ -159,4 +162,27 @@ public abstract class Path {
      * @throws IllegalArgumentException if {@code !this.startsWith(oldPrefix)}
      */
     public abstract Path rebase(Path oldPrefix, Path newPrefix);
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeByteArray(toByteArray());
+    }
+
+    public static final Creator<Path> CREATOR = new Creator<Path>() {
+
+        @Override
+        public Path createFromParcel(Parcel source) {
+            return Path.fromByteArray(source.createByteArray());
+        }
+
+        @Override
+        public Path[] newArray(int size) {
+            return new Path[size];
+        }
+    };
 }
