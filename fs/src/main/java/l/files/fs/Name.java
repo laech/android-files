@@ -33,8 +33,18 @@ public final class Name {
         this.bytes = validateName(Arrays.copyOfRange(bytes, start, end));
     }
 
+    /**
+     * @throws IllegalArgumentException if name is empty, or contains '/', or contains '\0'
+     */
     public static Name fromByteArray(byte[] bytes) {
         return new Name(bytes, 0, bytes.length);
+    }
+
+    /**
+     * @throws IllegalArgumentException if name is empty, or contains '/', or contains '\0'
+     */
+    public static Name fromString(String name) {
+        return fromByteArray(name.getBytes(Path.stringEncoding));
     }
 
     private static byte[] validateName(byte[] bytes) {
@@ -98,4 +108,55 @@ public final class Name {
     public void appendTo(ByteArrayOutputStream out) {
         out.write(bytes, 0, bytes.length);
     }
+
+    private int indexOfExtensionSeparator(int defaultValue) {
+        int i = Bytes.lastIndexOf(bytes, (byte) '.');
+        return (i <= 0 || i == bytes.length - 1) ? defaultValue : i;
+    }
+
+    /**
+     * The name part without extension.
+     * <pre>
+     *  base.ext  ->  base
+     *  base      ->  base
+     *  base.     ->  base.
+     * .base.ext  -> .base
+     * .base      -> .base
+     * .base.     -> .base.
+     * .          -> .
+     * ..         -> ..
+     * </pre>
+     */
+    public String base() {
+        int i = indexOfExtensionSeparator(bytes.length);
+        return new String(bytes, 0, i, Path.stringEncoding);
+    }
+
+    /**
+     * The extension part without base name.
+     * <pre>
+     *  base.ext  ->  ext
+     * .base.ext  ->  ext
+     *  base      ->  ""
+     *  base.     ->  ""
+     * .base      ->  ""
+     * .base.     ->  ""
+     * .          ->  ""
+     * ..         ->  ""
+     * </pre>
+     */
+    public String extension() {
+        int start = indexOfExtensionSeparator(bytes.length - 1) + 1;
+        int count = bytes.length - start;
+        return new String(bytes, start, count, Path.stringEncoding);
+    }
+
+    /**
+     * {@link #extension()} with a leading dot if it's not empty.
+     */
+    public String dotExtension() {
+        String ext = extension();
+        return ext.isEmpty() ? ext : "." + ext;
+    }
+
 }
