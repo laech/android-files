@@ -1,12 +1,15 @@
 package l.files.fs;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.Bytes;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 
-public final class Name {
+public final class Name implements Parcelable {
 
     /*
      * Binary representation of file name, normally it's whatever
@@ -159,4 +162,26 @@ public final class Name {
         return ext.isEmpty() ? ext : "." + ext;
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeByteArray(toByteArray());
+    }
+
+    public static final Creator<Name> CREATOR = new Creator<Name>() {
+
+        @Override
+        public Name createFromParcel(Parcel source) {
+            return fromByteArray(source.createByteArray());
+        }
+
+        @Override
+        public Name[] newArray(int size) {
+            return new Name[size];
+        }
+    };
 }
