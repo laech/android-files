@@ -16,7 +16,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import l.files.fs.Files;
 import l.files.fs.Path;
-import l.files.fs.Paths;
 
 import static android.os.Environment.DIRECTORY_DCIM;
 import static android.os.Environment.DIRECTORY_DOWNLOADS;
@@ -35,16 +34,15 @@ final class BookmarkManagerImpl extends BookmarkManager {
     private static final String PREF_KEY_V1 = "bookmarks";
     private static final String PREF_KEY_V2 = "bookmarks2";
 
-    @SuppressLint("SdCardPath")
     private static Set<Path> createDefaultBookmarks() {
         Set<Path> defaults = new HashSet<>();
-        addIfExists(defaults, Paths.get(getExternalStorageDirectory()));
+        addIfExists(defaults, Path.fromFile(getExternalStorageDirectory()));
         addIfExists(defaults, externalStoragePath(DIRECTORY_DCIM));
         addIfExists(defaults, externalStoragePath(DIRECTORY_MUSIC));
         addIfExists(defaults, externalStoragePath(DIRECTORY_MOVIES));
         addIfExists(defaults, externalStoragePath(DIRECTORY_PICTURES));
         addIfExists(defaults, externalStoragePath(DIRECTORY_DOWNLOADS));
-        addIfExists(defaults, Paths.get(new File("/sdcard2")));
+        addIfExists(defaults, Path.fromString("/sdcard2"));
         return unmodifiableSet(defaults);
     }
 
@@ -62,7 +60,7 @@ final class BookmarkManagerImpl extends BookmarkManager {
     }
 
     private static Path externalStoragePath(String name) {
-        return Paths.get(new File(getExternalStorageDirectory(), name));
+        return Path.fromFile(new File(getExternalStorageDirectory(), name));
     }
 
     private final Set<Path> bookmarks;
@@ -79,7 +77,7 @@ final class BookmarkManagerImpl extends BookmarkManager {
         Set<Path> paths = new HashSet<>();
         for (String uriString : uriStrings) {
             try {
-                Path path = Paths.get(new File(new URI(uriString)));
+                Path path = Path.fromFile(new File(new URI(uriString)));
                 try {
                     if (exists(path)) {
                         paths.add(path);
@@ -111,7 +109,7 @@ final class BookmarkManagerImpl extends BookmarkManager {
     private static Path decode(String encoded) {
         String[] parts = encoded.split(":");
         if (parts.length == 2) {
-            return Paths.get(Base64.decode(parts[1], Base64.DEFAULT));
+            return Path.fromByteArray(Base64.decode(parts[1], Base64.DEFAULT));
         } else {
             throw new IllegalArgumentException("Invalid bookmark: " + encoded);
         }
