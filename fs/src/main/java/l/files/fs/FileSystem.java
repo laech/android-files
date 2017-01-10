@@ -3,6 +3,7 @@ package l.files.fs;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collection;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -122,6 +123,22 @@ public abstract class FileSystem {
             Path path,
             LinkOption option,
             Consumer<? super Path> consumer) throws IOException;
+
+
+    public <C extends Collection<? super Path>> C list(
+            final Path path,
+            final LinkOption option,
+            final C collection) throws IOException {
+
+        list(path, option, new Consumer<Path>() {
+            @Override
+            public boolean accept(Path entry) throws IOException {
+                collection.add(entry);
+                return true;
+            }
+        });
+        return collection;
+    }
 
     public abstract void listDirs(
             Path path,

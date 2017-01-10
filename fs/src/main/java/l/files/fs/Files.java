@@ -185,7 +185,7 @@ public final class Files {
             TraversalCallback<? super Path> visitor,
             @Nullable Comparator<Path> childrenComparator) throws IOException {
 
-        new Traverser(path, option, visitor, childrenComparator).traverse();
+        new Traverser(path, path.fileSystem(), option, visitor, childrenComparator).traverse();
     }
 
     public static Observation observe(
@@ -234,7 +234,7 @@ public final class Files {
                 quickNotifyFirstEvent,
                 tag,
                 watchLimit
-        ).start(path, option, childrenConsumer);
+        ).start(path.fileSystem(), path, option, childrenConsumer);
     }
 
     public static void list(
@@ -243,21 +243,6 @@ public final class Files {
             Consumer<? super Path> consumer) throws IOException {
 
         path.fileSystem().list(path, option, consumer);
-    }
-
-    public static <C extends Collection<? super Path>> C list(
-            final Path path,
-            final LinkOption option,
-            final C collection) throws IOException {
-
-        path.fileSystem().list(path, option, new Consumer<Path>() {
-            @Override
-            public boolean accept(Path entry) throws IOException {
-                collection.add(entry);
-                return true;
-            }
-        });
-        return collection;
     }
 
     public static <C extends Collection<? super Path>> C listDirs(

@@ -11,8 +11,8 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
 
+import l.files.fs.FileSystem;
 import l.files.fs.FileSystem.Consumer;
-import l.files.fs.Files;
 import l.files.fs.LinkOption;
 import l.files.fs.Name;
 import l.files.fs.Path;
@@ -73,6 +73,7 @@ public final class BatchObserverNotifier implements Observer, Observation, Runna
     }
 
     public Observation start(
+            FileSystem fs,
             Path path,
             LinkOption option,
             Consumer<? super Path> childrenConsumer) throws IOException, InterruptedException {
@@ -83,7 +84,7 @@ public final class BatchObserverNotifier implements Observer, Observation, Runna
 
         try {
 
-            observation = Files.observe(path, option, this, childrenConsumer, tag, watchLimit);
+            observation = fs.observe(path, option, this, childrenConsumer, tag, watchLimit);
             if (!observation.isClosed()) {
                 checker = service.scheduleWithFixedDelay(
                         this, batchInterval, batchInterval, batchInternalUnit);

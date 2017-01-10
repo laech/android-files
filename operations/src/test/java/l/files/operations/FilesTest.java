@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import l.files.fs.FileName;
+import l.files.fs.Name;
 import l.files.fs.FileSystem;
 import l.files.fs.Path;
 import l.files.fs.Stat;
@@ -34,7 +34,7 @@ public final class FilesTest {
     }
 
     private Path mockFile(String nameStr, boolean isDir) throws IOException {
-        FileName name = FileName.fromString(nameStr);
+        Name name = Name.fromString(nameStr);
         FileSystem fs = mock(FileSystem.class);
         Stat stat = mock(Stat.class);
         Path file = mock(Path.class);
@@ -44,8 +44,8 @@ public final class FilesTest {
         given(file.name()).willReturn(name);
         given(fs.stat(file, FOLLOW)).willReturn(stat);
         given(fs.exists(file, NOFOLLOW)).willReturn(true);
-        given(dir.resolve(name)).willReturn(file);
-        given(dir.concat(file.name())).willReturn(file);
+        given(dir.concat(name.toPath())).willReturn(file);
+        given(dir.concat(file.name().toPath())).willReturn(file);
         return file;
     }
 

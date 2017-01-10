@@ -47,7 +47,7 @@ public abstract class Path implements Parcelable {
         return names.build();
     }
 
-    FileSystem fileSystem() {
+    public FileSystem fileSystem() {
         throw new RuntimeException("TODO");
     }
 
