@@ -5,6 +5,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import l.files.bookmarks.BookmarkManager;
+import l.files.fs.FileSystem;
 import l.files.fs.Path;
 import l.files.ui.base.app.OptionsMenuAction;
 import l.files.ui.bookmarks.R;
@@ -17,8 +18,8 @@ public final class BookmarkMenu extends OptionsMenuAction {
     private final BookmarkManager bookmarks;
     private final Path path;
 
-    public BookmarkMenu(Path path, Context context) {
-        this(path, BookmarkManager.get(context));
+    public BookmarkMenu(Path path, FileSystem fs, Context context) {
+        this(path, BookmarkManager.get(context, fs));
     }
 
     BookmarkMenu(Path path, BookmarkManager bookmarks) {

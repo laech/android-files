@@ -20,22 +20,22 @@ public interface FileSystem {
 
     Stat stat(Path path, LinkOption option) throws IOException;
 
-    void createDir(Path path) throws IOException;
+    Path createDir(Path path) throws IOException;
 
     /**
      * Creates directory with specified permissions,
      * the set of permissions with be restricted so
      * the resulting permissions may not be the same.
      */
-    void createDir(Path path, Set<Permission> permissions) throws IOException;
+    Path createDir(Path path, Set<Permission> permissions) throws IOException;
 
-    void createFile(Path path) throws IOException;
+    Path createFile(Path path) throws IOException;
 
     /**
      * @param link   the link itself
      * @param target the target the link will point to
      */
-    void createSymbolicLink(Path link, Path target) throws IOException;
+    Path createSymbolicLink(Path link, Path target) throws IOException;
 
     Path readSymbolicLink(Path path) throws IOException;
 

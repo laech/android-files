@@ -26,6 +26,7 @@ import javax.annotation.Nullable;
 
 import l.files.base.Provider;
 import l.files.fs.Path;
+import l.files.fs.local.LocalFileSystem;
 import l.files.premium.ConsumeTestPurchasesOnDebugMenu;
 import l.files.premium.PremiumLock;
 import l.files.ui.base.app.OptionsMenus;
@@ -291,7 +292,7 @@ public final class FilesFragment
         FragmentManager manager = activity.getSupportFragmentManager();
         setOptionsMenu(OptionsMenus.compose(
                 new RefreshMenu(autoRefreshDisable(), refresh()),
-                new BookmarkMenu(directory, activity),
+                new BookmarkMenu(directory, LocalFileSystem.INSTANCE, activity),
                 new NewDirMenu(manager, directory),
                 new PasteMenu(activity, directory),
                 new SortMenu(manager),

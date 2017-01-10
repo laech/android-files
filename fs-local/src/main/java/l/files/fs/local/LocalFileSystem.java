@@ -141,28 +141,31 @@ public final class LocalFileSystem extends Native implements FileSystem {
     }
 
     @Override
-    public void createDir(Path path) throws IOException {
+    public Path createDir(Path path) throws IOException {
         try {
             // Same permission bits as java.io.File.mkdir() on Android
             mkdir(path.toByteArray(), S_IRWXU);
+            return path;
         } catch (ErrnoException e) {
             throw ErrnoExceptions.toIOException(e, path);
         }
     }
 
     @Override
-    public void createDir(Path path, Set<Permission> permissions) throws IOException {
+    public Path createDir(Path path, Set<Permission> permissions) throws IOException {
         try {
             mkdir(path.toByteArray(), permissionsToMode(permissions));
+            return path;
         } catch (ErrnoException e) {
             throw ErrnoExceptions.toIOException(e, path);
         }
     }
 
     @Override
-    public void createFile(Path path) throws IOException {
+    public Path createFile(Path path) throws IOException {
         try {
             createFileNative(path);
+            return path;
         } catch (ErrnoException e) {
             throw ErrnoExceptions.toIOException(e, path);
         }
@@ -177,10 +180,11 @@ public final class LocalFileSystem extends Native implements FileSystem {
     }
 
     @Override
-    public void createSymbolicLink(Path link, Path target) throws IOException {
+    public Path createSymbolicLink(Path link, Path target) throws IOException {
         try {
 
             Unistd.symlink(target.toByteArray(), link.toByteArray());
+            return link;
 
         } catch (ErrnoException e) {
             throw ErrnoExceptions.toIOException(e, target, link);

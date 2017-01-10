@@ -1,6 +1,5 @@
 package l.files.bookmarks;
 
-import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.util.Base64;
 import android.util.Log;
@@ -14,7 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import l.files.fs.Files;
+import l.files.fs.FileSystem;
 import l.files.fs.Path;
 
 import static android.os.Environment.DIRECTORY_DCIM;
@@ -34,7 +33,7 @@ final class BookmarkManagerImpl extends BookmarkManager {
     private static final String PREF_KEY_V1 = "bookmarks";
     private static final String PREF_KEY_V2 = "bookmarks2";
 
-    private static Set<Path> createDefaultBookmarks() {
+    private Set<Path> createDefaultBookmarks() {
         Set<Path> defaults = new HashSet<>();
         addIfExists(defaults, Path.fromFile(getExternalStorageDirectory()));
         addIfExists(defaults, externalStoragePath(DIRECTORY_DCIM));
@@ -46,7 +45,7 @@ final class BookmarkManagerImpl extends BookmarkManager {
         return unmodifiableSet(defaults);
     }
 
-    private static void addIfExists(Set<Path> paths, Path path) {
+    private void addIfExists(Set<Path> paths, Path path) {
         try {
             if (exists(path)) {
                 paths.add(path);
@@ -55,19 +54,21 @@ final class BookmarkManagerImpl extends BookmarkManager {
         }
     }
 
-    private static boolean exists(Path path) throws IOException {
-        return Files.exists(path, FOLLOW);
+    private boolean exists(Path path) throws IOException {
+        return fs.exists(path, FOLLOW);
     }
 
     private static Path externalStoragePath(String name) {
         return Path.fromFile(new File(getExternalStorageDirectory(), name));
     }
 
+    private final FileSystem fs;
     private final Set<Path> bookmarks;
     private final SharedPreferences pref;
     private final Set<BookmarkChangedListener> listeners;
 
-    public BookmarkManagerImpl(SharedPreferences pref) {
+    public BookmarkManagerImpl(FileSystem fs, SharedPreferences pref) {
+        this.fs = requireNonNull(fs);
         this.pref = requireNonNull(pref);
         this.listeners = new CopyOnWriteArraySet<>();
         this.bookmarks = new CopyOnWriteArraySet<>();
@@ -115,7 +116,7 @@ final class BookmarkManagerImpl extends BookmarkManager {
         }
     }
 
-    private static Set<Path> decode(Collection<String> encoded) {
+    private Set<Path> decode(Collection<String> encoded) {
         Set<Path> bookmarks = new HashSet<>();
         for (String element : encoded) {
             try {

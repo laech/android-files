@@ -18,6 +18,7 @@ import javax.annotation.Nullable;
 
 import l.files.bookmarks.BookmarkManager;
 import l.files.fs.Path;
+import l.files.fs.local.LocalFileSystem;
 import l.files.ui.base.fs.OnOpenFileListener;
 import l.files.ui.base.selection.SelectionModeFragment;
 import l.files.ui.base.view.ActionModeProvider;
@@ -80,7 +81,8 @@ public final class BookmarksFragment
         return ActionModes.compose(
                 new CountSelectedItemsAction(selection()),
                 new ClearSelectionOnDestroyActionMode(selection()),
-                new RemoveBookmark(selection(), BookmarkManager.get(getActivity()))
+                new RemoveBookmark(selection(),  BookmarkManager.get(
+                        getActivity(), LocalFileSystem.INSTANCE))
         );
     }
 
@@ -93,7 +95,8 @@ public final class BookmarksFragment
     public Loader<List<Path>> onCreateLoader(int id, Bundle bundle) {
         return new BookmarksLoader(
                 getActivity(),
-                BookmarkManager.get(getActivity()), DIR_HOME);
+                BookmarkManager.get(getActivity(), LocalFileSystem.INSTANCE),
+                DIR_HOME);
     }
 
     @Override
