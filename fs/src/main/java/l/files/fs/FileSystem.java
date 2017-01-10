@@ -10,34 +10,40 @@ import javax.annotation.Nullable;
 import l.files.fs.event.Observation;
 import l.files.fs.event.Observer;
 
-public interface FileSystem {
+public abstract class FileSystem {
 
-    void setPermissions(Path path, Set<Permission> permissions)
+    public abstract void setPermissions(Path path, Set<Permission> permissions)
             throws IOException;
 
-    void setLastModifiedTime(Path path, LinkOption option, Instant instant)
+    public abstract void setLastModifiedTime(Path path, LinkOption option, Instant instant)
             throws IOException;
 
-    Stat stat(Path path, LinkOption option) throws IOException;
+    public abstract Stat stat(Path path, LinkOption option)
+            throws IOException;
 
-    Path createDir(Path path) throws IOException;
+    public abstract Path createDir(Path path)
+            throws IOException;
 
     /**
      * Creates directory with specified permissions,
      * the set of permissions with be restricted so
      * the resulting permissions may not be the same.
      */
-    Path createDir(Path path, Set<Permission> permissions) throws IOException;
+    public abstract Path createDir(Path path, Set<Permission> permissions)
+            throws IOException;
 
-    Path createFile(Path path) throws IOException;
+    public abstract Path createFile(Path path)
+            throws IOException;
 
     /**
      * @param link   the link itself
      * @param target the target the link will point to
      */
-    Path createSymbolicLink(Path link, Path target) throws IOException;
+    public abstract Path createSymbolicLink(Path link, Path target)
+            throws IOException;
 
-    Path readSymbolicLink(Path path) throws IOException;
+    public abstract Path readSymbolicLink(Path path)
+            throws IOException;
 
     /**
      * Moves src file tree to dst, destination must not exist.
@@ -45,11 +51,14 @@ public interface FileSystem {
      * If src is a link, the link itself is moved, link target file is
      * unaffected.
      */
-    void move(Path src, Path dst) throws IOException;
+    public abstract void move(Path src, Path dst)
+            throws IOException;
 
-    void delete(Path path) throws IOException;
+    public abstract void delete(Path path)
+            throws IOException;
 
-    boolean exists(Path path, LinkOption option) throws IOException;
+    public abstract boolean exists(Path path, LinkOption option)
+            throws IOException;
 
     /**
      * Returns true if this file is readable, return false if not.
@@ -57,7 +66,8 @@ public interface FileSystem {
      * If this is a link, returns the result for the link target, not the link
      * itself.
      */
-    boolean isReadable(Path path) throws IOException;
+    public abstract boolean isReadable(Path path)
+            throws IOException;
 
     /**
      * Returns true if this file is writable, return false if not.
@@ -65,7 +75,8 @@ public interface FileSystem {
      * If this is a link, returns the result for the link target, not the link
      * itself.
      */
-    boolean isWritable(Path path) throws IOException;
+    public abstract boolean isWritable(Path path)
+            throws IOException;
 
     /**
      * Returns true if this file is executable, return false if not.
@@ -73,7 +84,8 @@ public interface FileSystem {
      * If this is a link, returns the result for the link target, not the link
      * itself.
      */
-    boolean isExecutable(Path path) throws IOException;
+    public abstract boolean isExecutable(Path path)
+            throws IOException;
 
     /**
      * Observes on this file for change events.
@@ -97,7 +109,7 @@ public interface FileSystem {
      * @param logTag           tag for debug logging
      * @param watchLimit       limit the number of watch descriptors, or -1
      */
-    Observation observe(
+    public abstract Observation observe(
             Path path,
             LinkOption option,
             Observer observer,
@@ -106,21 +118,23 @@ public interface FileSystem {
             int watchLimit)
             throws IOException, InterruptedException;
 
-    void list(
+    public abstract void list(
             Path path,
             LinkOption option,
             Consumer<? super Path> consumer) throws IOException;
 
-    void listDirs(
+    public abstract void listDirs(
             Path path,
             LinkOption option,
             Consumer<? super Path> consumer) throws IOException;
 
-    InputStream newInputStream(Path path) throws IOException;
+    public abstract InputStream newInputStream(Path path)
+            throws IOException;
 
-    OutputStream newOutputStream(Path path, boolean append) throws IOException;
+    public abstract OutputStream newOutputStream(Path path, boolean append)
+            throws IOException;
 
-    interface Consumer<E> {
+    public interface Consumer<E> {
         /**
          * @return true to continue, false to stop for multi-item callbacks
          */

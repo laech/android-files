@@ -60,7 +60,7 @@ import static linux.Stat.S_IXUSR;
 import static linux.Stat.chmod;
 import static linux.Stat.mkdir;
 
-public final class LocalFileSystem extends Native implements FileSystem {
+public final class LocalFileSystem extends FileSystem {
 
     public static final LocalFileSystem INSTANCE = new LocalFileSystem();
 
