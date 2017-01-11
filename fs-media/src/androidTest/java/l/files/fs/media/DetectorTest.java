@@ -2,11 +2,16 @@ package l.files.fs.media;
 
 import java.io.IOException;
 
-import l.files.fs.Files;
 import l.files.fs.Path;
+import l.files.fs.local.LocalFileSystem;
+import l.files.testing.fs.Files;
 import l.files.testing.fs.PathBaseTest;
 
 public final class DetectorTest extends PathBaseTest {
+
+    public DetectorTest() {
+        super(LocalFileSystem.INSTANCE);
+    }
 
     private Detector detector() {
         return Detector.INSTANCE;
@@ -59,8 +64,8 @@ public final class DetectorTest extends PathBaseTest {
     public void test_fails_on_broken_circular_links() throws Exception {
         Path link1 = dir1().concat("link1");
         Path link2 = dir1().concat("link2");
-        Files.createSymbolicLink(link1, link2);
-        Files.createSymbolicLink(link2, link1);
+        fs.createSymbolicLink(link1, link2);
+        fs.createSymbolicLink(link2, link1);
         try {
             detector().detect(getContext(), link1);
             fail();
@@ -70,12 +75,12 @@ public final class DetectorTest extends PathBaseTest {
     }
 
     protected Path createDir(String name) throws IOException {
-        return Files.createDir(dir1().concat(name));
+        return fs.createDir(dir1().concat(name));
     }
 
     protected Path createSymbolicLink(String name, Path target) throws IOException {
         Path link = dir1().concat(name);
-        Files.createSymbolicLink(link, target);
+        fs.createSymbolicLink(link, target);
         return link;
     }
 
@@ -85,7 +90,7 @@ public final class DetectorTest extends PathBaseTest {
 
     protected Path createTextFile(String name, String content) throws IOException {
         Path path = dir1().concat(name);
-        Files.writeUtf8(path, content);
+        Files.writeUtf8(fs, path, content);
         return path;
     }
 

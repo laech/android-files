@@ -10,15 +10,10 @@ import java.util.List;
 import l.files.fs.Path;
 import l.files.fs.Permission;
 import l.files.fs.TraversalCallback;
+import l.files.testing.fs.PathBaseTest;
 
 import static java.util.Arrays.asList;
 import static l.files.base.Objects.requireNonNull;
-import static l.files.fs.Files.createDir;
-import static l.files.fs.Files.createDirs;
-import static l.files.fs.Files.createFile;
-import static l.files.fs.Files.createSymbolicLink;
-import static l.files.fs.Files.setPermissions;
-import static l.files.fs.Files.traverse;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.TraversalCallback.Result.CONTINUE;
@@ -36,14 +31,18 @@ public final class LocalFileTraverseTest extends PathBaseTest {
         }
     };
 
+    public LocalFileTraverseTest() {
+        super(LocalFileSystem.INSTANCE);
+    }
+
     public void test_traverse_noFollowLink() throws Exception {
-        Path dir = createDir(dir1().concat("dir"));
-        Path link = createSymbolicLink(dir1().concat("link"), dir);
-        createFile(link.concat("a"));
-        createFile(link.concat("b"));
+        Path dir = fs.createDir(dir1().concat("dir"));
+        Path link = fs.createSymbolicLink(dir1().concat("link"), dir);
+        fs.createFile(link.concat("a"));
+        fs.createFile(link.concat("b"));
 
         Recorder recorder = new Recorder();
-        traverse(link, NOFOLLOW, recorder);
+        fs.traverse(link, NOFOLLOW, recorder);
         List<TraversalEvent> expected = asList(
                 TraversalEvent.of(PRE, link),
                 TraversalEvent.of(POST, link)
@@ -52,15 +51,15 @@ public final class LocalFileTraverseTest extends PathBaseTest {
     }
 
     public void test_traverse_followLink_rootOnly() throws Exception {
-        createDir(dir1().concat("dir"));
-        createFile(dir1().concat("dir/a"));
-        createDir(dir1().concat("dir/b"));
-        createFile(dir1().concat("dir/b/1"));
-        createSymbolicLink(dir1().concat("dir/c"), dir1().concat("dir/b"));
-        createSymbolicLink(dir1().concat("link"), dir1().concat("dir"));
+        fs.createDir(dir1().concat("dir"));
+        fs.createFile(dir1().concat("dir/a"));
+        fs.createDir(dir1().concat("dir/b"));
+        fs.createFile(dir1().concat("dir/b/1"));
+        fs.createSymbolicLink(dir1().concat("dir/c"), dir1().concat("dir/b"));
+        fs.createSymbolicLink(dir1().concat("link"), dir1().concat("dir"));
 
         Recorder recorder = new Recorder();
-        traverse(dir1().concat("link"), FOLLOW, recorder, SORT_BY_NAME);
+        fs.traverse(dir1().concat("link"), FOLLOW, recorder, SORT_BY_NAME);
         List<TraversalEvent> expected = asList(
                 TraversalEvent.of(PRE, dir1().concat("link")),
                 TraversalEvent.of(PRE, dir1().concat("link/a")),
@@ -78,12 +77,12 @@ public final class LocalFileTraverseTest extends PathBaseTest {
     }
 
     public void test_traverse_followLink() throws Exception {
-        Path dir = createDir(dir1().concat("dir"));
-        Path link = createSymbolicLink(dir1().concat("link"), dir);
-        Path a = createFile(link.concat("a"));
+        Path dir = fs.createDir(dir1().concat("dir"));
+        Path link = fs.createSymbolicLink(dir1().concat("link"), dir);
+        Path a = fs.createFile(link.concat("a"));
 
         Recorder recorder = new Recorder();
-        traverse(link, FOLLOW, recorder);
+        fs.traverse(link, FOLLOW, recorder);
         List<TraversalEvent> expected = asList(
                 TraversalEvent.of(PRE, link),
                 TraversalEvent.of(PRE, a),
@@ -94,8 +93,8 @@ public final class LocalFileTraverseTest extends PathBaseTest {
     }
 
     public void test_traverse_continuesIfExceptionHandlerDoesNotThrow_pre() throws Exception {
-        createDir(dir1().concat("a"));
-        createDir(dir1().concat("b"));
+        fs.createDir(dir1().concat("a"));
+        fs.createDir(dir1().concat("b"));
 
         List<TraversalEvent> expected = asList(
                 TraversalEvent.of(PRE, dir1()),
@@ -120,15 +119,15 @@ public final class LocalFileTraverseTest extends PathBaseTest {
             }
 
         };
-        traverse(dir1(), NOFOLLOW, recorder);
+        fs.traverse(dir1(), NOFOLLOW, recorder);
 
         checkEquals(expected, recorder.events);
     }
 
     public void test_traverse_continuesIfExceptionHandlerDoesNotThrow_post() throws Exception {
-        createDirs(dir1().concat("a/1"));
-        createFile(dir1().concat("a/1/i"));
-        createDirs(dir1().concat("b"));
+        fs.createDirs(dir1().concat("a/1"));
+        fs.createFile(dir1().concat("a/1/i"));
+        fs.createDirs(dir1().concat("b"));
 
         List<TraversalEvent> expected = asList(
                 TraversalEvent.of(PRE, dir1()),
@@ -160,17 +159,17 @@ public final class LocalFileTraverseTest extends PathBaseTest {
             }
 
         };
-        traverse(dir1(), NOFOLLOW, recorder, SORT_BY_NAME);
+        fs.traverse(dir1(), NOFOLLOW, recorder, SORT_BY_NAME);
 
         checkEquals(expected, recorder.events);
     }
 
     public void test_traverse_continuesIfExceptionHandlerDoesNotThrow_noPermission() throws Exception {
-        createDirs(dir1().concat("a/1"));
-        createFile(dir1().concat("a/1/i"));
-        createDirs(dir1().concat("a/2"));
-        createDirs(dir1().concat("b"));
-        setPermissions(dir1().concat("a"), Permission.none());
+        fs.createDirs(dir1().concat("a/1"));
+        fs.createFile(dir1().concat("a/1/i"));
+        fs.createDirs(dir1().concat("a/2"));
+        fs.createDirs(dir1().concat("b"));
+        fs.setPermissions(dir1().concat("a"), Permission.none());
 
         List<TraversalEvent> expected = asList(
                 TraversalEvent.of(PRE, dir1()),
@@ -187,16 +186,16 @@ public final class LocalFileTraverseTest extends PathBaseTest {
                 // Ignore
             }
         };
-        traverse(dir1(), NOFOLLOW, recorder, SORT_BY_NAME);
+        fs.traverse(dir1(), NOFOLLOW, recorder, SORT_BY_NAME);
 
         checkEquals(expected, recorder.events);
     }
 
     public void test_traverse_order() throws Exception {
-        createDirs(dir1().concat("a/1"));
-        createFile(dir1().concat("a/1/i"));
-        createDirs(dir1().concat("a/2"));
-        createDirs(dir1().concat("b"));
+        fs.createDirs(dir1().concat("a/1"));
+        fs.createFile(dir1().concat("a/1/i"));
+        fs.createDirs(dir1().concat("a/2"));
+        fs.createDirs(dir1().concat("b"));
 
         List<TraversalEvent> expected = asList(
                 TraversalEvent.of(PRE, dir1()),
@@ -214,16 +213,16 @@ public final class LocalFileTraverseTest extends PathBaseTest {
         );
 
         Recorder recorder = new Recorder();
-        traverse(dir1(), NOFOLLOW, recorder, SORT_BY_NAME);
+        fs.traverse(dir1(), NOFOLLOW, recorder, SORT_BY_NAME);
 
         checkEquals(expected, recorder.events);
     }
 
     public void test_traversal_skip() throws Exception {
-        createDirs(dir1().concat("a/1"));
-        createFile(dir1().concat("a/1/i"));
-        createDirs(dir1().concat("a/2"));
-        createDirs(dir1().concat("b"));
+        fs.createDirs(dir1().concat("a/1"));
+        fs.createFile(dir1().concat("a/1/i"));
+        fs.createDirs(dir1().concat("a/2"));
+        fs.createDirs(dir1().concat("b"));
 
         List<TraversalEvent> expected = asList(
                 TraversalEvent.of(PRE, dir1()),
@@ -243,15 +242,15 @@ public final class LocalFileTraverseTest extends PathBaseTest {
                 return CONTINUE;
             }
         };
-        traverse(dir1(), NOFOLLOW, recorder, SORT_BY_NAME);
+        fs.traverse(dir1(), NOFOLLOW, recorder, SORT_BY_NAME);
         checkEquals(expected, recorder.events);
     }
 
     public void test_traverse_termination() throws Exception {
-        createDirs(dir1().concat("a/1"));
-        createFile(dir1().concat("a/1/i"));
-        createDirs(dir1().concat("a/2"));
-        createDirs(dir1().concat("b"));
+        fs.createDirs(dir1().concat("a/1"));
+        fs.createFile(dir1().concat("a/1/i"));
+        fs.createDirs(dir1().concat("a/2"));
+        fs.createDirs(dir1().concat("b"));
 
         List<TraversalEvent> expected = asList(
                 TraversalEvent.of(PRE, dir1()),
@@ -268,7 +267,7 @@ public final class LocalFileTraverseTest extends PathBaseTest {
                 return CONTINUE;
             }
         };
-        traverse(dir1(), NOFOLLOW, recorder, SORT_BY_NAME);
+        fs.traverse(dir1(), NOFOLLOW, recorder, SORT_BY_NAME);
         checkEquals(expected, recorder.events);
     }
 

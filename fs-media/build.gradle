@@ -25,5 +25,6 @@ dependencies {
     compile 'org.apache.tika:tika-core:1.10'
 
     androidTestCompile project(':testing-fs')
+    androidTestCompile project(':fs-local')
 
 }

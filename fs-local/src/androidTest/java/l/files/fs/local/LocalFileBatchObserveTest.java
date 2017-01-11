@@ -3,20 +3,20 @@ package l.files.fs.local;
 import java.util.Collections;
 import java.util.HashMap;
 
+import l.files.fs.FileSystem.Consumer;
+import l.files.fs.Instant;
 import l.files.fs.Name;
+import l.files.fs.Path;
 import l.files.fs.event.BatchObserver;
 import l.files.fs.event.Event;
-import l.files.fs.FileSystem.Consumer;
-import l.files.fs.Files;
-import l.files.fs.Instant;
 import l.files.fs.event.Observation;
-import l.files.fs.Path;
+import l.files.testing.fs.PathBaseTest;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.event.Event.CREATE;
 import static l.files.fs.event.Event.DELETE;
 import static l.files.fs.event.Event.MODIFY;
-import static l.files.fs.LinkOption.NOFOLLOW;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -30,6 +30,10 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
     private BatchObserver observer;
     private Consumer<Path> consumer;
 
+    public LocalFileBatchObserveTest() {
+        super(LocalFileSystem.INSTANCE);
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     protected void setUp() throws Exception {
@@ -40,7 +44,7 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
     }
 
     public void test_notifies_self_change() throws Exception {
-        Observation observation = Files.observe(
+        Observation observation = fs.observe(
                 dir1(),
                 NOFOLLOW,
                 observer,
@@ -52,7 +56,7 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
                 -1);
         try {
 
-            Files.setLastModifiedTime(dir1(), NOFOLLOW, Instant.ofMillis(1));
+            fs.setLastModifiedTime(dir1(), NOFOLLOW, Instant.ofMillis(1));
 
             verify(observer, timeout(100)).onLatestEvents(
                     true, Collections.<Name, Event>emptyMap());
@@ -67,15 +71,15 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
 
     public void test_notifies_children_change() throws Exception {
 
-        final Path b = Files.createDir(dir1().concat("b"));
-        final Path a = Files.createFile(dir1().concat("a"));
-        final Path c = Files.createDir(dir1().concat("c"));
+        final Path b = fs.createDir(dir1().concat("b"));
+        final Path a = fs.createFile(dir1().concat("a"));
+        final Path c = fs.createDir(dir1().concat("c"));
         final Path d = dir1().concat("d");
 
-        Files.createFile(dir1().concat("e"));
-        Files.createDir(dir1().concat("f"));
+        fs.createFile(dir1().concat("e"));
+        fs.createDir(dir1().concat("f"));
 
-        Observation observation = Files.observe(
+        Observation observation = fs.observe(
                 dir1(),
                 NOFOLLOW,
                 observer,
@@ -89,10 +93,10 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
 
             assertFalse(observation.isClosed());
 
-            Files.setLastModifiedTime(a, NOFOLLOW, Instant.ofMillis(1));
-            Files.setLastModifiedTime(b, NOFOLLOW, Instant.ofMillis(2));
-            Files.delete(c);
-            Files.createFile(d);
+            fs.setLastModifiedTime(a, NOFOLLOW, Instant.ofMillis(1));
+            fs.setLastModifiedTime(b, NOFOLLOW, Instant.ofMillis(2));
+            fs.delete(c);
+            fs.createFile(d);
 
             verify(observer, timeout(10000)).onLatestEvents(
                     false,
@@ -112,8 +116,8 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
 
     public void test_notifies_latest_event() throws Exception {
 
-        final Path file = Files.createFile(dir1().concat("file"));
-        final Observation observation = Files.observe(
+        final Path file = fs.createFile(dir1().concat("file"));
+        final Observation observation = fs.observe(
                 dir1(),
                 NOFOLLOW,
                 observer,
@@ -125,9 +129,9 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
                 -1);
         try {
 
-            Files.setLastModifiedTime(file, NOFOLLOW, Instant.ofMillis(1));
-            Files.delete(file);
-            Files.createFile(file);
+            fs.setLastModifiedTime(file, NOFOLLOW, Instant.ofMillis(1));
+            fs.delete(file);
+            fs.createFile(file);
 
             verify(observer, timeout(10000)).onLatestEvents(
                     false,
@@ -144,8 +148,8 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
 
     public void test_notifies_self_and_children_change() throws Exception {
 
-        final Path child = Files.createFile(dir1().concat("a"));
-        final Observation observation = Files.observe(
+        final Path child = fs.createFile(dir1().concat("a"));
+        final Observation observation = fs.observe(
                 dir1(),
                 NOFOLLOW,
                 observer,
@@ -159,8 +163,8 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
 
             verify(consumer).accept(child);
 
-            Files.setLastModifiedTime(dir1(), NOFOLLOW, Instant.ofMillis(1));
-            Files.setLastModifiedTime(child, NOFOLLOW, Instant.ofMillis(2));
+            fs.setLastModifiedTime(dir1(), NOFOLLOW, Instant.ofMillis(1));
+            fs.setLastModifiedTime(child, NOFOLLOW, Instant.ofMillis(2));
 
             verify(observer, timeout(10000)).onLatestEvents(
                     true,
@@ -168,14 +172,14 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
                         put(child.name(), MODIFY);
                     }});
 
-            Files.setLastModifiedTime(child, NOFOLLOW, Instant.ofMillis(3));
+            fs.setLastModifiedTime(child, NOFOLLOW, Instant.ofMillis(3));
             verify(observer, timeout(10000)).onLatestEvents(
                     false,
                     new HashMap<Name, Event>() {{
                         put(child.name(), MODIFY);
                     }});
 
-            Files.setLastModifiedTime(dir1(), NOFOLLOW, Instant.ofMillis(4));
+            fs.setLastModifiedTime(dir1(), NOFOLLOW, Instant.ofMillis(4));
             verify(observer, timeout(10000)).onLatestEvents(
                     true, Collections.<Name, Event>emptyMap());
 

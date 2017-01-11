@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import l.files.fs.Path;
+import l.files.fs.local.LocalFileSystem;
 import l.files.testing.fs.PathBaseTest;
 
 import static java.util.Arrays.asList;
@@ -17,6 +18,10 @@ import static l.files.fs.Files.exists;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class DeleteTest extends PathBaseTest {
+
+    public DeleteTest() {
+        super(LocalFileSystem.INSTANCE);
+    }
 
     public void test_notifiesListener() throws Exception {
         Path a = createDir(dir1().concat("a"));

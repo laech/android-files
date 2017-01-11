@@ -1,15 +1,22 @@
 package l.files.fs;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
 
+import l.files.fs.event.BatchObserver;
+import l.files.fs.event.BatchObserverNotifier;
 import l.files.fs.event.Observation;
 import l.files.fs.event.Observer;
+
+import static l.files.fs.LinkOption.NOFOLLOW;
 
 public abstract class FileSystem {
 
@@ -32,6 +39,33 @@ public abstract class FileSystem {
      */
     public abstract Path createDir(Path path, Set<Permission> permissions)
             throws IOException;
+
+    /**
+     * Creates this file and any missing parents as directories. This will
+     * throw the same exceptions as {@link #createDir(Path)} except
+     * will not error if already exists as a directory.
+     */
+    public Path createDirs(Path path) throws IOException {
+        try {
+            if (stat(path, NOFOLLOW).isDirectory()) {
+                return path;
+            }
+        } catch (FileNotFoundException ignore) {
+        }
+
+        Path parent = path.parent();
+        if (parent != null) {
+            createDirs(parent);
+        }
+
+        try {
+            createDir(path);
+        } catch (AlreadyExist ignore) {
+        }
+
+        return path;
+    }
+
 
     public abstract Path createFile(Path path)
             throws IOException;
@@ -119,6 +153,42 @@ public abstract class FileSystem {
             int watchLimit)
             throws IOException, InterruptedException;
 
+    public Observation observe(
+            Path path,
+            LinkOption option,
+            Observer observer)
+            throws IOException, InterruptedException {
+
+        return observe(path, option, observer, new Consumer<Path>() {
+            @Override
+            public boolean accept(Path entry) throws IOException {
+                return true;
+            }
+        }, null, -1);
+    }
+
+    public Observation observe(
+            Path path,
+            LinkOption option,
+            BatchObserver batchObserver,
+            Consumer<? super Path> childrenConsumer,
+            long batchInterval,
+            TimeUnit batchInternalUnit,
+            boolean quickNotifyFirstEvent,
+            String tag,
+            int watchLimit)
+            throws IOException, InterruptedException {
+
+        return new BatchObserverNotifier(
+                batchObserver,
+                batchInterval,
+                batchInternalUnit,
+                quickNotifyFirstEvent,
+                tag,
+                watchLimit
+        ).start(path.fileSystem(), path, option, childrenConsumer);
+    }
+
     public abstract void list(
             Path path,
             LinkOption option,
@@ -144,6 +214,45 @@ public abstract class FileSystem {
             Path path,
             LinkOption option,
             Consumer<? super Path> consumer) throws IOException;
+
+    public void traverse(
+            Path path,
+            LinkOption option,
+            TraversalCallback<? super Path> visitor) throws IOException {
+
+        traverse(path, option, visitor, null);
+    }
+
+    /**
+     * Performs a depth first traverse of this tree.
+     * <p/>
+     * e.g. traversing the follow tree:
+     * <pre>
+     *     a
+     *    / \
+     *   b   c
+     * </pre>
+     * will generate:
+     * <pre>
+     * visitor.onPreVisit(a)
+     * visitor.onPreVisit(b)
+     * visitor.onPostVisit(b)
+     * visitor.onPreVisit(c)
+     * visitor.onPostVisit(c)
+     * visitor.onPostVisit(a)
+     * </pre>
+     *
+     * @param option applies to root only, child links are never followed
+     */
+    public void traverse(
+            Path path,
+            LinkOption option,
+            TraversalCallback<? super Path> visitor,
+            @Nullable Comparator<Path> childrenComparator) throws IOException {
+
+        new Traverser(path, this, option, visitor, childrenComparator)
+                .traverse();
+    }
 
     public abstract InputStream newInputStream(Path path)
             throws IOException;

@@ -14,12 +14,10 @@ import java.io.InputStream;
 
 import javax.annotation.Nullable;
 
+import l.files.fs.FileSystem;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 
-import static l.files.fs.Files.newInputStream;
-import static l.files.fs.Files.readSymbolicLink;
-import static l.files.fs.Files.stat;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.media.MediaTypes.MEDIA_TYPE_OCTET_STREAM;
 import static org.apache.tika.metadata.TikaMetadataKeys.RESOURCE_NAME_KEY;
@@ -41,18 +39,19 @@ final class Detector {
     private Detector() {
     }
 
-    String detect(Context context, Path path) throws IOException {
-        return detect(context, path, stat(path, FOLLOW));
+    String detect(Context context, FileSystem fs, Path path) throws IOException {
+        return detect(context, fs, path, fs.stat(path, FOLLOW));
     }
 
-    String detect(Context context, Path path, Stat stat) throws IOException {
+    String detect(Context context, FileSystem fs, Path path, Stat stat) throws IOException {
         if (stat.isSymbolicLink()) {
             return detect(
                     context,
-                    readSymbolicLink(path),
-                    stat(path, FOLLOW));
+                    fs,
+                    fs.readSymbolicLink(path),
+                    fs.stat(path, FOLLOW));
         }
-        if (stat.isRegularFile()) return detectFile(context, path);
+        if (stat.isRegularFile()) return detectFile(context, fs, path);
         if (stat.isFifo()) return INODE_FIFO;
         if (stat.isSocket()) return INODE_SOCKET;
         if (stat.isDirectory()) return INODE_DIRECTORY;
@@ -61,7 +60,10 @@ final class Detector {
         return MEDIA_TYPE_OCTET_STREAM;
     }
 
-    private static String detectFile(Context context, Path path) throws IOException {
+    private static String detectFile(
+            Context context,
+            FileSystem fs,
+            Path path) throws IOException {
 
         if (types == null) {
             synchronized (Detector.class) {
@@ -79,7 +81,7 @@ final class Detector {
 
             MimeTypes t = types;
             assert t != null;
-            return detectFile(t, path);
+            return detectFile(t, fs, path);
 
         } catch (TaggedIOException e) {
             if (e.getCause() != null) {
@@ -107,10 +109,14 @@ final class Detector {
         }
     }
 
-    private static String detectFile(MimeTypes types, Path path) throws IOException {
+    private static String detectFile(
+            MimeTypes types,
+            FileSystem fs,
+            Path path) throws IOException {
+
         Metadata meta = new Metadata();
         meta.add(RESOURCE_NAME_KEY, path.name().toString());
-        InputStream in = new BufferedInputStream(newInputStream(path));
+        InputStream in = new BufferedInputStream(fs.newInputStream(path));
         try {
             return types.detect(in, meta).getBaseType().toString();
         } finally {

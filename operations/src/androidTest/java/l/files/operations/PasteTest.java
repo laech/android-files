@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import l.files.fs.Path;
+import l.files.fs.local.LocalFileSystem;
 import l.files.testing.fs.PathBaseTest;
 
 import static java.lang.Thread.currentThread;
@@ -15,10 +16,13 @@ import static l.files.fs.Files.createDir;
 import static l.files.fs.Files.createFile;
 import static l.files.fs.Files.createFiles;
 import static l.files.fs.Files.exists;
-import static l.files.fs.Files.list;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
 public abstract class PasteTest extends PathBaseTest {
+
+    public PasteTest() {
+        super(LocalFileSystem.INSTANCE);
+    }
 
     /**
      * When pasting emptying directories, they should be created on the
@@ -100,7 +104,7 @@ public abstract class PasteTest extends PathBaseTest {
         thread.start();
         thread.join();
 
-        List<Path> actual = list(dstDir, NOFOLLOW, new ArrayList<Path>());
+        List<Path> actual = fs.list(dstDir, NOFOLLOW, new ArrayList<Path>());
         assertTrue(actual.isEmpty());
     }
 

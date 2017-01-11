@@ -16,11 +16,12 @@ import org.junit.runner.RunWith;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 
-import l.files.fs.Files;
 import l.files.fs.Path;
 import l.files.fs.local.LocalObservableTest.Recorder;
 import l.files.testing.Executable;
 import l.files.testing.Tests;
+import l.files.testing.fs.Files;
+import l.files.testing.fs.PathBaseTest;
 
 import static android.app.DownloadManager.COLUMN_REASON;
 import static android.app.DownloadManager.COLUMN_STATUS;
@@ -32,7 +33,6 @@ import static android.os.Environment.DIRECTORY_DOWNLOADS;
 import static android.os.Environment.getExternalStoragePublicDirectory;
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static l.files.fs.Files.deleteIfExists;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.event.Event.CREATE;
 import static l.files.fs.local.LocalObservableTest.Recorder.observe;
@@ -40,6 +40,10 @@ import static org.junit.Assume.assumeTrue;
 
 @RunWith(AndroidJUnit4.class)
 public final class LocalObservableDownloadTest extends PathBaseTest {
+
+    public LocalObservableDownloadTest() {
+        super(LocalFileSystem.INSTANCE);
+    }
 
     @Before
     @Override
@@ -86,14 +90,14 @@ public final class LocalObservableDownloadTest extends PathBaseTest {
                 "test_notifies_files_downloaded_by_download_manager-" +
                         currentTimeMillis());
         try {
-            Recorder observer = observe(downloadDir);
+            Recorder observer = observe(fs, downloadDir);
             try {
                 observer.await(CREATE, downloadFile, newDownload(downloadFile));
             } finally {
                 observer.close();
             }
         } finally {
-            deleteIfExists(downloadFile);
+            Files.deleteIfExists(fs, downloadFile);
         }
     }
 
@@ -108,7 +112,7 @@ public final class LocalObservableDownloadTest extends PathBaseTest {
     }
 
     private void download(Path saveTo) throws Exception {
-        assertFalse(Files.exists(saveTo, NOFOLLOW));
+        assertFalse(fs.exists(saveTo, NOFOLLOW));
 
         Uri src = Uri.parse("https://www.google.com");
         Uri dst = Uri.fromFile(saveTo.toFile());
@@ -148,7 +152,7 @@ public final class LocalObservableDownloadTest extends PathBaseTest {
         } finally {
             cursor.close();
         }
-        assertTrue(Files.exists(dst, NOFOLLOW));
+        assertTrue(fs.exists(dst, NOFOLLOW));
     }
 
     private DownloadManager downloadManager() {

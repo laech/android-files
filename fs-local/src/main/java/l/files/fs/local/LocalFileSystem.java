@@ -277,7 +277,7 @@ public final class LocalFileSystem extends FileSystem {
             throws IOException, InterruptedException {
 
         LocalObservable observable = new LocalObservable(path, observer, logTag);
-        observable.start(option, childrenConsumer, watchLimit);
+        observable.start(this, option, childrenConsumer, watchLimit);
         return observable;
     }
 

@@ -1,6 +1,7 @@
 package l.files.operations;
 
 import l.files.fs.Path;
+import l.files.fs.local.LocalFileSystem;
 import l.files.testing.fs.PathBaseTest;
 
 import static java.util.Arrays.asList;
@@ -11,7 +12,11 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class SizeTest extends PathBaseTest {
 
-    public void teset_size() throws Exception {
+    public SizeTest() {
+        super(LocalFileSystem.INSTANCE);
+    }
+
+    public void test_size() throws Exception {
         Path a = createDir(dir1().concat("a"));
         Path b = createFile(dir1().concat("a/b"));
         Path c = createFile(dir1().concat("c"));

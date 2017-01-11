@@ -13,8 +13,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nullable;
 
+import l.files.fs.FileSystem;
 import l.files.fs.FileSystem.Consumer;
-import l.files.fs.Files;
 import l.files.fs.LinkOption;
 import l.files.fs.Name;
 import l.files.fs.Path;
@@ -33,7 +33,6 @@ import static android.os.Process.setThreadPriority;
 import static java.lang.Thread.currentThread;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.base.Throwables.addSuppressed;
-import static l.files.fs.Files.UTF_8;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.event.Event.CREATE;
 import static l.files.fs.event.Event.DELETE;
@@ -213,7 +212,11 @@ final class LocalObservable extends Native
         this.tag = tag;
     }
 
-    void start(LinkOption option, Consumer<? super Path> childrenConsumer, int watchLimit)
+    void start(
+            FileSystem fs,
+            LinkOption option,
+            Consumer<? super Path> childrenConsumer,
+            int watchLimit)
             throws IOException, InterruptedException {
 
         requireNonNull(option);
@@ -252,7 +255,7 @@ final class LocalObservable extends Native
                 thread.start();
             }
 
-            if (Files.stat(root, option).isDirectory()) {
+            if (fs.stat(root, option).isDirectory()) {
                 traverseChildren(option, childrenConsumer);
             }
 
@@ -530,7 +533,7 @@ final class LocalObservable extends Native
 
             } else {
                 throw new RuntimeException(eventNames(event) + ": " +
-                        (child != null ? new String(child, UTF_8) : null));
+                        (child != null ? Name.fromByteArray(child) : null));
             }
 
         } else {

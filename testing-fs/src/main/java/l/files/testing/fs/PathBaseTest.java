@@ -7,11 +7,14 @@ import java.io.IOException;
 
 import javax.annotation.Nullable;
 
+import l.files.fs.FileSystem;
 import l.files.fs.Path;
 
-import static l.files.fs.Files.deleteRecursiveIfExists;
+import static l.files.base.Objects.requireNonNull;
 
 public abstract class PathBaseTest extends AndroidTestCase {
+
+    protected final FileSystem fs;
 
     @Nullable
     private Path dir1;
@@ -19,13 +22,17 @@ public abstract class PathBaseTest extends AndroidTestCase {
     @Nullable
     private Path dir2;
 
+    public PathBaseTest(FileSystem fs) {
+        this.fs = requireNonNull(fs);
+    }
+
     @Override
     protected void tearDown() throws Exception {
         if (dir1 != null) {
-            deleteRecursiveIfExists(dir1);
+            Files.deleteRecursiveIfExists(fs, dir1);
         }
         if (dir2 != null) {
-            deleteRecursiveIfExists(dir2);
+            Files.deleteRecursiveIfExists(fs, dir2);
         }
         super.tearDown();
     }
