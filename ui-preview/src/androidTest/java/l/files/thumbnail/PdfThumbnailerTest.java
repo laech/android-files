@@ -7,16 +7,19 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import l.files.fs.Files;
+import l.files.fs.FileSystem;
 import l.files.fs.Path;
-import l.files.fs.Paths;
+import l.files.fs.local.LocalFileSystem;
+import l.files.testing.fs.Files;
 import l.files.ui.base.graphics.Rect;
 import l.files.ui.base.graphics.ScaledBitmap;
 
 import static java.io.File.createTempFile;
-import static l.files.fs.Files.deleteIfExists;
+import static l.files.testing.fs.Files.deleteIfExists;
 
 public final class PdfThumbnailerTest extends AndroidTestCase {
+
+    private final FileSystem fs = LocalFileSystem.INSTANCE;
 
     public void test_create_thumbnail_from_pdf() throws Exception {
         Path path = createTestPdf();
@@ -28,17 +31,17 @@ public final class PdfThumbnailerTest extends AndroidTestCase {
             assertTrue(result.originalSize().width() > max.width());
             assertTrue(result.originalSize().height() > max.height());
         } finally {
-            deleteIfExists(path);
+            deleteIfExists(fs, path);
         }
     }
 
     private Path createTestPdf() throws IOException {
         File file = createTempFile("PdfThumbnailerTest", null);
         try {
-            Path path = Paths.get(file);
+            Path path = Path.fromFile(file);
             InputStream in = openTestPdf();
             try {
-                Files.copy(in, path);
+                Files.copy(in, fs, path);
             } finally {
                 in.close();
             }

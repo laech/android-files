@@ -1,8 +1,9 @@
 package l.files.operations;
 
 import java.io.IOException;
-import java.util.Collection;
+import java.util.Map;
 
+import l.files.fs.FileSystem;
 import l.files.fs.Path;
 
 import static l.files.base.Objects.requireNonNull;
@@ -10,37 +11,48 @@ import static l.files.operations.Files.getNonExistentDestinationFile;
 
 abstract class Paste extends AbstractOperation {
 
-    private final Path destination;
+    private final FileSystem destinationFs;
+    private final Path destinationDir;
 
-    Paste(Collection<? extends Path> files, Path destination) {
-        super(files);
-        this.destination = requireNonNull(destination, "destination");
+    Paste(
+            Map<Path, FileSystem> sourcePaths,
+            FileSystem destinationFs,
+            Path destinationDir
+    ) {
+        super(sourcePaths);
+        this.destinationFs = requireNonNull(destinationFs, "destinationFs");
+        this.destinationDir = requireNonNull(destinationDir, "destinationDir");
     }
 
     @Override
-    void process(Path path) throws InterruptedException {
+    void process(FileSystem sourceFs, Path sourcePath) throws InterruptedException {
         checkInterrupt();
 
-        if (destination.startsWith(path)) {
+        if (destinationDir.startsWith(sourcePath)) {
             throw new CannotPasteIntoSelfException(
-                    "Cannot paste directory " + path +
-                            " into its own sub directory " + destination
+                    "Cannot paste directory " + sourcePath +
+                            " into its own sub directory " + destinationDir
             );
         }
 
         try {
-            Path to = getNonExistentDestinationFile(path, destination);
-            paste(path, to);
+            Path destinationPath = getNonExistentDestinationFile(sourcePath, destinationDir);
+            paste(sourceFs, sourcePath, destinationFs, destinationPath);
         } catch (IOException e) {
-            record(path, e);
+            record(sourcePath, e);
         }
     }
 
     /**
-     * Pastes the source to the destination. If {@code from} is a file, write
-     * its content into {@code to}. If {@code from} is a directory, paste its
-     * content into {@code to}.
+     * Pastes the source to the destination. If {@code sourcePath} is a file, write
+     * its content into {@code destinationPath}. If {@code sourcePath} is a directory,
+     * paste its content into {@code destinationPath}.
      */
-    abstract void paste(Path from, Path to) throws IOException;
+    abstract void paste(
+            FileSystem sourceFs,
+            Path sourcePath,
+            FileSystem destinationFs,
+            Path destinationPath
+    ) throws IOException;
 
 }

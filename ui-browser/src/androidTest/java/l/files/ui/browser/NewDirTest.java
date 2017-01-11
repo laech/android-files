@@ -9,8 +9,7 @@ import org.junit.runner.RunWith;
 import l.files.base.Consumer;
 import l.files.fs.Permission;
 
-import static l.files.fs.Files.createFile;
-import static l.files.fs.Files.removePermissions;
+import static l.files.testing.fs.Files.removePermissions;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(AndroidJUnit4.class)
@@ -21,7 +20,7 @@ public final class NewDirTest extends BaseFilesActivityTest {
     @Test
     public void shows_error_message_when_failed_to_create()
             throws Exception {
-        removePermissions(dir(), Permission.write());
+        removePermissions(fs, dir(), Permission.write());
         screen()
                 .newFolder()
                 .setFilename("a")
@@ -48,8 +47,8 @@ public final class NewDirTest extends BaseFilesActivityTest {
     public void name_field_has_new_name_suggestion_if_initial_names_are_taken()
             throws Exception {
 
-        createFile(dir().concat(string(R.string.untitled_dir)));
-        createFile(dir().concat(string(R.string.untitled_dir) + " " + 2));
+        fs.createFile(dir().concat(string(R.string.untitled_dir)));
+        fs.createFile(dir().concat(string(R.string.untitled_dir) + " " + 2));
 
         screen()
                 .newFolder()
@@ -60,7 +59,7 @@ public final class NewDirTest extends BaseFilesActivityTest {
     public void can_not_create_if_folder_with_specified_name_already_exists()
             throws Exception {
 
-        createFile(dir().concat("a"));
+        fs.createFile(dir().concat("a"));
         screen()
                 .newFolder()
                 .setFilename("a")

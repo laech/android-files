@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.util.Random;
 
 import l.files.fs.FileSystem;
-import l.files.fs.Files;
 import l.files.fs.Instant;
 import l.files.fs.Path;
 import l.files.fs.Permission;
@@ -18,18 +17,10 @@ import static java.lang.System.currentTimeMillis;
 import static java.lang.System.nanoTime;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static l.files.fs.Files.createDir;
-import static l.files.fs.Files.createDirs;
-import static l.files.fs.Files.createFile;
-import static l.files.fs.Files.createFiles;
-import static l.files.fs.Files.deleteRecursive;
-import static l.files.fs.Files.list;
-import static l.files.fs.Files.listDirs;
-import static l.files.fs.Files.move;
-import static l.files.fs.Files.setLastModifiedTime;
-import static l.files.fs.Files.writeUtf8;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static l.files.testing.fs.Files.createFiles;
+import static l.files.testing.fs.Files.writeUtf8;
 import static l.files.ui.browser.FileSort.MODIFIED;
 import static l.files.ui.browser.FilesLoader.BATCH_UPDATE_MILLIS;
 import static org.junit.Assert.assertFalse;
@@ -45,7 +36,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
         setActivityIntent(newIntent(dir(), watchLimit));
 
         for (int i = 0; i < watchLimit + 5; i++) {
-            Files.createDir(dir().concat(String.valueOf(i)));
+            fs.createDir(dir().concat(String.valueOf(i)));
         }
 
         screen()
@@ -60,14 +51,14 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
     private void testRefreshInManualMode(Path dir) throws IOException {
 
-        listDirs(dir, FOLLOW, new FileSystem.Consumer<Path>() {
+        fs.listDirs(dir, FOLLOW, new FileSystem.Consumer<Path>() {
             @Override
             public boolean accept(Path childDir) throws IOException {
                 // Inotify don't notify child directory last modified time,
                 // unless we explicitly monitor the child dir, but we aren't
                 // doing that because we ran out of watches, so this is a
                 // good operation for testing the manual refresh
-                Files.createFile(childDir.concat("x"));
+                fs.createFile(childDir.concat("x"));
                 return false;
             }
         });
@@ -106,7 +97,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
     public void auto_detect_files_added_and_removed_while_loading() throws Exception {
 
         for (int i = 0; i < 10; i++) {
-            Files.createDir(dir().concat(String.valueOf(i)));
+            fs.createDir(dir().concat(String.valueOf(i)));
         }
 
         Thread thread = new Thread(new Runnable() {
@@ -117,8 +108,8 @@ public final class RefreshTest extends BaseFilesActivityTest {
                     try {
 
                         deleteFiles(2);
-                        Files.createDir(randomFile(dir()));
-                        Files.createFile(randomFile(dir()));
+                        fs.createDir(randomFile(dir()));
+                        fs.createFile(randomFile(dir()));
 
                     } catch (IOException ignore) {
                     }
@@ -185,43 +176,43 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
     private void updateDirectory(String name) throws IOException {
         Path dir = dir().concat(name);
-        if (Files.exists(dir, NOFOLLOW)) {
-            Files.delete(dir);
+        if (fs.exists(dir, NOFOLLOW)) {
+            fs.delete(dir);
         } else {
-            Files.createDir(dir);
+            fs.createDir(dir);
         }
     }
 
     private void updatePermissions(String name) throws IOException {
-        Path res = createFiles(dir().concat(name));
-        if (Files.isReadable(res)) {
-            Files.setPermissions(res, Permission.read());
+        Path res = createFiles(fs, dir().concat(name));
+        if (fs.isReadable(res)) {
+            fs.setPermissions(res, Permission.read());
         } else {
-            Files.setPermissions(res, Permission.none());
+            fs.setPermissions(res, Permission.none());
         }
     }
 
     private void updateFileContent(String name) throws IOException {
-        Path file = createFiles(dir().concat(name));
-        writeUtf8(file, String.valueOf(new Random().nextLong()));
+        Path file = createFiles(fs, dir().concat(name));
+        writeUtf8(fs, file, String.valueOf(new Random().nextLong()));
     }
 
     private void updateDirectoryChild(String name) throws IOException {
         Path dir = createDirs(dir().concat(name));
         Path child = dir.concat("child");
-        if (Files.exists(child, NOFOLLOW)) {
-            Files.delete(child);
+        if (fs.exists(child, NOFOLLOW)) {
+            fs.delete(child);
         } else {
-            Files.createFile(child);
+            fs.createFile(child);
         }
     }
 
     private void updateLink(String name) throws IOException {
         Path link = dir().concat(name);
-        if (Files.exists(link, NOFOLLOW)) {
-            Files.delete(link);
+        if (fs.exists(link, NOFOLLOW)) {
+            fs.delete(link);
         }
-        Files.createSymbolicLink(
+        fs.createSymbolicLink(
                 link,
                 new Random().nextInt() % 2 == 0
                         ? link

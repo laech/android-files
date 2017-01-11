@@ -1,6 +1,5 @@
 package l.files.fs;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -15,8 +14,6 @@ import l.files.fs.event.BatchObserver;
 import l.files.fs.event.BatchObserverNotifier;
 import l.files.fs.event.Observation;
 import l.files.fs.event.Observer;
-
-import static l.files.fs.LinkOption.NOFOLLOW;
 
 public abstract class FileSystem {
 
@@ -39,33 +36,6 @@ public abstract class FileSystem {
      */
     public abstract Path createDir(Path path, Set<Permission> permissions)
             throws IOException;
-
-    /**
-     * Creates this file and any missing parents as directories. This will
-     * throw the same exceptions as {@link #createDir(Path)} except
-     * will not error if already exists as a directory.
-     */
-    public Path createDirs(Path path) throws IOException {
-        try {
-            if (stat(path, NOFOLLOW).isDirectory()) {
-                return path;
-            }
-        } catch (FileNotFoundException ignore) {
-        }
-
-        Path parent = path.parent();
-        if (parent != null) {
-            createDirs(parent);
-        }
-
-        try {
-            createDir(path);
-        } catch (AlreadyExist ignore) {
-        }
-
-        return path;
-    }
-
 
     public abstract Path createFile(Path path)
             throws IOException;
@@ -209,11 +179,6 @@ public abstract class FileSystem {
         });
         return collection;
     }
-
-    public abstract void listDirs(
-            Path path,
-            LinkOption option,
-            Consumer<? super Path> consumer) throws IOException;
 
     public void traverse(
             Path path,

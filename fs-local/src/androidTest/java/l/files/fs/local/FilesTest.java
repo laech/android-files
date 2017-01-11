@@ -32,7 +32,7 @@ import static android.test.MoreAsserts.assertNotEqual;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
-import static l.files.fs.Files.UTF_8;
+import static l.files.testing.fs.Files.UTF_8;
 import static l.files.fs.Files.newInputStream;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;

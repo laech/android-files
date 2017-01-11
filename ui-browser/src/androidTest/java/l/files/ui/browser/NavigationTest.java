@@ -17,7 +17,6 @@ import java.util.Date;
 import l.files.base.Consumer;
 import l.files.fs.Instant;
 import l.files.fs.Path;
-import l.files.fs.Paths;
 import l.files.fs.Permission;
 import l.files.fs.Stat;
 
@@ -34,21 +33,10 @@ import static java.lang.System.currentTimeMillis;
 import static java.lang.System.nanoTime;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static l.files.fs.Files.UTF_8;
-import static l.files.fs.Files.appendUtf8;
-import static l.files.fs.Files.createDir;
-import static l.files.fs.Files.createDirs;
-import static l.files.fs.Files.createFile;
-import static l.files.fs.Files.createSymbolicLink;
-import static l.files.fs.Files.delete;
-import static l.files.fs.Files.deleteRecursiveIfExists;
-import static l.files.fs.Files.move;
-import static l.files.fs.Files.removePermissions;
-import static l.files.fs.Files.setLastModifiedTime;
-import static l.files.fs.Files.stat;
-import static l.files.fs.Files.writeUtf8;
 import static l.files.fs.Instant.EPOCH;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static l.files.testing.fs.Files.UTF_8;
+import static l.files.testing.fs.Files.createDirs;
 import static l.files.ui.browser.FileSort.NAME;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -71,12 +59,12 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
         try {
 
-            Path src = createDir(dir.concat("a"));
+            Path src = fs.createDir(dir.concat("a"));
             Path dst = dir.concat("A");
 
             screen().assertAllItemsDisplayedInOrder(src);
 
-            move(src, dst);
+            fs.move(src, dst);
 
             screen()
                     .sort()
@@ -90,8 +78,8 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
     @Test
     public void can_start_from_data_uri() throws Exception {
-        Path dir = createDirs(dir().concat("dir"));
-        Path file = createFile(dir.concat("file"));
+        Path dir = createDirs(fs, dir().concat("dir"));
+        Path file = fs.createFile(dir.concat("file"));
         setActivityIntent(new Intent().setData(Uri.fromFile(dir.toFile())));
         screen()
                 .assertCurrentDirectory(dir)
@@ -100,10 +88,10 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
     @Test
     public void can_preview() throws Exception {
-        Path dir = createDir(dir().concat("test_can_preview"));
-        Path empty = createFile(dir.concat("empty"));
+        Path dir = fs.createDir(dir().concat("test_can_preview"));
+        Path empty = fs.createFile(dir.concat("empty"));
         Path file = dir.concat("file");
-        Path link = createSymbolicLink(dir.concat("link"), file);
+        Path link = fs.createSymbolicLink(dir.concat("link"), file);
         writeUtf8(file, "hello");
         screen()
                 .clickInto(dir)
@@ -121,8 +109,8 @@ public final class NavigationTest extends BaseFilesActivityTest {
                 new String(nonUtf8Name.clone(), UTF_8).getBytes(UTF_8)
         );
 
-        Path nonUtf8NamedDir = createDir(dir().concat(nonUtf8Name));
-        Path child = createFile(nonUtf8NamedDir.concat("a"));
+        Path nonUtf8NamedDir = fs.createDir(dir().concat(nonUtf8Name));
+        Path child = fs.createFile(nonUtf8NamedDir.concat("a"));
 
         screen()
                 .clickInto(nonUtf8NamedDir)
@@ -138,11 +126,11 @@ public final class NavigationTest extends BaseFilesActivityTest {
         assertFalse(Arrays.equals(notUtf8, utf8));
         assertEquals(new String(notUtf8, UTF_8), new String(utf8, UTF_8));
 
-        Path notUtf8Dir = createDir(dir().concat(notUtf8));
-        Path notUtf8Child = createFile(notUtf8Dir.concat("notUtf8"));
+        Path notUtf8Dir = fs.createDir(dir().concat(notUtf8));
+        Path notUtf8Child = fs.createFile(notUtf8Dir.concat("notUtf8"));
 
-        Path utf8Dir = createDir(dir().concat(utf8));
-        Path utf8Child = createFile(utf8Dir.concat("utf8"));
+        Path utf8Dir = fs.createDir(dir().concat(utf8));
+        Path utf8Child = fs.createFile(utf8Dir.concat("utf8"));
 
         screen()
                 .assertListViewContains(notUtf8Dir, true)
@@ -184,16 +172,16 @@ public final class NavigationTest extends BaseFilesActivityTest {
     @Test
     public void updates_navigation_list_when_going_into_a_new_dir() throws Exception {
         screen().assertNavigationModeHierarchy(dir());
-        Path dir = createDir(dir().concat("dir"));
+        Path dir = fs.createDir(dir().concat("dir"));
         screen().clickInto(dir).assertNavigationModeHierarchy(dir);
     }
 
     @Test
     public void shows_size_only_if_unable_to_determine_modified_date() throws Exception {
-        Path file = createFile(dir().concat("file"));
-        setLastModifiedTime(file, NOFOLLOW, EPOCH);
+        Path file = fs.createFile(dir().concat("file"));
+        fs.setLastModifiedTime(file, NOFOLLOW, EPOCH);
 
-        long size = stat(file, NOFOLLOW).size();
+        long size = fs.stat(file, NOFOLLOW).size();
         Context c = getActivity();
         final String expected = formatShortFileSize(c, size);
 
@@ -207,11 +195,11 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
     @Test
     public void shows_time_and_size_for_file() throws Exception {
-        Path file = createFile(dir().concat("file"));
+        Path file = fs.createFile(dir().concat("file"));
         appendUtf8(file, file.toString());
 
         Context c = getActivity();
-        Stat stat = stat(file, NOFOLLOW);
+        Stat stat = fs.stat(file, NOFOLLOW);
         long lastModifiedMillis = stat.lastModifiedTime().to(MILLISECONDS);
         String date = getTimeFormat(c).format(new Date(lastModifiedMillis));
         String size = formatShortFileSize(c, stat.size());
@@ -248,22 +236,22 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
     private void testDirectorySummary(
             String expected, long modifiedAt) throws Exception {
-        Path d = createDir(dir().concat("dir"));
-        setLastModifiedTime(d, NOFOLLOW, Instant.of(modifiedAt / 1000, 0));
+        Path d = fs.createDir(dir().concat("dir"));
+        fs.setLastModifiedTime(d, NOFOLLOW, Instant.of(modifiedAt / 1000, 0));
         screen().assertSummary(d, expected);
     }
 
     @Test
     public void directory_view_is_disabled_if_no_read_permission() throws Exception {
-        Path dir = createDir(dir().concat("dir"));
+        Path dir = fs.createDir(dir().concat("dir"));
         removePermissions(dir, Permission.read());
         screen().assertDisabled(dir);
     }
 
     @Test
     public void link_displayed() throws Exception {
-        Path dir = createDir(dir().concat("dir"));
-        Path link = createSymbolicLink(dir().concat("link"), dir);
+        Path dir = fs.createDir(dir().concat("dir"));
+        Path link = fs.createSymbolicLink(dir().concat("link"), dir);
 
         screen()
                 .assertLinkPathDisplayed(dir, null)
@@ -274,8 +262,8 @@ public final class NavigationTest extends BaseFilesActivityTest {
     public void can_see_changes_in_parent_directory() throws Exception {
 
         Path level1Dir = dir();
-        Path level2Dir = createDir(level1Dir.concat("level2Dir"));
-        Path level3Dir = createDir(level2Dir.concat("level3Dir"));
+        Path level2Dir = fs.createDir(level1Dir.concat("level2Dir"));
+        Path level3Dir = fs.createDir(level2Dir.concat("level3Dir"));
         screen()
                 .sort()
                 .by(NAME)
@@ -283,8 +271,8 @@ public final class NavigationTest extends BaseFilesActivityTest {
                 .clickInto(level3Dir)
                 .assertCurrentDirectory(level3Dir);
 
-        Path level3File = createFile(level2Dir.concat("level3File"));
-        Path level2File = createFile(level1Dir.concat("level2File"));
+        Path level3File = fs.createFile(level2Dir.concat("level3File"));
+        Path level2File = fs.createFile(level1Dir.concat("level2File"));
         screen()
                 .pressBack()
                 .assertAllItemsDisplayedInOrder(level3Dir, level3File)
@@ -294,13 +282,13 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
     @Test
     public void can_see_changes_in_linked_directory() throws Exception {
-        Path dir = createDir(dir().concat("dir"));
-        Path link = createSymbolicLink(dir().concat("link"), dir);
+        Path dir = fs.createDir(dir().concat("dir"));
+        Path link = fs.createSymbolicLink(dir().concat("link"), dir);
         screen()
                 .clickInto(link)
                 .assertCurrentDirectory(link);
 
-        Path child = createDir(link.concat("child"));
+        Path child = fs.createDir(link.concat("child"));
         screen()
                 .clickInto(child)
                 .assertCurrentDirectory(child);
@@ -308,7 +296,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
     @Test
     public void press_action_bar_up_indicator_will_go_back() throws Exception {
-        Path dir = createDir(dir().concat("dir"));
+        Path dir = fs.createDir(dir().concat("dir"));
         Path parent = dir.parent();
         assert parent != null;
         screen()
@@ -321,7 +309,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
     @Test
     public void action_bar_title_shows_name_of_directory() throws Exception {
         screen()
-                .clickInto(createDir(dir().concat("a")))
+                .clickInto(fs.createDir(dir().concat("a")))
                 .assertActionBarTitle("a");
     }
 
@@ -333,14 +321,14 @@ public final class NavigationTest extends BaseFilesActivityTest {
     @Test
     public void action_bar_shows_up_indicator_when_there_is_back_stack() throws Exception {
         screen()
-                .clickInto(createDir(dir().concat("dir")))
+                .clickInto(fs.createDir(dir().concat("dir")))
                 .assertActionBarUpIndicatorIsVisible(true);
     }
 
     @Test
     public void action_bar_hides_up_indicator_when_there_is_no_back_stack_to_go_back_to() throws Exception {
         screen()
-                .clickInto(createDir(dir().concat("dir")))
+                .clickInto(fs.createDir(dir().concat("dir")))
                 .pressBack()
                 .assertActionBarUpIndicatorIsVisible(false);
     }
@@ -348,19 +336,19 @@ public final class NavigationTest extends BaseFilesActivityTest {
     @Test
     public void long_press_back_will_clear_back_stack() throws Exception {
         screen()
-                .clickInto(createDir(dir().concat("a")))
-                .clickInto(createDir(dir().concat("a/b")))
-                .clickInto(createDir(dir().concat("a/b/c")))
+                .clickInto(fs.createDir(dir().concat("a")))
+                .clickInto(fs.createDir(dir().concat("a/b")))
+                .clickInto(fs.createDir(dir().concat("a/b/c")))
                 .longPressBack()
                 .assertCurrentDirectory(dir());
     }
 
     @Test
     public void observes_on_current_directory_and_shows_added_deleted_files() throws Exception {
-        Path a = createDir(dir().concat("a"));
+        Path a = fs.createDir(dir().concat("a"));
         screen().assertListViewContains(a, true);
 
-        Path b = createFile(dir().concat("b"));
+        Path b = fs.createFile(dir().concat("b"));
         screen()
                 .assertListViewContains(a, true)
                 .assertListViewContains(b, true);
@@ -373,20 +361,20 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
     @Test
     public void updates_view_on_child_directory_modified() throws Exception {
-        Path dir = createDir(dir().concat("a"));
+        Path dir = fs.createDir(dir().concat("a"));
         testUpdatesDateViewOnChildModified(dir);
     }
 
     @Test
     public void updates_view_on_child_file_modified() throws Exception {
-        Path file = createFile(dir().concat("a"));
+        Path file = fs.createFile(dir().concat("a"));
         testUpdatesDateViewOnChildModified(file);
         testUpdatesSizeViewOnChildModified(file);
     }
 
     private void testUpdatesSizeViewOnChildModified(Path file)
             throws IOException {
-        setLastModifiedTime(file, NOFOLLOW, EPOCH);
+        fs.setLastModifiedTime(file, NOFOLLOW, EPOCH);
 
         final CharSequence[] chars = {null};
         screen().assertSummary(file, new Consumer<String>() {
@@ -409,7 +397,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
     private void testUpdatesDateViewOnChildModified(Path file)
             throws IOException {
 
-        setLastModifiedTime(file, NOFOLLOW, Instant.of(100000, 1));
+        fs.setLastModifiedTime(file, NOFOLLOW, Instant.of(100000, 1));
 
         final CharSequence[] date = {null};
         screen().assertSummary(file, new Consumer<String>() {
@@ -430,14 +418,14 @@ public final class NavigationTest extends BaseFilesActivityTest {
     }
 
     private Path modify(Path file) throws IOException {
-        Stat stat = stat(file, NOFOLLOW);
+        Stat stat = fs.stat(file, NOFOLLOW);
         Instant lastModifiedBefore = stat.lastModifiedTime();
         if (stat.isDirectory()) {
-            createDir(file.concat(String.valueOf(nanoTime())));
+            fs.createDir(file.concat(String.valueOf(nanoTime())));
         } else {
             appendUtf8(file, "test");
         }
-        Instant lastModifiedAfter = stat(file, NOFOLLOW).lastModifiedTime();
+        Instant lastModifiedAfter = fs.stat(file, NOFOLLOW).lastModifiedTime();
         assertNotEqual(lastModifiedBefore, lastModifiedAfter);
         return file;
     }

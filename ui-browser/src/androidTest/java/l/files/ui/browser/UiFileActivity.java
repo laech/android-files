@@ -27,7 +27,6 @@ import javax.annotation.Nullable;
 import l.files.base.Consumer;
 import l.files.base.Provider;
 import l.files.fs.FileSystem;
-import l.files.fs.Files;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.fs.FileInfo;
@@ -47,7 +46,7 @@ import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 import static l.files.base.Objects.requireNonNull;
-import static l.files.fs.Files.stat;
+import static l.files.fs.Files.hierarchy;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.ui.base.view.Views.find;
@@ -536,7 +535,7 @@ final class UiFileActivity {
             @Override
             public void run() {
                 List<Path> actual = activity().hierarchy();
-                List<Path> expected = new ArrayList<>(Files.hierarchy(dir));
+                List<Path> expected = new ArrayList<>(hierarchy(dir));
                 reverse(expected);
                 assertEquals(expected, actual);
                 assertEquals(dir, activity().title().getSelectedItem());
@@ -545,12 +544,13 @@ final class UiFileActivity {
         return this;
     }
 
-    UiFileActivity assertListMatchesFileSystem(Path dir)
+    UiFileActivity assertListMatchesFileSystem(FileSystem fs, Path dir)
             throws IOException {
-        return assertListMatchesFileSystem(dir, 1, MINUTES);
+        return assertListMatchesFileSystem(fs, dir, 1, MINUTES);
     }
 
     UiFileActivity assertListMatchesFileSystem(
+            final FileSystem fs,
             final Path dir,
             final int timeout,
             final TimeUnit timeoutUnit)
@@ -563,7 +563,7 @@ final class UiFileActivity {
 
                 final SimpleArrayMap<Path, Stat> filesInView = filesInView();
 
-                Files.list(dir, FOLLOW, new FileSystem.Consumer<Path>() {
+                fs.list(dir, FOLLOW, new FileSystem.Consumer<Path>() {
                     @Override
                     public boolean accept(Path child) throws IOException {
                         Stat oldStat = filesInView.remove(child);
@@ -571,7 +571,7 @@ final class UiFileActivity {
                             fail("Path in file system but not in view: " + child);
                         }
 
-                        Stat newStat = stat(child, NOFOLLOW);
+                        Stat newStat = fs.stat(child, NOFOLLOW);
                         if (!newStat.equals(oldStat)) {
                             fail("Path details differ for : " + child
                                     + "\nnew: " + newStat

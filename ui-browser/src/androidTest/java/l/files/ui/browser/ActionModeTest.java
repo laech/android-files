@@ -5,9 +5,9 @@ import android.support.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import l.files.fs.Files;
 import l.files.fs.Path;
 import l.files.fs.Permission;
+import l.files.testing.fs.Files;
 
 import static l.files.ui.browser.FileSort.NAME;
 
@@ -16,8 +16,8 @@ public final class ActionModeTest extends BaseFilesActivityTest {
 
     @Test
     public void disabled_item_can_still_be_selected() throws Exception {
-        Path a = Files.createFile(dir().concat("a"));
-        Files.removePermissions(a, Permission.read());
+        Path a = fs.createFile(dir().concat("a"));
+        Files.removePermissions(fs, a, Permission.read());
         screen()
                 .longClick(a)
                 .assertActionModePresent(true)
@@ -28,9 +28,9 @@ public final class ActionModeTest extends BaseFilesActivityTest {
     public void auto_finishes_action_mode_if_selected_item_deleted_from_file_system()
             throws Exception {
 
-        Path a = Files.createFile(dir().concat("a"));
+        Path a = fs.createFile(dir().concat("a"));
         screen().longClick(a).assertActionModeTitle(1);
-        Files.delete(a);
+        fs.delete(a);
         screen().assertActionModePresent(false);
     }
 
@@ -38,16 +38,16 @@ public final class ActionModeTest extends BaseFilesActivityTest {
     public void title_shows_correct_selected_item_count_after_selected_item_deletion()
             throws Exception {
 
-        Path a = Files.createFile(dir().concat("a"));
-        Path b = Files.createFile(dir().concat("b"));
-        Path c = Files.createFile(dir().concat("c"));
+        Path a = fs.createFile(dir().concat("a"));
+        Path b = fs.createFile(dir().concat("b"));
+        Path c = fs.createFile(dir().concat("c"));
 
         screen()
                 .longClick(a)
                 .click(b)
                 .assertActionModeTitle(2);
 
-        Files.delete(a);
+        fs.delete(a);
 
         screen()
                 .assertActionModePresent(true)
@@ -60,7 +60,7 @@ public final class ActionModeTest extends BaseFilesActivityTest {
     public void old_checked_item_remains_checked_when_new_item_added()
             throws Exception {
 
-        Path a = Files.createFile(dir().concat("a"));
+        Path a = fs.createFile(dir().concat("a"));
 
         screen()
                 .sort()
@@ -68,7 +68,7 @@ public final class ActionModeTest extends BaseFilesActivityTest {
                 .longClick(a)
                 .assertChecked(a, true);
 
-        Path b = Files.createFile(dir().concat("b"));
+        Path b = fs.createFile(dir().concat("b"));
 
         screen()
                 .assertChecked(b, false)

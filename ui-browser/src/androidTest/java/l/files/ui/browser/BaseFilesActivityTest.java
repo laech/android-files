@@ -20,11 +20,12 @@ import javax.annotation.Nullable;
 
 import l.files.base.Provider;
 import l.files.base.Throwables;
-import l.files.fs.Files;
+import l.files.fs.FileSystem;
 import l.files.fs.Path;
-import l.files.fs.Paths;
 import l.files.fs.Permission;
 import l.files.fs.TraversalCallback;
+import l.files.fs.local.LocalFileSystem;
+import l.files.testing.fs.Files;
 
 import static android.content.Intent.ACTION_MAIN;
 import static android.os.Build.VERSION.SDK_INT;
@@ -52,6 +53,8 @@ public class BaseFilesActivityTest {
                 }
             };
 
+    final FileSystem fs = LocalFileSystem.INSTANCE;
+
     @Nullable
     private Path dir;
 
@@ -70,7 +73,7 @@ public class BaseFilesActivityTest {
 
     @Before
     public void setUp() throws Exception {
-        dir = Paths.get(createTempFolder());
+        dir = Path.fromFile(createTempFolder());
         setActivityIntent(newIntent(dir));
         screen = new UiFileActivity(
                 getInstrumentation(),
@@ -85,8 +88,8 @@ public class BaseFilesActivityTest {
     @After
     public void tearDown() throws Exception {
         screen = null;
-        if (dir != null && Files.exists(dir, NOFOLLOW)) {
-            Files.traverse(dir, NOFOLLOW, delete());
+        if (dir != null && fs.exists(dir, NOFOLLOW)) {
+            fs.traverse(dir, NOFOLLOW, delete());
         }
         dir = null;
     }
@@ -134,7 +137,7 @@ public class BaseFilesActivityTest {
             @Override
             public Result onPreVisit(Path file) throws IOException {
                 try {
-                    Files.setPermissions(file, Permission.all());
+                    fs.setPermissions(file, Permission.all());
                 } catch (IOException ignored) {
                 }
                 return CONTINUE;
@@ -142,7 +145,7 @@ public class BaseFilesActivityTest {
 
             @Override
             public Result onPostVisit(Path file) throws IOException {
-                Files.delete(file);
+                fs.delete(file);
                 return CONTINUE;
             }
 
@@ -186,21 +189,21 @@ public class BaseFilesActivityTest {
          * The bug: "a" gets renamed to "A", instead of displaying only
          * "A", both "a" and "A" are displayed.
          */
-        Path dir = Paths.get(getExternalStorageDirectory()).concat(name);
+        Path dir = Path.fromFile(getExternalStorageDirectory()).concat(name);
         Path src = dir.concat("z");
         Path dst = dir.concat("Z");
         try {
 
-            Files.deleteRecursiveIfExists(dir);
-            Files.createFiles(src);
+            Files.deleteRecursiveIfExists(fs, dir);
+            Files.createFiles(fs, src);
 
-            assertTrue(Files.exists(src, NOFOLLOW));
+            assertTrue(fs.exists(src, NOFOLLOW));
             assertTrue(
                     "Assuming the underlying file system is case insensitive",
-                    Files.exists(dst, NOFOLLOW));
+                    fs.exists(dst, NOFOLLOW));
 
-            Files.move(src, dst);
-            List<Path> actual = Files.list(dir, NOFOLLOW, new ArrayList<Path>());
+            fs.move(src, dst);
+            List<Path> actual = fs.list(dir, NOFOLLOW, new ArrayList<Path>());
             List<Path> expected = singletonList(dst);
             assertEquals(1, actual.size());
             if (!expected.equals(actual)) {
@@ -212,7 +215,7 @@ public class BaseFilesActivityTest {
 
         } catch (Throwable e) {
             try {
-                Files.deleteRecursiveIfExists(dir);
+                Files.deleteRecursiveIfExists(fs, dir);
             } catch (Throwable sup) {
                 Throwables.addSuppressed(e, sup);
             }
@@ -221,19 +224,19 @@ public class BaseFilesActivityTest {
         } finally {
 
             try {
-                Files.deleteIfExists(src);
+                Files.deleteIfExists(fs, src);
             } catch (IOException ignore) {
             }
 
             try {
-                Files.deleteIfExists(dst);
+                Files.deleteIfExists(fs, dst);
             } catch (IOException ignore) {
             }
 
         }
 
-        assertFalse(Files.exists(src, NOFOLLOW));
-        assertFalse(Files.exists(dst, NOFOLLOW));
+        assertFalse(fs.exists(src, NOFOLLOW));
+        assertFalse(fs.exists(dst, NOFOLLOW));
 
         return dir;
     }

@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.Random;
 
 import l.files.fs.FileSystem;
-import l.files.fs.Files;
 import l.files.fs.Instant;
 import l.files.fs.Path;
 import l.files.fs.Stat;
@@ -15,7 +14,6 @@ import l.files.fs.local.LocalFileSystem;
 import l.files.ui.base.graphics.Rect;
 
 import static java.io.File.createTempFile;
-import static l.files.fs.Files.setLastModifiedTime;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
@@ -48,7 +46,7 @@ public abstract class CacheTest<V, C extends Cache<V>> extends TestCase {
 
         File localFile = createTempFile("123", null, tempDir);
         file = Path.fromFile(localFile);
-        stat = Files.stat(file, FOLLOW);
+        stat = fs.stat(file, FOLLOW);
         fs = LocalFileSystem.INSTANCE;
     }
 
@@ -64,8 +62,8 @@ public abstract class CacheTest<V, C extends Cache<V>> extends TestCase {
         V value = newValue();
         cache.put(file, stat, constraint, value);
 
-        setLastModifiedTime(file, NOFOLLOW, Instant.EPOCH);
-        assertNull(cache.get(file, Files.stat(file, NOFOLLOW), constraint, true));
+        fs.setLastModifiedTime(file, NOFOLLOW, Instant.EPOCH);
+        assertNull(cache.get(file, fs.stat(file, NOFOLLOW), constraint, true));
     }
 
     public void test_gets_old_value_if_stat_not_provided() throws Exception {

@@ -5,7 +5,6 @@ import android.support.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import l.files.fs.Files;
 import l.files.fs.Path;
 
 @RunWith(AndroidJUnit4.class)
@@ -14,7 +13,7 @@ public final class BookmarksTest extends BaseFilesActivityTest {
     @Test
     public void clears_selection_on_finish_of_action_mode() throws Exception {
 
-        Path a = Files.createDir(dir().concat("a"));
+        Path a = fs.createDir(dir().concat("a"));
         screen()
                 .clickInto(a)
                 .bookmark()
@@ -36,8 +35,8 @@ public final class BookmarksTest extends BaseFilesActivityTest {
     @Test
     public void click_on_bookmark_opens_directory() throws Exception {
 
-        Path a = Files.createDir(dir().concat("a"));
-        Path b = Files.createDir(dir().concat("b"));
+        Path a = fs.createDir(dir().concat("a"));
+        Path b = fs.createDir(dir().concat("b"));
         screen()
                 .clickInto(a)
                 .assertCurrentDirectory(a)
@@ -59,9 +58,9 @@ public final class BookmarksTest extends BaseFilesActivityTest {
     @Test
     public void sidebar_displays_up_to_date_bookmarks() throws Exception {
 
-        Path a = Files.createDir(dir().concat("a"));
-        Path b = Files.createDir(dir().concat("b"));
-        Path c = Files.createDir(dir().concat("c"));
+        Path a = fs.createDir(dir().concat("a"));
+        Path b = fs.createDir(dir().concat("b"));
+        Path c = fs.createDir(dir().concat("c"));
 
         screen()
 

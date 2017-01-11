@@ -7,11 +7,10 @@ import org.junit.runner.RunWith;
 
 import java.io.IOException;
 
-import l.files.fs.Files;
 import l.files.fs.Instant;
 import l.files.fs.Path;
+import l.files.testing.fs.Files;
 
-import static l.files.fs.Files.createDir;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.ui.browser.FileSort.MODIFIED;
 import static l.files.ui.browser.FileSort.NAME;
@@ -22,7 +21,7 @@ public final class SortTest extends BaseFilesActivityTest {
 
     @Test
     public void updates_list_on_sort_option_change_on_back() throws Exception {
-        Path a = createDir(dir().concat("a"));
+        Path a = fs.createDir(dir().concat("a"));
         Path aa = createFile("aa", "aa", Instant.of(1, 1), a);
         Path ab = createFile("ab", "ab", Instant.of(2, 1), a);
         Path b = createFile("b", "b", Instant.of(1, 1));
@@ -60,9 +59,9 @@ public final class SortTest extends BaseFilesActivityTest {
             Instant modified,
             Path dir) throws IOException {
 
-        Path file = Files.createFile(dir.concat(name));
-        Files.writeUtf8(file, content);
-        Files.setLastModifiedTime(file, NOFOLLOW, modified);
+        Path file = fs.createFile(dir.concat(name));
+        Files.writeUtf8(fs, file, content);
+        fs.setLastModifiedTime(file, NOFOLLOW, modified);
         return file;
 
     }

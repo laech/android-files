@@ -9,11 +9,13 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 import l.files.fs.AlreadyExist;
 import l.files.fs.FileSystem;
+import l.files.fs.LinkOption;
 import l.files.fs.Path;
 import l.files.fs.Permission;
 import l.files.fs.TraversalCallback;
@@ -21,12 +23,55 @@ import l.files.fs.TraversalCallback;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
-public final class Files {
+public final class Files { // TODO make this a subclass of FileSystem
 
-    private static final Charset UTF_8 = Charset.forName("UTF-8");
+    public static final Charset UTF_8 = Charset.forName("UTF-8");
 
     private Files() {
     }
+
+    public static <C extends Collection<? super Path>> C listDirs(
+            final FileSystem fs,
+            final Path path,
+            final LinkOption option,
+            final C collection) throws IOException {
+
+        fs.listDirs(path, option, new FileSystem.Consumer<Path>() {
+            @Override
+            public boolean accept(Path entry) throws IOException {
+                collection.add(entry);
+                return true;
+            }
+        });
+        return collection;
+    }
+
+    /**
+     * Creates this file and any missing parents as directories. This will
+     * throw the same exceptions as {@link FileSystem#createDir(Path)} except
+     * will not error if already exists as a directory.
+     */
+    public static Path createDirs(FileSystem fs, Path path) throws IOException {
+        try {
+            if (fs.stat(path, NOFOLLOW).isDirectory()) {
+                return path;
+            }
+        } catch (FileNotFoundException ignore) {
+        }
+
+        Path parent = path.parent();
+        if (parent != null) {
+            createDirs(fs, parent);
+        }
+
+        try {
+            fs.createDir(path);
+        } catch (AlreadyExist ignore) {
+        }
+
+        return path;
+    }
+
 
     /**
      * Creates this file as a file and creates any missing parents. This
@@ -43,7 +88,7 @@ public final class Files {
 
         Path parent = path.parent();
         if (parent != null) {
-            fs.createDirs(parent);
+            createDirs(fs, parent);
         }
 
         try {

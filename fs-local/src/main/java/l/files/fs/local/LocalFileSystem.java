@@ -290,15 +290,6 @@ public final class LocalFileSystem extends FileSystem {
         list(path, option, false, consumer);
     }
 
-    @Override
-    public void listDirs(
-            Path path,
-            LinkOption option,
-            Consumer<? super Path> consumer) throws IOException {
-
-        list(path, option, true, consumer);
-    }
-
     private void list(
             Path path,
             LinkOption option,

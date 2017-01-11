@@ -111,6 +111,10 @@ public abstract class Path implements Parcelable {
      */
     public abstract Path concat(Path path);
 
+    public final Path concat(Name name) {
+        return concat(name.toPath());
+    }
+
     public final Path concat(String path) {
         return concat(fromString(path));
     }
@@ -142,7 +146,7 @@ public abstract class Path implements Parcelable {
      *     ""     ->  null
      * </pre>
      */
-    @Nullable
+    @Nullable // TODO old code expect not null
     public abstract Name name();
 
     public abstract boolean isHidden();

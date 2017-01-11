@@ -7,8 +7,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
-import l.files.fs.FileName;
-import l.files.fs.Files;
+import l.files.fs.FileSystem;
+import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.fs.FileInfo;
@@ -23,9 +23,10 @@ abstract class FileSortTest {
     protected final void testSortMatches(
             Locale locale,
             Comparator<FileInfo> comparator,
+            FileSystem fs,
             Path... expectedOrder) throws IOException {
 
-        List<FileInfo> expected = mapData(locale, expectedOrder);
+        List<FileInfo> expected = mapData(locale, fs, expectedOrder);
         List<FileInfo> actual = new ArrayList<>(expected);
         shuffle(actual);
         sort(actual, comparator);
@@ -33,8 +34,8 @@ abstract class FileSortTest {
         assertEquals(expected, actual);
     }
 
-    private List<FileName> names(List<FileInfo> items) {
-        List<FileName> names = new ArrayList<>(items.size());
+    private List<Name> names(List<FileInfo> items) {
+        List<Name> names = new ArrayList<>(items.size());
         for (FileInfo item : items) {
             names.add(item.selfPath().name());
         }
@@ -43,6 +44,7 @@ abstract class FileSortTest {
 
     private List<FileInfo> mapData(
             Locale locale,
+            FileSystem fs,
             Path... files) throws IOException {
 
         final Collator collator = Collator.getInstance(locale);
@@ -50,11 +52,11 @@ abstract class FileSortTest {
         for (Path file : files) {
             Stat stat;
             try {
-                stat = Files.stat(file, NOFOLLOW);
+                stat = fs.stat(file, NOFOLLOW);
             } catch (IOException e) {
                 stat = null;
             }
-            expected.add(FileInfo.create(file, stat, null, null, collator));
+            expected.add(FileInfo.create(fs, file, stat, null, null, collator));
         }
         return expected;
     }

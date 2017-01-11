@@ -8,7 +8,7 @@ import java.io.InputStream;
 import l.files.ui.base.graphics.Rect;
 import l.files.ui.base.graphics.ScaledBitmap;
 
-import static l.files.fs.Files.UTF_8;
+import static l.files.testing.fs.Files.UTF_8;
 
 public final class TextThumbnailerTest extends AndroidTestCase {
 

@@ -1,19 +1,22 @@
 package l.files.operations;
 
 import java.io.IOException;
-import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import l.files.fs.FileSystem;
 import l.files.fs.Path;
-
-import static l.files.fs.Files.move;
 
 final class Move extends Paste {
 
     private final AtomicInteger movedItemCount = new AtomicInteger();
 
-    Move(Collection<? extends Path> sources, Path destination) {
-        super(sources, destination);
+    Move(
+            Map<Path, FileSystem> sourcePaths,
+            FileSystem destinationFs,
+            Path destinationPath
+    ) {
+        super(sourcePaths, destinationFs, destinationPath);
     }
 
     public int getMovedItemCount() {
@@ -21,12 +24,20 @@ final class Move extends Paste {
     }
 
     @Override
-    void paste(Path from, Path to) {
+    void paste(
+            FileSystem sourceFs,
+            Path sourcePath,
+            FileSystem destinationFs,
+            Path destinationPath
+    ) throws IOException {
         try {
-            move(from, to);
+            if (!sourceFs.equals(destinationFs)) {
+                throw new IOException(sourceFs + " != " + destinationFs);
+            }
+            destinationFs.move(sourcePath, destinationPath);
             movedItemCount.incrementAndGet();
         } catch (IOException e) {
-            record(from, e);
+            record(sourcePath, e);
         }
     }
 
