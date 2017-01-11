@@ -3,7 +3,6 @@ package l.files.ui.preview;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 
-import l.files.fs.Files;
 import l.files.fs.Instant;
 import l.files.fs.Path;
 import l.files.ui.base.graphics.Rect;
@@ -15,8 +14,6 @@ import static android.graphics.Color.BLUE;
 import static android.test.MoreAsserts.assertNotEqual;
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.DAYS;
-import static l.files.fs.Files.exists;
-import static l.files.fs.Files.setLastModifiedTime;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class ThumbnailDiskCacheTest
@@ -35,24 +32,24 @@ public final class ThumbnailDiskCacheTest
         ScaledBitmap value = newValue();
 
         Path cacheFile = cache.cacheFile(file, stat, constraint, true);
-        assertFalse(exists(cacheFile, NOFOLLOW));
+        assertFalse(fs.exists(cacheFile, NOFOLLOW));
 
         cache.put(file, stat, constraint, value);
-        assertTrue(exists(cacheFile, NOFOLLOW));
+        assertTrue(fs.exists(cacheFile, NOFOLLOW));
 
         cache.cleanup();
-        assertTrue(exists(cacheFile, NOFOLLOW));
+        assertTrue(fs.exists(cacheFile, NOFOLLOW));
 
-        setLastModifiedTime(cacheFile, NOFOLLOW, Instant.ofMillis(
+        fs.setLastModifiedTime(cacheFile, NOFOLLOW, Instant.ofMillis(
                 currentTimeMillis() - DAYS.toMillis(29)));
         cache.cleanup();
-        assertTrue(exists(cacheFile, NOFOLLOW));
+        assertTrue(fs.exists(cacheFile, NOFOLLOW));
 
-        setLastModifiedTime(cacheFile, NOFOLLOW, Instant.ofMillis(
+        fs.setLastModifiedTime(cacheFile, NOFOLLOW, Instant.ofMillis(
                 currentTimeMillis() - DAYS.toMillis(31)));
         cache.cleanup();
-        assertFalse(exists(cacheFile, NOFOLLOW));
-        assertFalse(exists(cacheFile.parent(), NOFOLLOW));
+        assertFalse(fs.exists(cacheFile, NOFOLLOW));
+        assertFalse(fs.exists(cacheFile.parent(), NOFOLLOW));
     }
 
     public void test_updates_modified_time_on_read() throws Exception {
@@ -63,11 +60,11 @@ public final class ThumbnailDiskCacheTest
 
         Path cacheFile = cache.cacheFile(file, stat, constraint, true);
         Instant oldTime = Instant.ofMillis(1000);
-        setLastModifiedTime(cacheFile, NOFOLLOW, oldTime);
-        assertEquals(oldTime, Files.stat(cacheFile, NOFOLLOW).lastModifiedTime());
+        fs.setLastModifiedTime(cacheFile, NOFOLLOW, oldTime);
+        assertEquals(oldTime, fs.stat(cacheFile, NOFOLLOW).lastModifiedTime());
 
         cache.get(file, stat, constraint, true);
-        Instant newTime = Files.stat(cacheFile, NOFOLLOW).lastModifiedTime();
+        Instant newTime = fs.stat(cacheFile, NOFOLLOW).lastModifiedTime();
         assertNotEqual(oldTime, newTime);
         assertTrue(oldTime.to(DAYS) < newTime.to(DAYS));
     }

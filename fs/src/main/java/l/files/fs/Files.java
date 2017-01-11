@@ -75,32 +75,6 @@ public final class Files {
         return path;
     }
 
-    /**
-     * Creates this file as a file and creates any missing parents. This
-     * will throw the same exceptions as {@link #createFile(Path)} except
-     * will not error if already exists.
-     */
-    public static Path createFiles(Path path) throws IOException {
-        try {
-            if (stat(path, NOFOLLOW).isRegularFile()) {
-                return path;
-            }
-        } catch (FileNotFoundException ignore) {
-        }
-
-        Path parent = path.parent();
-        if (parent != null) {
-            createDirs(parent);
-        }
-
-        try {
-            createFile(path);
-        } catch (AlreadyExist ignore) {
-        }
-
-        return path;
-    }
-
     public static Path createFile(Path path) throws IOException {
         path.fileSystem().createFile(path);
         return path;

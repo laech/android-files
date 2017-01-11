@@ -12,6 +12,7 @@ import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.Set;
 
+import l.files.fs.AlreadyExist;
 import l.files.fs.FileSystem;
 import l.files.fs.Path;
 import l.files.fs.Permission;
@@ -25,6 +26,32 @@ public final class Files {
     private static final Charset UTF_8 = Charset.forName("UTF-8");
 
     private Files() {
+    }
+
+    /**
+     * Creates this file as a file and creates any missing parents. This
+     * will throw the same exceptions as {@link FileSystem#createFile(Path)} except
+     * will not error if already exists.
+     */
+    public static Path createFiles(FileSystem fs, Path path) throws IOException {
+        try {
+            if (fs.stat(path, NOFOLLOW).isRegularFile()) {
+                return path;
+            }
+        } catch (FileNotFoundException ignore) {
+        }
+
+        Path parent = path.parent();
+        if (parent != null) {
+            fs.createDirs(parent);
+        }
+
+        try {
+            fs.createFile(path);
+        } catch (AlreadyExist ignore) {
+        }
+
+        return path;
     }
 
     public static void removePermissions(

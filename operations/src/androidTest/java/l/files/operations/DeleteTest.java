@@ -11,10 +11,6 @@ import l.files.testing.fs.PathBaseTest;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
-import static l.files.fs.Files.createDir;
-import static l.files.fs.Files.createFile;
-import static l.files.fs.Files.createSymbolicLink;
-import static l.files.fs.Files.exists;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class DeleteTest extends PathBaseTest {
@@ -24,8 +20,8 @@ public final class DeleteTest extends PathBaseTest {
     }
 
     public void test_notifiesListener() throws Exception {
-        Path a = createDir(dir1().concat("a"));
-        Path b = createFile(dir1().concat("a/b"));
+        Path a = fs.createDir(dir1().concat("a"));
+        Path b = fs.createFile(dir1().concat("a/b"));
 
         Set<Path> expected = new HashSet<>(asList(a, b));
 
@@ -36,33 +32,33 @@ public final class DeleteTest extends PathBaseTest {
     }
 
     public void test_deletesFile() throws Exception {
-        Path file = createFile(dir1().concat("a"));
+        Path file = fs.createFile(dir1().concat("a"));
         delete(file);
-        assertFalse(exists(file, NOFOLLOW));
+        assertFalse(fs.exists(file, NOFOLLOW));
     }
 
     public void test_deletesNonEmptyDirectory() throws Exception {
-        Path dir = createDir(dir1().concat("a"));
-        Path file = createFile(dir1().concat("a/child.txt"));
+        Path dir = fs.createDir(dir1().concat("a"));
+        Path file = fs.createFile(dir1().concat("a/child.txt"));
         delete(dir);
-        assertFalse(exists(file, NOFOLLOW));
-        assertFalse(exists(dir, NOFOLLOW));
+        assertFalse(fs.exists(file, NOFOLLOW));
+        assertFalse(fs.exists(dir, NOFOLLOW));
     }
 
     public void test_deletesEmptyDirectory() throws Exception {
-        Path dir = createDir(dir1().concat("a"));
+        Path dir = fs.createDir(dir1().concat("a"));
         delete(dir);
-        assertFalse(exists(dir, NOFOLLOW));
+        assertFalse(fs.exists(dir, NOFOLLOW));
     }
 
     public void test_deletesSymbolicLinkButNotLinkedFile() throws Exception {
-        Path a = createFile(dir1().concat("a"));
-        Path b = createSymbolicLink(dir1().concat("b"), a);
-        assertTrue(exists(a, NOFOLLOW));
-        assertTrue(exists(b, NOFOLLOW));
+        Path a = fs.createFile(dir1().concat("a"));
+        Path b = fs.createSymbolicLink(dir1().concat("b"), a);
+        assertTrue(fs.exists(a, NOFOLLOW));
+        assertTrue(fs.exists(b, NOFOLLOW));
         delete(b);
-        assertFalse(exists(b, NOFOLLOW));
-        assertTrue(exists(a, NOFOLLOW));
+        assertFalse(fs.exists(b, NOFOLLOW));
+        assertTrue(fs.exists(a, NOFOLLOW));
     }
 
     private void delete(Path file) throws Exception {

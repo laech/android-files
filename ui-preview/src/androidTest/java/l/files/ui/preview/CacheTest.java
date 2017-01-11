@@ -6,11 +6,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
+import l.files.fs.FileSystem;
 import l.files.fs.Files;
 import l.files.fs.Instant;
 import l.files.fs.Path;
-import l.files.fs.Paths;
 import l.files.fs.Stat;
+import l.files.fs.local.LocalFileSystem;
 import l.files.ui.base.graphics.Rect;
 
 import static java.io.File.createTempFile;
@@ -23,6 +24,7 @@ public abstract class CacheTest<V, C extends Cache<V>> extends TestCase {
     C cache;
     Random random;
 
+    FileSystem fs;
     Path file;
     Stat stat;
 
@@ -45,8 +47,9 @@ public abstract class CacheTest<V, C extends Cache<V>> extends TestCase {
         random = new Random();
 
         File localFile = createTempFile("123", null, tempDir);
-        file = Paths.get(localFile);
+        file = Path.fromFile(localFile);
         stat = Files.stat(file, FOLLOW);
+        fs = LocalFileSystem.INSTANCE;
     }
 
     public void test_gets_what_has_put_in() throws Exception {
@@ -90,6 +93,6 @@ public abstract class CacheTest<V, C extends Cache<V>> extends TestCase {
     }
 
     Path mockCacheDir() {
-        return Paths.get(tempDir);
+        return Path.fromFile(tempDir);
     }
 }
