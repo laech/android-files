@@ -47,7 +47,7 @@ public final class Name implements Parcelable {
      * @throws IllegalArgumentException if name is empty, or contains '/', or contains '\0'
      */
     public static Name fromString(String name) {
-        return fromByteArray(name.getBytes(Path.stringEncoding));
+        return fromByteArray(name.getBytes(Path.ENCODING));
     }
 
     private static byte[] validateName(byte[] bytes) {
@@ -67,7 +67,7 @@ public final class Name implements Parcelable {
         if (Bytes.indexOf(name, (byte) '/') >= 0) {
             throw new IllegalArgumentException(
                     "Path separator '/' is not allowed in file name: " +
-                            new String(name, Path.stringEncoding));
+                            new String(name, Path.ENCODING));
         }
     }
 
@@ -76,7 +76,7 @@ public final class Name implements Parcelable {
         if (i >= 0) {
             throw new IllegalArgumentException(
                     "Null character (index=" + i + ") is not allowed in file name: " +
-                            new String(name, Path.stringEncoding));
+                            new String(name, Path.ENCODING));
         }
     }
 
@@ -93,7 +93,7 @@ public final class Name implements Parcelable {
 
     @Override
     public String toString() {
-        return new String(bytes, Path.stringEncoding);
+        return new String(bytes, Path.ENCODING);
     }
 
     public byte[] toByteArray() {
@@ -132,7 +132,7 @@ public final class Name implements Parcelable {
      */
     public String base() {
         int i = indexOfExtensionSeparator(bytes.length);
-        return new String(bytes, 0, i, Path.stringEncoding);
+        return new String(bytes, 0, i, Path.ENCODING);
     }
 
     /**
@@ -151,7 +151,7 @@ public final class Name implements Parcelable {
     public String extension() {
         int start = indexOfExtensionSeparator(bytes.length - 1) + 1;
         int count = bytes.length - start;
-        return new String(bytes, start, count, Path.stringEncoding);
+        return new String(bytes, start, count, Path.ENCODING);
     }
 
     /**

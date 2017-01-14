@@ -21,7 +21,7 @@ import static java.util.Collections.unmodifiableList;
 
 public abstract class Path implements Parcelable {
 
-    static final Charset stringEncoding =
+    static final Charset ENCODING =
             Charset.forName(System.getProperty("sun.jnu.encoding"));
 
     public static Path fromFile(File file) {
@@ -29,7 +29,7 @@ public abstract class Path implements Parcelable {
     }
 
     public static Path fromString(String path) {
-        return fromByteArray(path.getBytes(stringEncoding));
+        return fromByteArray(path.getBytes(ENCODING));
     }
 
     public static Path fromByteArray(byte[] path) {
@@ -52,10 +52,6 @@ public abstract class Path implements Parcelable {
         return names.build();
     }
 
-    public FileSystem fileSystem() {
-        throw new RuntimeException("TODO");
-    }
-
     public final byte[] toByteArray() {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         toByteArray(out);
@@ -75,7 +71,7 @@ public abstract class Path implements Parcelable {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         toByteArray(out);
         try {
-            return out.toString(stringEncoding.name());
+            return out.toString(ENCODING.name());
         } catch (UnsupportedEncodingException e) {
             throw new AssertionError(e);
         }
@@ -172,7 +168,8 @@ public abstract class Path implements Parcelable {
     public abstract boolean startsWith(Path prefix);
 
     /**
-     * Returns a path by replace the prefix {@code oldPrefix} with {@code newPrefix}. For example
+     * Returns a path by replace the prefix {@code oldPrefix} with
+     * {@code newPrefix}. For example
      * <pre>
      * "/a/b".rebase("/a", "/hello") -> "/hello/b"
      * </pre>
