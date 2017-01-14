@@ -156,7 +156,7 @@ public abstract class FileSystem {
                 quickNotifyFirstEvent,
                 tag,
                 watchLimit
-        ).start(path.fileSystem(), path, option, childrenConsumer);
+        ).start(this, path, option, childrenConsumer);
     }
 
     public abstract void list(

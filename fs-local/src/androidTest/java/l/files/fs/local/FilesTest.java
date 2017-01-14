@@ -132,21 +132,6 @@ public final class FilesTest extends PathBaseTest {
         assertTrue(fs.stat(dir, NOFOLLOW).isRegularFile());
     }
 
-    public void test_getHierarchy_single() throws Exception {
-        Path a = Path.fromString("/");
-        assertEquals(singletonList(a), a.hierarchy());
-    }
-
-    public void test_getHierarchy_multi() throws Exception {
-        Path a = Path.fromString("/a/b");
-        List<Path> expected = asList(
-                Path.fromString("/"),
-                Path.fromString("/a"),
-                Path.fromString("/a/b")
-        );
-        assertEquals(expected, a.hierarchy());
-    }
-
     public void test_list_linkFollowSuccess() throws Exception {
         Path dir = fs.createDir(dir1().concat("dir"));
         Path a = fs.createFile(dir.concat("a"));
