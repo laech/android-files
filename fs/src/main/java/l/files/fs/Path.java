@@ -11,8 +11,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.Nullable;
+
+import static java.util.Collections.reverse;
+import static java.util.Collections.unmodifiableList;
 
 public abstract class Path implements Parcelable {
 
@@ -135,6 +140,15 @@ public abstract class Path implements Parcelable {
      */
     @Nullable
     public abstract Path parent();
+
+    public List<Path> hierarchy() {
+        List<Path> hierarchy = new ArrayList<>();
+        for (Path p = this; p != null; p = p.parent()) {
+            hierarchy.add(p);
+        }
+        reverse(hierarchy);
+        return unmodifiableList(hierarchy);
+    }
 
     /**
      * Gets the name of this file, if any. For example:

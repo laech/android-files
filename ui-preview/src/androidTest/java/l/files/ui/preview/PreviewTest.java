@@ -8,7 +8,6 @@ import java.io.InputStream;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.fs.local.LocalFileSystem;
-import l.files.testing.fs.Files;
 import l.files.testing.fs.PathBaseTest;
 import l.files.ui.base.graphics.Rect;
 
@@ -82,7 +81,7 @@ public final class PreviewTest extends PathBaseTest {
         Path file = dir1().concat(dstFileName);
         InputStream in = getContext().getAssets().open(testFile);
         try {
-            Files.copy(in, fs, file);
+            fs.copy(in, fs, file);
         } finally {
             in.close();
         }
@@ -97,7 +96,7 @@ public final class PreviewTest extends PathBaseTest {
     public void test_preview_link() throws Throwable {
         Path file = fs.createFile(dir1().concat("file"));
         Path link = fs.createSymbolicLink(dir1().concat("link"), file);
-        Files.writeUtf8(fs, file, "hi");
+        fs.writeUtf8(file, "hi");
         testPreviewSuccess(file);
         testPreviewSuccess(file);
         testPreviewSuccess(link);
@@ -109,14 +108,14 @@ public final class PreviewTest extends PathBaseTest {
         Path link = fs.createSymbolicLink(dir1().concat("link"), file);
         testPreviewFailure(link);
 
-        Files.writeUtf8(fs, file, "hi");
+        fs.writeUtf8(file, "hi");
         testPreviewSuccess(link);
         testPreviewSuccess(link);
     }
 
     private void testPreviewSuccessForContent(String content) throws Throwable {
         Path file = dir1().concat(String.valueOf(nanoTime()));
-        Files.writeUtf8(fs, file, content);
+        fs.writeUtf8(file, content);
         testPreviewSuccess(file);
         testPreviewSuccess(file);
     }

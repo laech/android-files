@@ -12,8 +12,6 @@ import l.files.fs.Permission;
 import static java.lang.Thread.sleep;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.testing.fs.Files.deleteRecursiveIfExists;
-import static l.files.testing.fs.Files.removePermissions;
 import static l.files.ui.browser.Tests.timeout;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -50,14 +48,14 @@ public class RenameTest extends BaseFilesActivityTest {
                     .assertAllItemsDisplayedInOrder(dst);
 
         } finally {
-            deleteRecursiveIfExists(fs, dir);
+            fs.deleteRecursiveIfExists(dir);
         }
     }
 
     @Test
     public void shows_error_when_failed_to_rename() throws Exception {
         Path file = fs.createFile(dir().concat("a"));
-        removePermissions(fs, dir(), Permission.write());
+        fs.removePermissions(dir(), Permission.write());
         rename(file)
                 .setFilename("abc")
                 .okExpectingFailure("Permission denied");

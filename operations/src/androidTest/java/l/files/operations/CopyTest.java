@@ -1,19 +1,18 @@
 package l.files.operations;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
+import l.files.fs.FileSystem;
 import l.files.fs.Instant;
 import l.files.fs.Path;
 
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static java.util.Arrays.asList;
-import static java.util.Collections.singleton;
+import static java.util.Collections.singletonMap;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.testing.fs.Files.readAllUtf8;
-import static l.files.testing.fs.Files.writeUtf8;
 
 public final class CopyTest extends PasteTest {
 
@@ -22,7 +21,7 @@ public final class CopyTest extends PasteTest {
         Path srcDir = fs.createDir(dir1().concat("a"));
         Path srcFile = fs.createFile(dir1().concat("a/file"));
 
-        Copy copy = create(singleton(srcDir), dstDir);
+        Copy copy = create(singletonMap(srcDir, fs), fs, dstDir);
         copy.execute();
 
         List<Path> expected = asList(srcDir, srcFile);
@@ -98,11 +97,11 @@ public final class CopyTest extends PasteTest {
         Path dstDir = fs.createDir(dir1().concat("dst"));
         Path srcFile = srcDir.concat("test.txt");
         Path dstFile = dstDir.concat("a/test.txt");
-        writeUtf8(fs, srcFile, "Testing");
+        fs.writeUtf8(srcFile, "Testing");
 
         copy(srcDir, dstDir);
-        assertEquals("Testing", readAllUtf8(fs, srcFile));
-        assertEquals("Testing", readAllUtf8(fs, dstFile));
+        assertEquals("Testing", fs.readAllUtf8(srcFile));
+        assertEquals("Testing", fs.readAllUtf8(dstFile));
     }
 
     public void test_copies_empty_directory() throws Exception {
@@ -124,21 +123,25 @@ public final class CopyTest extends PasteTest {
         Path srcFile = fs.createFile(dir1().concat("test.txt"));
         Path dstDir = fs.createDir(dir1().concat("dst"));
         Path dstFile = dstDir.concat("test.txt");
-        writeUtf8(fs, srcFile, "Testing");
+        fs.writeUtf8(srcFile, "Testing");
 
         copy(srcFile, dstDir);
-        assertEquals("Testing", readAllUtf8(fs, srcFile));
-        assertEquals("Testing", readAllUtf8(fs, dstFile));
+        assertEquals("Testing", fs.readAllUtf8(srcFile));
+        assertEquals("Testing", fs.readAllUtf8(dstFile));
     }
 
     private void copy(Path src, Path dstDir)
             throws IOException, InterruptedException {
-        create(singleton(src), dstDir).execute();
+        create(singletonMap(src, fs), fs, dstDir).execute();
     }
 
     @Override
-    Copy create(Collection<Path> sources, Path dstDir) {
-        return new Copy(sources, dstDir);
+    Copy create(
+            Map<? extends Path, ? extends FileSystem> sourcePaths,
+            FileSystem destinationFs,
+            Path destinationDir
+    ) {
+        return new Copy(sourcePaths, destinationFs, destinationDir);
     }
 
 }

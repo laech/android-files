@@ -14,7 +14,7 @@ import static l.files.base.Objects.requireNonNull;
 
 public abstract class PathBaseTest extends AndroidTestCase {
 
-    protected final FileSystem fs;
+    protected final ExtendedFileSystem fs;
 
     @Nullable
     private Path dir1;
@@ -23,16 +23,16 @@ public abstract class PathBaseTest extends AndroidTestCase {
     private Path dir2;
 
     public PathBaseTest(FileSystem fs) {
-        this.fs = requireNonNull(fs);
+        this.fs = new ExtendedFileSystem(fs);
     }
 
     @Override
     protected void tearDown() throws Exception {
         if (dir1 != null) {
-            Files.deleteRecursiveIfExists(fs, dir1);
+            fs.deleteRecursiveIfExists(dir1);
         }
         if (dir2 != null) {
-            Files.deleteRecursiveIfExists(fs, dir2);
+            fs.deleteRecursiveIfExists(dir2);
         }
         super.tearDown();
     }

@@ -20,12 +20,11 @@ import javax.annotation.Nullable;
 
 import l.files.base.Provider;
 import l.files.base.Throwables;
-import l.files.fs.FileSystem;
 import l.files.fs.Path;
 import l.files.fs.Permission;
 import l.files.fs.TraversalCallback;
 import l.files.fs.local.LocalFileSystem;
-import l.files.testing.fs.Files;
+import l.files.testing.fs.ExtendedFileSystem;
 
 import static android.content.Intent.ACTION_MAIN;
 import static android.os.Build.VERSION.SDK_INT;
@@ -53,7 +52,9 @@ public class BaseFilesActivityTest {
                 }
             };
 
-    final FileSystem fs = LocalFileSystem.INSTANCE;
+
+    final ExtendedFileSystem fs =
+            new ExtendedFileSystem(LocalFileSystem.INSTANCE);
 
     @Nullable
     private Path dir;
@@ -194,8 +195,8 @@ public class BaseFilesActivityTest {
         Path dst = dir.concat("Z");
         try {
 
-            Files.deleteRecursiveIfExists(fs, dir);
-            Files.createFiles(fs, src);
+            fs.deleteRecursiveIfExists(dir);
+            fs.createFiles(src);
 
             assertTrue(fs.exists(src, NOFOLLOW));
             assertTrue(
@@ -215,7 +216,7 @@ public class BaseFilesActivityTest {
 
         } catch (Throwable e) {
             try {
-                Files.deleteRecursiveIfExists(fs, dir);
+                fs.deleteRecursiveIfExists(dir);
             } catch (Throwable sup) {
                 Throwables.addSuppressed(e, sup);
             }
@@ -224,12 +225,12 @@ public class BaseFilesActivityTest {
         } finally {
 
             try {
-                Files.deleteIfExists(fs, src);
+                fs.deleteIfExists(src);
             } catch (IOException ignore) {
             }
 
             try {
-                Files.deleteIfExists(fs, dst);
+                fs.deleteIfExists(dst);
             } catch (IOException ignore) {
             }
 

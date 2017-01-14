@@ -19,8 +19,6 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.testing.fs.Files.createFiles;
-import static l.files.testing.fs.Files.writeUtf8;
 import static l.files.ui.browser.FileSort.MODIFIED;
 import static l.files.ui.browser.FilesLoader.BATCH_UPDATE_MILLIS;
 import static org.junit.Assert.assertFalse;
@@ -42,7 +40,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
         screen()
                 .sort()
                 .by(MODIFIED)
-                .assertListMatchesFileSystem(dir())
+                .assertListMatchesFileSystem(fs, dir())
                 .assertRefreshMenuVisible(true);
 
         testRefreshInManualMode(dir());
@@ -65,32 +63,32 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
         boolean updated = false;
         try {
-            screen().assertListMatchesFileSystem(dir, BATCH_UPDATE_MILLIS + 2000, MILLISECONDS);
+            screen().assertListMatchesFileSystem(fs, dir, BATCH_UPDATE_MILLIS + 2000, MILLISECONDS);
             updated = true;
         } catch (AssertionError e) {
             // Pass
         }
         assertFalse("Expected auto refresh to have been disabled", updated);
-        screen().refresh().assertListMatchesFileSystem(dir);
+        screen().refresh().assertListMatchesFileSystem(fs, dir);
     }
 
     private void testFileCreationDeletionWillStillBeNotifiedInManualMode(Path dir)
             throws IOException {
 
-        createFile(dir.concat("file-" + nanoTime()));
-        createDir(dir.concat("dir-" + nanoTime()));
-        move(createFile(dir.concat("before-move-" + nanoTime())),
+        fs.createFile(dir.concat("file-" + nanoTime()));
+        fs.createDir(dir.concat("dir-" + nanoTime()));
+        fs.move(fs.createFile(dir.concat("before-move-" + nanoTime())),
                 dir.concat("after-move-" + nanoTime()));
 
-        list(dir, FOLLOW, new FileSystem.Consumer<Path>() {
+        fs.list(dir, FOLLOW, new FileSystem.Consumer<Path>() {
             @Override
             public boolean accept(Path file) throws IOException {
-                deleteRecursive(file);
+                fs.deleteRecursive(file);
                 return false;
             }
         });
 
-        screen().assertListMatchesFileSystem(dir);
+        screen().assertListMatchesFileSystem(fs, dir);
     }
 
     @Test
@@ -120,17 +118,17 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
         screen();
         thread.join();
-        screen().assertListMatchesFileSystem(dir());
+        screen().assertListMatchesFileSystem(fs, dir());
     }
 
     private void deleteFiles(final int n) throws IOException {
-        list(dir(), FOLLOW, new FileSystem.Consumer<Path>() {
+        fs.list(dir(), FOLLOW, new FileSystem.Consumer<Path>() {
 
             int count = 0;
 
             @Override
             public boolean accept(Path file) throws IOException {
-                deleteRecursive(file);
+                fs.deleteRecursive(file);
                 count++;
                 return count < n;
             }
@@ -144,8 +142,8 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
     @Test
     public void auto_show_correct_information_on_large_change_events() throws Exception {
-        createFile(dir().concat("a"));
-        screen().assertListMatchesFileSystem(dir());
+        fs.createFile(dir().concat("a"));
+        screen().assertListMatchesFileSystem(fs, dir());
 
         long end = currentTimeMillis() + SECONDS.toMillis(5);
         while (currentTimeMillis() < end) {
@@ -157,16 +155,16 @@ public final class RefreshTest extends BaseFilesActivityTest {
             updateAttributes();
         }
 
-        screen().assertListMatchesFileSystem(dir());
+        screen().assertListMatchesFileSystem(fs, dir());
     }
 
     private void updateAttributes() throws IOException {
 
         final Random r = new Random();
-        list(dir(), NOFOLLOW, new FileSystem.Consumer<Path>() {
+        fs.list(dir(), NOFOLLOW, new FileSystem.Consumer<Path>() {
             @Override
             public boolean accept(Path child) throws IOException {
-                setLastModifiedTime(child, NOFOLLOW, Instant.of(
+                fs.setLastModifiedTime(child, NOFOLLOW, Instant.of(
                         r.nextInt((int) (currentTimeMillis() / 1000)),
                         r.nextInt(999999)));
                 return true;
@@ -184,7 +182,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
     }
 
     private void updatePermissions(String name) throws IOException {
-        Path res = createFiles(fs, dir().concat(name));
+        Path res = fs.createFiles(dir().concat(name));
         if (fs.isReadable(res)) {
             fs.setPermissions(res, Permission.read());
         } else {
@@ -193,12 +191,12 @@ public final class RefreshTest extends BaseFilesActivityTest {
     }
 
     private void updateFileContent(String name) throws IOException {
-        Path file = createFiles(fs, dir().concat(name));
-        writeUtf8(fs, file, String.valueOf(new Random().nextLong()));
+        Path file = fs.createFiles(dir().concat(name));
+        fs.writeUtf8(file, String.valueOf(new Random().nextLong()));
     }
 
     private void updateDirectoryChild(String name) throws IOException {
-        Path dir = createDirs(dir().concat(name));
+        Path dir = fs.createDirs(dir().concat(name));
         Path child = dir.concat("child");
         if (fs.exists(child, NOFOLLOW)) {
             fs.delete(child);

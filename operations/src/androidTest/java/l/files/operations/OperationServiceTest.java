@@ -29,7 +29,6 @@ import static l.files.operations.OperationService.newMoveIntent;
 import static l.files.operations.TaskKind.COPY;
 import static l.files.operations.TaskKind.DELETE;
 import static l.files.operations.TaskKind.MOVE;
-import static l.files.testing.fs.Files.createFiles;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -100,8 +99,8 @@ public final class OperationServiceTest extends PathBaseTest {
 
     public void test_deletes_files() throws Exception {
 
-        Path a = createFiles(fs, dir1().concat("a"));
-        Path b = createFiles(fs, dir1().concat("b/c"));
+        Path a = fs.createFiles(dir1().concat("a"));
+        Path b = fs.createFiles(dir1().concat("b/c"));
         CountDownListener listener = new CountDownListener(DELETE);
         service.listener = listener;
         service.onCreate();

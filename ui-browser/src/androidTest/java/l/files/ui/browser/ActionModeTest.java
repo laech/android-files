@@ -7,7 +7,6 @@ import org.junit.runner.RunWith;
 
 import l.files.fs.Path;
 import l.files.fs.Permission;
-import l.files.testing.fs.Files;
 
 import static l.files.ui.browser.FileSort.NAME;
 
@@ -17,7 +16,7 @@ public final class ActionModeTest extends BaseFilesActivityTest {
     @Test
     public void disabled_item_can_still_be_selected() throws Exception {
         Path a = fs.createFile(dir().concat("a"));
-        Files.removePermissions(fs, a, Permission.read());
+        fs.removePermissions(a, Permission.read());
         screen()
                 .longClick(a)
                 .assertActionModePresent(true)

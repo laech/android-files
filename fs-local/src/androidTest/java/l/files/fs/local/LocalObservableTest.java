@@ -30,7 +30,7 @@ import l.files.fs.Permission;
 import l.files.fs.event.Event;
 import l.files.fs.event.Observation;
 import l.files.fs.event.Observer;
-import l.files.testing.fs.Files;
+import l.files.testing.fs.ExtendedFileSystem;
 import l.files.testing.fs.PathBaseTest;
 
 import static java.lang.Integer.parseInt;
@@ -100,7 +100,7 @@ public final class LocalObservableTest extends PathBaseTest {
         observables.add(createRandomChildDir(dir1()));
 
         Path unobservable = fs.createDir(dir1().concat("unobservable"));
-        Files.removePermissions(fs, unobservable, Permission.read());
+        fs.removePermissions(unobservable, Permission.read());
 
         observables.add(createRandomChildDir(dir1()));
         observables.add(createRandomChildDir(dir1()));
@@ -373,7 +373,7 @@ public final class LocalObservableTest extends PathBaseTest {
 
     private int maxUserInstances() throws IOException {
         Path limitFile = Path.fromString("/proc/sys/fs/inotify/max_user_instances");
-        return parseInt(Files.readAllUtf8(fs, limitFile).trim());
+        return parseInt(fs.readAllUtf8(limitFile).trim());
     }
 
     public void test_observe_on_link_no_follow() throws Exception {
@@ -692,7 +692,7 @@ public final class LocalObservableTest extends PathBaseTest {
             throws Exception {
 
         Path dir = fs.createDir(dir1().concat("dir"));
-        Files.removePermissions(fs, dir, Permission.read());
+        fs.removePermissions(dir, Permission.read());
         Recorder observer = observe(fs, dir1());
         try {
             observer.awaitOnIncompleteObservation();
@@ -919,13 +919,13 @@ public final class LocalObservableTest extends PathBaseTest {
     }
 
     private static Callable<Void> newAppend(
-            final FileSystem fs,
+            final ExtendedFileSystem fs,
             final Path file,
             final CharSequence content) {
         return new Callable<Void>() {
             @Override
             public Void call() throws Exception {
-                Files.writeUtf8(fs, file, content);
+                fs.writeUtf8(file, content);
                 return null;
             }
         };
@@ -960,7 +960,7 @@ public final class LocalObservableTest extends PathBaseTest {
 
     static class Recorder extends Tracker implements Observer {
 
-        private final FileSystem fs;
+        private final ExtendedFileSystem fs;
         private final Path root;
 
         private final Observer observer = mock(Observer.class);
@@ -975,29 +975,32 @@ public final class LocalObservableTest extends PathBaseTest {
         private final List<WatchEvent> actual = new CopyOnWriteArrayList<>();
         private volatile CountDownLatch success;
 
-        Recorder(FileSystem fs, Path root) {
+        Recorder(ExtendedFileSystem fs, Path root) {
             this.fs = fs;
             this.root = root;
         }
 
         static Recorder observe(
-                FileSystem fs,
-                Path observable) throws Exception {
+                ExtendedFileSystem fs,
+                Path observable
+        ) throws Exception {
             return observe(fs, observable, NOFOLLOW);
         }
 
         static Recorder observe(
-                FileSystem fs,
+                ExtendedFileSystem fs,
                 Path file,
-                LinkOption option) throws Exception {
+                LinkOption option
+        ) throws Exception {
             return observe(fs, file, option, true);
         }
 
         static Recorder observe(
-                FileSystem fs,
+                ExtendedFileSystem fs,
                 Path file,
                 LinkOption option,
-                boolean verifyTracker) throws Exception {
+                boolean verifyTracker
+        ) throws Exception {
 
             Tracker tracker = registerMockTracker();
             try {
@@ -1019,9 +1022,10 @@ public final class LocalObservableTest extends PathBaseTest {
                 final Recorder observer,
                 final Tracker tracker,
                 final Path file,
-                final LinkOption option) throws IOException {
+                final LinkOption option
+        ) throws IOException {
 
-            final FileSystem fs = observer.fs;
+            final ExtendedFileSystem fs = observer.fs;
             final ArgumentCaptor<Integer> fd = ArgumentCaptor.forClass(Integer.class);
             final ArgumentCaptor<Integer> wd = ArgumentCaptor.forClass(Integer.class);
             final InOrder order = inOrder(tracker);
@@ -1439,7 +1443,7 @@ public final class LocalObservableTest extends PathBaseTest {
             return add(new PreAction() {
                 @Override
                 public void action(Path src) throws Exception {
-                    Files.removePermissions(fs, src, Permission.read());
+                    fs.removePermissions(src, Permission.read());
                 }
             });
         }

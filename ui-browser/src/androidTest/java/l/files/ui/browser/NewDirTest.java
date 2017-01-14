@@ -9,7 +9,6 @@ import org.junit.runner.RunWith;
 import l.files.base.Consumer;
 import l.files.fs.Permission;
 
-import static l.files.testing.fs.Files.removePermissions;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(AndroidJUnit4.class)
@@ -20,7 +19,7 @@ public final class NewDirTest extends BaseFilesActivityTest {
     @Test
     public void shows_error_message_when_failed_to_create()
             throws Exception {
-        removePermissions(fs, dir(), Permission.write());
+        fs.removePermissions(dir(), Permission.write());
         screen()
                 .newFolder()
                 .setFilename("a")

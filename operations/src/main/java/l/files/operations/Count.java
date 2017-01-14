@@ -11,7 +11,7 @@ class Count extends AbstractOperation {
 
     private final AtomicInteger count = new AtomicInteger();
 
-    Count(Map<Path, FileSystem> sourcePaths) {
+    Count(Map<? extends Path, ? extends FileSystem> sourcePaths) {
         super(sourcePaths);
     }
 

@@ -9,21 +9,20 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import l.files.base.Consumer;
-import l.files.fs.FileSystem;
 import l.files.fs.Path;
 import l.files.fs.local.LocalFileSystem;
-import l.files.testing.fs.Files;
+import l.files.testing.fs.ExtendedFileSystem;
 import l.files.ui.base.graphics.Rect;
 import l.files.ui.base.graphics.ScaledBitmap;
 
 import static java.io.File.createTempFile;
-import static l.files.testing.fs.Files.deleteIfExists;
 import static l.files.ui.base.media.MediaMetadataRetrievers.getEmbeddedThumbnail;
 import static l.files.ui.base.media.MediaMetadataRetrievers.getFrameAtAnyTimeThumbnail;
 
 public final class MediaMetadataRetrieversTest extends AndroidTestCase {
 
-    private final FileSystem fs = LocalFileSystem.INSTANCE;
+    private final ExtendedFileSystem fs =
+            new ExtendedFileSystem(LocalFileSystem.INSTANCE);
 
     public void test_getFrameAtAnyTimeThumbnail() throws Exception {
         String name = "MediaMetadataRetrieversTest.mp4";
@@ -74,7 +73,7 @@ public final class MediaMetadataRetrieversTest extends AndroidTestCase {
                 retriever.release();
             }
         } finally {
-            deleteIfExists(fs, path);
+            fs.deleteIfExists(path);
         }
     }
 
@@ -84,7 +83,7 @@ public final class MediaMetadataRetrieversTest extends AndroidTestCase {
             Path path = Path.fromFile(file);
             InputStream in = getContext().getAssets().open(name);
             try {
-                Files.copy(in, fs, path);
+                fs.copy(in, fs, path);
             } finally {
                 in.close();
             }

@@ -15,7 +15,7 @@ abstract class Paste extends AbstractOperation {
     private final Path destinationDir;
 
     Paste(
-            Map<Path, FileSystem> sourcePaths,
+            Map<? extends Path, ? extends FileSystem> sourcePaths,
             FileSystem destinationFs,
             Path destinationDir
     ) {

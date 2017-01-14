@@ -1,13 +1,12 @@
 package l.files.operations;
 
-import java.util.Collection;
+import java.util.Map;
 
+import l.files.fs.FileSystem;
 import l.files.fs.Path;
 
-import static java.util.Collections.singleton;
+import static java.util.Collections.singletonMap;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.testing.fs.Files.readAllUtf8;
-import static l.files.testing.fs.Files.writeUtf8;
 
 public final class MoveTest extends PasteTest {
 
@@ -34,13 +33,13 @@ public final class MoveTest extends PasteTest {
         Path srcFile = fs.createFile(dir1().concat("a.txt"));
         Path dstDir = fs.createDir(dir1().concat("dst"));
         Path dstFile = dstDir.concat("a.txt");
-        writeUtf8(fs, srcFile, "Test");
+        fs.writeUtf8(srcFile, "Test");
 
         Move move = create(srcFile, dstDir);
         move.execute();
 
         assertFalse(fs.exists(srcFile, NOFOLLOW));
-        assertEquals("Test", readAllUtf8(fs, dstFile));
+        assertEquals("Test", fs.readAllUtf8(dstFile));
         assertEquals(move.getMovedItemCount(), 1);
     }
 
@@ -49,23 +48,26 @@ public final class MoveTest extends PasteTest {
         Path dstDir = fs.createDir(dir1().concat("dst"));
         Path srcFile = srcDir.concat("test.txt");
         Path dstFile = dstDir.concat("a/test.txt");
-        writeUtf8(fs, srcFile, "Test");
+        fs.writeUtf8(srcFile, "Test");
 
         Move move = create(srcDir, dstDir);
         move.execute();
 
         assertFalse(fs.exists(srcDir, NOFOLLOW));
-        assertEquals("Test", readAllUtf8(fs, dstFile));
+        assertEquals("Test", fs.readAllUtf8(dstFile));
         assertEquals(move.getMovedItemCount(), 1);
     }
 
     @Override
-    Move create(Collection<Path> sources, Path dstDir) {
-        return new Move(sources, dstDir);
+    Move create(
+            Map<? extends Path, ? extends FileSystem> sourcePaths,
+            FileSystem destinationFs,
+            Path destinationDir) {
+        return new Move(sourcePaths, destinationFs, destinationDir);
     }
 
     private Move create(Path src, Path dstDir) {
-        return create(singleton(src), dstDir);
+        return create(singletonMap(src, fs), fs, dstDir);
     }
 
 }

@@ -11,11 +11,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import l.files.fs.FileSystem;
 import l.files.fs.Instant;
 import l.files.fs.Path;
 import l.files.fs.local.LocalFileSystem;
-import l.files.testing.fs.Files;
+import l.files.testing.fs.ExtendedFileSystem;
 
 import static android.os.Environment.getExternalStorageDirectory;
 import static android.test.MoreAsserts.assertNotEqual;
@@ -25,25 +24,26 @@ import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.testing.fs.Files.UTF_8;
+import static l.files.testing.fs.ExtendedFileSystem.UTF_8;
 
 @RunWith(AndroidJUnit4.class)
 public final class ManualInspectionTest extends InstrumentationTestCase {
 
-    private final FileSystem fs = LocalFileSystem.INSTANCE;
+    private final ExtendedFileSystem fs =
+            new ExtendedFileSystem(LocalFileSystem.INSTANCE);
 
     @Test
     public void test() throws Exception {
         Path dir = Path.fromFile(getExternalStorageDirectory()).concat("test");
-        Files.createDirs(fs, dir);
+        fs.createDirs(dir);
         try {
             fs.setLastModifiedTime(dir, NOFOLLOW, Instant.ofMillis(currentTimeMillis()));
         } catch (IOException ignore) {
             // Older versions does not support changing mtime
         }
-        Files.createFiles(fs, dir.concat(".nomedia"));
-        Files.createFiles(fs, dir.concat("html.html"));
-        Files.createFiles(fs, dir.concat("zip.zip"));
+        fs.createFiles(dir.concat(".nomedia"));
+        fs.createFiles(dir.concat("html.html"));
+        fs.createFiles(dir.concat("zip.zip"));
         try {
             createNonUtf8Dir();
         } catch (IOException e) {
@@ -72,7 +72,7 @@ public final class ManualInspectionTest extends InstrumentationTestCase {
 
             InputStream in = getInstrumentation().getContext().getAssets().open(res);
             try {
-                Files.copy(in, fs, file);
+                fs.copy(in, fs, file);
             } finally {
                 in.close();
             }
@@ -89,7 +89,7 @@ public final class ManualInspectionTest extends InstrumentationTestCase {
         Path child = dir.concat("good we can see this dir");
 
         try {
-            Files.deleteRecursive(fs, dir);
+            fs.deleteRecursive(dir);
         } catch (FileNotFoundException ignored) {
         }
 
@@ -99,17 +99,17 @@ public final class ManualInspectionTest extends InstrumentationTestCase {
 
     private void createFutureFiles(Path dir) throws IOException {
         fs.setLastModifiedTime(
-                Files.createFiles(fs, dir.concat("future")),
+                fs.createFiles(dir.concat("future")),
                 FOLLOW,
                 Instant.ofMillis(currentTimeMillis() + DAYS.toMillis(365)));
 
         fs.setLastModifiedTime(
-                Files.createFiles(fs, dir.concat("future3")),
+                fs.createFiles(dir.concat("future3")),
                 FOLLOW,
                 Instant.ofMillis(currentTimeMillis() + DAYS.toMillis(2)));
 
         fs.setLastModifiedTime(
-                Files.createFiles(fs, dir.concat("future5")),
+                fs.createFiles(dir.concat("future5")),
                 FOLLOW,
                 Instant.ofMillis(currentTimeMillis() + SECONDS.toMillis(5)));
     }

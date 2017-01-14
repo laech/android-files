@@ -1,19 +1,20 @@
 package l.files.operations;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import com.google.common.collect.ImmutableMap;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import l.files.fs.FileSystem;
 import l.files.fs.Path;
 import l.files.fs.local.LocalFileSystem;
 import l.files.testing.fs.PathBaseTest;
 
 import static java.lang.Thread.currentThread;
-import static java.util.Arrays.asList;
-import static java.util.Collections.singleton;
+import static java.util.Collections.singletonMap;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.testing.fs.Files.createFiles;
 
 public abstract class PasteTest extends PathBaseTest {
 
@@ -28,7 +29,7 @@ public abstract class PasteTest extends PathBaseTest {
     public void test_pastesEmptyDirectories() throws Exception {
         Path src = fs.createDir(dir1().concat("empty"));
         Path dstDir = fs.createDir(dir1().concat("dst"));
-        create(singleton(src), dstDir).execute();
+        create(singletonMap(src, fs), fs, dstDir).execute();
         assertTrue(fs.exists(dir1().concat("dst/empty"), NOFOLLOW));
     }
 
@@ -38,9 +39,9 @@ public abstract class PasteTest extends PathBaseTest {
      * pasted with new names.
      */
     public void test_doesNotOverrideExistingFile() throws Exception {
-        List<Path> sources = asList(
-                fs.createFile(dir1().concat("a.txt")),
-                fs.createFile(dir1().concat("b.mp4"))
+        Map<Path, FileSystem> sources = ImmutableMap.<Path, FileSystem>of(
+                fs.createFile(dir1().concat("a.txt")), fs,
+                fs.createFile(dir1().concat("b.mp4")), fs
         );
         fs.createDir(dir1().concat("1"));
         fs.createFile(dir1().concat("1/a.txt"));
@@ -48,7 +49,7 @@ public abstract class PasteTest extends PathBaseTest {
 
         Path dstDir = dir1().concat("1");
 
-        create(sources, dstDir).execute();
+        create(sources, fs, dstDir).execute();
 
         assertTrue(fs.exists(dir1().concat("1/a.txt"), NOFOLLOW));
         assertTrue(fs.exists(dir1().concat("1/b.mp4"), NOFOLLOW));
@@ -62,14 +63,15 @@ public abstract class PasteTest extends PathBaseTest {
      * new directories will be pasted with new names.
      */
     public void test_doesNotOverrideExistingDirectory() throws Exception {
-        createFiles(fs, dir1().concat("a/1.txt"));
-        createFiles(fs, dir1().concat("a/b/2.txt"));
-        createFiles(fs, dir1().concat("a/b/3.txt"));
-        createFiles(fs, dir1().concat("b/a/1.txt"));
-        Set<Path> sources = singleton(dir1().concat("a"));
+        fs.createFiles(dir1().concat("a/1.txt"));
+        fs.createFiles(dir1().concat("a/b/2.txt"));
+        fs.createFiles(dir1().concat("a/b/3.txt"));
+        fs.createFiles(dir1().concat("b/a/1.txt"));
+        Map<Path, FileSystem> sources = Collections.<Path, FileSystem>
+                singletonMap(dir1().concat("a"), fs);
         Path dstDir = dir1().concat("b");
 
-        create(sources, dstDir).execute();
+        create(sources, fs, dstDir).execute();
 
         assertTrue(fs.exists(dir1().concat("b/a/1.txt"), NOFOLLOW));
         assertTrue(fs.exists(dir1().concat("b/a 2/1.txt"), NOFOLLOW));
@@ -78,9 +80,9 @@ public abstract class PasteTest extends PathBaseTest {
     }
 
     public void test_doesNothingIfAlreadyCancelledOnExecution() throws Exception {
-        final List<Path> sources = asList(
-                createFiles(fs, dir1().concat("a/1.txt")),
-                createFiles(fs, dir1().concat("a/2.txt"))
+        final Map<Path, FileSystem> sources = ImmutableMap.<Path, FileSystem>of(
+                fs.createFiles(dir1().concat("a/1.txt")), fs,
+                fs.createFiles(dir1().concat("a/2.txt")), fs
         );
         final Path dstDir = fs.createDir(dir1().concat("b"));
 
@@ -89,7 +91,7 @@ public abstract class PasteTest extends PathBaseTest {
             public void run() {
                 currentThread().interrupt();
                 try {
-                    create(sources, dstDir).execute();
+                    create(sources, fs, dstDir).execute();
                     fail();
                 } catch (InterruptedException e) {
                     // Pass
@@ -109,7 +111,7 @@ public abstract class PasteTest extends PathBaseTest {
         Path parent = fs.createDir(dir1().concat("parent"));
         Path child = fs.createDir(dir1().concat("parent/child"));
         try {
-            create(singleton(parent), child).execute();
+            create(singletonMap(parent, fs), fs, child).execute();
             fail();
         } catch (CannotPasteIntoSelfException pass) {
             // Pass
@@ -119,13 +121,17 @@ public abstract class PasteTest extends PathBaseTest {
     public void test_errorOnPastingIntoSelf() throws Exception {
         Path dir = fs.createDir(dir1().concat("parent"));
         try {
-            create(singleton(dir), dir).execute();
+            create(singletonMap(dir, fs), fs, dir).execute();
             fail();
         } catch (CannotPasteIntoSelfException pass) {
             // Pass
         }
     }
 
-    abstract Paste create(Collection<Path> sources, Path dstDir);
+    abstract Paste create(
+            Map<? extends Path, ? extends FileSystem> sourcePaths,
+            FileSystem destinationFs,
+            Path destinationDir
+    );
 
 }

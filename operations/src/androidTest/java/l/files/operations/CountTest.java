@@ -8,8 +8,7 @@ import l.files.fs.local.LocalFileSystem;
 import l.files.testing.fs.PathBaseTest;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-import static l.files.testing.fs.Files.createFiles;
+import static java.util.Collections.singletonMap;
 
 public final class CountTest extends PathBaseTest {
 
@@ -18,8 +17,8 @@ public final class CountTest extends PathBaseTest {
     }
 
     public void test_count() throws Exception {
-        createFiles(fs, dir1().concat("1/a.txt"));
-        createFiles(fs, dir1().concat("3/4/c.txt"));
+        fs.createFiles(dir1().concat("1/a.txt"));
+        fs.createFiles(dir1().concat("3/4/c.txt"));
 
         Set<Path> expected = new HashSet<>(asList(
                 dir1(),
@@ -30,7 +29,7 @@ public final class CountTest extends PathBaseTest {
                 dir1().concat("3/4/c.txt")
         ));
 
-        Count counter = new Count(singletonList(dir1()));
+        Count counter = new Count(singletonMap(dir1(), fs));
         counter.execute();
 
         assertEquals(expected.size(), counter.getCount());

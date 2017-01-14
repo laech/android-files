@@ -26,7 +26,7 @@ abstract class AbstractOperation implements FileOperation {
     private final Map<Path, FileSystem> paths;
     private final FailureRecorder recorder;
 
-    AbstractOperation(Map<Path, FileSystem> paths) {
+    AbstractOperation(Map<? extends Path, ? extends FileSystem> paths) {
         this.paths = unmodifiableMap(new HashMap<>(paths));
         this.recorder = new FailureRecorder(ERROR_LIMIT);
     }

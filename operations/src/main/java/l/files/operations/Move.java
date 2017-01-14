@@ -12,7 +12,7 @@ final class Move extends Paste {
     private final AtomicInteger movedItemCount = new AtomicInteger();
 
     Move(
-            Map<Path, FileSystem> sourcePaths,
+            Map<? extends Path, ? extends FileSystem> sourcePaths,
             FileSystem destinationFs,
             Path destinationPath
     ) {

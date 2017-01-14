@@ -15,7 +15,6 @@ import static android.text.format.Formatter.formatFileSize;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.fs.Instant.EPOCH;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.testing.fs.Files.writeUtf8;
 
 @RunWith(AndroidJUnit4.class)
 public final class InfoTest extends BaseFilesActivityTest {
@@ -51,7 +50,7 @@ public final class InfoTest extends BaseFilesActivityTest {
     public void gets_info_of_file() throws Exception {
 
         Path path = dir().concat("test.txt");
-        writeUtf8(fs, path, "hello world");
+        fs.writeUtf8(path, "hello world");
         Stat stat = fs.stat(path, NOFOLLOW);
 
         screen()

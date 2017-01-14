@@ -26,7 +26,7 @@ final class Copy extends Paste {
     private final AtomicInteger copiedItemCount = new AtomicInteger();
 
     Copy(
-            Map<Path, FileSystem> sourcePaths,
+            Map<? extends Path, ? extends FileSystem> sourcePaths,
             FileSystem destinationFs,
             Path destinationDir
     ) {

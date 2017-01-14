@@ -20,7 +20,6 @@ import l.files.fs.Path;
 import l.files.fs.local.LocalObservableTest.Recorder;
 import l.files.testing.Executable;
 import l.files.testing.Tests;
-import l.files.testing.fs.Files;
 import l.files.testing.fs.PathBaseTest;
 
 import static android.app.DownloadManager.COLUMN_REASON;
@@ -97,7 +96,7 @@ public final class LocalObservableDownloadTest extends PathBaseTest {
                 observer.close();
             }
         } finally {
-            Files.deleteIfExists(fs, downloadFile);
+            fs.deleteIfExists(downloadFile);
         }
     }
 

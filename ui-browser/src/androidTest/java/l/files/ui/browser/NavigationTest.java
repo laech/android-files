@@ -35,8 +35,7 @@ import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.fs.Instant.EPOCH;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.testing.fs.Files.UTF_8;
-import static l.files.testing.fs.Files.createDirs;
+import static l.files.testing.fs.ExtendedFileSystem.UTF_8;
 import static l.files.ui.browser.FileSort.NAME;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -72,13 +71,13 @@ public final class NavigationTest extends BaseFilesActivityTest {
                     .assertAllItemsDisplayedInOrder(dst);
 
         } finally {
-            deleteRecursiveIfExists(dir);
+            fs.deleteRecursiveIfExists(dir);
         }
     }
 
     @Test
     public void can_start_from_data_uri() throws Exception {
-        Path dir = createDirs(fs, dir().concat("dir"));
+        Path dir = fs.createDirs(dir().concat("dir"));
         Path file = fs.createFile(dir.concat("file"));
         setActivityIntent(new Intent().setData(Uri.fromFile(dir.toFile())));
         screen()
@@ -92,7 +91,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
         Path empty = fs.createFile(dir.concat("empty"));
         Path file = dir.concat("file");
         Path link = fs.createSymbolicLink(dir.concat("link"), file);
-        writeUtf8(file, "hello");
+        fs.writeUtf8(file, "hello");
         screen()
                 .clickInto(dir)
                 .assertThumbnailShown(file, true)
@@ -154,10 +153,10 @@ public final class NavigationTest extends BaseFilesActivityTest {
                 SDK_INT != 24);
 //                SDK_INT != N); // TODO Change to 'N' after upgrade to API 24
 
-        screen().selectFromNavigationMode(Paths.get("/"));
-        screen().clickInto(Paths.get("/proc"));
-        screen().clickInto(Paths.get("/proc/self"));
-        screen().clickInto(Paths.get("/proc/self/fdinfo"));
+        screen().selectFromNavigationMode(Path.fromString("/"));
+        screen().clickInto(Path.fromString("/proc"));
+        screen().clickInto(Path.fromString("/proc/self"));
+        screen().clickInto(Path.fromString("/proc/self/fdinfo"));
     }
 
     @Test
@@ -196,7 +195,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
     @Test
     public void shows_time_and_size_for_file() throws Exception {
         Path file = fs.createFile(dir().concat("file"));
-        appendUtf8(file, file.toString());
+        fs.appendUtf8(file, file.toString());
 
         Context c = getActivity();
         Stat stat = fs.stat(file, NOFOLLOW);
@@ -244,7 +243,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
     @Test
     public void directory_view_is_disabled_if_no_read_permission() throws Exception {
         Path dir = fs.createDir(dir().concat("dir"));
-        removePermissions(dir, Permission.read());
+        fs.removePermissions(dir, Permission.read());
         screen().assertDisabled(dir);
     }
 
@@ -353,7 +352,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
                 .assertListViewContains(a, true)
                 .assertListViewContains(b, true);
 
-        delete(b);
+        fs.delete(b);
         screen()
                 .assertListViewContains(a, true)
                 .assertListViewContains(b, false);
@@ -423,7 +422,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
         if (stat.isDirectory()) {
             fs.createDir(file.concat(String.valueOf(nanoTime())));
         } else {
-            appendUtf8(file, "test");
+            fs.appendUtf8(file, "test");
         }
         Instant lastModifiedAfter = fs.stat(file, NOFOLLOW).lastModifiedTime();
         assertNotEqual(lastModifiedBefore, lastModifiedAfter);
