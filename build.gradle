@@ -13,7 +13,7 @@ buildscript {
     // Cannot target API 24 yet, need to handle FileUriExposedException when clicking on a file
     ext.targetSdkVersion = 23
     ext.compileSdkVersion = 23
-    ext.buildToolsVersion = '24.0.3'
+    ext.buildToolsVersion = '25.0.2'
     ext.supportLibVersion = '24.2.1'
     ext.firebaseVersion = '9.4.0'
     ext.guavaVersion = '19.0'
