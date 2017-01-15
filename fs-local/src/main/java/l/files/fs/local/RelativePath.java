@@ -1,4 +1,4 @@
-package l.files.fs;
+package l.files.fs.local;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.UnmodifiableIterator;
@@ -8,14 +8,18 @@ import java.io.File;
 
 import javax.annotation.Nullable;
 
+import l.files.fs.Name;
+import l.files.fs.Path;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public final class RelativePath extends Path {
+final class RelativePath extends LocalPath {
 
     private final ImmutableList<Name> names;
 
-    RelativePath(ImmutableList<Name> names) {
-        this.names = checkNotNull(names);
+    @SuppressWarnings("unchecked")
+    RelativePath(ImmutableList<? extends Name> names) {
+        this.names = (ImmutableList<Name>) checkNotNull(names);
     }
 
     @Override
@@ -39,7 +43,7 @@ public final class RelativePath extends Path {
     }
 
     @Override
-    ImmutableList<Name> names() {
+    public ImmutableList<Name> names() {
         return names;
     }
 

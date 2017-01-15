@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import static l.files.fs.TraversalCallback.Result.CONTINUE;
 
-public interface TraversalCallback<E> {
+public interface TraversalCallback<E> { // TODO make non-generic?
 
     Result onPreVisit(E element) throws IOException;
 

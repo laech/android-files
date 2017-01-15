@@ -12,10 +12,10 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import l.files.fs.FileSystem;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
 import l.files.fs.Path;
+import l.files.fs.Path.Consumer;
 import l.files.fs.Permission;
 import l.files.fs.event.Observation;
 import l.files.fs.event.Observer;
@@ -60,7 +60,7 @@ import static linux.Stat.S_IXUSR;
 import static linux.Stat.chmod;
 import static linux.Stat.mkdir;
 
-public final class LocalFileSystem extends FileSystem {
+public final class LocalFileSystem {
 
     public static final LocalFileSystem INSTANCE = new LocalFileSystem();
 
@@ -80,7 +80,7 @@ public final class LocalFileSystem extends FileSystem {
         return unmodifiableMap(map);
     }
 
-    public static Set<Permission> permissionsFromMode(int mode) {
+    static Set<Permission> permissionsFromMode(int mode) {
         Set<Permission> permissions = EnumSet.noneOf(Permission.class);
         if ((mode & S_IRUSR) != 0) permissions.add(OWNER_READ);
         if ((mode & S_IWUSR) != 0) permissions.add(OWNER_WRITE);
@@ -102,8 +102,7 @@ public final class LocalFileSystem extends FileSystem {
         return mode;
     }
 
-    @Override
-    public void setPermissions(Path path, Set<Permission> permissions)
+    void setPermissions(Path path, Set<Permission> permissions)
             throws IOException {
 
         try {
@@ -113,8 +112,7 @@ public final class LocalFileSystem extends FileSystem {
         }
     }
 
-    @Override
-    public void setLastModifiedTime(Path path, LinkOption option, Instant instant)
+    void setLastModifiedTime(Path path, LinkOption option, Instant instant)
             throws IOException {
 
 
@@ -135,37 +133,30 @@ public final class LocalFileSystem extends FileSystem {
             int nanos,
             boolean followLink) throws ErrnoException;
 
-    @Override
-    public LocalStat stat(Path path, LinkOption option) throws IOException {
+    LocalStat stat(Path path, LinkOption option) throws IOException {
         return LocalStat.stat(path, option);
     }
 
-    @Override
-    public Path createDir(Path path) throws IOException {
+    void createDir(Path path) throws IOException {
         try {
             // Same permission bits as java.io.File.mkdir() on Android
             mkdir(path.toByteArray(), S_IRWXU);
-            return path;
         } catch (ErrnoException e) {
             throw ErrnoExceptions.toIOException(e, path);
         }
     }
 
-    @Override
-    public Path createDir(Path path, Set<Permission> permissions) throws IOException {
+    void createDir(Path path, Set<Permission> permissions) throws IOException {
         try {
             mkdir(path.toByteArray(), permissionsToMode(permissions));
-            return path;
         } catch (ErrnoException e) {
             throw ErrnoExceptions.toIOException(e, path);
         }
     }
 
-    @Override
-    public Path createFile(Path path) throws IOException {
+    void createFile(Path path) throws IOException {
         try {
             createFileNative(path);
-            return path;
         } catch (ErrnoException e) {
             throw ErrnoExceptions.toIOException(e, path);
         }
@@ -179,30 +170,24 @@ public final class LocalFileSystem extends FileSystem {
         Unistd.close(fd);
     }
 
-    @Override
-    public Path createSymbolicLink(Path link, Path target) throws IOException {
+    void createSymbolicLink(Path link, Path target) throws IOException {
         try {
-
             Unistd.symlink(target.toByteArray(), link.toByteArray());
-            return link;
-
         } catch (ErrnoException e) {
             throw ErrnoExceptions.toIOException(e, target, link);
         }
     }
 
-    @Override
-    public Path readSymbolicLink(Path path) throws IOException {
+    Path readSymbolicLink(Path path) throws IOException {
         try {
             byte[] link = Unistd.readlink(path.toByteArray());
-            return Path.fromByteArray(link);
+            return LocalPath.fromByteArray(link);
         } catch (ErrnoException e) {
             throw ErrnoExceptions.toIOException(e, path);
         }
     }
 
-    @Override
-    public void move(Path src, Path dst) throws IOException {
+    void move(Path src, Path dst) throws IOException {
         try {
 
             Stdio.rename(src.toByteArray(), dst.toByteArray());
@@ -212,8 +197,7 @@ public final class LocalFileSystem extends FileSystem {
         }
     }
 
-    @Override
-    public void delete(Path path) throws IOException {
+    void delete(Path path) throws IOException {
         while (true) {
             try {
                 Stdio.remove(path.toByteArray());
@@ -226,8 +210,7 @@ public final class LocalFileSystem extends FileSystem {
         }
     }
 
-    @Override
-    public boolean exists(Path path, LinkOption option) throws IOException {
+    boolean exists(Path path, LinkOption option) throws IOException {
         try {
             // access() follows symbolic links
             // faccessat(AT_SYMLINK_NOFOLLOW) doesn't work on android
@@ -239,18 +222,15 @@ public final class LocalFileSystem extends FileSystem {
         }
     }
 
-    @Override
-    public boolean isReadable(Path path) throws IOException {
+    boolean isReadable(Path path) throws IOException {
         return accessible(path, Unistd.R_OK);
     }
 
-    @Override
-    public boolean isWritable(Path path) throws IOException {
+    boolean isWritable(Path path) throws IOException {
         return accessible(path, Unistd.W_OK);
     }
 
-    @Override
-    public boolean isExecutable(Path path) throws IOException {
+    boolean isExecutable(Path path) throws IOException {
         return accessible(path, Unistd.X_OK);
     }
 
@@ -266,26 +246,24 @@ public final class LocalFileSystem extends FileSystem {
         }
     }
 
-    @Override
-    public Observation observe(
+    Observation observe(
             Path path,
             LinkOption option,
             Observer observer,
-            Consumer<? super Path> childrenConsumer,
+            Consumer childrenConsumer,
             @Nullable String logTag,
             int watchLimit)
             throws IOException, InterruptedException {
 
         LocalObservable observable = new LocalObservable(path, observer, logTag);
-        observable.start(this, option, childrenConsumer, watchLimit);
+        observable.start(option, childrenConsumer, watchLimit);
         return observable;
     }
 
-    @Override
-    public void list(
+    void list(
             Path path,
             LinkOption option,
-            Consumer<? super Path> consumer) throws IOException {
+            Consumer consumer) throws IOException {
 
         list(path, option, false, consumer);
     }
@@ -294,7 +272,8 @@ public final class LocalFileSystem extends FileSystem {
             Path path,
             LinkOption option,
             boolean dirOnly,
-            Consumer<? super Path> consumer) throws IOException {
+            Consumer consumer
+    ) throws IOException {
 
         int flags = O_DIRECTORY;
         if (option == NOFOLLOW) {
@@ -336,13 +315,11 @@ public final class LocalFileSystem extends FileSystem {
         return false;
     }
 
-    @Override
-    public InputStream newInputStream(Path path) throws IOException {
+    InputStream newInputStream(Path path) throws IOException {
         return LocalStreams.newInputStream(path);
     }
 
-    @Override
-    public OutputStream newOutputStream(Path path, boolean append) throws IOException {
+    OutputStream newOutputStream(Path path, boolean append) throws IOException {
         return LocalStreams.newOutputStream(path, append);
     }
 

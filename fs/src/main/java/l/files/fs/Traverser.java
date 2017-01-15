@@ -19,7 +19,6 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 final class Traverser {
 
     private final Path root;
-    private final FileSystem fs;
     private final LinkOption rootOption;
     private final TraversalCallback<Path> visitor;
     private final Deque<Node> stack;
@@ -30,12 +29,10 @@ final class Traverser {
     @SuppressWarnings("unchecked")
     Traverser(
             Path root,
-            FileSystem fs,
             LinkOption option,
             TraversalCallback<? super Path> visitor,
-            @Nullable Comparator<Path> childrenComparator) {
-
-        this.fs = requireNonNull(fs);
+            @Nullable Comparator<Path> childrenComparator
+    ) {
         this.childrenComparator = childrenComparator;
         this.rootOption = requireNonNull(option, "option");
         this.root = requireNonNull(root, "root");
@@ -94,11 +91,11 @@ final class Traverser {
 
     private void pushChildren(Deque<Node> stack, Node parent) throws IOException {
         LinkOption option = parent.path.equals(root) ? rootOption : NOFOLLOW;
-        if (!fs.stat(parent.path, option).isDirectory()) {
+        if (!parent.path.stat(option).isDirectory()) {
             return;
         }
 
-        List<Path> children = fs.list(parent.path, option, new ArrayList<Path>());
+        List<Path> children = parent.path.list(option, new ArrayList<Path>());
         if (childrenComparator != null) {
             Collections.sort(children, childrenComparator);
         }

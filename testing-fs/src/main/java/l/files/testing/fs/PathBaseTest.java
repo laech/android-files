@@ -7,40 +7,33 @@ import java.io.IOException;
 
 import javax.annotation.Nullable;
 
-import l.files.fs.FileSystem;
 import l.files.fs.Path;
-
-import static l.files.base.Objects.requireNonNull;
 
 public abstract class PathBaseTest extends AndroidTestCase {
 
-    protected final ExtendedFileSystem fs;
+    @Nullable
+    private ExtendedPath dir1;
 
     @Nullable
-    private Path dir1;
-
-    @Nullable
-    private Path dir2;
-
-    public PathBaseTest(FileSystem fs) {
-        this.fs = new ExtendedFileSystem(fs);
-    }
+    private ExtendedPath dir2;
 
     @Override
     protected void tearDown() throws Exception {
         if (dir1 != null) {
-            fs.deleteRecursiveIfExists(dir1);
+            dir1.deleteRecursiveIfExists();
         }
         if (dir2 != null) {
-            fs.deleteRecursiveIfExists(dir2);
+            dir2.deleteRecursiveIfExists();
         }
         super.tearDown();
     }
 
+    protected abstract Path create(File file);
+
     protected Path dir1() {
         if (dir1 == null) {
             try {
-                dir1 = Path.fromFile(createTempFolder());
+                dir1 = new ExtendedPath(create(createTempFolder()));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -51,7 +44,7 @@ public abstract class PathBaseTest extends AndroidTestCase {
     protected Path dir2() {
         if (dir2 == null) {
             try {
-                dir2 = Path.fromFile(createTempFolder());
+                dir2 = new ExtendedPath(create(createTempFolder()));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

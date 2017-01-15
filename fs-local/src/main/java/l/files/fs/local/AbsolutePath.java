@@ -1,4 +1,4 @@
-package l.files.fs;
+package l.files.fs.local;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
@@ -7,9 +7,12 @@ import java.io.ByteArrayOutputStream;
 
 import javax.annotation.Nullable;
 
+import l.files.fs.Name;
+import l.files.fs.Path;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public final class AbsolutePath extends Path {
+final class AbsolutePath extends LocalPath {
 
     private final RelativePath path;
 
@@ -29,7 +32,7 @@ public final class AbsolutePath extends Path {
     }
 
     @Override
-    ImmutableList<Name> names() {
+    public ImmutableList<Name> names() {
         return path.names();
     }
 

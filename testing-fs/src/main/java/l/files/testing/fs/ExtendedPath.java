@@ -1,5 +1,7 @@
 package l.files.testing.fs;
 
+import android.annotation.SuppressLint;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,7 +16,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import l.files.fs.AlreadyExist;
-import l.files.fs.FileSystem;
 import l.files.fs.LinkOption;
 import l.files.fs.Path;
 import l.files.fs.Permission;
@@ -25,22 +26,20 @@ import l.files.fs.event.Observer;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
-public final class ExtendedFileSystem extends ForwardingFileSystem {
+@SuppressLint("ParcelCreator")
+public final class ExtendedPath extends ForwardingPath {
 
     public static final Charset UTF_8 = Charset.forName("UTF-8");
 
-    public ExtendedFileSystem(FileSystem delegate) {
+    public ExtendedPath(Path delegate) {
         super(delegate);
     }
 
 
-    public Observation observe(
-            Path path,
-            LinkOption option,
-            Observer observer
-    ) throws IOException, InterruptedException {
+    public Observation observe(LinkOption option, Observer observer)
+            throws IOException, InterruptedException {
 
-        return observe(path, option, observer, new Consumer<Path>() {
+        return observe(option, observer, new Consumer() {
             @Override
             public boolean accept(Path entry) throws IOException {
                 return true;
@@ -48,28 +47,24 @@ public final class ExtendedFileSystem extends ForwardingFileSystem {
         }, null, -1);
     }
 
-    public void listDirs(
-            final Path path,
-            final LinkOption option,
-            final Consumer<? super Path> consumer
-    ) throws IOException {
+    public void listDirs(final LinkOption option, final Consumer consumer)
+            throws IOException {
 
-        list(path, option, new Consumer<Path>() {
+        list(option, new Consumer() {
             @Override
             public boolean accept(Path entry) throws IOException {
-                return !stat(entry, NOFOLLOW).isDirectory() ||
+                return !entry.stat(NOFOLLOW).isDirectory() ||
                         consumer.accept(entry);
             }
         });
     }
 
     public <C extends Collection<? super Path>> C listDirs(
-            final Path path,
             final LinkOption option,
             final C collection
     ) throws IOException {
 
-        listDirs(path, option, new FileSystem.Consumer<Path>() {
+        listDirs(option, new Consumer() {
             @Override
             public boolean accept(Path entry) throws IOException {
                 collection.add(entry);
@@ -81,78 +76,76 @@ public final class ExtendedFileSystem extends ForwardingFileSystem {
 
     /**
      * Creates this file and any missing parents as directories. This will
-     * throw the same exceptions as {@link FileSystem#createDir(Path)} except
+     * throw the same exceptions as {@link Path#createDir()} except
      * will not error if already exists as a directory.
      */
-    public Path createDirs(Path path) throws IOException {
+    public Path createDirs() throws IOException {
         try {
-            if (stat(path, NOFOLLOW).isDirectory()) {
-                return path;
+            if (stat(NOFOLLOW).isDirectory()) {
+                return this;
             }
         } catch (FileNotFoundException ignore) {
         }
 
-        Path parent = path.parent();
+        ExtendedPath parent = parent();
         if (parent != null) {
-            createDirs(parent);
+            parent.createDirs();
         }
 
         try {
-            createDir(path);
+            createDir();
         } catch (AlreadyExist ignore) {
         }
 
-        return path;
+        return this;
     }
 
     /**
      * Creates this file as a file and creates any missing parents. This
-     * will throw the same exceptions as {@link FileSystem#createFile(Path)}
+     * will throw the same exceptions as {@link Path#createFile()}
      * except will not error if already exists.
      */
-    public Path createFiles(Path path) throws IOException {
+    public Path createFiles() throws IOException {
         try {
-            if (stat(path, NOFOLLOW).isRegularFile()) {
-                return path;
+            if (stat(NOFOLLOW).isRegularFile()) {
+                return this;
             }
         } catch (FileNotFoundException ignore) {
         }
 
-        Path parent = path.parent();
+        ExtendedPath parent = parent();
         if (parent != null) {
-            createDirs(parent);
+            parent.createDirs();
         }
 
         try {
-            createFile(path);
+            createFile();
         } catch (AlreadyExist ignore) {
         }
 
-        return path;
+        return this;
     }
 
-    public void removePermissions(Path path, Set<Permission> permissions)
+    public void removePermissions(Set<Permission> permissions)
             throws IOException {
-        Set<Permission> existing = stat(path, FOLLOW).permissions();
+        Set<Permission> existing = stat(FOLLOW).permissions();
         Set<Permission> perms = new HashSet<>(existing);
         perms.removeAll(permissions);
-        setPermissions(path, perms);
+        setPermissions(perms);
     }
 
-    public Reader newReader(Path path, Charset charset) throws IOException {
-        return new InputStreamReader(newInputStream(path), charset);
+    public Reader newReader(Charset charset) throws IOException {
+        return new InputStreamReader(newInputStream(), charset);
     }
 
-    public Writer newWriter(Path path, Charset charset, boolean append)
+    public Writer newWriter(Charset charset, boolean append)
             throws IOException {
-        return new OutputStreamWriter(
-                newOutputStream(path, append), charset
-        );
+        return new OutputStreamWriter(newOutputStream(append), charset);
     }
 
-    public String readAllUtf8(Path path) throws IOException {
+    public String readAllUtf8() throws IOException {
         StringBuilder builder = new StringBuilder();
-        Reader reader = newReader(path, UTF_8);
+        Reader reader = newReader(UTF_8);
         try {
             char[] buffer = new char[8192];
             for (int i; (i = reader.read(buffer)) != -1; ) {
@@ -164,14 +157,14 @@ public final class ExtendedFileSystem extends ForwardingFileSystem {
         return builder.toString();
     }
 
-    public void writeUtf8(Path path, CharSequence content) throws IOException {
-        write(path, content, UTF_8);
+    public void writeUtf8(CharSequence content) throws IOException {
+        write(content, UTF_8);
     }
 
-    public void write(Path path, CharSequence content, Charset charset)
+    public void write(CharSequence content, Charset charset)
             throws IOException {
 
-        Writer writer = newWriter(path, charset, false);
+        Writer writer = newWriter(charset, false);
         try {
             writer.write(content.toString());
         } finally {
@@ -179,9 +172,9 @@ public final class ExtendedFileSystem extends ForwardingFileSystem {
         }
     }
 
-    public void appendUtf8(Path path, CharSequence content)
+    public void appendUtf8(CharSequence content)
             throws IOException {
-        Writer writer = newWriter(path, UTF_8, true);
+        Writer writer = newWriter(UTF_8, true);
         try {
             writer.write(content.toString());
         } finally {
@@ -190,19 +183,19 @@ public final class ExtendedFileSystem extends ForwardingFileSystem {
     }
 
 
-    public void deleteIfExists(Path path) throws IOException {
+    public void deleteIfExists() throws IOException {
         try {
-            delete(path);
+            delete();
         } catch (FileNotFoundException ignored) {
         }
     }
 
-    public void deleteRecursive(final Path path) throws IOException {
-        traverse(path, NOFOLLOW, new TraversalCallback.Base<Path>() {
+    public void deleteRecursive() throws IOException {
+        traverse(NOFOLLOW, new TraversalCallback.Base<Path>() {
 
             @Override
             public Result onPostVisit(Path path) throws IOException {
-                deleteIfExists(path);
+                new ExtendedPath(path).deleteIfExists();
                 return super.onPostVisit(path);
             }
 
@@ -218,16 +211,16 @@ public final class ExtendedFileSystem extends ForwardingFileSystem {
         });
     }
 
-    public void deleteRecursiveIfExists(Path path) throws IOException {
+    public void deleteRecursiveIfExists() throws IOException {
         try {
-            deleteRecursive(path);
+            deleteRecursive();
         } catch (FileNotFoundException ignore) {
         }
     }
 
-    public void copy(InputStream in, FileSystem fs, Path path)
+    public void copy(InputStream in, Path path)
             throws IOException {
-        OutputStream out = fs.newOutputStream(path, false);
+        OutputStream out = path.newOutputStream(false);
         try {
             byte[] buffer = new byte[8192];
             for (int i; (i = in.read(buffer)) != -1; ) {
