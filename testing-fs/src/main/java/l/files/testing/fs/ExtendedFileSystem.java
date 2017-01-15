@@ -19,6 +19,8 @@ import l.files.fs.LinkOption;
 import l.files.fs.Path;
 import l.files.fs.Permission;
 import l.files.fs.TraversalCallback;
+import l.files.fs.event.Observation;
+import l.files.fs.event.Observer;
 
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
@@ -29,6 +31,21 @@ public final class ExtendedFileSystem extends ForwardingFileSystem {
 
     public ExtendedFileSystem(FileSystem delegate) {
         super(delegate);
+    }
+
+
+    public Observation observe(
+            Path path,
+            LinkOption option,
+            Observer observer
+    ) throws IOException, InterruptedException {
+
+        return observe(path, option, observer, new Consumer<Path>() {
+            @Override
+            public boolean accept(Path entry) throws IOException {
+                return true;
+            }
+        }, null, -1);
     }
 
     public void listDirs(

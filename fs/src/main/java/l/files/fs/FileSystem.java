@@ -126,20 +126,6 @@ public abstract class FileSystem {
     public Observation observe(
             Path path,
             LinkOption option,
-            Observer observer)
-            throws IOException, InterruptedException {
-
-        return observe(path, option, observer, new Consumer<Path>() {
-            @Override
-            public boolean accept(Path entry) throws IOException {
-                return true;
-            }
-        }, null, -1);
-    }
-
-    public Observation observe(
-            Path path,
-            LinkOption option,
             BatchObserver batchObserver,
             Consumer<? super Path> childrenConsumer,
             long batchInterval,
