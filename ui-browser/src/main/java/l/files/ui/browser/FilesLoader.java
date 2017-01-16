@@ -22,14 +22,12 @@ import java.util.concurrent.ExecutorService;
 
 import javax.annotation.Nullable;
 
-import l.files.fs.event.BatchObserver;
-import l.files.fs.event.Event;
-import l.files.fs.FileSystem;
-import l.files.fs.Files;
 import l.files.fs.Name;
-import l.files.fs.event.Observation;
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.fs.event.BatchObserver;
+import l.files.fs.event.Event;
+import l.files.fs.event.Observation;
 import l.files.ui.base.fs.FileInfo;
 
 import static android.os.Looper.getMainLooper;
@@ -41,9 +39,9 @@ import static java.util.Collections.unmodifiableList;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.base.Objects.requireNonNull;
-import static l.files.fs.event.Event.DELETE;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static l.files.fs.event.Event.DELETE;
 import static l.files.ui.base.content.Contexts.isDebugBuild;
 
 final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
@@ -92,7 +90,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     };
 
-    void updateAll(
+    private void updateAll(
             final Map<Name, Event> changedChildren,
             final boolean forceReload) {
 
@@ -218,8 +216,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     private List<Path> observe() throws IOException, InterruptedException {
         List<Path> children = new ArrayList<>();
-        observation = Files.observe(
-                root,
+        observation = root.observe(
                 FOLLOW,
                 listener,
                 collectInto(children),
@@ -233,7 +230,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     private List<Path> visit() throws IOException {
         final List<Path> children = new ArrayList<>();
-        Files.list(root, FOLLOW, new FileSystem.Consumer<Path>() {
+        root.list(FOLLOW, new Path.Consumer() {
             @Override
             public boolean accept(Path child) {
                 checkedAdd(children, child);
@@ -256,8 +253,8 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         children.add(child);
     }
 
-    private FileSystem.Consumer<Path> collectInto(final List<Path> children) {
-        return new FileSystem.Consumer<Path>() {
+    private Path.Consumer collectInto(final List<Path> children) {
+        return new Path.Consumer() {
             @Override
             public boolean accept(Path child) {
                 checkedAdd(children, child);
@@ -379,7 +376,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
         try {
 
-            Stat stat = Files.stat(path, NOFOLLOW);
+            Stat stat = path.stat(NOFOLLOW);
             Stat targetStat = readTargetStatus(path, stat);
             Path target = readTarget(path, stat);
             FileInfo newStat = FileInfo.create(path, stat, target, targetStat, collator);
@@ -400,7 +397,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     private Path readTarget(Path path, Stat stat) throws FileNotFoundException {
         if (stat.isSymbolicLink()) {
             try {
-                return Files.readSymbolicLink(path);
+                return path.readSymbolicLink();
             } catch (FileNotFoundException e) {
                 throw e;
             } catch (IOException ignored) {
@@ -412,7 +409,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     private Stat readTargetStatus(Path file, Stat stat) {
         if (stat.isSymbolicLink()) {
             try {
-                return Files.stat(file, FOLLOW);
+                return file.stat(FOLLOW);
             } catch (IOException ignored) {
             }
         }
