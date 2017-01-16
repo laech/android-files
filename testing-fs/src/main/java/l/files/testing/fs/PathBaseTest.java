@@ -33,7 +33,7 @@ public abstract class PathBaseTest extends AndroidTestCase {
     protected ExtendedPath dir1() {
         if (dir1 == null) {
             try {
-                dir1 = new ExtendedPath(create(createTempFolder()));
+                dir1 = ExtendedPath.wrap(create(createTempFolder()));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -44,7 +44,7 @@ public abstract class PathBaseTest extends AndroidTestCase {
     protected ExtendedPath dir2() {
         if (dir2 == null) {
             try {
-                dir2 = new ExtendedPath(create(createTempFolder()));
+                dir2 = ExtendedPath.wrap(create(createTempFolder()));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
