@@ -9,7 +9,6 @@ import java.util.Collection;
 
 import javax.annotation.Nullable;
 
-import l.files.fs.FileSystem;
 import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.Stat;
@@ -31,17 +30,14 @@ final class CalculateSizeLoader
     @Nullable
     private volatile Size result;
 
-    private final FileSystem fs;
     private final Path dir;
     private final Collection<Name> children;
 
     CalculateSizeLoader(
             Context context,
-            FileSystem fs,
             Path dir,
             Collection<Name> children) {
         super(context);
-        this.fs = requireNonNull(fs);
         this.dir = requireNonNull(dir);
         this.children = requireNonNull(children);
     }
@@ -65,7 +61,7 @@ final class CalculateSizeLoader
         for (Name child : children) {
             Path path = dir.concat(child.toPath());
             try {
-                fs.traverse(path, NOFOLLOW, this);
+                path.traverse(NOFOLLOW, this);
             } catch (IOException e) {
                 Log.w(getClass().getSimpleName(),
                         "Failed to traverse " + path, e);
@@ -89,7 +85,7 @@ final class CalculateSizeLoader
             return Result.TERMINATE;
         }
 
-        Stat stat = fs.stat(path, NOFOLLOW);
+        Stat stat = path.stat(NOFOLLOW);
 
         currentCount++;
         currentSize += stat.size();
