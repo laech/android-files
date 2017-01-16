@@ -14,6 +14,7 @@ import org.junit.Rule;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -23,8 +24,7 @@ import l.files.base.Throwables;
 import l.files.fs.Path;
 import l.files.fs.Permission;
 import l.files.fs.TraversalCallback;
-import l.files.fs.local.LocalFileSystem;
-import l.files.testing.fs.ExtendedFileSystem;
+import l.files.fs.local.LocalPath;
 import l.files.testing.fs.ExtendedPath;
 
 import static android.content.Intent.ACTION_MAIN;
@@ -32,7 +32,6 @@ import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.M;
 import static android.os.Environment.getExternalStorageDirectory;
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
-import static java.util.Collections.singletonList;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.TraversalCallback.Result.CONTINUE;
 import static l.files.ui.browser.FilesActivity.EXTRA_DIRECTORY;
@@ -72,7 +71,7 @@ public class BaseFilesActivityTest {
 
     @Before
     public void setUp() throws Exception {
-        dir = Path.fromFile(createTempFolder());
+        dir = ExtendedPath.wrap(LocalPath.fromFile(createTempFolder()));
         setActivityIntent(newIntent(dir));
         screen = new UiFileActivity(
                 getInstrumentation(),
@@ -87,13 +86,13 @@ public class BaseFilesActivityTest {
     @After
     public void tearDown() throws Exception {
         screen = null;
-        if (dir != null && fs.exists(dir, NOFOLLOW)) {
-            fs.traverse(dir, NOFOLLOW, delete());
+        if (dir != null && dir.exists(NOFOLLOW)) {
+            dir.traverse(NOFOLLOW, delete());
         }
         dir = null;
     }
 
-    public FilesActivity getActivity() {
+    FilesActivity getActivity() {
         FilesActivity activity = activityTestRule.getActivity();
         if (activity == null) {
             activity = activityTestRule.launchActivity(activityIntent);
@@ -102,7 +101,7 @@ public class BaseFilesActivityTest {
         return activity;
     }
 
-    public void setActivityIntent(Intent intent) {
+    void setActivityIntent(Intent intent) {
         this.activityIntent = intent;
     }
 
@@ -136,7 +135,7 @@ public class BaseFilesActivityTest {
             @Override
             public Result onPreVisit(Path file) throws IOException {
                 try {
-                    fs.setPermissions(file, Permission.all());
+                    file.setPermissions(Permission.all());
                 } catch (IOException ignored) {
                 }
                 return CONTINUE;
@@ -144,7 +143,7 @@ public class BaseFilesActivityTest {
 
             @Override
             public Result onPostVisit(Path file) throws IOException {
-                fs.delete(file);
+                file.delete();
                 return CONTINUE;
             }
 
@@ -162,7 +161,7 @@ public class BaseFilesActivityTest {
         return dir;
     }
 
-    Intent newIntent(Path dir) {
+    private Intent newIntent(Path dir) {
         return newIntent(dir, -1);
     }
 
@@ -188,22 +187,23 @@ public class BaseFilesActivityTest {
          * The bug: "a" gets renamed to "A", instead of displaying only
          * "A", both "a" and "A" are displayed.
          */
-        Path dir = Path.fromFile(getExternalStorageDirectory()).concat(name);
-        Path src = dir.concat("z");
-        Path dst = dir.concat("Z");
+        ExtendedPath dir = ExtendedPath.wrap(LocalPath.fromFile(
+                getExternalStorageDirectory()).concat(name));
+        ExtendedPath src = dir.concat("z");
+        ExtendedPath dst = dir.concat("Z");
         try {
 
-            fs.deleteRecursiveIfExists(dir);
-            fs.createFiles(src);
+            dir.deleteRecursiveIfExists();
+            src.createFiles();
 
-            assertTrue(fs.exists(src, NOFOLLOW));
+            assertTrue(src.exists(NOFOLLOW));
             assertTrue(
                     "Assuming the underlying file system is case insensitive",
-                    fs.exists(dst, NOFOLLOW));
+                    dst.exists(NOFOLLOW));
 
-            fs.move(src, dst);
-            List<Path> actual = fs.list(dir, NOFOLLOW, new ArrayList<Path>());
-            List<Path> expected = singletonList(dst);
+            src.move(dst);
+            List<Path> actual = dir.list(NOFOLLOW, new ArrayList<Path>());
+            List<Path> expected = Collections.<Path>singletonList(dst);
             assertEquals(1, actual.size());
             if (!expected.equals(actual)) {
                 throw new CannotRenameFileToDifferentCasing(
@@ -214,7 +214,7 @@ public class BaseFilesActivityTest {
 
         } catch (Throwable e) {
             try {
-                fs.deleteRecursiveIfExists(dir);
+                dir.deleteRecursiveIfExists();
             } catch (Throwable sup) {
                 Throwables.addSuppressed(e, sup);
             }
@@ -223,19 +223,19 @@ public class BaseFilesActivityTest {
         } finally {
 
             try {
-                fs.deleteIfExists(src);
+                src.deleteIfExists();
             } catch (IOException ignore) {
             }
 
             try {
-                fs.deleteIfExists(dst);
+                dst.deleteIfExists();
             } catch (IOException ignore) {
             }
 
         }
 
-        assertFalse(fs.exists(src, NOFOLLOW));
-        assertFalse(fs.exists(dst, NOFOLLOW));
+        assertFalse(src.exists(NOFOLLOW));
+        assertFalse(dst.exists(NOFOLLOW));
 
         return dir;
     }
