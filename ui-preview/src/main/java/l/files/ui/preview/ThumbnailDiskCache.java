@@ -3,6 +3,8 @@ package l.files.ui.preview;
 import android.graphics.Bitmap;
 import android.util.Log;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
@@ -14,8 +16,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import l.files.fs.DirectoryNotEmpty;
-import l.files.fs.FileSystem.Consumer;
-import l.files.fs.Files;
 import l.files.fs.Instant;
 import l.files.fs.Path;
 import l.files.fs.Stat;
@@ -34,9 +34,6 @@ import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.base.Throwables.addSuppressed;
-import static l.files.fs.Files.newBufferedDataInputStream;
-import static l.files.fs.Files.newBufferedDataOutputStream;
-import static l.files.fs.Files.setLastModifiedTime;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.TraversalCallback.Result.CONTINUE;
@@ -85,11 +82,11 @@ final class ThumbnailDiskCache extends Cache<ScaledBitmap> {
     }
 
     void cleanup() throws IOException {
-        if (!Files.exists(cacheDir, FOLLOW)) {
+        if (!cacheDir.exists(FOLLOW)) {
             return;
         }
 
-        Files.traverse(cacheDir, NOFOLLOW, new TraversalCallback.Base<Path>() {
+        cacheDir.traverse(NOFOLLOW, new TraversalCallback.Base<Path>() {
 
             final long now = currentTimeMillis();
 
@@ -97,11 +94,11 @@ final class ThumbnailDiskCache extends Cache<ScaledBitmap> {
             public Result onPostVisit(Path path) throws IOException {
 
                 try {
-                    Stat stat = Files.stat(path, NOFOLLOW);
+                    Stat stat = path.stat(NOFOLLOW);
                     if (stat.isDirectory()) {
 
                         try {
-                            Files.delete(path);
+                            path.delete();
                         } catch (DirectoryNotEmpty ignore) {
                         }
 
@@ -109,7 +106,7 @@ final class ThumbnailDiskCache extends Cache<ScaledBitmap> {
 
                         long lastModifiedMillis = stat.lastModifiedTime().to(MILLISECONDS);
                         if (MILLISECONDS.toDays(now - lastModifiedMillis) > 30) {
-                            Files.delete(path);
+                            path.delete();
                         }
 
                     }
@@ -133,7 +130,7 @@ final class ThumbnailDiskCache extends Cache<ScaledBitmap> {
     Path cacheFile(Path path, Stat stat, Rect constraint, boolean matchTime) throws IOException {
         if (!matchTime) {
             final Path[] result = {null};
-            Files.list(cacheDir(path, constraint), NOFOLLOW, new Consumer<Path>() {
+            cacheDir(path, constraint).list(NOFOLLOW, new Path.Consumer() {
                 @Override
                 public boolean accept(Path path) {
                     result[0] = path;
@@ -176,7 +173,7 @@ final class ThumbnailDiskCache extends Cache<ScaledBitmap> {
             }
 
             try {
-                setLastModifiedTime(cache, NOFOLLOW, Instant.ofMillis(currentTimeMillis()));
+                cache.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(currentTimeMillis()));
             } catch (IOException ignore) {
             }
 
@@ -191,6 +188,18 @@ final class ThumbnailDiskCache extends Cache<ScaledBitmap> {
         }
     }
 
+    private DataInputStream newBufferedDataInputStream(Path path)
+            throws IOException {
+        return new DataInputStream(new BufferedInputStream(
+                path.newInputStream()));
+    }
+
+    private DataOutputStream newBufferedDataOutputStream(Path path)
+            throws IOException {
+        return new DataOutputStream(new BufferedOutputStream(
+                path.newOutputStream(false)));
+    }
+
     @Override
     Snapshot<ScaledBitmap> put(
             Path path,
@@ -203,7 +212,7 @@ final class ThumbnailDiskCache extends Cache<ScaledBitmap> {
         Path cache = cacheFile(path, stat, constraint, true);
         Path parent = cache.parent();
         assert parent != null;
-        Files.createDirs(parent);
+        parent.createDirs();
 
         Path tmp = parent.concat(cache.name() + "-" + nanoTime());
         DataOutputStream out = newBufferedDataOutputStream(tmp);
@@ -216,7 +225,7 @@ final class ThumbnailDiskCache extends Cache<ScaledBitmap> {
 
         } catch (Exception e) {
             try {
-                Files.delete(tmp);
+                tmp.delete();
             } catch (Exception sup) {
                 addSuppressed(e, sup);
             }
@@ -225,7 +234,7 @@ final class ThumbnailDiskCache extends Cache<ScaledBitmap> {
             out.close();
         }
 
-        Files.move(tmp, cache);
+        tmp.move(cache);
 
         return null;
     }
@@ -233,11 +242,11 @@ final class ThumbnailDiskCache extends Cache<ScaledBitmap> {
     private void purgeOldCacheFiles(Path path, Rect constraint) throws IOException {
         try {
 
-            Files.list(cacheDir(path, constraint), FOLLOW, new Consumer<Path>() {
+            cacheDir(path, constraint).list(FOLLOW, new Path.Consumer() {
                 @Override
                 public boolean accept(Path path) {
                     try {
-                        Files.delete(path);
+                        path.delete();
                     } catch (IOException e) {
                         Log.w(getClass().getSimpleName(),
                                 "Failed to purge " + path, e);

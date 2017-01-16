@@ -4,6 +4,7 @@ import android.os.Parcelable;
 
 import com.google.common.collect.ImmutableList;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -19,6 +20,8 @@ import l.files.fs.event.BatchObserver;
 import l.files.fs.event.BatchObserverNotifier;
 import l.files.fs.event.Observation;
 import l.files.fs.event.Observer;
+
+import static l.files.fs.LinkOption.NOFOLLOW;
 
 public abstract class Path implements Parcelable {
 
@@ -138,6 +141,32 @@ public abstract class Path implements Parcelable {
 
     public abstract Stat stat(LinkOption option)
             throws IOException;
+
+    /**
+     * Creates this file and any missing parents as directories. This will
+     * throw the same exceptions as {@link Path#createDir()} except
+     * will not error if already exists as a directory.
+     */
+    public Path createDirs() throws IOException {
+        try {
+            if (stat(NOFOLLOW).isDirectory()) {
+                return this;
+            }
+        } catch (FileNotFoundException ignore) {
+        }
+
+        Path parent = parent();
+        if (parent != null) {
+            parent.createDirs();
+        }
+
+        try {
+            createDir();
+        } catch (AlreadyExist ignore) {
+        }
+
+        return this;
+    }
 
     public abstract Path createDir()
             throws IOException;

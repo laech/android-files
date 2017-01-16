@@ -122,30 +122,9 @@ public final class ExtendedPath extends ForwardingPath {
         return collection;
     }
 
-    /**
-     * Creates this file and any missing parents as directories. This will
-     * throw the same exceptions as {@link Path#createDir()} except
-     * will not error if already exists as a directory.
-     */
+    @Override
     public ExtendedPath createDirs() throws IOException {
-        try {
-            if (stat(NOFOLLOW).isDirectory()) {
-                return this;
-            }
-        } catch (FileNotFoundException ignore) {
-        }
-
-        ExtendedPath parent = parent();
-        if (parent != null) {
-            parent.createDirs();
-        }
-
-        try {
-            createDir();
-        } catch (AlreadyExist ignore) {
-        }
-
-        return this;
+        return (ExtendedPath) super.createDirs();
     }
 
     /**
