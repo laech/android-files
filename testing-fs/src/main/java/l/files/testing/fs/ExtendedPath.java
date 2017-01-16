@@ -17,6 +17,7 @@ import java.util.Set;
 
 import l.files.fs.AlreadyExist;
 import l.files.fs.LinkOption;
+import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.Permission;
 import l.files.fs.TraversalCallback;
@@ -31,10 +32,57 @@ public final class ExtendedPath extends ForwardingPath {
 
     public static final Charset UTF_8 = Charset.forName("UTF-8");
 
-    public ExtendedPath(Path delegate) {
+    private ExtendedPath(Path delegate) {
         super(delegate);
     }
 
+    public static ExtendedPath wrap(Path path) {
+        if (path instanceof ExtendedPath) {
+            return (ExtendedPath) path;
+        }
+        return new ExtendedPath(path);
+    }
+
+    @Override
+    public ExtendedPath concat(Name name) {
+        return new ExtendedPath(super.concat(name));
+    }
+
+    @Override
+    public ExtendedPath concat(Path path) {
+        return new ExtendedPath(super.concat(path));
+    }
+
+    @Override
+    public ExtendedPath concat(String path) {
+        return new ExtendedPath(super.concat(path));
+    }
+
+    @Override
+    public ExtendedPath concat(byte[] path) {
+        return new ExtendedPath(super.concat(path));
+    }
+
+    @Override
+    public ExtendedPath createDir() throws IOException {
+        return (ExtendedPath) super.createDir();
+    }
+
+    @Override
+    public ExtendedPath createDir(Set<Permission> permissions)
+            throws IOException {
+        return (ExtendedPath) super.createDir(permissions);
+    }
+
+    @Override
+    public ExtendedPath createFile() throws IOException {
+        return (ExtendedPath) super.createFile();
+    }
+
+    @Override
+    public ExtendedPath createSymbolicLink(Path target) throws IOException {
+        return (ExtendedPath) super.createSymbolicLink(target);
+    }
 
     public Observation observe(LinkOption option, Observer observer)
             throws IOException, InterruptedException {
