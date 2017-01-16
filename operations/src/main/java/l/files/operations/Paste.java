@@ -1,9 +1,8 @@
 package l.files.operations;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.Set;
 
-import l.files.fs.FileSystem;
 import l.files.fs.Path;
 
 import static l.files.base.Objects.requireNonNull;
@@ -11,21 +10,15 @@ import static l.files.operations.Files.getNonExistentDestinationFile;
 
 abstract class Paste extends AbstractOperation {
 
-    private final FileSystem destinationFs;
     private final Path destinationDir;
 
-    Paste(
-            Map<? extends Path, ? extends FileSystem> sourcePaths,
-            FileSystem destinationFs,
-            Path destinationDir
-    ) {
+    Paste(Set<? extends Path> sourcePaths, Path destinationDir) {
         super(sourcePaths);
-        this.destinationFs = requireNonNull(destinationFs, "destinationFs");
         this.destinationDir = requireNonNull(destinationDir, "destinationDir");
     }
 
     @Override
-    void process(FileSystem sourceFs, Path sourcePath) throws InterruptedException {
+    void process(Path sourcePath) throws InterruptedException {
         checkInterrupt();
 
         if (destinationDir.startsWith(sourcePath)) {
@@ -37,7 +30,7 @@ abstract class Paste extends AbstractOperation {
 
         try {
             Path destinationPath = getNonExistentDestinationFile(sourcePath, destinationDir);
-            paste(sourceFs, sourcePath, destinationFs, destinationPath);
+            paste(sourcePath, destinationPath);
         } catch (IOException e) {
             record(sourcePath, e);
         }
@@ -48,11 +41,7 @@ abstract class Paste extends AbstractOperation {
      * its content into {@code destinationPath}. If {@code sourcePath} is a directory,
      * paste its content into {@code destinationPath}.
      */
-    abstract void paste(
-            FileSystem sourceFs,
-            Path sourcePath,
-            FileSystem destinationFs,
-            Path destinationPath
-    ) throws IOException;
+    abstract void paste(Path sourcePath, Path destinationPath)
+            throws IOException;
 
 }

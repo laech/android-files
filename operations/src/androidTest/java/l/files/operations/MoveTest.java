@@ -1,73 +1,70 @@
 package l.files.operations;
 
-import java.util.Map;
+import java.util.Set;
 
-import l.files.fs.FileSystem;
 import l.files.fs.Path;
+import l.files.testing.fs.ExtendedPath;
 
-import static java.util.Collections.singletonMap;
+import static java.util.Collections.singleton;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class MoveTest extends PasteTest {
 
     public void test_movedCountInitialZero() throws Exception {
-        Path src = fs.createFile(dir1().concat("a"));
-        Path dstDir = fs.createDir(dir1().concat("b"));
+        Path src = dir1().concat("a").createFile();
+        Path dstDir = dir1().concat("b").createDir();
         Move move = create(src, dstDir);
         assertEquals(move.getMovedItemCount(), 0);
     }
 
     public void test_movesSymlink() throws Exception {
-        Path target = fs.createFile(dir1().concat("target"));
-        Path link = fs.createSymbolicLink(dir1().concat("link"), target);
+        Path target = dir1().concat("target").createFile();
+        Path link = dir1().concat("link").createSymbolicLink(target);
 
-        Move move = create(link, fs.createDir(dir1().concat("moved")));
+        Move move = create(link, dir1().concat("moved").createDir());
         move.execute();
 
-        Path actual = fs.readSymbolicLink(dir1().concat("moved/link"));
+        Path actual = dir1().concat("moved/link").readSymbolicLink();
         assertEquals(target, actual);
         assertEquals(1, move.getMovedItemCount());
     }
 
     public void test_movesFile() throws Exception {
-        Path srcFile = fs.createFile(dir1().concat("a.txt"));
-        Path dstDir = fs.createDir(dir1().concat("dst"));
-        Path dstFile = dstDir.concat("a.txt");
-        fs.writeUtf8(srcFile, "Test");
+        ExtendedPath srcFile = dir1().concat("a.txt").createFile();
+        ExtendedPath dstDir = dir1().concat("dst").createDir();
+        ExtendedPath dstFile = dstDir.concat("a.txt");
+        srcFile.writeUtf8("Test");
 
         Move move = create(srcFile, dstDir);
         move.execute();
 
-        assertFalse(fs.exists(srcFile, NOFOLLOW));
-        assertEquals("Test", fs.readAllUtf8(dstFile));
+        assertFalse(srcFile.exists(NOFOLLOW));
+        assertEquals("Test", dstFile.readAllUtf8());
         assertEquals(move.getMovedItemCount(), 1);
     }
 
     public void test_movesDirectory() throws Exception {
-        Path srcDir = fs.createDir(dir1().concat("a"));
-        Path dstDir = fs.createDir(dir1().concat("dst"));
-        Path srcFile = srcDir.concat("test.txt");
-        Path dstFile = dstDir.concat("a/test.txt");
-        fs.writeUtf8(srcFile, "Test");
+        ExtendedPath srcDir = dir1().concat("a").createDir();
+        ExtendedPath dstDir = dir1().concat("dst").createDir();
+        ExtendedPath srcFile = srcDir.concat("test.txt");
+        ExtendedPath dstFile = dstDir.concat("a/test.txt");
+        srcFile.writeUtf8("Test");
 
         Move move = create(srcDir, dstDir);
         move.execute();
 
-        assertFalse(fs.exists(srcDir, NOFOLLOW));
-        assertEquals("Test", fs.readAllUtf8(dstFile));
+        assertFalse(srcDir.exists(NOFOLLOW));
+        assertEquals("Test", dstFile.readAllUtf8());
         assertEquals(move.getMovedItemCount(), 1);
     }
 
     @Override
-    Move create(
-            Map<? extends Path, ? extends FileSystem> sourcePaths,
-            FileSystem destinationFs,
-            Path destinationDir) {
-        return new Move(sourcePaths, destinationFs, destinationDir);
+    Move create(Set<? extends Path> sourcePaths, Path destinationDir) {
+        return new Move(sourcePaths, destinationDir);
     }
 
     private Move create(Path src, Path dstDir) {
-        return create(singletonMap(src, fs), fs, dstDir);
+        return create(singleton(src), dstDir);
     }
 
 }

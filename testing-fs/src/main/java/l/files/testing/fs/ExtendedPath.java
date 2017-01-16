@@ -127,7 +127,7 @@ public final class ExtendedPath extends ForwardingPath {
      * throw the same exceptions as {@link Path#createDir()} except
      * will not error if already exists as a directory.
      */
-    public Path createDirs() throws IOException {
+    public ExtendedPath createDirs() throws IOException {
         try {
             if (stat(NOFOLLOW).isDirectory()) {
                 return this;
@@ -153,7 +153,7 @@ public final class ExtendedPath extends ForwardingPath {
      * will throw the same exceptions as {@link Path#createFile()}
      * except will not error if already exists.
      */
-    public Path createFiles() throws IOException {
+    public ExtendedPath createFiles() throws IOException {
         try {
             if (stat(NOFOLLOW).isRegularFile()) {
                 return this;

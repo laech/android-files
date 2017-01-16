@@ -1,15 +1,14 @@
 package l.files.operations;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import com.google.common.collect.ImmutableSet;
 
-import l.files.fs.FileSystem;
+import java.io.IOException;
+import java.util.Set;
+
 import l.files.fs.Path;
 import l.files.fs.TraversalCallback;
 
 import static java.lang.Thread.currentThread;
-import static java.util.Collections.unmodifiableMap;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.TraversalCallback.Result.CONTINUE;
 import static l.files.fs.TraversalCallback.Result.TERMINATE;
@@ -23,11 +22,11 @@ abstract class AbstractOperation implements FileOperation {
      */
     private static final int ERROR_LIMIT = 20;
 
-    private final Map<Path, FileSystem> paths;
+    private final Set<Path> paths;
     private final FailureRecorder recorder;
 
-    AbstractOperation(Map<? extends Path, ? extends FileSystem> paths) {
-        this.paths = unmodifiableMap(new HashMap<>(paths));
+    AbstractOperation(Set<? extends Path> paths) {
+        this.paths = ImmutableSet.copyOf(paths);
         this.recorder = new FailureRecorder(ERROR_LIMIT);
     }
 
@@ -45,9 +44,9 @@ abstract class AbstractOperation implements FileOperation {
         recorder.onFailure(path, exception);
     }
 
-    final void traverse(FileSystem fs, Path path, OperationVisitor visitor) {
+    final void traverse(Path path, OperationVisitor visitor) {
         try {
-            fs.traverse(path, NOFOLLOW, visitor);
+            path.traverse(NOFOLLOW, visitor);
         } catch (IOException e) {
             record(path, e);
         }
@@ -74,15 +73,12 @@ abstract class AbstractOperation implements FileOperation {
 
     @Override
     public void execute() throws InterruptedException {
-        for (Map.Entry<Path, FileSystem> entry : paths.entrySet()) {
-            checkInterrupt();
-            FileSystem fs = entry.getValue();
-            Path path = entry.getKey();
-            process(fs, path);
+        for (Path path : paths) {
+            process(path);
         }
         recorder.throwIfNotEmpty();
     }
 
-    abstract void process(FileSystem fs, Path path) throws InterruptedException;
+    abstract void process(Path path) throws InterruptedException;
 
 }
