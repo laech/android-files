@@ -1,17 +1,16 @@
 package l.files.operations;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import l.files.fs.FileSystem;
 import l.files.fs.Path;
 
 class Count extends AbstractOperation {
 
     private final AtomicInteger count = new AtomicInteger();
 
-    Count(Map<? extends Path, ? extends FileSystem> sourcePaths) {
+    Count(Set<? extends Path> sourcePaths) {
         super(sourcePaths);
     }
 
@@ -20,20 +19,20 @@ class Count extends AbstractOperation {
     }
 
     @Override
-    void process(final FileSystem fs, final Path path) throws InterruptedException {
-        traverse(fs, path, new OperationVisitor() {
+    void process(final Path path) throws InterruptedException {
+        traverse(path, new OperationVisitor() {
 
             @Override
             public Result onPreVisit(Path path) throws IOException {
                 count.incrementAndGet();
-                onCount(fs, path);
+                onCount(path);
                 return super.onPreVisit(path);
             }
 
         });
     }
 
-    void onCount(FileSystem fs, Path path) {
+    void onCount(Path path) {
     }
 
 }
