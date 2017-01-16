@@ -13,8 +13,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import l.files.fs.FileSystem;
 import l.files.fs.Path;
+import l.files.fs.local.LocalPath;
 
 import static android.os.Environment.DIRECTORY_DCIM;
 import static android.os.Environment.DIRECTORY_DOWNLOADS;
@@ -35,13 +35,13 @@ final class BookmarkManagerImpl extends BookmarkManager {
 
     private Set<Path> createDefaultBookmarks() {
         Set<Path> defaults = new HashSet<>();
-        addIfExists(defaults, Path.fromFile(getExternalStorageDirectory()));
+        addIfExists(defaults, LocalPath.fromFile(getExternalStorageDirectory()));
         addIfExists(defaults, externalStoragePath(DIRECTORY_DCIM));
         addIfExists(defaults, externalStoragePath(DIRECTORY_MUSIC));
         addIfExists(defaults, externalStoragePath(DIRECTORY_MOVIES));
         addIfExists(defaults, externalStoragePath(DIRECTORY_PICTURES));
         addIfExists(defaults, externalStoragePath(DIRECTORY_DOWNLOADS));
-        addIfExists(defaults, Path.fromString("/sdcard2"));
+        addIfExists(defaults, LocalPath.fromString("/sdcard2"));
         return unmodifiableSet(defaults);
     }
 
@@ -55,20 +55,18 @@ final class BookmarkManagerImpl extends BookmarkManager {
     }
 
     private boolean exists(Path path) throws IOException {
-        return fs.exists(path, FOLLOW);
+        return path.exists(FOLLOW);
     }
 
     private static Path externalStoragePath(String name) {
-        return Path.fromFile(new File(getExternalStorageDirectory(), name));
+        return LocalPath.fromFile(new File(getExternalStorageDirectory(), name));
     }
 
-    private final FileSystem fs;
     private final Set<Path> bookmarks;
     private final SharedPreferences pref;
     private final Set<BookmarkChangedListener> listeners;
 
-    public BookmarkManagerImpl(FileSystem fs, SharedPreferences pref) {
-        this.fs = requireNonNull(fs);
+    public BookmarkManagerImpl(SharedPreferences pref) {
         this.pref = requireNonNull(pref);
         this.listeners = new CopyOnWriteArraySet<>();
         this.bookmarks = new CopyOnWriteArraySet<>();
@@ -78,7 +76,7 @@ final class BookmarkManagerImpl extends BookmarkManager {
         Set<Path> paths = new HashSet<>();
         for (String uriString : uriStrings) {
             try {
-                Path path = Path.fromFile(new File(new URI(uriString)));
+                Path path = LocalPath.fromFile(new File(new URI(uriString)));
                 try {
                     if (exists(path)) {
                         paths.add(path);
@@ -110,7 +108,7 @@ final class BookmarkManagerImpl extends BookmarkManager {
     private static Path decode(String encoded) {
         String[] parts = encoded.split(":");
         if (parts.length == 2) {
-            return Path.fromByteArray(Base64.decode(parts[1], Base64.DEFAULT));
+            return LocalPath.fromByteArray(Base64.decode(parts[1], Base64.DEFAULT));
         } else {
             throw new IllegalArgumentException("Invalid bookmark: " + encoded);
         }

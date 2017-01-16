@@ -29,7 +29,7 @@ public final class BookmarkManagerTest extends PathBaseTest {
     protected void setUp() throws Exception {
         super.setUp();
         pref = getContext().getSharedPreferences("bookmark-test", MODE_PRIVATE);
-        manager = new BookmarkManagerImpl(fs, pref);
+        manager = new BookmarkManagerImpl(pref);
     }
 
     @Override

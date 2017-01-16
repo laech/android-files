@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import java.util.Collection;
 import java.util.Set;
 
-import l.files.fs.FileSystem;
 import l.files.fs.Path;
 
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
@@ -15,11 +14,11 @@ public abstract class BookmarkManager {
 
     private static BookmarkManager instance;
 
-    public static BookmarkManager get(Context context, FileSystem fs) {
+    public static BookmarkManager get(Context context) {
         synchronized (BookmarkManagerImpl.class) {
             if (instance == null) {
                 SharedPreferences pref = getDefaultSharedPreferences(context);
-                instance = new BookmarkManagerImpl(fs, pref);
+                instance = new BookmarkManagerImpl(pref);
             }
             return instance;
         }

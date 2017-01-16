@@ -19,7 +19,7 @@ public final class BookmarkMenu extends OptionsMenuAction {
     private final Path path;
 
     public BookmarkMenu(Path path, FileSystem fs, Context context) {
-        this(path, BookmarkManager.get(context, fs));
+        this(path, BookmarkManager.get(context));
     }
 
     BookmarkMenu(Path path, BookmarkManager bookmarks) {
