@@ -14,7 +14,6 @@ import java.io.InputStream;
 
 import javax.annotation.Nullable;
 
-import l.files.fs.FileSystem;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 
@@ -39,19 +38,18 @@ final class Detector {
     private Detector() {
     }
 
-    String detect(Context context, FileSystem fs, Path path) throws IOException {
-        return detect(context, fs, path, fs.stat(path, FOLLOW));
+    String detect(Context context, Path path) throws IOException {
+        return detect(context, path, path.stat(FOLLOW));
     }
 
-    String detect(Context context, FileSystem fs, Path path, Stat stat) throws IOException {
+    String detect(Context context, Path path, Stat stat) throws IOException {
         if (stat.isSymbolicLink()) {
             return detect(
                     context,
-                    fs,
-                    fs.readSymbolicLink(path),
-                    fs.stat(path, FOLLOW));
+                    path.readSymbolicLink(),
+                    path.stat(FOLLOW));
         }
-        if (stat.isRegularFile()) return detectFile(context, fs, path);
+        if (stat.isRegularFile()) return detectFile(context, path);
         if (stat.isFifo()) return INODE_FIFO;
         if (stat.isSocket()) return INODE_SOCKET;
         if (stat.isDirectory()) return INODE_DIRECTORY;
@@ -62,7 +60,6 @@ final class Detector {
 
     private static String detectFile(
             Context context,
-            FileSystem fs,
             Path path) throws IOException {
 
         if (types == null) {
@@ -81,7 +78,7 @@ final class Detector {
 
             MimeTypes t = types;
             assert t != null;
-            return detectFile(t, fs, path);
+            return detectFile(t, path);
 
         } catch (TaggedIOException e) {
             if (e.getCause() != null) {
@@ -111,12 +108,11 @@ final class Detector {
 
     private static String detectFile(
             MimeTypes types,
-            FileSystem fs,
             Path path) throws IOException {
 
         Metadata meta = new Metadata();
         meta.add(RESOURCE_NAME_KEY, path.name().toString());
-        InputStream in = new BufferedInputStream(fs.newInputStream(path));
+        InputStream in = new BufferedInputStream(path.newInputStream());
         try {
             return types.detect(in, meta).getBaseType().toString();
         } finally {

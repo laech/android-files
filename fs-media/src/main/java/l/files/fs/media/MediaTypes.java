@@ -4,7 +4,6 @@ import android.content.Context;
 
 import java.io.IOException;
 
-import l.files.fs.FileSystem;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 
@@ -39,10 +38,9 @@ public final class MediaTypes {
      */
     public static String detect(
             Context context,
-            FileSystem fs,
             Path path,
             Stat stat) throws IOException {
-        return Detector.INSTANCE.detect(context, fs, path, stat).intern();
+        return Detector.INSTANCE.detect(context, path, stat).intern();
     }
 
 }
