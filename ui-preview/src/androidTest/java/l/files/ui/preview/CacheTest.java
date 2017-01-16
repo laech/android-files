@@ -6,11 +6,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
-import l.files.fs.FileSystem;
 import l.files.fs.Instant;
 import l.files.fs.Path;
 import l.files.fs.Stat;
-import l.files.fs.local.LocalFileSystem;
+import l.files.fs.local.LocalPath;
 import l.files.ui.base.graphics.Rect;
 
 import static java.io.File.createTempFile;
@@ -22,7 +21,6 @@ public abstract class CacheTest<V, C extends Cache<V>> extends TestCase {
     C cache;
     Random random;
 
-    FileSystem fs;
     Path file;
     Stat stat;
 
@@ -45,9 +43,8 @@ public abstract class CacheTest<V, C extends Cache<V>> extends TestCase {
         random = new Random();
 
         File localFile = createTempFile("123", null, tempDir);
-        file = Path.fromFile(localFile);
-        stat = fs.stat(file, FOLLOW);
-        fs = LocalFileSystem.INSTANCE;
+        file = LocalPath.fromFile(localFile);
+        stat = file.stat(FOLLOW);
     }
 
     public void test_gets_what_has_put_in() throws Exception {
@@ -62,8 +59,8 @@ public abstract class CacheTest<V, C extends Cache<V>> extends TestCase {
         V value = newValue();
         cache.put(file, stat, constraint, value);
 
-        fs.setLastModifiedTime(file, NOFOLLOW, Instant.EPOCH);
-        assertNull(cache.get(file, fs.stat(file, NOFOLLOW), constraint, true));
+        file.setLastModifiedTime(NOFOLLOW, Instant.EPOCH);
+        assertNull(cache.get(file, file.stat(NOFOLLOW), constraint, true));
     }
 
     public void test_gets_old_value_if_stat_not_provided() throws Exception {
@@ -91,6 +88,6 @@ public abstract class CacheTest<V, C extends Cache<V>> extends TestCase {
     }
 
     Path mockCacheDir() {
-        return Path.fromFile(tempDir);
+        return LocalPath.fromFile(tempDir);
     }
 }
