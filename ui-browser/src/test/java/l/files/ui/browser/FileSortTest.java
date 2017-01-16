@@ -7,7 +7,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
-import l.files.fs.FileSystem;
 import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.Stat;
@@ -20,13 +19,12 @@ import static org.junit.Assert.assertEquals;
 
 abstract class FileSortTest {
 
-    protected final void testSortMatches(
+    final void testSortMatches(
             Locale locale,
             Comparator<FileInfo> comparator,
-            FileSystem fs,
             Path... expectedOrder) throws IOException {
 
-        List<FileInfo> expected = mapData(locale, fs, expectedOrder);
+        List<FileInfo> expected = mapData(locale, expectedOrder);
         List<FileInfo> actual = new ArrayList<>(expected);
         shuffle(actual);
         sort(actual, comparator);
@@ -42,21 +40,19 @@ abstract class FileSortTest {
         return names;
     }
 
-    private List<FileInfo> mapData(
-            Locale locale,
-            FileSystem fs,
-            Path... files) throws IOException {
+    private List<FileInfo> mapData(Locale locale, Path... files)
+            throws IOException {
 
         final Collator collator = Collator.getInstance(locale);
         final List<FileInfo> expected = new ArrayList<>(files.length);
         for (Path file : files) {
             Stat stat;
             try {
-                stat = fs.stat(file, NOFOLLOW);
+                stat = file.stat(NOFOLLOW);
             } catch (IOException e) {
                 stat = null;
             }
-            expected.add(FileInfo.create(fs, file, stat, null, null, collator));
+            expected.add(FileInfo.create(file, stat, null, null, collator));
         }
         return expected;
     }

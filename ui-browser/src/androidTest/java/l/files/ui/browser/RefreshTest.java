@@ -8,10 +8,11 @@ import org.junit.runner.RunWith;
 import java.io.IOException;
 import java.util.Random;
 
-import l.files.fs.FileSystem;
 import l.files.fs.Instant;
 import l.files.fs.Path;
+import l.files.fs.Path.Consumer;
 import l.files.fs.Permission;
+import l.files.testing.fs.ExtendedPath;
 
 import static java.lang.System.currentTimeMillis;
 import static java.lang.System.nanoTime;
@@ -34,13 +35,13 @@ public final class RefreshTest extends BaseFilesActivityTest {
         setActivityIntent(newIntent(dir(), watchLimit));
 
         for (int i = 0; i < watchLimit + 5; i++) {
-            fs.createDir(dir().concat(String.valueOf(i)));
+            dir().concat(String.valueOf(i)).createDir();
         }
 
         screen()
                 .sort()
                 .by(MODIFIED)
-                .assertListMatchesFileSystem(fs, dir())
+                .assertListMatchesFileSystem(dir())
                 .assertRefreshMenuVisible(true);
 
         testRefreshInManualMode(dir());
@@ -49,53 +50,54 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
     private void testRefreshInManualMode(Path dir) throws IOException {
 
-        fs.listDirs(dir, FOLLOW, new FileSystem.Consumer<Path>() {
+        ExtendedPath.wrap(dir).listDirs(FOLLOW, new Consumer() {
             @Override
             public boolean accept(Path childDir) throws IOException {
                 // Inotify don't notify child directory last modified time,
                 // unless we explicitly monitor the child dir, but we aren't
                 // doing that because we ran out of watches, so this is a
                 // good operation for testing the manual refresh
-                fs.createFile(childDir.concat("x"));
+                childDir.concat("x").createFile();
                 return false;
             }
         });
 
         boolean updated = false;
         try {
-            screen().assertListMatchesFileSystem(fs, dir, BATCH_UPDATE_MILLIS + 2000, MILLISECONDS);
+            screen().assertListMatchesFileSystem(dir, BATCH_UPDATE_MILLIS + 2000, MILLISECONDS);
             updated = true;
         } catch (AssertionError e) {
             // Pass
         }
         assertFalse("Expected auto refresh to have been disabled", updated);
-        screen().refresh().assertListMatchesFileSystem(fs, dir);
+        screen().refresh().assertListMatchesFileSystem(dir);
     }
 
     private void testFileCreationDeletionWillStillBeNotifiedInManualMode(Path dir)
             throws IOException {
 
-        fs.createFile(dir.concat("file-" + nanoTime()));
-        fs.createDir(dir.concat("dir-" + nanoTime()));
-        fs.move(fs.createFile(dir.concat("before-move-" + nanoTime())),
-                dir.concat("after-move-" + nanoTime()));
+        dir.concat("file-" + nanoTime()).createFile();
+        dir.concat("dir-" + nanoTime()).createDir();
+        dir.concat("before-move-" + nanoTime())
+                .createFile()
+                .move(dir.concat("after-move-" + nanoTime()));
 
-        fs.list(dir, FOLLOW, new FileSystem.Consumer<Path>() {
+        dir.list(FOLLOW, new Consumer() {
             @Override
             public boolean accept(Path file) throws IOException {
-                fs.deleteRecursive(file);
+                ExtendedPath.wrap(file).deleteRecursive();
                 return false;
             }
         });
 
-        screen().assertListMatchesFileSystem(fs, dir);
+        screen().assertListMatchesFileSystem(dir);
     }
 
     @Test
     public void auto_detect_files_added_and_removed_while_loading() throws Exception {
 
         for (int i = 0; i < 10; i++) {
-            fs.createDir(dir().concat(String.valueOf(i)));
+            dir().concat(String.valueOf(i)).createDir();
         }
 
         Thread thread = new Thread(new Runnable() {
@@ -106,8 +108,8 @@ public final class RefreshTest extends BaseFilesActivityTest {
                     try {
 
                         deleteFiles(2);
-                        fs.createDir(randomFile(dir()));
-                        fs.createFile(randomFile(dir()));
+                        randomFile(dir()).createDir();
+                        randomFile(dir()).createFile();
 
                     } catch (IOException ignore) {
                     }
@@ -118,17 +120,17 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
         screen();
         thread.join();
-        screen().assertListMatchesFileSystem(fs, dir());
+        screen().assertListMatchesFileSystem(dir());
     }
 
     private void deleteFiles(final int n) throws IOException {
-        fs.list(dir(), FOLLOW, new FileSystem.Consumer<Path>() {
+        dir().list(FOLLOW, new Consumer() {
 
             int count = 0;
 
             @Override
             public boolean accept(Path file) throws IOException {
-                fs.deleteRecursive(file);
+                ExtendedPath.wrap(file).deleteRecursive();
                 count++;
                 return count < n;
             }
@@ -142,8 +144,8 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
     @Test
     public void auto_show_correct_information_on_large_change_events() throws Exception {
-        fs.createFile(dir().concat("a"));
-        screen().assertListMatchesFileSystem(fs, dir());
+        dir().concat("a").createFile();
+        screen().assertListMatchesFileSystem(dir());
 
         long end = currentTimeMillis() + SECONDS.toMillis(5);
         while (currentTimeMillis() < end) {
@@ -155,16 +157,16 @@ public final class RefreshTest extends BaseFilesActivityTest {
             updateAttributes();
         }
 
-        screen().assertListMatchesFileSystem(fs, dir());
+        screen().assertListMatchesFileSystem(dir());
     }
 
     private void updateAttributes() throws IOException {
 
         final Random r = new Random();
-        fs.list(dir(), NOFOLLOW, new FileSystem.Consumer<Path>() {
+        dir().list(NOFOLLOW, new Consumer() {
             @Override
             public boolean accept(Path child) throws IOException {
-                fs.setLastModifiedTime(child, NOFOLLOW, Instant.of(
+                child.setLastModifiedTime(NOFOLLOW, Instant.of(
                         r.nextInt((int) (currentTimeMillis() / 1000)),
                         r.nextInt(999999)));
                 return true;
@@ -174,44 +176,43 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
     private void updateDirectory(String name) throws IOException {
         Path dir = dir().concat(name);
-        if (fs.exists(dir, NOFOLLOW)) {
-            fs.delete(dir);
+        if (dir.exists(NOFOLLOW)) {
+            dir.delete();
         } else {
-            fs.createDir(dir);
+            dir.createDir();
         }
     }
 
     private void updatePermissions(String name) throws IOException {
-        Path res = fs.createFiles(dir().concat(name));
-        if (fs.isReadable(res)) {
-            fs.setPermissions(res, Permission.read());
+        Path res = dir().concat(name).createFiles();
+        if (res.isReadable()) {
+            res.setPermissions(Permission.read());
         } else {
-            fs.setPermissions(res, Permission.none());
+            res.setPermissions(Permission.none());
         }
     }
 
     private void updateFileContent(String name) throws IOException {
-        Path file = fs.createFiles(dir().concat(name));
-        fs.writeUtf8(file, String.valueOf(new Random().nextLong()));
+        ExtendedPath file = dir().concat(name).createFiles();
+        file.writeUtf8(String.valueOf(new Random().nextLong()));
     }
 
     private void updateDirectoryChild(String name) throws IOException {
-        Path dir = fs.createDirs(dir().concat(name));
+        Path dir = dir().concat(name).createDirs();
         Path child = dir.concat("child");
-        if (fs.exists(child, NOFOLLOW)) {
-            fs.delete(child);
+        if (child.exists(NOFOLLOW)) {
+            child.delete();
         } else {
-            fs.createFile(child);
+            child.createFile();
         }
     }
 
     private void updateLink(String name) throws IOException {
         Path link = dir().concat(name);
-        if (fs.exists(link, NOFOLLOW)) {
-            fs.delete(link);
+        if (link.exists(NOFOLLOW)) {
+            link.delete();
         }
-        fs.createSymbolicLink(
-                link,
+        link.createSymbolicLink(
                 new Random().nextInt() % 2 == 0
                         ? link
                         : link.parent()

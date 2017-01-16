@@ -4,13 +4,12 @@ import org.junit.Test;
 
 import java.util.Locale;
 
-import l.files.fs.FileName;
-import l.files.fs.FileSystem;
+import l.files.fs.Name;
 import l.files.fs.Path;
 
 import static java.util.Locale.SIMPLIFIED_CHINESE;
 import static l.files.ui.browser.FileSort.NAME;
-import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 public final class FileSortNameTest extends FileSortTest {
@@ -69,10 +68,8 @@ public final class FileSortNameTest extends FileSortTest {
     }
 
     private Path mockFile(String name) {
-        FileSystem fs = mock(FileSystem.class);
         Path file = mock(Path.class);
-        given(file.name()).willReturn(FileName.fromString(name));
-        given(file.fileSystem()).willReturn(fs);
+        doReturn(mock(Name.class, name)).when(file).name();
         return file;
     }
 

@@ -26,7 +26,6 @@ import javax.annotation.Nullable;
 
 import l.files.base.Consumer;
 import l.files.base.Provider;
-import l.files.fs.FileSystem;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.fs.FileInfo;
@@ -46,7 +45,6 @@ import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 import static l.files.base.Objects.requireNonNull;
-import static l.files.fs.Files.hierarchy;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.ui.base.view.Views.find;
@@ -222,7 +220,7 @@ final class UiFileActivity {
         return this;
     }
 
-    public void waitForUpIndicatorToAppear() {
+    private void waitForUpIndicatorToAppear() {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
@@ -535,7 +533,7 @@ final class UiFileActivity {
             @Override
             public void run() {
                 List<Path> actual = activity().hierarchy();
-                List<Path> expected = new ArrayList<>(hierarchy(dir));
+                List<Path> expected = dir.hierarchy();
                 reverse(expected);
                 assertEquals(expected, actual);
                 assertEquals(dir, activity().title().getSelectedItem());
@@ -544,13 +542,12 @@ final class UiFileActivity {
         return this;
     }
 
-    UiFileActivity assertListMatchesFileSystem(FileSystem fs, Path dir)
+    UiFileActivity assertListMatchesFileSystem(Path dir)
             throws IOException {
-        return assertListMatchesFileSystem(fs, dir, 1, MINUTES);
+        return assertListMatchesFileSystem(dir, 1, MINUTES);
     }
 
     UiFileActivity assertListMatchesFileSystem(
-            final FileSystem fs,
             final Path dir,
             final int timeout,
             final TimeUnit timeoutUnit)
@@ -563,7 +560,7 @@ final class UiFileActivity {
 
                 final SimpleArrayMap<Path, Stat> filesInView = filesInView();
 
-                fs.list(dir, FOLLOW, new FileSystem.Consumer<Path>() {
+                dir.list(FOLLOW, new Path.Consumer() {
                     @Override
                     public boolean accept(Path child) throws IOException {
                         Stat oldStat = filesInView.remove(child);
@@ -571,7 +568,7 @@ final class UiFileActivity {
                             fail("Path in file system but not in view: " + child);
                         }
 
-                        Stat newStat = fs.stat(child, NOFOLLOW);
+                        Stat newStat = child.stat(NOFOLLOW);
                         if (!newStat.equals(oldStat)) {
                             fail("Path details differ for : " + child
                                     + "\nnew: " + newStat
@@ -645,7 +642,7 @@ final class UiFileActivity {
         return this;
     }
 
-    public UiInfo getInfo() {
+    UiInfo getInfo() {
         selectActionModeAction(R.id.info);
         return new UiInfo(this);
     }

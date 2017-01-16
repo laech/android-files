@@ -5,16 +5,14 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.Locale;
 
-import l.files.fs.FileName;
-import l.files.fs.FileSystem;
 import l.files.fs.LinkOption;
+import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 
 import static l.files.ui.browser.FileSort.SIZE;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 public final class FileSortSizeTest extends FileSortTest {
@@ -56,25 +54,21 @@ public final class FileSortSizeTest extends FileSortTest {
     }
 
     protected Path createFile(String name, long size) throws IOException {
-        FileSystem fs = mock(FileSystem.class);
         Stat stat = mock(Stat.class);
         Path file = mock(Path.class);
-        given(stat.size()).willReturn(size);
-        given(stat.isRegularFile()).willReturn(true);
-        given(fs.stat(eq(file), any(LinkOption.class))).willReturn(stat);
-        given(file.name()).willReturn(FileName.fromString(name));
-        given(file.fileSystem()).willReturn(fs);
+        doReturn(size).when(stat.size());
+        doReturn(true).when(stat).isRegularFile();
+        doReturn(stat).when(file).stat(any(LinkOption.class));
+        doReturn(mock(Name.class, name)).when(file).name();
         return file;
     }
 
     protected Path createDir(String name) throws IOException {
-        FileSystem fs = mock(FileSystem.class);
         Stat stat = mock(Stat.class);
         Path file = mock(Path.class);
-        given(stat.isDirectory()).willReturn(true);
-        given(fs.stat(eq(file), any(LinkOption.class))).willReturn(stat);
-        given(file.name()).willReturn(FileName.fromString(name));
-        given(file.fileSystem()).willReturn(fs);
+        doReturn(true).when(stat).isDirectory();
+        doReturn(stat).when(file).stat(any(LinkOption.class));
+        doReturn(mock(Name.class, name)).when(file).name();
         return file;
     }
 

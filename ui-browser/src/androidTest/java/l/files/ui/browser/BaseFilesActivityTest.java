@@ -25,6 +25,7 @@ import l.files.fs.Permission;
 import l.files.fs.TraversalCallback;
 import l.files.fs.local.LocalFileSystem;
 import l.files.testing.fs.ExtendedFileSystem;
+import l.files.testing.fs.ExtendedPath;
 
 import static android.content.Intent.ACTION_MAIN;
 import static android.os.Build.VERSION.SDK_INT;
@@ -53,11 +54,8 @@ public class BaseFilesActivityTest {
             };
 
 
-    final ExtendedFileSystem fs =
-            new ExtendedFileSystem(LocalFileSystem.INSTANCE);
-
     @Nullable
-    private Path dir;
+    private ExtendedPath dir;
 
     @Nullable
     private UiFileActivity screen;
@@ -159,7 +157,7 @@ public class BaseFilesActivityTest {
         return screen;
     }
 
-    Path dir() {
+    ExtendedPath dir() {
         assert dir != null;
         return dir;
     }

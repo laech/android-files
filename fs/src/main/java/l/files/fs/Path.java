@@ -8,10 +8,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -21,9 +19,6 @@ import l.files.fs.event.BatchObserver;
 import l.files.fs.event.BatchObserverNotifier;
 import l.files.fs.event.Observation;
 import l.files.fs.event.Observer;
-
-import static java.util.Collections.reverse;
-import static java.util.Collections.unmodifiableList;
 
 public abstract class Path implements Parcelable {
 
@@ -90,13 +85,12 @@ public abstract class Path implements Parcelable {
     @Nullable
     public abstract Path parent();
 
-    public List<Path> hierarchy() {
-        List<Path> hierarchy = new ArrayList<>();
+    public ImmutableList<Path> hierarchy() {
+        ImmutableList.Builder<Path> hierarchy = ImmutableList.builder();
         for (Path p = this; p != null; p = p.parent()) {
             hierarchy.add(p);
         }
-        reverse(hierarchy);
-        return unmodifiableList(hierarchy);
+        return hierarchy.build().reverse();
     }
 
     /**

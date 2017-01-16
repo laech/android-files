@@ -8,7 +8,6 @@ import java.text.Collator;
 import javax.annotation.Nullable;
 
 import l.files.base.Objects;
-import l.files.fs.FileSystem;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.text.CollationKey;
@@ -17,7 +16,6 @@ import static l.files.base.Objects.requireNonNull;
 
 public final class FileInfo implements Comparable<FileInfo> {
 
-    private final FileSystem fs;
     private final Collator collator;
 
     @Nullable
@@ -38,14 +36,12 @@ public final class FileInfo implements Comparable<FileInfo> {
     private final Stat linkTargetStat;
 
     private FileInfo(
-            FileSystem fs,
             Path selfPath,
             @Nullable Stat selfStat,
             @Nullable Path linkTargetPath,
             @Nullable Stat linkTargetStat,
             Collator collator) {
 
-        this.fs = requireNonNull(fs);
         this.selfPath = requireNonNull(selfPath);
         this.selfStat = selfStat;
         this.linkTargetPath = linkTargetPath;
@@ -64,7 +60,7 @@ public final class FileInfo implements Comparable<FileInfo> {
     public boolean isReadable() {
         if (readable == null) {
             try {
-                readable = fs.isReadable(selfPath());
+                readable = selfPath().isReadable();
             } catch (IOException e) {
                 readable = false;
             }
@@ -151,13 +147,12 @@ public final class FileInfo implements Comparable<FileInfo> {
     }
 
     public static FileInfo create(
-            FileSystem fs,
             Path path,
             @Nullable Stat stat,
             @Nullable Path target,
             @Nullable Stat targetStat,
             Collator collator) {
-        return new FileInfo(fs, path, stat, target, targetStat, collator);
+        return new FileInfo(path, stat, target, targetStat, collator);
     }
 
 }
