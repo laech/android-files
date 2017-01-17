@@ -13,37 +13,35 @@ import java.util.List;
 
 import l.files.fs.Instant;
 import l.files.fs.Path;
-import l.files.fs.local.LocalFileSystem;
-import l.files.testing.fs.ExtendedFileSystem;
+import l.files.fs.local.LocalPath;
+import l.files.testing.fs.ExtendedPath;
 
 import static android.os.Environment.getExternalStorageDirectory;
 import static android.test.MoreAsserts.assertNotEqual;
+import static com.google.common.base.Charsets.UTF_8;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.asList;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.testing.fs.ExtendedFileSystem.UTF_8;
 
 @RunWith(AndroidJUnit4.class)
 public final class ManualInspectionTest extends InstrumentationTestCase {
 
-    private final ExtendedFileSystem fs =
-            new ExtendedFileSystem(LocalFileSystem.INSTANCE);
-
     @Test
     public void test() throws Exception {
-        Path dir = Path.fromFile(getExternalStorageDirectory()).concat("test");
-        fs.createDirs(dir);
+        ExtendedPath dir = ExtendedPath.wrap(LocalPath.fromFile(
+                getExternalStorageDirectory()).concat("test"));
+        dir.createDirs();
         try {
-            fs.setLastModifiedTime(dir, NOFOLLOW, Instant.ofMillis(currentTimeMillis()));
+            dir.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(currentTimeMillis()));
         } catch (IOException ignore) {
             // Older versions does not support changing mtime
         }
-        fs.createFiles(dir.concat(".nomedia"));
-        fs.createFiles(dir.concat("html.html"));
-        fs.createFiles(dir.concat("zip.zip"));
+        dir.concat(".nomedia").createFiles();
+        dir.concat("html.html").createFiles();
+        dir.concat("zip.zip").createFiles();
         try {
             createNonUtf8Dir();
         } catch (IOException e) {
@@ -65,14 +63,14 @@ public final class ManualInspectionTest extends InstrumentationTestCase {
                 "test.svg");
 
         for (String res : resources) {
-            Path file = dir.concat(res);
-            if (fs.exists(file, NOFOLLOW)) {
+            ExtendedPath file = dir.concat(res);
+            if (file.exists(NOFOLLOW)) {
                 continue;
             }
 
             InputStream in = getInstrumentation().getContext().getAssets().open(res);
             try {
-                fs.copy(in, fs, file);
+                file.copy(in);
             } finally {
                 in.close();
             }
@@ -85,33 +83,36 @@ public final class ManualInspectionTest extends InstrumentationTestCase {
         byte[] nonUtf8 = {-19, -96, -67, -19, -80, -117};
         assertNotEqual(nonUtf8.clone(), new String(nonUtf8.clone(), UTF_8).getBytes(UTF_8));
 
-        Path dir = Path.fromFile(getExternalStorageDirectory()).concat(nonUtf8);
+        Path dir = LocalPath.fromFile(getExternalStorageDirectory()).concat(nonUtf8);
         Path child = dir.concat("good we can see this dir");
 
         try {
-            fs.deleteRecursive(dir);
+            ExtendedPath.wrap(dir).deleteRecursive();
         } catch (FileNotFoundException ignored) {
         }
 
-        fs.createDir(dir);
-        fs.createFile(child);
+        dir.createDir();
+        child.createFile();
     }
 
-    private void createFutureFiles(Path dir) throws IOException {
-        fs.setLastModifiedTime(
-                fs.createFiles(dir.concat("future")),
-                FOLLOW,
-                Instant.ofMillis(currentTimeMillis() + DAYS.toMillis(365)));
+    private void createFutureFiles(ExtendedPath dir) throws IOException {
+        dir.concat("future")
+                .createFiles()
+                .setLastModifiedTime(
+                        FOLLOW,
+                        Instant.ofMillis(currentTimeMillis() + DAYS.toMillis(365)));
 
-        fs.setLastModifiedTime(
-                fs.createFiles(dir.concat("future3")),
-                FOLLOW,
-                Instant.ofMillis(currentTimeMillis() + DAYS.toMillis(2)));
+        dir.concat("future3")
+                .createFiles()
+                .setLastModifiedTime(
+                        FOLLOW,
+                        Instant.ofMillis(currentTimeMillis() + DAYS.toMillis(2)));
 
-        fs.setLastModifiedTime(
-                fs.createFiles(dir.concat("future5")),
-                FOLLOW,
-                Instant.ofMillis(currentTimeMillis() + SECONDS.toMillis(5)));
+        dir.concat("future5")
+                .createFiles()
+                .setLastModifiedTime(
+                        FOLLOW,
+                        Instant.ofMillis(currentTimeMillis() + SECONDS.toMillis(5)));
     }
 
 }
