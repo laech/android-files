@@ -24,13 +24,12 @@ import l.files.fs.TraversalCallback;
 import l.files.fs.event.Observation;
 import l.files.fs.event.Observer;
 
+import static com.google.common.base.Charsets.UTF_8;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
 @SuppressLint("ParcelCreator")
 public final class ExtendedPath extends ForwardingPath {
-
-    public static final Charset UTF_8 = Charset.forName("UTF-8");
 
     private ExtendedPath(Path delegate) {
         super(delegate);

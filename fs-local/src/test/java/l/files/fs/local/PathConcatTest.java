@@ -9,6 +9,7 @@ import java.util.Collection;
 
 import l.files.fs.Path;
 
+import static com.google.common.base.Charsets.UTF_8;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 
@@ -99,7 +100,7 @@ public final class PathConcatTest {
     public void concatenated_path_is_as_expected() throws Exception {
         Path base = LocalPath.fromString(basePath);
         assertEquals(expectedPath, base.concat(additionalPath).toString());
-        assertEquals(expectedPath, base.concat(additionalPath.getBytes("UTF-8")).toString());
+        assertEquals(expectedPath, base.concat(additionalPath.getBytes(UTF_8)).toString());
         assertEquals(expectedPath, base.concat(LocalPath.fromString(additionalPath)).toString());
     }
 }

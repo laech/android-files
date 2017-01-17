@@ -8,7 +8,6 @@ import android.widget.TextView;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 
 import l.files.base.io.Readers;
 import l.files.fs.Path;
@@ -27,6 +26,7 @@ import static android.util.TypedValue.applyDimension;
 import static android.view.View.MeasureSpec.AT_MOST;
 import static android.view.View.MeasureSpec.UNSPECIFIED;
 import static android.view.View.MeasureSpec.makeMeasureSpec;
+import static com.google.common.base.Charsets.UTF_8;
 import static java.lang.Math.min;
 
 public final class TextThumbnailer implements Thumbnailer<InputStream> {
@@ -42,7 +42,7 @@ public final class TextThumbnailer implements Thumbnailer<InputStream> {
     @Override
     public ScaledBitmap create(InputStream input, Rect max, Context context) throws IOException {
         // TODO support more charsets
-        String text = Readers.readString(input, PREVIEW_LIMIT, Charset.forName("UTF-8"));
+        String text = Readers.readString(input, PREVIEW_LIMIT, UTF_8);
         if (text == null) {
             return null;
         }
