@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.testing.fs.ExtendedPath;
 
 import static android.text.format.DateUtils.FORMAT_SHOW_DATE;
 import static android.text.format.DateUtils.FORMAT_SHOW_TIME;
@@ -22,13 +23,13 @@ public final class InfoTest extends BaseFilesActivityTest {
     @Test
     public void gets_info_of_multiple_files() throws Exception {
 
-        Path child1 = fs.createFile(dir().concat("1"));
-        Path child2 = fs.createDir(dir().concat("2"));
-        Path child3 = fs.createSymbolicLink(dir().concat("3"), child2);
+        Path child1 = dir().concat("1").createFile();
+        Path child2 = dir().concat("2").createDir();
+        Path child3 = dir().concat("3").createSymbolicLink(child2);
 
-        Stat st1 = fs.stat(child1, NOFOLLOW);
-        Stat st2 = fs.stat(child2, NOFOLLOW);
-        Stat st3 = fs.stat(child3, NOFOLLOW);
+        Stat st1 = child1.stat(NOFOLLOW);
+        Stat st2 = child2.stat(NOFOLLOW);
+        Stat st3 = child3.stat(NOFOLLOW);
 
         screen()
                 .longClick(child1)
@@ -49,9 +50,9 @@ public final class InfoTest extends BaseFilesActivityTest {
     @Test
     public void gets_info_of_file() throws Exception {
 
-        Path path = dir().concat("test.txt");
-        fs.writeUtf8(path, "hello world");
-        Stat stat = fs.stat(path, NOFOLLOW);
+        ExtendedPath path = dir().concat("test.txt");
+        path.writeUtf8("hello world");
+        Stat stat = path.stat(NOFOLLOW);
 
         screen()
                 .longClick(path)
@@ -65,9 +66,9 @@ public final class InfoTest extends BaseFilesActivityTest {
     @Test
     public void gets_info_of_link() throws Exception {
 
-        fs.setLastModifiedTime(dir(), NOFOLLOW, EPOCH);
-        Path path = fs.createSymbolicLink(dir().concat("link"), dir());
-        Stat stat = fs.stat(path, NOFOLLOW);
+        dir().setLastModifiedTime(NOFOLLOW, EPOCH);
+        Path path = dir().concat("link").createSymbolicLink(dir());
+        Stat stat = path.stat(NOFOLLOW);
 
         screen()
                 .longClick(path)
@@ -81,8 +82,8 @@ public final class InfoTest extends BaseFilesActivityTest {
     @Test
     public void gets_info_of_empty_dir() throws Exception {
 
-        Path dir = fs.createDir(dir().concat("dir"));
-        Stat stat = fs.stat(dir, NOFOLLOW);
+        Path dir = dir().concat("dir").createDir();
+        Stat stat = dir.stat(NOFOLLOW);
 
         screen()
                 .longClick(dir)
@@ -96,15 +97,15 @@ public final class InfoTest extends BaseFilesActivityTest {
     @Test
     public void gets_info_of_non_empty_dir() throws Exception {
 
-        Path dir = fs.createDir(dir().concat("dir"));
-        Path child1 = fs.createDir(dir.concat("dir"));
-        Path child2 = fs.createFile(dir.concat("file"));
-        Path child3 = fs.createSymbolicLink(dir.concat("link"), dir);
+        Path dir = dir().concat("dir").createDir();
+        Path child1 = dir.concat("dir").createDir();
+        Path child2 = dir.concat("file").createFile();
+        Path child3 = dir.concat("link").createSymbolicLink(dir);
 
-        Stat stat = fs.stat(dir, NOFOLLOW);
-        Stat childStat1 = fs.stat(child1, NOFOLLOW);
-        Stat childStat2 = fs.stat(child2, NOFOLLOW);
-        Stat childStat3 = fs.stat(child3, NOFOLLOW);
+        Stat stat = dir.stat(NOFOLLOW);
+        Stat childStat1 = child1.stat(NOFOLLOW);
+        Stat childStat2 = child2.stat(NOFOLLOW);
+        Stat childStat3 = child3.stat(NOFOLLOW);
 
         screen()
                 .longClick(dir)
