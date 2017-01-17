@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 import l.files.fs.Path;
-import l.files.fs.local.LocalFileSystem;
+import l.files.fs.local.LocalPath;
 import l.files.operations.OperationService.TaskListener;
 import l.files.testing.fs.PathBaseTest;
 
@@ -36,8 +37,9 @@ public final class OperationServiceTest extends PathBaseTest {
 
     private OperationService service;
 
-    public OperationServiceTest() {
-        super(LocalFileSystem.INSTANCE);
+    @Override
+    protected Path create(File file) {
+        return LocalPath.fromFile(file);
     }
 
     @Override
@@ -69,8 +71,8 @@ public final class OperationServiceTest extends PathBaseTest {
 
     public void test_moves_file() throws Exception {
 
-        Path src = fs.createFile(dir1().concat("a"));
-        Path dst = fs.createDir(dir1().concat("dst"));
+        Path src = dir1().concat("a").createFile();
+        Path dst = dir1().concat("dst").createDir();
         CountDownListener listener = new CountDownListener(MOVE);
         service.listener = listener;
         service.onCreate();
@@ -78,14 +80,14 @@ public final class OperationServiceTest extends PathBaseTest {
         service.onStartCommand(newMoveIntent(getContext(), singleton(src), dst), 0, 0);
 
         listener.await();
-        assertFalse(fs.exists(src, NOFOLLOW));
-        assertTrue(fs.exists(dst.concat(src.name().toPath()), NOFOLLOW));
+        assertFalse(src.exists(NOFOLLOW));
+        assertTrue(dst.concat(src.name().toPath()).exists(NOFOLLOW));
     }
 
     public void test_copies_file() throws Exception {
 
-        Path src = fs.createFile(dir1().concat("a"));
-        Path dst = fs.createDir(dir1().concat("dst"));
+        Path src = dir1().concat("a").createFile();
+        Path dst = dir1().concat("dst").createDir();
         CountDownListener listener = new CountDownListener(COPY);
         service.listener = listener;
         service.onCreate();
@@ -93,14 +95,14 @@ public final class OperationServiceTest extends PathBaseTest {
         service.onStartCommand(newCopyIntent(getContext(), singleton(src), dst), 0, 0);
 
         listener.await();
-        assertTrue(fs.exists(src, NOFOLLOW));
-        assertTrue(fs.exists(dst.concat(src.name().toPath()), NOFOLLOW));
+        assertTrue(src.exists(NOFOLLOW));
+        assertTrue(dst.concat(src.name().toPath()).exists(NOFOLLOW));
     }
 
     public void test_deletes_files() throws Exception {
 
-        Path a = fs.createFiles(dir1().concat("a"));
-        Path b = fs.createFiles(dir1().concat("b/c"));
+        Path a = dir1().concat("a").createFiles();
+        Path b = dir1().concat("b/c").createFiles();
         CountDownListener listener = new CountDownListener(DELETE);
         service.listener = listener;
         service.onCreate();
@@ -108,14 +110,14 @@ public final class OperationServiceTest extends PathBaseTest {
         service.onStartCommand(newDeleteIntent(getContext(), asList(a, b)), 0, 0);
 
         listener.await();
-        assertFalse(fs.exists(a, NOFOLLOW));
-        assertFalse(fs.exists(b, NOFOLLOW));
+        assertFalse(a.exists(NOFOLLOW));
+        assertFalse(b.exists(NOFOLLOW));
     }
 
     public void test_task_start_time_is_correct() throws Exception {
 
-        Path file1 = fs.createFile(dir1().concat("a"));
-        Path file2 = fs.createFile(dir1().concat("b"));
+        Path file1 = dir1().concat("a").createFile();
+        Path file2 = dir1().concat("b").createFile();
         CountDownListener listener = new CountDownListener(DELETE);
         service.listener = listener;
         service.onCreate();
