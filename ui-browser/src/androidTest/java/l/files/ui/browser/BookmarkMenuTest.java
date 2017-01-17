@@ -14,8 +14,8 @@ public final class BookmarkMenuTest extends BaseFilesActivityTest {
     public void bookmark_menu_is_unchecked_for_non_bookmarked_directory()
             throws Exception {
 
-        Path dir1 = fs.createDir(dir().concat("Not bookmarked 1"));
-        Path dir2 = fs.createDir(dir().concat("Not bookmarked 2"));
+        Path dir1 = dir().concat("Not bookmarked 1").createDir();
+        Path dir2 = dir().concat("Not bookmarked 2").createDir();
         screen()
                 .clickInto(dir1)
                 .assertBookmarkMenuChecked(false)
@@ -28,7 +28,7 @@ public final class BookmarkMenuTest extends BaseFilesActivityTest {
     public void bookmark_menu_is_checked_for_bookmarked_directory()
             throws Exception {
 
-        Path dir = fs.createDir(dir().concat("Bookmarked"));
+        Path dir = dir().concat("Bookmarked").createDir();
         screen()
                 .clickInto(dir)
                 .bookmark()
@@ -39,7 +39,7 @@ public final class BookmarkMenuTest extends BaseFilesActivityTest {
     public void bookmark_unbookmark_directory_checks_bookmark_menu_correctly()
             throws Exception {
 
-        Path dir = fs.createDir(dir().concat("Bookmarked then unbookmarked"));
+        Path dir = dir().concat("Bookmarked then unbookmarked").createDir();
         screen()
                 .clickInto(dir)
                 .bookmark()
@@ -52,8 +52,8 @@ public final class BookmarkMenuTest extends BaseFilesActivityTest {
     public void navigate_through_bookmarked_unbookmarked_directories_checks_bookmark_menu_correctly()
             throws Exception {
 
-        Path bookmarked = fs.createDir(dir().concat("Bookmarked"));
-        Path unbookmarked = fs.createDir(dir().concat("Bookmarked/Unbookmarked"));
+        Path bookmarked = dir().concat("Bookmarked").createDir();
+        Path unbookmarked = dir().concat("Bookmarked/Unbookmarked").createDir();
         screen()
                 .clickInto(bookmarked)
                 .bookmark()
