@@ -19,7 +19,7 @@ public final class NewDirTest extends BaseFilesActivityTest {
     @Test
     public void shows_error_message_when_failed_to_create()
             throws Exception {
-        fs.removePermissions(dir(), Permission.write());
+        dir().removePermissions(Permission.write());
         screen()
                 .newFolder()
                 .setFilename("a")
@@ -46,8 +46,8 @@ public final class NewDirTest extends BaseFilesActivityTest {
     public void name_field_has_new_name_suggestion_if_initial_names_are_taken()
             throws Exception {
 
-        fs.createFile(dir().concat(string(R.string.untitled_dir)));
-        fs.createFile(dir().concat(string(R.string.untitled_dir) + " " + 2));
+        dir().concat(string(R.string.untitled_dir)).createFile();
+        dir().concat(string(R.string.untitled_dir) + " " + 2).createFile();
 
         screen()
                 .newFolder()
@@ -58,7 +58,7 @@ public final class NewDirTest extends BaseFilesActivityTest {
     public void can_not_create_if_folder_with_specified_name_already_exists()
             throws Exception {
 
-        fs.createFile(dir().concat("a"));
+        dir().concat("a").createFile();
         screen()
                 .newFolder()
                 .setFilename("a")
