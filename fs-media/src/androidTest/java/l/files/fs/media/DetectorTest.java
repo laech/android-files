@@ -1,15 +1,18 @@
 package l.files.fs.media;
 
+import java.io.File;
 import java.io.IOException;
 
 import l.files.fs.Path;
-import l.files.fs.local.LocalFileSystem;
+import l.files.fs.local.LocalPath;
+import l.files.testing.fs.ExtendedPath;
 import l.files.testing.fs.PathBaseTest;
 
 public final class DetectorTest extends PathBaseTest {
 
-    public DetectorTest() {
-        super(LocalFileSystem.INSTANCE);
+    @Override
+    protected Path create(File file) {
+        return LocalPath.fromFile(file);
     }
 
     private Detector detector() {
@@ -63,8 +66,8 @@ public final class DetectorTest extends PathBaseTest {
     public void test_fails_on_broken_circular_links() throws Exception {
         Path link1 = dir1().concat("link1");
         Path link2 = dir1().concat("link2");
-        fs.createSymbolicLink(link1, link2);
-        fs.createSymbolicLink(link2, link1);
+        link1.createSymbolicLink(link2);
+        link2.createSymbolicLink(link1);
         try {
             detector().detect(getContext(), link1);
             fail();
@@ -74,22 +77,22 @@ public final class DetectorTest extends PathBaseTest {
     }
 
     protected Path createDir(String name) throws IOException {
-        return fs.createDir(dir1().concat(name));
+        return dir1().concat(name).createDir();
     }
 
-    protected Path createSymbolicLink(String name, Path target) throws IOException {
+    private Path createSymbolicLink(String name, Path target) throws IOException {
         Path link = dir1().concat(name);
-        fs.createSymbolicLink(link, target);
+        link.createSymbolicLink(target);
         return link;
     }
 
-    protected Path createTextFile(String name) throws IOException {
+    private Path createTextFile(String name) throws IOException {
         return createTextFile(name, "hello world");
     }
 
-    protected Path createTextFile(String name, String content) throws IOException {
-        Path path = dir1().concat(name);
-        fs.writeUtf8(path, content);
+    private Path createTextFile(String name, String content) throws IOException {
+        ExtendedPath path = dir1().concat(name);
+        path.writeUtf8(content);
         return path;
     }
 

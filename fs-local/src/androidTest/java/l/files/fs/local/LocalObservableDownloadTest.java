@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 
@@ -20,6 +21,7 @@ import l.files.fs.Path;
 import l.files.fs.local.LocalObservableTest.Recorder;
 import l.files.testing.Executable;
 import l.files.testing.Tests;
+import l.files.testing.fs.ExtendedPath;
 import l.files.testing.fs.PathBaseTest;
 
 import static android.app.DownloadManager.COLUMN_REASON;
@@ -40,8 +42,9 @@ import static org.junit.Assume.assumeTrue;
 @RunWith(AndroidJUnit4.class)
 public final class LocalObservableDownloadTest extends PathBaseTest {
 
-    public LocalObservableDownloadTest() {
-        super(LocalFileSystem.INSTANCE);
+    @Override
+    protected Path create(File file) {
+        return LocalPath.fromFile(file);
     }
 
     @Before
@@ -89,14 +92,14 @@ public final class LocalObservableDownloadTest extends PathBaseTest {
                 "test_notifies_files_downloaded_by_download_manager-" +
                         currentTimeMillis());
         try {
-            Recorder observer = observe(fs, downloadDir);
+            Recorder observer = observe(downloadDir);
             try {
                 observer.await(CREATE, downloadFile, newDownload(downloadFile));
             } finally {
                 observer.close();
             }
         } finally {
-            fs.deleteIfExists(downloadFile);
+            ExtendedPath.wrap(downloadFile).deleteIfExists();
         }
     }
 
@@ -111,10 +114,10 @@ public final class LocalObservableDownloadTest extends PathBaseTest {
     }
 
     private void download(Path saveTo) throws Exception {
-        assertFalse(fs.exists(saveTo, NOFOLLOW));
+        assertFalse(saveTo.exists(NOFOLLOW));
 
         Uri src = Uri.parse("https://www.google.com");
-        Uri dst = Uri.fromFile(saveTo.toFile());
+        Uri dst = saveTo.toUri();
         Request request = new Request(src).setDestinationUri(dst);
         long id = downloadManager().enqueue(request);
 
@@ -151,7 +154,7 @@ public final class LocalObservableDownloadTest extends PathBaseTest {
         } finally {
             cursor.close();
         }
-        assertTrue(fs.exists(dst, NOFOLLOW));
+        assertTrue(dst.exists(NOFOLLOW));
     }
 
     private DownloadManager downloadManager() {
@@ -160,7 +163,7 @@ public final class LocalObservableDownloadTest extends PathBaseTest {
     }
 
     private Path downloadsDir() {
-        return Path.fromFile(getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS));
+        return LocalPath.fromFile(getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS));
     }
 
 }
