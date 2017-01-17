@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 
 import l.files.fs.Path;
 import l.files.fs.Permission;
+import l.files.testing.fs.ExtendedPath;
 
 import static l.files.ui.browser.FileSort.NAME;
 
@@ -15,8 +16,8 @@ public final class ActionModeTest extends BaseFilesActivityTest {
 
     @Test
     public void disabled_item_can_still_be_selected() throws Exception {
-        Path a = fs.createFile(dir().concat("a"));
-        fs.removePermissions(a, Permission.read());
+        ExtendedPath a = dir().concat("a").createFile();
+        a.removePermissions(Permission.read());
         screen()
                 .longClick(a)
                 .assertActionModePresent(true)
@@ -27,9 +28,9 @@ public final class ActionModeTest extends BaseFilesActivityTest {
     public void auto_finishes_action_mode_if_selected_item_deleted_from_file_system()
             throws Exception {
 
-        Path a = fs.createFile(dir().concat("a"));
+        Path a = dir().concat("a").createFile();
         screen().longClick(a).assertActionModeTitle(1);
-        fs.delete(a);
+        a.delete();
         screen().assertActionModePresent(false);
     }
 
@@ -37,16 +38,16 @@ public final class ActionModeTest extends BaseFilesActivityTest {
     public void title_shows_correct_selected_item_count_after_selected_item_deletion()
             throws Exception {
 
-        Path a = fs.createFile(dir().concat("a"));
-        Path b = fs.createFile(dir().concat("b"));
-        Path c = fs.createFile(dir().concat("c"));
+        Path a = dir().concat("a").createFile();
+        Path b = dir().concat("b").createFile();
+        Path c = dir().concat("c").createFile();
 
         screen()
                 .longClick(a)
                 .click(b)
                 .assertActionModeTitle(2);
 
-        fs.delete(a);
+        a.delete();
 
         screen()
                 .assertActionModePresent(true)
@@ -59,7 +60,7 @@ public final class ActionModeTest extends BaseFilesActivityTest {
     public void old_checked_item_remains_checked_when_new_item_added()
             throws Exception {
 
-        Path a = fs.createFile(dir().concat("a"));
+        Path a = dir().concat("a").createFile();
 
         screen()
                 .sort()
@@ -67,7 +68,7 @@ public final class ActionModeTest extends BaseFilesActivityTest {
                 .longClick(a)
                 .assertChecked(a, true);
 
-        Path b = fs.createFile(dir().concat("b"));
+        Path b = dir().concat("b").createFile();
 
         screen()
                 .assertChecked(b, false)
