@@ -244,9 +244,9 @@ public final class ExtendedPath extends ForwardingPath {
         }
     }
 
-    public void copy(InputStream in, Path path)
+    public void copy(InputStream in)
             throws IOException {
-        OutputStream out = path.newOutputStream(false);
+        OutputStream out = newOutputStream(false);
         try {
             byte[] buffer = new byte[8192];
             for (int i; (i = in.read(buffer)) != -1; ) {

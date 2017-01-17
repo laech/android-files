@@ -10,8 +10,8 @@ import java.io.InputStream;
 
 import l.files.base.Consumer;
 import l.files.fs.Path;
-import l.files.fs.local.LocalFileSystem;
-import l.files.testing.fs.ExtendedFileSystem;
+import l.files.fs.local.LocalPath;
+import l.files.testing.fs.ExtendedPath;
 import l.files.ui.base.graphics.Rect;
 import l.files.ui.base.graphics.ScaledBitmap;
 
@@ -20,9 +20,6 @@ import static l.files.ui.base.media.MediaMetadataRetrievers.getEmbeddedThumbnail
 import static l.files.ui.base.media.MediaMetadataRetrievers.getFrameAtAnyTimeThumbnail;
 
 public final class MediaMetadataRetrieversTest extends AndroidTestCase {
-
-    private final ExtendedFileSystem fs =
-            new ExtendedFileSystem(LocalFileSystem.INSTANCE);
 
     public void test_getFrameAtAnyTimeThumbnail() throws Exception {
         String name = "MediaMetadataRetrieversTest.mp4";
@@ -66,24 +63,24 @@ public final class MediaMetadataRetrieversTest extends AndroidTestCase {
         try {
             MediaMetadataRetriever retriever = new MediaMetadataRetriever();
             try {
-                Uri uri = Uri.fromFile(path.toFile());
+                Uri uri = path.toUri();
                 retriever.setDataSource(getContext(), uri);
                 test.accept(retriever);
             } finally {
                 retriever.release();
             }
         } finally {
-            fs.deleteIfExists(path);
+            ExtendedPath.wrap(path).deleteIfExists();
         }
     }
 
     private Path createTestFile(String name) throws IOException {
         File file = createTempFile("MediaMetadataRetrieversTest", null);
         try {
-            Path path = Path.fromFile(file);
+            Path path = LocalPath.fromFile(file);
             InputStream in = getContext().getAssets().open(name);
             try {
-                fs.copy(in, fs, path);
+                ExtendedPath.wrap(path).copy(in);
             } finally {
                 in.close();
             }
