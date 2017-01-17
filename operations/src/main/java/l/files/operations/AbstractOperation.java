@@ -25,7 +25,7 @@ abstract class AbstractOperation implements FileOperation {
     private final Set<Path> paths;
     private final FailureRecorder recorder;
 
-    AbstractOperation(Set<? extends Path> paths) {
+    AbstractOperation(Iterable<? extends Path> paths) {
         this.paths = ImmutableSet.copyOf(paths);
         this.recorder = new FailureRecorder(ERROR_LIMIT);
     }

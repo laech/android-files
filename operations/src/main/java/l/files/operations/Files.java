@@ -9,8 +9,6 @@ import l.files.fs.Path;
 import l.files.fs.Stat;
 
 import static java.lang.Long.parseLong;
-import static l.files.fs.Files.exists;
-import static l.files.fs.Files.stat;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
@@ -40,7 +38,7 @@ final class Files {
             throw new IllegalArgumentException("source=" + source);
         }
 
-        Stat stat = stat(source, FOLLOW);
+        Stat stat = source.stat(FOLLOW);
         if (stat.isDirectory()) {
             base = name.toString();
             last = "";
@@ -50,7 +48,7 @@ final class Files {
         }
 
         Path dst;
-        while (exists((dst = dstDir.concat(base + last)), NOFOLLOW)) {
+        while ((dst = dstDir.concat(base + last)).exists(NOFOLLOW)) {
             base = increment(base);
         }
 

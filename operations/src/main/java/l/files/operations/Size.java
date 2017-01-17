@@ -1,7 +1,6 @@
 package l.files.operations;
 
 import java.io.IOException;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 import l.files.fs.Path;
@@ -12,7 +11,7 @@ final class Size extends Count {
 
     private final AtomicLong size = new AtomicLong();
 
-    Size(Set<? extends Path> sourcePaths) {
+    Size(Iterable<? extends Path> sourcePaths) {
         super(sourcePaths);
     }
 

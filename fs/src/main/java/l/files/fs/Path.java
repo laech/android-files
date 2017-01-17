@@ -1,5 +1,6 @@
 package l.files.fs;
 
+import android.net.Uri;
 import android.os.Parcelable;
 
 import com.google.common.collect.ImmutableList;
@@ -8,7 +9,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URI;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Set;
@@ -41,7 +41,7 @@ public abstract class Path implements Parcelable {
      * this method always replaces malformed-input and unmappable-character
      * sequences with some default replacement string.
      */
-    public abstract URI toUri();
+    public abstract Uri toUri();
 
     /**
      * If this is a relative path, converts it to an absolute path by

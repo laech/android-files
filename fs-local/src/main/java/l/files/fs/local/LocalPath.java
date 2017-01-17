@@ -1,5 +1,6 @@
 package l.files.fs.local;
 
+import android.net.Uri;
 import android.os.Parcel;
 
 import com.google.common.collect.ImmutableList;
@@ -12,7 +13,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Set;
 
@@ -96,8 +96,8 @@ public abstract class LocalPath extends Path {
     }
 
     @Override
-    public URI toUri() {
-        return new File(toString()).toURI();
+    public final Uri toUri() {
+        return Uri.fromFile(new File(toString()));
     }
 
     @Override
@@ -105,6 +105,9 @@ public abstract class LocalPath extends Path {
 
     @Override
     public abstract boolean equals(Object o);
+
+    @Override
+    public abstract LocalPath concat(Path path);
 
     public final LocalPath concat(Name name) {
         return concat(name.toPath());

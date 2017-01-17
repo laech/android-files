@@ -12,7 +12,7 @@ abstract class Paste extends AbstractOperation {
 
     private final Path destinationDir;
 
-    Paste(Set<? extends Path> sourcePaths, Path destinationDir) {
+    Paste(Iterable<? extends Path> sourcePaths, Path destinationDir) {
         super(sourcePaths);
         this.destinationDir = requireNonNull(destinationDir, "destinationDir");
     }

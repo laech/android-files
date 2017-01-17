@@ -10,7 +10,6 @@ import l.files.fs.Path;
 import l.files.ui.base.graphics.Rect;
 import l.files.ui.base.graphics.ScaledBitmap;
 
-import static l.files.fs.Files.newInputStream;
 import static l.files.ui.base.graphics.Bitmaps.decodeScaledDownBitmap;
 
 public final class ImageThumbnailer implements Thumbnailer<Path> {
@@ -25,7 +24,7 @@ public final class ImageThumbnailer implements Thumbnailer<Path> {
         return decodeScaledDownBitmap(new Callable<InputStream>() {
             @Override
             public InputStream call() throws IOException {
-                return newInputStream(path);
+                return path.newInputStream();
             }
         }, max);
     }

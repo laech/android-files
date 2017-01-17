@@ -9,9 +9,9 @@ import java.util.concurrent.Future;
 
 import javax.annotation.Nullable;
 
-import l.files.fs.Files;
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.fs.local.LocalPath;
 import l.files.ui.base.graphics.Rect;
 import l.files.ui.base.graphics.ScaledBitmap;
 
@@ -30,7 +30,7 @@ public final class Preview {
                 if (dir == null) {
                     dir = context.getCacheDir();
                 }
-                Path cacheDir = Path.fromFile(dir);
+                Path cacheDir = LocalPath.fromFile(dir);
                 instance = new Preview(context.getApplicationContext(), cacheDir);
                 instance.cleanupAsync();
             }
@@ -138,7 +138,7 @@ public final class Preview {
         }
 
         try {
-            if (!Files.isReadable(path)) {
+            if (!path.isReadable()) {
                 return NoPreview.FILE_UNREADABLE;
             }
         } catch (IOException e) {

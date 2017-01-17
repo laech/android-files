@@ -22,8 +22,7 @@ public final class MediaThumbnailer implements Thumbnailer<Path> {
     public ScaledBitmap create(Path path, Rect max, Context context) throws Exception {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         try {
-            Uri uri = Uri.fromFile(path.toFile());
-            retriever.setDataSource(context, uri);
+            retriever.setDataSource(context, path.toUri());
             return getAnyThumbnail(retriever, max);
         } finally {
             retriever.release();

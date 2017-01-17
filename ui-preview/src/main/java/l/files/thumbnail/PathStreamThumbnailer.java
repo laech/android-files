@@ -9,7 +9,6 @@ import l.files.ui.base.graphics.Rect;
 import l.files.ui.base.graphics.ScaledBitmap;
 
 import static l.files.base.Objects.requireNonNull;
-import static l.files.fs.Files.newInputStream;
 
 public final class PathStreamThumbnailer implements Thumbnailer<Path> {
 
@@ -26,7 +25,7 @@ public final class PathStreamThumbnailer implements Thumbnailer<Path> {
 
     @Override
     public ScaledBitmap create(Path path, Rect max, Context context) throws Exception {
-        InputStream in = newInputStream(path);
+        InputStream in = path.newInputStream();
         try {
             return thumbnailer.create(in, max, context);
         } finally {

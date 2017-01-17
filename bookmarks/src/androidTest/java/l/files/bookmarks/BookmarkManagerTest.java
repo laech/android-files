@@ -2,10 +2,11 @@ package l.files.bookmarks;
 
 import android.content.SharedPreferences;
 
+import java.io.File;
 import java.util.HashSet;
 
 import l.files.fs.Path;
-import l.files.fs.local.LocalFileSystem;
+import l.files.fs.local.LocalPath;
 import l.files.testing.fs.PathBaseTest;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -21,8 +22,9 @@ public final class BookmarkManagerTest extends PathBaseTest {
     private BookmarkManagerImpl manager;
     private SharedPreferences pref;
 
-    public BookmarkManagerTest() {
-        super(LocalFileSystem.INSTANCE);
+    @Override
+    protected Path create(File file) {
+        return LocalPath.fromFile(file);
     }
 
     @Override
@@ -39,17 +41,17 @@ public final class BookmarkManagerTest extends PathBaseTest {
     }
 
     public void test_can_add_bookmarks() throws Exception {
-        Path a = fs.createDir(dir1().concat("a"));
-        Path b = fs.createDir(dir2().concat("b"));
+        Path a = dir1().concat("a").createDir();
+        Path b = dir2().concat("b").createDir();
         manager.addBookmark(a);
         manager.addBookmark(b);
         assertTrue(manager.getBookmarks().containsAll(asList(a, b)));
     }
 
     public void test_can_remove_bookmarks() throws Exception {
-        Path a = fs.createDir(dir1().concat("a"));
-        Path b = fs.createDir(dir1().concat("b"));
-        Path c = fs.createDir(dir1().concat("c"));
+        Path a = dir1().concat("a").createDir();
+        Path b = dir1().concat("b").createDir();
+        Path c = dir1().concat("c").createDir();
         manager.addBookmark(a);
         manager.addBookmark(b);
         manager.addBookmark(c);
@@ -76,15 +78,15 @@ public final class BookmarkManagerTest extends PathBaseTest {
     }
 
     public void test_removes_non_existing_bookmarks() throws Exception {
-        Path file = fs.createFile(dir1().concat("file"));
-        Path dir = fs.createDir(dir1().concat("dir"));
-        Path link = fs.createSymbolicLink(dir1().concat("link"), file);
+        Path file = dir1().concat("file").createFile();
+        Path dir = dir1().concat("dir").createDir();
+        Path link = dir1().concat("link").createSymbolicLink(file);
         manager.addBookmark(file);
         manager.addBookmark(dir);
         manager.addBookmark(link);
         assertEquals(new HashSet<>(asList(file, link, dir)), manager.loadBookmarks());
 
-        fs.delete(file);
+        file.delete();
         assertEquals(singleton(dir), manager.loadBookmarks());
     }
 

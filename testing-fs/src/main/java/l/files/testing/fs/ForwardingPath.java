@@ -1,6 +1,7 @@
 package l.files.testing.fs;
 
 import android.annotation.SuppressLint;
+import android.net.Uri;
 import android.os.Parcel;
 
 import com.google.common.collect.ImmutableList;
@@ -8,7 +9,6 @@ import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URI;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -44,7 +44,7 @@ public class ForwardingPath extends Path {
     }
 
     @Override
-    public URI toUri() {
+    public Uri toUri() {
         return delegate.toUri();
     }
 
@@ -99,7 +99,7 @@ public class ForwardingPath extends Path {
     public ExtendedPath parent() {
         Path parent = delegate.parent();
         if (parent != null) {
-            return new ExtendedPath(parent);
+            return ExtendedPath.wrap(parent);
         }
         return null;
     }

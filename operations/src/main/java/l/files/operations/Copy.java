@@ -24,7 +24,7 @@ final class Copy extends Paste {
     private final AtomicLong copiedByteCount = new AtomicLong();
     private final AtomicInteger copiedItemCount = new AtomicInteger();
 
-    Copy(Set<? extends Path> sourcePaths, Path destinationDir) {
+    Copy(Iterable<? extends Path> sourcePaths, Path destinationDir) {
         super(sourcePaths, destinationDir);
     }
 

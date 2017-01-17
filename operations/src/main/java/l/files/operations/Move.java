@@ -10,7 +10,7 @@ final class Move extends Paste {
 
     private final AtomicInteger movedItemCount = new AtomicInteger();
 
-    Move(Set<? extends Path> sourcePaths, Path destinationPath) {
+    Move(Iterable<? extends Path> sourcePaths, Path destinationPath) {
         super(sourcePaths, destinationPath);
     }
 

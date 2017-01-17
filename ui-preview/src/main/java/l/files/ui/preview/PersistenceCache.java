@@ -4,6 +4,8 @@ import android.os.AsyncTask;
 import android.support.v4.util.LruCache;
 import android.util.Log;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.DataOutput;
@@ -17,9 +19,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Nullable;
 
-import l.files.fs.Files;
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.fs.local.LocalPath;
 import l.files.ui.base.graphics.Rect;
 
 import static android.os.AsyncTask.SERIAL_EXECUTOR;
@@ -27,8 +29,6 @@ import static java.lang.System.nanoTime;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.base.Throwables.addSuppressed;
-import static l.files.fs.Files.newBufferedDataInputStream;
-import static l.files.fs.Files.newBufferedDataOutputStream;
 
 abstract class PersistenceCache<V> extends MemCache<Path, V> {
 
@@ -135,7 +135,7 @@ abstract class PersistenceCache<V> extends MemCache<Path, V> {
                     short len = in.readShort();
                     byte[] bytes = new byte[len];
                     in.readFully(bytes);
-                    Path key = Path.fromByteArray(bytes);
+                    Path key = LocalPath.fromByteArray(bytes); // TODO
                     long time = in.readLong();
                     V value = read(in);
 
@@ -152,6 +152,10 @@ abstract class PersistenceCache<V> extends MemCache<Path, V> {
                 in.close();
             }
         }
+    }
+
+    private DataInputStream newBufferedDataInputStream(Path path) throws IOException {
+        return new DataInputStream(new BufferedInputStream(path.newInputStream()));
     }
 
     abstract V read(DataInput in) throws IOException;
@@ -184,7 +188,7 @@ abstract class PersistenceCache<V> extends MemCache<Path, V> {
         Path file = cacheFile();
         Path parent = file.parent();
         assert parent != null;
-        Files.createDirs(parent);
+        parent.createDirs();
 
         Path tmp = parent.concat(file.name() + "-" + nanoTime());
         DataOutputStream out = newBufferedDataOutputStream(tmp);
@@ -206,7 +210,7 @@ abstract class PersistenceCache<V> extends MemCache<Path, V> {
 
         } catch (Exception e) {
             try {
-                Files.delete(tmp);
+                tmp.delete();
             } catch (IOException sup) {
                 addSuppressed(e, sup);
             }
@@ -215,7 +219,11 @@ abstract class PersistenceCache<V> extends MemCache<Path, V> {
             out.close();
         }
 
-        Files.move(tmp, file);
+        tmp.move(file);
+    }
+
+    private DataOutputStream newBufferedDataOutputStream(Path path) throws IOException {
+        return new DataOutputStream(new BufferedOutputStream(path.newOutputStream(false)));
     }
 
     abstract void write(DataOutput out, V value) throws IOException;
