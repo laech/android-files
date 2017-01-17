@@ -3,7 +3,6 @@ package l.files.ui.browser;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.AsyncTask;
 
 import java.io.IOException;
@@ -62,10 +61,9 @@ final class OpenFile extends AsyncTask<Void, Void, Object> {
     private boolean showFile(String media) {
         debug(media);
 
-        Uri uri = Uri.fromFile(file.toFile());
         try {
             Intent intent = new Intent(ACTION_VIEW);
-            intent.setDataAndType(uri, media);
+            intent.setDataAndType(file.toUri(), media);
             context.startActivity(intent);
             return true;
         } catch (ActivityNotFoundException e) {

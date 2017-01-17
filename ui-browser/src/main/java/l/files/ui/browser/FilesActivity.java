@@ -23,6 +23,7 @@ import java.util.List;
 
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.fs.local.LocalPath;
 import l.files.premium.PremiumLock;
 import l.files.ui.base.app.BaseActivity;
 import l.files.ui.base.app.OptionsMenus;
@@ -174,7 +175,7 @@ public final class FilesActivity extends BaseActivity implements
                 && getIntent().getData() != null
                 && getIntent().getData().getScheme() != null
                 && getIntent().getData().getScheme().equals(SCHEME_FILE)) {
-            dir = Path.fromString(getIntent().getData().getPath());
+            dir = LocalPath.fromString(getIntent().getData().getPath()); // TODO
         }
         return dir == null ? DIR_HOME : dir;
     }
@@ -292,7 +293,7 @@ public final class FilesActivity extends BaseActivity implements
             @Override
             protected Object doInBackground(Void... params) {
                 try {
-                    return Files.stat(path, FOLLOW);
+                    return path.stat(FOLLOW);
                 } catch (IOException e) {
                     return e;
                 }
@@ -326,7 +327,7 @@ public final class FilesActivity extends BaseActivity implements
 
     private boolean isReadable(Path path) {
         try {
-            return Files.isReadable(path);
+            return path.isReadable();
         } catch (IOException e) {
             return false;
         }

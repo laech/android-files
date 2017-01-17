@@ -106,7 +106,7 @@ public final class ShareAction extends ActionModeItem
         ArrayList<Uri> uris = new ArrayList<>(files.size());
         for (FileInfo item : files) {
             Path path = item.linkTargetOrSelfPath();
-            uris.add(Uri.fromFile(path.toFile()));
+            uris.add(path.toUri());
         }
         return uris;
     }
