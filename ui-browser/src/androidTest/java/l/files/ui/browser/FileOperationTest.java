@@ -24,11 +24,11 @@ public final class FileOperationTest extends BaseFilesActivityTest {
     @Test
     public void delete() throws Exception {
 
-        final Path file = fs.createFile(dir().concat("file"));
-        final Path link = fs.createSymbolicLink(dir().concat("link"), file);
-        final Path dir1 = fs.createDir(dir().concat("dir1"));
-        final Path dir2 = fs.createDir(dir().concat("dir2"));
-        fs.createFile(dir2.concat("a"));
+        final Path file = dir().concat("file").createFile();
+        final Path link = dir().concat("link").createSymbolicLink(file);
+        final Path dir1 = dir().concat("dir1").createDir();
+        final Path dir2 = dir().concat("dir2").createDir();
+        dir2.concat("a").createFile();
 
         screen()
                 .longClick(file)
@@ -41,10 +41,10 @@ public final class FileOperationTest extends BaseFilesActivityTest {
         timeout(5, SECONDS, new Executable() {
             @Override
             public void execute() throws Exception {
-                assertFalse(fs.exists(file, NOFOLLOW));
-                assertFalse(fs.exists(link, NOFOLLOW));
-                assertFalse(fs.exists(dir1, NOFOLLOW));
-                assertFalse(fs.exists(dir2, NOFOLLOW));
+                assertFalse(file.exists(NOFOLLOW));
+                assertFalse(link.exists(NOFOLLOW));
+                assertFalse(dir1.exists(NOFOLLOW));
+                assertFalse(dir2.exists(NOFOLLOW));
             }
         });
 
@@ -53,8 +53,8 @@ public final class FileOperationTest extends BaseFilesActivityTest {
     @Test
     public void cut_files() throws Exception {
 
-        final Path file = fs.createFile(dir().concat("a"));
-        final Path dir = fs.createDir(dir().concat("dir"));
+        final Path file = dir().concat("a").createFile();
+        final Path dir = dir().concat("dir").createDir();
 
         screen()
                 .longClick(file)
@@ -65,8 +65,8 @@ public final class FileOperationTest extends BaseFilesActivityTest {
         timeout(5, SECONDS, new Executable() {
             @Override
             public void execute() throws Exception {
-                assertFalse(fs.exists(file, NOFOLLOW));
-                assertTrue(fs.exists(dir.concat(file), NOFOLLOW));
+                assertFalse(file.exists(NOFOLLOW));
+                assertTrue(dir.concat(file).exists(NOFOLLOW));
             }
         });
 
@@ -75,14 +75,14 @@ public final class FileOperationTest extends BaseFilesActivityTest {
     @Test
     public void copy() throws Exception {
 
-        Path dstDir = fs.createDir(dir().concat("dstDir"));
-        Path srcFile = fs.createFile(dir().concat("srcFile"));
-        Path srcLink = fs.createSymbolicLink(dir().concat("srcLink"), srcFile);
-        Path srcEmpty = fs.createDir(dir().concat("srcEmpty"));
-        Path srcFull = fs.createDir(dir().concat("srcFull"));
-        fs.createFile(srcFull.concat("a"));
-        fs.createDir(srcFull.concat("b"));
-        fs.createSymbolicLink(srcFull.concat("c"), srcFull.concat("a"));
+        Path dstDir = dir().concat("dstDir").createDir();
+        Path srcFile = dir().concat("srcFile").createFile();
+        Path srcLink = dir().concat("srcLink").createSymbolicLink(srcFile);
+        Path srcEmpty = dir().concat("srcEmpty").createDir();
+        Path srcFull = dir().concat("srcFull").createDir();
+        srcFull.concat("a").createFile();
+        srcFull.concat("b").createDir();
+        srcFull.concat("c").createSymbolicLink(srcFull.concat("a"));
 
         screen()
                 .longClick(srcEmpty)
@@ -109,7 +109,7 @@ public final class FileOperationTest extends BaseFilesActivityTest {
 
         long end = currentTimeMillis() + unit.toMillis(time);
         while (currentTimeMillis() < end) {
-            if (fs.exists(file, NOFOLLOW)) {
+            if (file.exists(NOFOLLOW)) {
                 return true;
             }
             sleep(20);
@@ -121,7 +121,7 @@ public final class FileOperationTest extends BaseFilesActivityTest {
     public void paste_menu_is_disabled_inside_folder_being_copied()
             throws Exception {
 
-        Path dir = fs.createDir(dir().concat("dir"));
+        Path dir = dir().concat("dir").createDir();
 
         screen()
                 .longClick(dir)
