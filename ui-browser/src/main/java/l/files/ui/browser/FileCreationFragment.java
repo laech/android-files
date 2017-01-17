@@ -26,7 +26,6 @@ import java.io.IOException;
 import javax.annotation.Nullable;
 
 import l.files.base.Consumer;
-import l.files.fs.Files;
 import l.files.fs.Path;
 import l.files.ui.browser.widget.Toaster;
 
@@ -158,7 +157,7 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
                 @Override
                 public Existence loadInBackground() {
                     try {
-                        boolean exists = Files.exists(file, NOFOLLOW);
+                        boolean exists = file.exists(NOFOLLOW);
                         return new Existence(file, exists);
                     } catch (IOException e) {
                         return null;

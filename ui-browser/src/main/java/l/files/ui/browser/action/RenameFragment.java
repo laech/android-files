@@ -11,7 +11,6 @@ import java.io.IOException;
 
 import javax.annotation.Nullable;
 
-import l.files.fs.Files;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.app.BaseActivity;
@@ -106,7 +105,7 @@ public final class RenameFragment extends FileCreationFragment {
         protected Pair<Path, Stat> doInBackground(Path... params) {
             Path path = params[0];
             try {
-                return Pair.create(path, Files.stat(path, NOFOLLOW));
+                return Pair.create(path, path.stat(NOFOLLOW));
             } catch (IOException e) {
                 return null;
             }
@@ -175,7 +174,7 @@ public final class RenameFragment extends FileCreationFragment {
         @Override
         protected IOException doInBackground(Path... params) {
             try {
-                Files.move(src, dst);
+                src.move(dst);
                 return null;
             } catch (IOException e) {
                 return e;
