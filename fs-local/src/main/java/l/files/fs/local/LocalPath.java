@@ -42,8 +42,6 @@ public abstract class LocalPath extends Path {
         }
     };
 
-    private static final LocalFileSystem fs = LocalFileSystem.INSTANCE;
-
     static final Charset ENCODING =
             Charset.forName(System.getProperty("sun.jnu.encoding"));
 
@@ -129,78 +127,78 @@ public abstract class LocalPath extends Path {
     @Override
     public void setPermissions(Set<Permission> permissions)
             throws IOException {
-        fs.setPermissions(this, permissions);
+        LocalFileSystem.INSTANCE.setPermissions(this, permissions);
     }
 
     @Override
     public void setLastModifiedTime(LinkOption option, Instant instant)
             throws IOException {
-        fs.setLastModifiedTime(this, option, instant);
+        LocalFileSystem.INSTANCE.setLastModifiedTime(this, option, instant);
     }
 
     @Override
     public Stat stat(LinkOption option) throws IOException {
-        return fs.stat(this, option);
+        return LocalFileSystem.INSTANCE.stat(this, option);
     }
 
     @Override
     public Path createDir() throws IOException {
-        fs.createDir(this);
+        LocalFileSystem.INSTANCE.createDir(this);
         return this;
     }
 
     @Override
     public Path createDir(Set<Permission> permissions) throws IOException {
-        fs.createDir(this, permissions);
+        LocalFileSystem.INSTANCE.createDir(this, permissions);
         return this;
     }
 
     @Override
     public Path createFile() throws IOException {
-        fs.createFile(this);
+        LocalFileSystem.INSTANCE.createFile(this);
         return this;
     }
 
     @Override
     public Path createSymbolicLink(Path target) throws IOException {
         // TODO verify target is LocalPath?
-        fs.createSymbolicLink(this, target);
+        LocalFileSystem.INSTANCE.createSymbolicLink(this, target);
         return this;
     }
 
     @Override
     public Path readSymbolicLink() throws IOException {
-        return fs.readSymbolicLink(this);
+        return LocalFileSystem.INSTANCE.readSymbolicLink(this);
     }
 
     @Override
     public void move(Path destination) throws IOException {
-        fs.move(this, destination); // TODO verify destination is LocalPath?
+        LocalFileSystem.INSTANCE.move(this, destination); // TODO verify destination is LocalPath?
     }
 
     @Override
     public void delete() throws IOException {
-        fs.delete(this);
+        LocalFileSystem.INSTANCE.delete(this);
     }
 
     @Override
     public boolean exists(LinkOption option) throws IOException {
-        return fs.exists(this, option);
+        return LocalFileSystem.INSTANCE.exists(this, option);
     }
 
     @Override
     public boolean isReadable() throws IOException {
-        return fs.isReadable(this);
+        return LocalFileSystem.INSTANCE.isReadable(this);
     }
 
     @Override
     public boolean isWritable() throws IOException {
-        return fs.isWritable(this);
+        return LocalFileSystem.INSTANCE.isWritable(this);
     }
 
     @Override
     public boolean isExecutable() throws IOException {
-        return fs.isExecutable(this);
+        return LocalFileSystem.INSTANCE.isExecutable(this);
     }
 
     @Override
@@ -212,7 +210,7 @@ public abstract class LocalPath extends Path {
             int watchLimit
     ) throws IOException, InterruptedException {
 
-        return fs.observe(
+        return LocalFileSystem.INSTANCE.observe(
                 this,
                 option,
                 observer,
@@ -224,17 +222,17 @@ public abstract class LocalPath extends Path {
 
     @Override
     public void list(LinkOption option, Consumer consumer) throws IOException {
-        fs.list(this, option, consumer);
+        LocalFileSystem.INSTANCE.list(this, option, consumer);
     }
 
     @Override
     public InputStream newInputStream() throws IOException {
-        return fs.newInputStream(this);
+        return LocalFileSystem.INSTANCE.newInputStream(this);
     }
 
     @Override
     public OutputStream newOutputStream(boolean append) throws IOException {
-        return fs.newOutputStream(this, append);
+        return LocalFileSystem.INSTANCE.newOutputStream(this, append);
     }
 
 }
