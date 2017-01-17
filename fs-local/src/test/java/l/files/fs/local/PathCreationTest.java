@@ -1,4 +1,4 @@
-package l.files.fs;
+package l.files.fs.local;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,6 +9,8 @@ import java.io.File;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+
+import l.files.fs.Path;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
@@ -66,38 +68,31 @@ public final class PathCreationTest {
 
     @Test
     public void path_is_as_expected() throws Exception {
-        Path actual = Path.fromString(sourcePathString);
+        Path actual = LocalPath.fromString(sourcePathString);
         assertEquals(expectedPath, actual.toString());
         assertAbsoluteness(actual);
     }
 
     @Test
     public void can_recreate_from_byte_array() throws Exception {
-        byte[] bytes = Path.fromString(sourcePathString).toByteArray();
-        String actual = Path.fromByteArray(bytes).toString();
+        byte[] bytes = LocalPath.fromString(sourcePathString).toByteArray();
+        String actual = LocalPath.fromByteArray(bytes).toString();
         assertEquals(expectedPath, actual);
     }
 
     @Test
     public void can_recreate_from_string() throws Exception {
-        String string = Path.fromString(sourcePathString).toString();
-        String actual = Path.fromString(string).toString();
-        assertEquals(expectedPath, actual);
-    }
-
-    @Test
-    public void can_recreate_from_file() throws Exception {
-        File file = Path.fromString(sourcePathString).toFile();
-        String actual = Path.fromFile(file).toString();
+        String string = LocalPath.fromString(sourcePathString).toString();
+        String actual = LocalPath.fromString(string).toString();
         assertEquals(expectedPath, actual);
     }
 
     @Test
     public void paths_are_equivalent_when_recreated() throws Exception {
-        Path p1 = Path.fromString(sourcePathString);
-        Path p2 = Path.fromString(p1.toString());
-        Path p3 = Path.fromByteArray(p2.toByteArray());
-        Path p4 = Path.fromFile(new File(sourcePathString));
+        Path p1 = LocalPath.fromString(sourcePathString);
+        Path p2 = LocalPath.fromString(p1.toString());
+        Path p3 = LocalPath.fromByteArray(p2.toByteArray());
+        Path p4 = LocalPath.fromFile(new File(sourcePathString));
         assertEquals(
                 toSet(expectedPath).toString(),
                 toSet(p1, p2, p3, p4).toString());
@@ -106,7 +101,7 @@ public final class PathCreationTest {
     @Test
     public void can_convert_to_absolute_path() throws Exception {
         String expected = new File(expectedPath).getAbsolutePath();
-        AbsolutePath actual = Path.fromString(sourcePathString).toAbsolutePath();
+        Path actual = LocalPath.fromString(sourcePathString).toAbsolutePath();
         assertEquals(expected, actual.toString());
     }
 

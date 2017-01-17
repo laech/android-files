@@ -1,4 +1,4 @@
-package l.files.fs;
+package l.files.fs.local;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -7,6 +7,8 @@ import org.junit.runners.Parameterized.Parameters;
 
 import java.util.Collection;
 import java.util.List;
+
+import l.files.fs.Path;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -19,7 +21,7 @@ public final class PathHierarchyTest {
     private final List<String> expectedHierarchy;
 
     public PathHierarchyTest(String path, List<String> expectedHierarchy) {
-        this.path = Path.fromString(path);
+        this.path = LocalPath.fromString(path);
         this.expectedHierarchy = expectedHierarchy;
     }
 

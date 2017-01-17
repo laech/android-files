@@ -1,4 +1,4 @@
-package l.files.fs;
+package l.files.fs.local;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -6,6 +6,8 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import java.util.Collection;
+
+import l.files.fs.Path;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
@@ -24,9 +26,9 @@ public final class PathRebaseTest {
             String newPrefix,
             String newPath) {
 
-        this.oldPath = Path.fromString(oldPath);
-        this.oldPrefix = Path.fromString(oldPrefix);
-        this.newPrefix = Path.fromString(newPrefix);
+        this.oldPath = LocalPath.fromString(oldPath);
+        this.oldPrefix = LocalPath.fromString(oldPrefix);
+        this.newPrefix = LocalPath.fromString(newPrefix);
         this.newPath = newPath;
     }
 

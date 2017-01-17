@@ -1,4 +1,4 @@
-package l.files.fs;
+package l.files.fs.local;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -8,6 +8,8 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import java.util.Collection;
+
+import l.files.fs.Path;
 
 import static java.util.Arrays.asList;
 
@@ -26,9 +28,9 @@ public final class PathRebaseInvalidTest {
             String oldPrefix,
             String newPrefix) {
 
-        this.oldPath = Path.fromString(oldPath);
-        this.oldPrefix = Path.fromString(oldPrefix);
-        this.newPrefix = Path.fromString(newPrefix);
+        this.oldPath = LocalPath.fromString(oldPath);
+        this.oldPrefix = LocalPath.fromString(oldPrefix);
+        this.newPrefix = LocalPath.fromString(newPrefix);
     }
 
     @Parameters(name = "\"{0}\".rebase(\"{1}\", \"{2}\") throws IllegalArgumentException")

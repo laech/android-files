@@ -1,4 +1,4 @@
-package l.files.fs;
+package l.files.fs.local;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -8,6 +8,8 @@ import org.junit.runners.Parameterized.Parameters;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+
+import l.files.fs.Path;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
@@ -19,8 +21,8 @@ public final class PathInequalityTest {
     private final Path path2;
 
     public PathInequalityTest(String path1, String path2) {
-        this.path1 = Path.fromString(path1);
-        this.path2 = Path.fromString(path2);
+        this.path1 = LocalPath.fromString(path1);
+        this.path2 = LocalPath.fromString(path2);
     }
 
     @Parameters(name = "!\"{0}\".equals(\"{1}\")")

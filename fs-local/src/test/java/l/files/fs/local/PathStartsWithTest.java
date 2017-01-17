@@ -1,4 +1,4 @@
-package l.files.fs;
+package l.files.fs.local;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -6,6 +6,8 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import java.util.Collection;
+
+import l.files.fs.Path;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
@@ -18,8 +20,8 @@ public final class PathStartsWithTest {
     private final boolean result;
 
     public PathStartsWithTest(String path, String startsWith, boolean result) {
-        this.path = Path.fromString(path);
-        this.startsWith = Path.fromString(startsWith);
+        this.path = LocalPath.fromString(path);
+        this.startsWith = LocalPath.fromString(startsWith);
         this.result = result;
     }
 

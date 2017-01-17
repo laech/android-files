@@ -1,4 +1,4 @@
-package l.files.fs;
+package l.files.fs.local;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -6,6 +6,8 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import java.util.Collection;
+
+import l.files.fs.Name;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
@@ -17,7 +19,7 @@ public final class NameExtensionTest {
     private final String expectedExtension;
 
     public NameExtensionTest(String name, String expectedExtension) {
-        this.name = Name.fromString(name);
+        this.name = LocalName.fromString(name);
         this.expectedExtension = expectedExtension;
     }
 

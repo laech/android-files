@@ -1,4 +1,4 @@
-package l.files.fs;
+package l.files.fs.local;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -6,6 +6,8 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import java.util.Collection;
+
+import l.files.fs.Path;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
@@ -95,9 +97,9 @@ public final class PathConcatTest {
 
     @Test
     public void concatenated_path_is_as_expected() throws Exception {
-        Path base = Path.fromString(basePath);
+        Path base = LocalPath.fromString(basePath);
         assertEquals(expectedPath, base.concat(additionalPath).toString());
         assertEquals(expectedPath, base.concat(additionalPath.getBytes("UTF-8")).toString());
-        assertEquals(expectedPath, base.concat(Path.fromString(additionalPath)).toString());
+        assertEquals(expectedPath, base.concat(LocalPath.fromString(additionalPath)).toString());
     }
 }

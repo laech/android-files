@@ -1,4 +1,4 @@
-package l.files.fs;
+package l.files.fs.local;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -8,6 +8,9 @@ import org.junit.runners.Parameterized.Parameters;
 import java.util.Collection;
 
 import javax.annotation.Nullable;
+
+import l.files.fs.Name;
+import l.files.fs.Path;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
@@ -21,7 +24,7 @@ public final class PathNameTest {
     private final String expectedName;
 
     public PathNameTest(String path, @Nullable String expectedName) {
-        this.path = Path.fromString(path);
+        this.path = LocalPath.fromString(path);
         this.expectedName = expectedName;
     }
 

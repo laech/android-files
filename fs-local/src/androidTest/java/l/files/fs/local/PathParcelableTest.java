@@ -1,4 +1,4 @@
-package l.files.fs;
+package l.files.fs.local;
 
 import android.os.Parcel;
 
@@ -9,21 +9,24 @@ import org.junit.runners.Parameterized.Parameters;
 
 import java.util.Collection;
 
+import l.files.fs.Path;
+
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
-public final class NameParcelableTest {
+public final class PathParcelableTest {
 
-    private final Name expected;
+    private final Path expected;
 
-    public NameParcelableTest(String expected) {
-        this.expected = Name.fromString(expected);
+    public PathParcelableTest(String expected) {
+        this.expected = LocalPath.fromString(expected);
     }
 
     @Parameters
     public static Collection<Object[]> data() {
         return asList(new Object[][]{
+                {"/abc"},
                 {"def"},
                 {""},
                 {"."},
@@ -37,7 +40,7 @@ public final class NameParcelableTest {
         Parcel parcel = Parcel.obtain();
         try {
             expected.writeToParcel(parcel, 0);
-            Name actual = Name.CREATOR.createFromParcel(parcel);
+            Path actual = LocalPath.CREATOR.createFromParcel(parcel);
             assertEquals(expected, actual);
         } finally {
             parcel.recycle();
