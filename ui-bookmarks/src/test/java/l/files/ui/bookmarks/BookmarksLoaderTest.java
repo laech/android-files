@@ -10,13 +10,14 @@ import java.util.List;
 import java.util.Set;
 
 import l.files.bookmarks.BookmarkManager;
-import l.files.fs.FileName;
+import l.files.fs.Name;
 import l.files.fs.Path;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 public final class BookmarksLoaderTest {
@@ -31,7 +32,7 @@ public final class BookmarksLoaderTest {
         given(context.getApplicationContext()).willReturn(context);
 
         home = mock(Path.class);
-        given(home.name()).willReturn(FileName.fromString("a"));
+        doReturn(mock(Name.class, "a")).when(home).name();
         bookmarks = mock(BookmarkManager.class);
         loader = new BookmarksLoader(context, bookmarks, home);
     }
@@ -67,7 +68,7 @@ public final class BookmarksLoaderTest {
 
     private Path mockFile(String name) {
         Path file = mock(Path.class);
-        given(file.name()).willReturn(FileName.fromString(name));
+        doReturn(mock(Name.class, name)).when(file).name();
         return file;
     }
 
