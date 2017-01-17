@@ -12,9 +12,9 @@ public final class SelectAllTest extends BaseFilesActivityTest {
 
     @Test
     public void selects_all() throws Exception {
-        Path a = fs.createFile(dir().concat("a"));
-        Path b = fs.createFile(dir().concat("b"));
-        Path c = fs.createDir(dir().concat("c"));
+        Path a = dir().concat("a").createFile();
+        Path b = dir().concat("b").createFile();
+        Path c = dir().concat("c").createDir();
 
         screen()
                 .longClick(a)
@@ -26,7 +26,7 @@ public final class SelectAllTest extends BaseFilesActivityTest {
 
     @Test
     public void finishes_action_mode_on_no_selection() throws Throwable {
-        Path a = fs.createFile(dir().concat("a"));
+        Path a = dir().concat("a").createFile();
         screen()
                 .longClick(a)
                 .assertActionModePresent(true)
