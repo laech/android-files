@@ -56,7 +56,7 @@ public final class FileSortSizeTest extends FileSortTest {
     protected Path createFile(String name, long size) throws IOException {
         Stat stat = mock(Stat.class);
         Path file = mock(Path.class);
-        doReturn(size).when(stat.size());
+        doReturn(size).when(stat).size();
         doReturn(true).when(stat).isRegularFile();
         doReturn(stat).when(file).stat(any(LinkOption.class));
         doReturn(mock(Name.class, name)).when(file).name();
