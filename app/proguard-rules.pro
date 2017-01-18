@@ -21,6 +21,8 @@
 
 -dontwarn com.caverock.androidsvg.**
 
+-dontwarn com.google.common.**
+
 # Defined as l_files_operations_listeners
 -keep class l.files.ui.operations.NotificationProvider
 
