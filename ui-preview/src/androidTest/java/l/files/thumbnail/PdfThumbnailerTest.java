@@ -7,9 +7,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import l.files.fs.Path;
-import l.files.fs.local.LocalFileSystem;
-import l.files.testing.fs.ExtendedFileSystem;
+import l.files.fs.local.LocalPath;
+import l.files.testing.fs.ExtendedPath;
 import l.files.ui.base.graphics.Rect;
 import l.files.ui.base.graphics.ScaledBitmap;
 
@@ -17,11 +16,8 @@ import static java.io.File.createTempFile;
 
 public final class PdfThumbnailerTest extends AndroidTestCase {
 
-    private final ExtendedFileSystem fs =
-            new ExtendedFileSystem(LocalFileSystem.INSTANCE);
-
     public void test_create_thumbnail_from_pdf() throws Exception {
-        Path path = createTestPdf();
+        ExtendedPath path = createTestPdf();
         try {
             Rect max = Rect.of(10, 100);
             ScaledBitmap result = newThumbnailer().create(path, max, getContext());
@@ -30,17 +26,17 @@ public final class PdfThumbnailerTest extends AndroidTestCase {
             assertTrue(result.originalSize().width() > max.width());
             assertTrue(result.originalSize().height() > max.height());
         } finally {
-            fs.deleteIfExists(path);
+            path.deleteIfExists();
         }
     }
 
-    private Path createTestPdf() throws IOException {
+    private ExtendedPath createTestPdf() throws IOException {
         File file = createTempFile("PdfThumbnailerTest", null);
         try {
-            Path path = Path.fromFile(file);
+            ExtendedPath path = ExtendedPath.wrap(LocalPath.fromFile(file));
             InputStream in = openTestPdf();
             try {
-                fs.copy(in, fs, path);
+                path.copy(in);
             } finally {
                 in.close();
             }
