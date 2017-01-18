@@ -42,6 +42,13 @@ public final class ExtendedPath extends ForwardingPath {
         return new ExtendedPath(path);
     }
 
+    public Path unwrap() {
+        if (delegate instanceof ExtendedPath) {
+            return ((ExtendedPath) delegate).unwrap();
+        }
+        return delegate;
+    }
+
     @Override
     public ExtendedPath concat(Name name) {
         return wrap(super.concat(name));

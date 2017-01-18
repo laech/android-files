@@ -60,18 +60,12 @@ public class ForwardingPath extends Path {
 
     @Override
     public int hashCode() {
-        return delegate.hashCode();
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof ForwardingPath) {
-            return equals(((ForwardingPath) o).delegate);
-        }
-        if (delegate instanceof ForwardingPath) {
-            return ((ForwardingPath) delegate).delegate.equals(o);
-        }
-        return delegate.equals(o);
+        throw new UnsupportedOperationException();
     }
 
     @Override
