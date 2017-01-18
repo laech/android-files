@@ -2,12 +2,14 @@ package l.files.ui.preview;
 
 import android.graphics.Bitmap;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
 import l.files.fs.Path;
 import l.files.fs.Stat;
-import l.files.fs.local.LocalFileSystem;
+import l.files.fs.local.LocalPath;
+import l.files.testing.fs.ExtendedPath;
 import l.files.testing.fs.PathBaseTest;
 import l.files.ui.base.graphics.Rect;
 
@@ -23,8 +25,9 @@ import static org.mockito.Mockito.verify;
 
 public final class PreviewTest extends PathBaseTest {
 
-    public PreviewTest() {
-        super(LocalFileSystem.INSTANCE);
+    @Override
+    protected Path create(File file) {
+        return LocalPath.fromFile(file);
     }
 
     private Preview newPreview() {
@@ -78,10 +81,10 @@ public final class PreviewTest extends PathBaseTest {
     }
 
     private void testPreviewSuccessForTestFile(String testFile, String dstFileName) throws Throwable {
-        Path file = dir1().concat(dstFileName);
+        ExtendedPath file = dir1().concat(dstFileName);
         InputStream in = getContext().getAssets().open(testFile);
         try {
-            fs.copy(in, fs, file);
+            file.copy(in);
         } finally {
             in.close();
         }
@@ -90,13 +93,13 @@ public final class PreviewTest extends PathBaseTest {
     }
 
     public void test_preview_proc_cpuinfo() throws Throwable {
-        testPreviewSuccess(Path.fromString("/proc/cpuinfo"));
+        testPreviewSuccess(LocalPath.fromString("/proc/cpuinfo"));
     }
 
     public void test_preview_link() throws Throwable {
-        Path file = fs.createFile(dir1().concat("file"));
-        Path link = fs.createSymbolicLink(dir1().concat("link"), file);
-        fs.writeUtf8(file, "hi");
+        ExtendedPath file = dir1().concat("file").createFile();
+        ExtendedPath link = dir1().concat("link").createSymbolicLink(file);
+        file.writeUtf8("hi");
         testPreviewSuccess(file);
         testPreviewSuccess(file);
         testPreviewSuccess(link);
@@ -104,25 +107,25 @@ public final class PreviewTest extends PathBaseTest {
     }
 
     public void test_preview_link_modified_target() throws Throwable {
-        Path file = fs.createFile(dir1().concat("file"));
-        Path link = fs.createSymbolicLink(dir1().concat("link"), file);
+        ExtendedPath file = dir1().concat("file").createFile();
+        ExtendedPath link = dir1().concat("link").createSymbolicLink(file);
         testPreviewFailure(link);
 
-        fs.writeUtf8(file, "hi");
+        file.writeUtf8("hi");
         testPreviewSuccess(link);
         testPreviewSuccess(link);
     }
 
     private void testPreviewSuccessForContent(String content) throws Throwable {
-        Path file = dir1().concat(String.valueOf(nanoTime()));
-        fs.writeUtf8(file, content);
+        ExtendedPath file = dir1().concat(String.valueOf(nanoTime()));
+        file.writeUtf8(content);
         testPreviewSuccess(file);
         testPreviewSuccess(file);
     }
 
     private void testPreviewSuccess(Path file) throws Throwable {
         Preview.Callback callback = mock(Preview.Callback.class);
-        Stat stat = fs.stat(file, FOLLOW);
+        Stat stat = file.stat(FOLLOW);
         Preview preview = newPreview();
         Rect max = Rect.of(100, 100);
         Decode task = preview.get(file, stat, max, callback);
@@ -152,7 +155,7 @@ public final class PreviewTest extends PathBaseTest {
 
     private void testPreviewFailure(Path file) throws IOException {
         Preview.Callback callback = mock(Preview.Callback.class);
-        Stat stat = fs.stat(file, NOFOLLOW);
+        Stat stat = file.stat(NOFOLLOW);
         Rect rect = Rect.of(10, 10);
         assertNull(newPreview().get(file, stat, rect, callback));
     }
