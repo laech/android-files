@@ -27,6 +27,8 @@ import l.files.fs.Stat;
 import l.files.fs.event.Observation;
 import l.files.fs.event.Observer;
 
+import static com.google.common.base.Charsets.UTF_8;
+
 public abstract class LocalPath extends Path {
 
     public static final Creator<LocalPath> CREATOR = new Creator<LocalPath>() {
@@ -42,8 +44,7 @@ public abstract class LocalPath extends Path {
         }
     };
 
-    static final Charset ENCODING =
-            Charset.forName(System.getProperty("sun.jnu.encoding"));
+    static final Charset ENCODING = UTF_8;
 
     public static LocalPath fromFile(File file) {
         return fromString(file.getPath());
