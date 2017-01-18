@@ -44,43 +44,47 @@ public final class ExtendedPath extends ForwardingPath {
 
     @Override
     public ExtendedPath concat(Name name) {
-        return new ExtendedPath(super.concat(name));
+        return wrap(super.concat(name));
     }
 
     @Override
     public ExtendedPath concat(Path path) {
-        return new ExtendedPath(super.concat(path));
+        return wrap(super.concat(path));
     }
 
     @Override
     public ExtendedPath concat(String path) {
-        return new ExtendedPath(super.concat(path));
+        return wrap(super.concat(path));
     }
 
     @Override
     public ExtendedPath concat(byte[] path) {
-        return new ExtendedPath(super.concat(path));
+        return wrap(super.concat(path));
     }
 
     @Override
     public ExtendedPath createDir() throws IOException {
-        return (ExtendedPath) super.createDir();
+        super.createDir();
+        return this;
     }
 
     @Override
     public ExtendedPath createDir(Set<Permission> permissions)
             throws IOException {
-        return (ExtendedPath) super.createDir(permissions);
+        super.createDir(permissions);
+        return this;
     }
 
     @Override
     public ExtendedPath createFile() throws IOException {
-        return (ExtendedPath) super.createFile();
+        super.createFile();
+        return this;
     }
 
     @Override
     public ExtendedPath createSymbolicLink(Path target) throws IOException {
-        return (ExtendedPath) super.createSymbolicLink(target);
+        super.createSymbolicLink(target);
+        return this;
     }
 
     public Observation observe(LinkOption option, Observer observer)
@@ -221,7 +225,7 @@ public final class ExtendedPath extends ForwardingPath {
 
             @Override
             public Result onPostVisit(Path path) throws IOException {
-                new ExtendedPath(path).deleteIfExists();
+                wrap(path).deleteIfExists();
                 return super.onPostVisit(path);
             }
 
