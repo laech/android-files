@@ -25,7 +25,6 @@ android {
 
 dependencies {
 
-    compile project(':premium')
     compile project(':operations')
     compile project(':ui-base')
 

@@ -26,8 +26,6 @@ import javax.annotation.Nullable;
 
 import l.files.base.Provider;
 import l.files.fs.Path;
-import l.files.premium.ConsumeTestPurchasesOnDebugMenu;
-import l.files.premium.PremiumLock;
 import l.files.ui.base.app.OptionsMenus;
 import l.files.ui.base.fs.FileInfo;
 import l.files.ui.base.selection.SelectionModeFragment;
@@ -61,8 +59,6 @@ import static android.support.v7.widget.StaggeredGridLayoutManager.VERTICAL;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.unmodifiableList;
-import static l.files.premium.PremiumLock.isPremiumPreferenceKey;
 import static l.files.ui.base.fs.IOExceptions.message;
 import static l.files.ui.base.view.Views.find;
 import static l.files.ui.browser.FilesAdapter.VIEW_TYPE_FILE;
@@ -194,8 +190,7 @@ public final class FilesFragment
                 selection(),
                 actionModeProvider(),
                 actionModeCallback(),
-                (FilesActivity) getActivity(),
-                ((FilesActivity) getActivity()).getPremiumLock()));
+                (FilesActivity) getActivity()));
 
         setupOptionsMenu();
         setHasOptionsMenu(true);
@@ -287,7 +282,6 @@ public final class FilesFragment
 
     private void setupOptionsMenu() {
         FilesActivity activity = (FilesActivity) getActivity();
-        PremiumLock premiumLock = activity.getPremiumLock();
         FragmentManager manager = activity.getSupportFragmentManager();
         setOptionsMenu(OptionsMenus.compose(
                 new RefreshMenu(autoRefreshDisable(), refresh()),
@@ -295,8 +289,7 @@ public final class FilesFragment
                 new NewDirMenu(manager, directory),
                 new PasteMenu(activity, directory),
                 new SortMenu(manager),
-                new ShowHiddenFilesMenu(activity),
-                new ConsumeTestPurchasesOnDebugMenu(premiumLock)
+                new ShowHiddenFilesMenu(activity)
         ));
     }
 
@@ -381,19 +374,8 @@ public final class FilesFragment
 
             updateSelection(data);
 
-            // TODO make this cleaner
-            List<Object> items;
-            if (!((FilesActivity) getActivity()).getPremiumLock().isUnlocked()
-                    && !data.items().isEmpty()) {
-                items = new ArrayList<>();
-                items.add(Ad.INSTANCE);
-                items.addAll(data.items());
-                items = unmodifiableList(items);
-            } else {
-                items = data.items();
-            }
             assert adapter != null;
-            adapter.setItems(items);
+            adapter.setItems(data.items());
 
             IOException e = data.exception();
             if (e != null) {
@@ -449,10 +431,6 @@ public final class FilesFragment
         } else if (isSortKey(key)) {
             loader.setSort(getSort(activity));
 
-        } else if (isPremiumPreferenceKey(key)
-                && activity.getPremiumLock().isUnlocked()) {
-            assert adapter != null;
-            adapter.removeAd();
         }
     }
 

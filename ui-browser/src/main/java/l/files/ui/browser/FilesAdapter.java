@@ -11,12 +11,10 @@ import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import l.files.fs.Path;
-import l.files.premium.PremiumLock;
 import l.files.ui.base.app.LifeCycleListenable;
 import l.files.ui.base.fs.FileInfo;
 import l.files.ui.base.fs.OnOpenFileListener;
@@ -33,7 +31,6 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
 
     static final int VIEW_TYPE_FILE = 0;
     static final int VIEW_TYPE_HEADER = 1;
-    static final int VIEW_TYPE_AD = 2;
 
     private final ActionModeProvider actionModeProvider;
     private final ActionMode.Callback actionModeCallback;
@@ -41,7 +38,6 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
 
     private final OnOpenFileListener listener;
 
-    private final PremiumLock premiumLock;
     private final LifeCycleListenable listenable;
     private final RecyclerView recyclerView;
 
@@ -51,12 +47,10 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
             Selection<Path, FileInfo> selection,
             ActionModeProvider actionModeProvider,
             ActionMode.Callback actionModeCallback,
-            OnOpenFileListener listener,
-            PremiumLock premiumLock) {
+            OnOpenFileListener listener) {
 
         this.recyclerView = requireNonNull(recyclerView);
         this.listenable = requireNonNull(listenable);
-        this.premiumLock = requireNonNull(premiumLock);
         this.actionModeProvider = requireNonNull(actionModeProvider);
         this.actionModeCallback = requireNonNull(actionModeCallback);
         this.listener = requireNonNull(listener);
@@ -70,8 +64,6 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
             return VIEW_TYPE_FILE;
         } else if (item instanceof Header) {
             return VIEW_TYPE_HEADER;
-        } else if (item instanceof Ad) {
-            return VIEW_TYPE_AD;
         } else {
             throw new IllegalArgumentException(String.valueOf(item));
         }
@@ -97,12 +89,6 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
                 return new HeaderViewHolder(
                         inflater.inflate(HeaderViewHolder.LAYOUT_ID, parent, false));
 
-            case VIEW_TYPE_AD:
-                return new AdViewHolder(
-                        inflater.inflate(AdViewHolder.LAYOUT_ID, parent, false),
-                        listenable,
-                        premiumLock);
-
             default:
                 throw new IllegalArgumentException(String.valueOf(viewType));
         }
@@ -115,8 +101,6 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
             ((HeaderViewHolder) holder).bind((Header) item);
         } else if (holder instanceof FileViewHolder) {
             ((FileViewHolder) holder).bind((FileInfo) item, payloads);
-        } else if (holder instanceof AdViewHolder) {
-            ((AdViewHolder) holder).bind();
         } else {
             throw new IllegalArgumentException(String.valueOf(item));
         }
@@ -147,19 +131,6 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
             }
         }
         selection.addAll(files);
-    }
-
-    void removeAd() {
-        List<Object> oldItems = items();
-        List<Object> newItems = new ArrayList<>(oldItems.size());
-        for (Object item : oldItems) {
-            if (!(item instanceof Ad)) {
-                newItems.add(item);
-            }
-        }
-        if (newItems.size() != oldItems.size()) {
-            setItems(newItems);
-        }
     }
 
     static int calculateCardContentWidthPixels(CardView card, int columns) {

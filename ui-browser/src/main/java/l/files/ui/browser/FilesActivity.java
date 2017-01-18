@@ -24,7 +24,6 @@ import java.util.List;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.fs.local.LocalPath;
-import l.files.premium.PremiumLock;
 import l.files.ui.base.app.BaseActivity;
 import l.files.ui.base.app.OptionsMenus;
 import l.files.ui.base.fs.OnOpenFileListener;
@@ -65,8 +64,6 @@ public final class FilesActivity extends BaseActivity implements
     private Toolbar toolbar;
     private Spinner title;
     private DrawerArrowDrawable navigationIcon;
-
-    private PremiumLock premiumLock;
 
     public List<Path> hierarchy() {
         return hierarchy.get();
@@ -135,13 +132,10 @@ public final class FilesActivity extends BaseActivity implements
             }
         });
 
-        premiumLock = new PremiumLock(this);
-        premiumLock.onCreate();
     }
 
     @Override
     protected void onDestroy() {
-        premiumLock.onDestroy();
         getSupportFragmentManager().removeOnBackStackChangedListener(this);
         super.onDestroy();
     }
@@ -149,11 +143,6 @@ public final class FilesActivity extends BaseActivity implements
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        premiumLock.onActivityResult(requestCode, resultCode, data);
-    }
-
-    PremiumLock getPremiumLock() {
-        return premiumLock;
     }
 
     @Override

@@ -31,8 +31,6 @@ dependencies {
     compile project(':ui-preview')
     compile project(':ui-operations')
     compile project(':ui-bookmarks')
-    compile project(':premium')
-    compile "com.google.firebase:firebase-ads:$firebaseVersion"
 
     androidTestCompile project(':testing-fs')
 
