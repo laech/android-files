@@ -32,24 +32,24 @@ public final class ThumbnailDiskCacheTest
         ScaledBitmap value = newValue();
 
         Path cacheFile = cache.cacheFile(file, stat, constraint, true);
-        assertFalse(fs.exists(cacheFile, NOFOLLOW));
+        assertFalse(cacheFile.exists(NOFOLLOW));
 
         cache.put(file, stat, constraint, value);
-        assertTrue(fs.exists(cacheFile, NOFOLLOW));
+        assertTrue(cacheFile.exists(NOFOLLOW));
 
         cache.cleanup();
-        assertTrue(fs.exists(cacheFile, NOFOLLOW));
+        assertTrue(cacheFile.exists(NOFOLLOW));
 
-        fs.setLastModifiedTime(cacheFile, NOFOLLOW, Instant.ofMillis(
+        cacheFile.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(
                 currentTimeMillis() - DAYS.toMillis(29)));
         cache.cleanup();
-        assertTrue(fs.exists(cacheFile, NOFOLLOW));
+        assertTrue(cacheFile.exists(NOFOLLOW));
 
-        fs.setLastModifiedTime(cacheFile, NOFOLLOW, Instant.ofMillis(
+        cacheFile.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(
                 currentTimeMillis() - DAYS.toMillis(31)));
         cache.cleanup();
-        assertFalse(fs.exists(cacheFile, NOFOLLOW));
-        assertFalse(fs.exists(cacheFile.parent(), NOFOLLOW));
+        assertFalse(cacheFile.exists(NOFOLLOW));
+        assertFalse(cacheFile.parent().exists(NOFOLLOW));
     }
 
     public void test_updates_modified_time_on_read() throws Exception {
@@ -60,11 +60,11 @@ public final class ThumbnailDiskCacheTest
 
         Path cacheFile = cache.cacheFile(file, stat, constraint, true);
         Instant oldTime = Instant.ofMillis(1000);
-        fs.setLastModifiedTime(cacheFile, NOFOLLOW, oldTime);
-        assertEquals(oldTime, fs.stat(cacheFile, NOFOLLOW).lastModifiedTime());
+        cacheFile.setLastModifiedTime(NOFOLLOW, oldTime);
+        assertEquals(oldTime, cacheFile.stat(NOFOLLOW).lastModifiedTime());
 
         cache.get(file, stat, constraint, true);
-        Instant newTime = fs.stat(cacheFile, NOFOLLOW).lastModifiedTime();
+        Instant newTime = cacheFile.stat(NOFOLLOW).lastModifiedTime();
         assertNotEqual(oldTime, newTime);
         assertTrue(oldTime.to(DAYS) < newTime.to(DAYS));
     }
