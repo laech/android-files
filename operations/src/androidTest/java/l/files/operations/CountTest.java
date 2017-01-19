@@ -15,7 +15,7 @@ public final class CountTest extends PathBaseTest {
 
     @Override
     protected Path create(File file) {
-        return LocalPath.fromFile(file);
+        return LocalPath.create(file);
     }
 
     public void test_count() throws Exception {

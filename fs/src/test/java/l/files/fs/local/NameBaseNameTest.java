@@ -19,7 +19,7 @@ public final class NameBaseNameTest {
     private final String expectedBaseName;
 
     public NameBaseNameTest(String name, String expectedBaseName) {
-        this.name = LocalName.fromString(name);
+        this.name = LocalName.create(name);
         this.expectedBaseName = expectedBaseName;
     }
 

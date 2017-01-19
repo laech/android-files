@@ -31,7 +31,7 @@ public final class ManualInspectionTest extends InstrumentationTestCase {
 
     @Test
     public void test() throws Exception {
-        ExtendedPath dir = ExtendedPath.wrap(LocalPath.fromFile(
+        ExtendedPath dir = ExtendedPath.wrap(LocalPath.create(
                 getExternalStorageDirectory()).concat("test"));
         dir.createDirs();
         try {
@@ -83,7 +83,7 @@ public final class ManualInspectionTest extends InstrumentationTestCase {
         byte[] nonUtf8 = {-19, -96, -67, -19, -80, -117};
         assertNotEqual(nonUtf8.clone(), new String(nonUtf8.clone(), UTF_8).getBytes(UTF_8));
 
-        Path dir = LocalPath.fromFile(getExternalStorageDirectory()).concat(nonUtf8);
+        Path dir = LocalPath.create(getExternalStorageDirectory()).concat(nonUtf8);
         Path child = dir.concat("good we can see this dir");
 
         try {

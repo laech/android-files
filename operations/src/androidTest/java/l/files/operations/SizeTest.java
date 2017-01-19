@@ -13,7 +13,7 @@ public final class SizeTest extends PathBaseTest {
 
     @Override
     protected Path create(File file) {
-        return LocalPath.fromFile(file);
+        return LocalPath.create(file);
     }
 
     public void test_size() throws Exception {

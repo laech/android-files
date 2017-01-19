@@ -33,7 +33,7 @@ public final class PdfThumbnailerTest extends AndroidTestCase {
     private ExtendedPath createTestPdf() throws IOException {
         File file = createTempFile("PdfThumbnailerTest", null);
         try {
-            ExtendedPath path = ExtendedPath.wrap(LocalPath.fromFile(file));
+            ExtendedPath path = ExtendedPath.wrap(LocalPath.create(file));
             InputStream in = openTestPdf();
             try {
                 path.copy(in);

@@ -13,7 +13,7 @@ public final class LocalStatTest extends PathBaseTest {
 
     @Override
     protected Path create(File file) {
-        return LocalPath.fromFile(file);
+        return LocalPath.create(file);
     }
 
     public void test_can_create_from_parcel() throws Exception {

@@ -13,7 +13,7 @@ public final class FilesTest extends PathBaseTest {
 
     @Override
     protected Path create(File file) {
-        return LocalPath.fromFile(file);
+        return LocalPath.create(file);
     }
 
     private Path createFile(String name) throws IOException {

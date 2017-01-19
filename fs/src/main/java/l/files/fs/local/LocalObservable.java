@@ -322,7 +322,7 @@ final class LocalObservable extends Native
 
                         byte[] childPath = child.toByteArray();
                         int wd = inotify.addWatch(fd, childPath, CHILD_DIR_MASK);
-                        childDirs.put(wd, LocalName.fromByteArray(name));
+                        childDirs.put(wd, LocalName.create(name));
 
                     } catch (ErrnoException e) {
                         handleAddChildDirWatchFailure(e);
@@ -531,7 +531,7 @@ final class LocalObservable extends Native
 
             } else {
                 throw new RuntimeException(eventNames(event) + ": " +
-                        (child != null ? LocalName.fromByteArray(child) : null));
+                        (child != null ? LocalName.create(child) : null));
             }
 
         } else {
@@ -548,7 +548,7 @@ final class LocalObservable extends Native
     }
 
     private void observer(Event kind, @Nullable byte[] name) {
-        notifyEventOrClose(kind, name == null ? null : LocalName.fromByteArray(name));
+        notifyEventOrClose(kind, name == null ? null : LocalName.create(name));
     }
 
     private void observer(Event kind, Name name) {
@@ -580,7 +580,7 @@ final class LocalObservable extends Native
 
             byte[] path = child.toByteArray();
             int wd = inotify.addWatch(fd, path, CHILD_DIR_MASK);
-            childDirs.put(wd, LocalName.fromByteArray(name));
+            childDirs.put(wd, LocalName.create(name));
 
         } catch (ErrnoException e) {
             handleAddChildDirWatchFailure(e);
@@ -619,7 +619,7 @@ final class LocalObservable extends Native
     }
 
     private void removeChildWatch(byte[] child) {
-        Integer wd = childDirs.remove2(LocalName.fromByteArray(child));
+        Integer wd = childDirs.remove2(LocalName.create(child));
         if (wd != null) {
             try {
                 inotify.removeWatch(fd, wd);

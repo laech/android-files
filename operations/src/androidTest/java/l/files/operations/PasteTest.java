@@ -20,7 +20,7 @@ public abstract class PasteTest extends PathBaseTest {
 
     @Override
     protected Path create(File file) {
-        return LocalPath.fromFile(file);
+        return LocalPath.create(file);
     }
 
     /**

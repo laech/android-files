@@ -27,7 +27,7 @@ public final class PreviewTest extends PathBaseTest {
 
     @Override
     protected Path create(File file) {
-        return LocalPath.fromFile(file);
+        return LocalPath.create(file);
     }
 
     private Preview newPreview() {
@@ -93,7 +93,7 @@ public final class PreviewTest extends PathBaseTest {
     }
 
     public void test_preview_proc_cpuinfo() throws Throwable {
-        testPreviewSuccess(LocalPath.fromString("/proc/cpuinfo"));
+        testPreviewSuccess(LocalPath.create("/proc/cpuinfo"));
     }
 
     public void test_preview_link() throws Throwable {

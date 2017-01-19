@@ -181,7 +181,7 @@ final class LocalFileSystem extends Native {
     Path readSymbolicLink(Path path) throws IOException {
         try {
             byte[] link = Unistd.readlink(path.toByteArray());
-            return LocalPath.fromByteArray(link);
+            return LocalPath.create(link);
         } catch (ErrnoException e) {
             throw ErrnoExceptions.toIOException(e, path);
         }

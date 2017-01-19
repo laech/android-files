@@ -26,9 +26,9 @@ public final class PathRebaseTest {
             String newPrefix,
             String newPath) {
 
-        this.oldPath = LocalPath.fromString(oldPath);
-        this.oldPrefix = LocalPath.fromString(oldPrefix);
-        this.newPrefix = LocalPath.fromString(newPrefix);
+        this.oldPath = LocalPath.create(oldPath);
+        this.oldPrefix = LocalPath.create(oldPrefix);
+        this.newPrefix = LocalPath.create(newPrefix);
         this.newPath = newPath;
     }
 

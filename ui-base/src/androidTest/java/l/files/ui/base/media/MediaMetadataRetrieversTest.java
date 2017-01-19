@@ -77,7 +77,7 @@ public final class MediaMetadataRetrieversTest extends AndroidTestCase {
     private Path createTestFile(String name) throws IOException {
         File file = createTempFile("MediaMetadataRetrieversTest", null);
         try {
-            Path path = LocalPath.fromFile(file);
+            Path path = LocalPath.create(file);
             InputStream in = getContext().getAssets().open(name);
             try {
                 ExtendedPath.wrap(path).copy(in);

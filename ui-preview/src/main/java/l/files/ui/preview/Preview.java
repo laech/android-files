@@ -30,7 +30,7 @@ public final class Preview {
                 if (dir == null) {
                     dir = context.getCacheDir();
                 }
-                Path cacheDir = LocalPath.fromFile(dir);
+                Path cacheDir = LocalPath.create(dir);
                 instance = new Preview(context.getApplicationContext(), cacheDir);
                 instance.cleanupAsync();
             }

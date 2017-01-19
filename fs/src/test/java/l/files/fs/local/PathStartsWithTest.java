@@ -20,8 +20,8 @@ public final class PathStartsWithTest {
     private final boolean result;
 
     public PathStartsWithTest(String path, String startsWith, boolean result) {
-        this.path = LocalPath.fromString(path);
-        this.startsWith = LocalPath.fromString(startsWith);
+        this.path = LocalPath.create(path);
+        this.startsWith = LocalPath.create(startsWith);
         this.result = result;
     }
 

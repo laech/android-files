@@ -19,7 +19,7 @@ public final class PathIsHiddenTest {
     private final boolean hidden;
 
     public PathIsHiddenTest(String path, boolean hidden) {
-        this.path = LocalPath.fromString(path);
+        this.path = LocalPath.create(path);
         this.hidden = hidden;
     }
 

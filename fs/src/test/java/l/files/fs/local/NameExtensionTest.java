@@ -19,7 +19,7 @@ public final class NameExtensionTest {
     private final String expectedExtension;
 
     public NameExtensionTest(String name, String expectedExtension) {
-        this.name = LocalName.fromString(name);
+        this.name = LocalName.create(name);
         this.expectedExtension = expectedExtension;
     }
 

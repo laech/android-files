@@ -35,13 +35,13 @@ final class BookmarkManagerImpl extends BookmarkManager {
 
     private Set<Path> createDefaultBookmarks() {
         Set<Path> defaults = new HashSet<>();
-        addIfExists(defaults, LocalPath.fromFile(getExternalStorageDirectory()));
+        addIfExists(defaults, LocalPath.create(getExternalStorageDirectory()));
         addIfExists(defaults, externalStoragePath(DIRECTORY_DCIM));
         addIfExists(defaults, externalStoragePath(DIRECTORY_MUSIC));
         addIfExists(defaults, externalStoragePath(DIRECTORY_MOVIES));
         addIfExists(defaults, externalStoragePath(DIRECTORY_PICTURES));
         addIfExists(defaults, externalStoragePath(DIRECTORY_DOWNLOADS));
-        addIfExists(defaults, LocalPath.fromString("/sdcard2"));
+        addIfExists(defaults, LocalPath.create("/sdcard2"));
         return unmodifiableSet(defaults);
     }
 
@@ -59,7 +59,7 @@ final class BookmarkManagerImpl extends BookmarkManager {
     }
 
     private static Path externalStoragePath(String name) {
-        return LocalPath.fromFile(new File(getExternalStorageDirectory(), name));
+        return LocalPath.create(new File(getExternalStorageDirectory(), name));
     }
 
     private final Set<Path> bookmarks;
@@ -76,7 +76,7 @@ final class BookmarkManagerImpl extends BookmarkManager {
         Set<Path> paths = new HashSet<>();
         for (String uriString : uriStrings) {
             try {
-                Path path = LocalPath.fromFile(new File(new URI(uriString)));
+                Path path = LocalPath.create(new File(new URI(uriString)));
                 try {
                     if (exists(path)) {
                         paths.add(path);
@@ -108,7 +108,7 @@ final class BookmarkManagerImpl extends BookmarkManager {
     private static Path decode(String encoded) {
         String[] parts = encoded.split(":");
         if (parts.length == 2) {
-            return LocalPath.fromByteArray(Base64.decode(parts[1], Base64.DEFAULT));
+            return LocalPath.create(Base64.decode(parts[1], Base64.DEFAULT));
         } else {
             throw new IllegalArgumentException("Invalid bookmark: " + encoded);
         }

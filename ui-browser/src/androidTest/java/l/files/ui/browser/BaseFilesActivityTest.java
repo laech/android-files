@@ -71,7 +71,7 @@ public class BaseFilesActivityTest {
 
     @Before
     public void setUp() throws Exception {
-        dir = ExtendedPath.wrap(LocalPath.fromFile(createTempFolder()));
+        dir = ExtendedPath.wrap(LocalPath.create(createTempFolder()));
         setActivityIntent(newIntent(dir));
         screen = new UiFileActivity(
                 getInstrumentation(),
@@ -187,7 +187,7 @@ public class BaseFilesActivityTest {
          * The bug: "a" gets renamed to "A", instead of displaying only
          * "A", both "a" and "A" are displayed.
          */
-        ExtendedPath dir = ExtendedPath.wrap(LocalPath.fromFile(
+        ExtendedPath dir = ExtendedPath.wrap(LocalPath.create(
                 getExternalStorageDirectory()).concat(name));
         ExtendedPath src = dir.concat("z");
         ExtendedPath dst = dir.concat("Z");

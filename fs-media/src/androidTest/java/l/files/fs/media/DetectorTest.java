@@ -12,7 +12,7 @@ public final class DetectorTest extends PathBaseTest {
 
     @Override
     protected Path create(File file) {
-        return LocalPath.fromFile(file);
+        return LocalPath.create(file);
     }
 
     private Detector detector() {

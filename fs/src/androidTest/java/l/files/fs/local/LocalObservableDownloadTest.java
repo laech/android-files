@@ -44,7 +44,7 @@ public final class LocalObservableDownloadTest extends PathBaseTest {
 
     @Override
     protected Path create(File file) {
-        return LocalPath.fromFile(file);
+        return LocalPath.create(file);
     }
 
     @Before
@@ -163,7 +163,7 @@ public final class LocalObservableDownloadTest extends PathBaseTest {
     }
 
     private Path downloadsDir() {
-        return LocalPath.fromFile(getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS));
+        return LocalPath.create(getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS));
     }
 
 }

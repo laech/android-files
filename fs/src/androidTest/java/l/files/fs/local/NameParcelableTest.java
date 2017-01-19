@@ -20,7 +20,7 @@ public final class NameParcelableTest {
     private final Name expected;
 
     public NameParcelableTest(String expected) {
-        this.expected = LocalName.fromString(expected);
+        this.expected = LocalName.create(expected);
     }
 
     @Parameters

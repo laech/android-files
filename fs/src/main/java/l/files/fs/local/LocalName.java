@@ -40,15 +40,15 @@ final class LocalName extends Name {
     /**
      * @throws IllegalArgumentException if name is empty, or contains '/', or contains '\0'
      */
-    static LocalName fromByteArray(byte[] bytes) {
+    static LocalName create(byte[] bytes) {
         return new LocalName(bytes, 0, bytes.length);
     }
 
     /**
      * @throws IllegalArgumentException if name is empty, or contains '/', or contains '\0'
      */
-    public static LocalName fromString(String name) {
-        return fromByteArray(name.getBytes(LocalPath.ENCODING));
+    public static LocalName create(String name) {
+        return create(name.getBytes(LocalPath.ENCODING));
     }
 
     private static byte[] validateName(byte[] bytes) {
@@ -144,7 +144,7 @@ final class LocalName extends Name {
 
         @Override
         public LocalName createFromParcel(Parcel source) {
-            return fromByteArray(source.createByteArray());
+            return create(source.createByteArray());
         }
 
         @Override

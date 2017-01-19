@@ -135,7 +135,7 @@ abstract class PersistenceCache<V> extends MemCache<Path, V> {
                     short len = in.readShort();
                     byte[] bytes = new byte[len];
                     in.readFully(bytes);
-                    Path key = LocalPath.fromByteArray(bytes); // TODO
+                    Path key = LocalPath.create(bytes); // TODO
                     long time = in.readLong();
                     V value = read(in);
 

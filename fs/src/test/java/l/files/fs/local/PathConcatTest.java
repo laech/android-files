@@ -98,9 +98,9 @@ public final class PathConcatTest {
 
     @Test
     public void concatenated_path_is_as_expected() throws Exception {
-        Path base = LocalPath.fromString(basePath);
+        Path base = LocalPath.create(basePath);
         assertEquals(expectedPath, base.concat(additionalPath).toString());
         assertEquals(expectedPath, base.concat(additionalPath.getBytes(UTF_8)).toString());
-        assertEquals(expectedPath, base.concat(LocalPath.fromString(additionalPath)).toString());
+        assertEquals(expectedPath, base.concat(LocalPath.create(additionalPath)).toString());
     }
 }

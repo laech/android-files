@@ -70,7 +70,7 @@ public final class LocalObservableTest extends PathBaseTest {
 
     @Override
     protected Path create(File file) {
-        return LocalPath.fromFile(file);
+        return LocalPath.create(file);
     }
 
     public void test_able_to_continue_observing_existing_dirs_when_new_dir_added_is_not_observable()
@@ -123,7 +123,7 @@ public final class LocalObservableTest extends PathBaseTest {
         Tracker tracker = registerMockTracker();
         try {
             Recorder observer = observe(
-                    LocalPath.fromString("/proc/self"), FOLLOW, false);
+                    LocalPath.create("/proc/self"), FOLLOW, false);
             try {
                 assertTrue(observer.isClosed());
                 verifyZeroInteractions(tracker);
@@ -368,7 +368,7 @@ public final class LocalObservableTest extends PathBaseTest {
     }
 
     private int maxUserInstances() throws IOException {
-        ExtendedPath limitFile = ExtendedPath.wrap(LocalPath.fromString(
+        ExtendedPath limitFile = ExtendedPath.wrap(LocalPath.create(
                 "/proc/sys/fs/inotify/max_user_instances"));
         return parseInt(limitFile.readAllUtf8().trim());
     }
@@ -1047,7 +1047,7 @@ public final class LocalObservableTest extends PathBaseTest {
         public void onWatchAdded(int fd, byte[] path, int mask, int wd) {
             super.onWatchAdded(fd, path, mask, wd);
             if (this.fd == fd) {
-                this.allChildWds.put(LocalPath.fromByteArray(path), wd);
+                this.allChildWds.put(LocalPath.create(path), wd);
                 this.validChildWds.add(wd);
             }
         }

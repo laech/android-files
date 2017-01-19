@@ -12,9 +12,9 @@ public final class UserDirs {
     private UserDirs() {
     }
 
-    public static final Path DIR_SDCARD2 = LocalPath.fromString("/sdcard2");
-    public static final Path DIR_ROOT = LocalPath.fromString("/");
-    public static final Path DIR_HOME = LocalPath.fromFile(getExternalStorageDirectory());
+    public static final Path DIR_SDCARD2 = LocalPath.create("/sdcard2");
+    public static final Path DIR_ROOT = LocalPath.create("/");
+    public static final Path DIR_HOME = LocalPath.create(getExternalStorageDirectory());
     public static final Path DIR_DCIM = dir(Environment.DIRECTORY_DCIM);
     public static final Path DIR_DOWNLOADS = dir(Environment.DIRECTORY_DOWNLOADS);
     public static final Path DIR_MOVIES = dir(Environment.DIRECTORY_MOVIES);
@@ -22,7 +22,7 @@ public final class UserDirs {
     public static final Path DIR_PICTURES = dir(Environment.DIRECTORY_PICTURES);
 
     private static Path dir(String type) {
-        return LocalPath.fromFile(getExternalStoragePublicDirectory(type));
+        return LocalPath.create(getExternalStoragePublicDirectory(type));
     }
 
 }

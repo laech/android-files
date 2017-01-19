@@ -24,7 +24,7 @@ public final class PathNameTest {
     private final String expectedName;
 
     public PathNameTest(String path, @Nullable String expectedName) {
-        this.path = LocalPath.fromString(path);
+        this.path = LocalPath.create(path);
         this.expectedName = expectedName;
     }
 

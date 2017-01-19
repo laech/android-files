@@ -50,7 +50,7 @@ public final class FilesTest extends PathBaseTest {
 
     @Override
     protected Path create(File file) {
-        return LocalPath.fromFile(file);
+        return LocalPath.create(file);
     }
 
     public void test_can_handle_invalid_utf_8_path() throws Exception {

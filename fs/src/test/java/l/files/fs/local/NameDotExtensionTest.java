@@ -43,7 +43,7 @@ public final class NameDotExtensionTest {
 
     @Test
     public void dot_extension_is_expected() throws Exception {
-        Name nameObject = LocalName.fromString(name);
+        Name nameObject = LocalName.create(name);
         assertEquals(nameObject.base() + nameObject.dotExtension(), name);
     }
 }

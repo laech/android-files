@@ -68,31 +68,31 @@ public final class PathCreationTest {
 
     @Test
     public void path_is_as_expected() throws Exception {
-        Path actual = LocalPath.fromString(sourcePathString);
+        Path actual = LocalPath.create(sourcePathString);
         assertEquals(expectedPath, actual.toString());
         assertAbsoluteness(actual);
     }
 
     @Test
     public void can_recreate_from_byte_array() throws Exception {
-        byte[] bytes = LocalPath.fromString(sourcePathString).toByteArray();
-        String actual = LocalPath.fromByteArray(bytes).toString();
+        byte[] bytes = LocalPath.create(sourcePathString).toByteArray();
+        String actual = LocalPath.create(bytes).toString();
         assertEquals(expectedPath, actual);
     }
 
     @Test
     public void can_recreate_from_string() throws Exception {
-        String string = LocalPath.fromString(sourcePathString).toString();
-        String actual = LocalPath.fromString(string).toString();
+        String string = LocalPath.create(sourcePathString).toString();
+        String actual = LocalPath.create(string).toString();
         assertEquals(expectedPath, actual);
     }
 
     @Test
     public void paths_are_equivalent_when_recreated() throws Exception {
-        Path p1 = LocalPath.fromString(sourcePathString);
-        Path p2 = LocalPath.fromString(p1.toString());
-        Path p3 = LocalPath.fromByteArray(p2.toByteArray());
-        Path p4 = LocalPath.fromFile(new File(sourcePathString));
+        Path p1 = LocalPath.create(sourcePathString);
+        Path p2 = LocalPath.create(p1.toString());
+        Path p3 = LocalPath.create(p2.toByteArray());
+        Path p4 = LocalPath.create(new File(sourcePathString));
         assertEquals(
                 toSet(expectedPath).toString(),
                 toSet(p1, p2, p3, p4).toString());
@@ -101,7 +101,7 @@ public final class PathCreationTest {
     @Test
     public void can_convert_to_absolute_path() throws Exception {
         String expected = new File(expectedPath).getAbsolutePath();
-        Path actual = LocalPath.fromString(sourcePathString).toAbsolutePath();
+        Path actual = LocalPath.create(sourcePathString).toAbsolutePath();
         assertEquals(expected, actual.toString());
     }
 

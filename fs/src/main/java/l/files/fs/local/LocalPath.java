@@ -35,7 +35,7 @@ public abstract class LocalPath extends Path {
 
         @Override
         public LocalPath createFromParcel(Parcel source) {
-            return LocalPath.fromByteArray(source.createByteArray());
+            return LocalPath.create(source.createByteArray());
         }
 
         @Override
@@ -46,15 +46,15 @@ public abstract class LocalPath extends Path {
 
     static final Charset ENCODING = UTF_8;
 
-    public static LocalPath fromFile(File file) {
-        return fromString(file.getPath());
+    public static LocalPath create(File file) {
+        return create(file.getPath());
     }
 
-    public static LocalPath fromString(String path) {
-        return fromByteArray(path.getBytes(ENCODING));
+    public static LocalPath create(String path) {
+        return create(path.getBytes(ENCODING));
     }
 
-    public static LocalPath fromByteArray(byte[] path) {
+    public static LocalPath create(byte[] path) {
         RelativePath result = new RelativePath(getNames(path));
         boolean absolute = path.length > 0 && path[0] == '/';
         return absolute ? new AbsolutePath(result) : result;
@@ -113,11 +113,11 @@ public abstract class LocalPath extends Path {
     }
 
     public final LocalPath concat(String path) {
-        return concat(fromString(path));
+        return concat(create(path));
     }
 
     public final LocalPath concat(byte[] path) {
-        return concat(fromByteArray(path));
+        return concat(create(path));
     }
 
     @Override

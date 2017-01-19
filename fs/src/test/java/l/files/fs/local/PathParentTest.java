@@ -19,7 +19,7 @@ public final class PathParentTest {
     private final String expectedParent;
 
     public PathParentTest(String path, String expectedParent) {
-        this.path = LocalPath.fromString(path);
+        this.path = LocalPath.create(path);
         this.expectedParent = expectedParent;
     }
 

@@ -21,7 +21,7 @@ public final class PathHierarchyTest {
     private final List<String> expectedHierarchy;
 
     public PathHierarchyTest(String path, List<String> expectedHierarchy) {
-        this.path = LocalPath.fromString(path);
+        this.path = LocalPath.create(path);
         this.expectedHierarchy = expectedHierarchy;
     }
 

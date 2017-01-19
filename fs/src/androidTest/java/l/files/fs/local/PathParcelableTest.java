@@ -20,7 +20,7 @@ public final class PathParcelableTest {
     private final Path expected;
 
     public PathParcelableTest(String expected) {
-        this.expected = LocalPath.fromString(expected);
+        this.expected = LocalPath.create(expected);
     }
 
     @Parameters
