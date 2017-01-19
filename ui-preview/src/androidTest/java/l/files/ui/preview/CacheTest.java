@@ -9,7 +9,6 @@ import java.util.Random;
 import l.files.fs.Instant;
 import l.files.fs.Path;
 import l.files.fs.Stat;
-import l.files.fs.local.LocalPath;
 import l.files.ui.base.graphics.Rect;
 
 import static java.io.File.createTempFile;
@@ -43,7 +42,7 @@ public abstract class CacheTest<V, C extends Cache<V>> extends TestCase {
         random = new Random();
 
         File localFile = createTempFile("123", null, tempDir);
-        file = LocalPath.create(localFile);
+        file = Path.create(localFile);
         stat = file.stat(FOLLOW);
     }
 
@@ -88,6 +87,6 @@ public abstract class CacheTest<V, C extends Cache<V>> extends TestCase {
     }
 
     Path mockCacheDir() {
-        return LocalPath.create(tempDir);
+        return Path.create(tempDir);
     }
 }

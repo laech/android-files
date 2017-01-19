@@ -1,20 +1,13 @@
 package l.files.operations;
 
-import java.io.File;
 import java.io.IOException;
 
 import l.files.fs.Path;
-import l.files.fs.local.LocalPath;
 import l.files.testing.fs.PathBaseTest;
 
 import static l.files.operations.Files.getNonExistentDestinationFile;
 
 public final class FilesTest extends PathBaseTest {
-
-    @Override
-    protected Path create(File file) {
-        return LocalPath.create(file);
-    }
 
     private Path createFile(String name) throws IOException {
         return dir1().concat(name).createFile();

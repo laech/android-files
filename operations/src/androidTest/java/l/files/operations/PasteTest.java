@@ -2,14 +2,12 @@ package l.files.operations;
 
 import com.google.common.collect.ImmutableSet;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import l.files.fs.Path;
-import l.files.fs.local.LocalPath;
 import l.files.testing.fs.PathBaseTest;
 
 import static java.lang.Thread.currentThread;
@@ -17,11 +15,6 @@ import static java.util.Collections.singleton;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
 public abstract class PasteTest extends PathBaseTest {
-
-    @Override
-    protected Path create(File file) {
-        return LocalPath.create(file);
-    }
 
     /**
      * When pasting emptying directories, they should be created on the

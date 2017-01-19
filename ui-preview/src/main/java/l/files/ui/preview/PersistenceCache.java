@@ -21,7 +21,6 @@ import javax.annotation.Nullable;
 
 import l.files.fs.Path;
 import l.files.fs.Stat;
-import l.files.fs.local.LocalPath;
 import l.files.ui.base.graphics.Rect;
 
 import static android.os.AsyncTask.SERIAL_EXECUTOR;
@@ -135,7 +134,7 @@ abstract class PersistenceCache<V> extends MemCache<Path, V> {
                     short len = in.readShort();
                     byte[] bytes = new byte[len];
                     in.readFully(bytes);
-                    Path key = LocalPath.create(bytes); // TODO
+                    Path key = Path.create(bytes); // TODO
                     long time = in.readLong();
                     V value = read(in);
 

@@ -12,7 +12,6 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 import l.files.fs.Path;
-import l.files.fs.local.LocalPath;
 import l.files.operations.OperationService.TaskListener;
 import l.files.testing.fs.PathBaseTest;
 
@@ -36,11 +35,6 @@ import static org.mockito.Mockito.verify;
 public final class OperationServiceTest extends PathBaseTest {
 
     private OperationService service;
-
-    @Override
-    protected Path create(File file) {
-        return LocalPath.create(file);
-    }
 
     @Override
     protected void setUp() throws Exception {

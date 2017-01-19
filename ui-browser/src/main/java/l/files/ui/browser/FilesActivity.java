@@ -23,7 +23,6 @@ import java.util.List;
 
 import l.files.fs.Path;
 import l.files.fs.Stat;
-import l.files.fs.local.LocalPath;
 import l.files.ui.base.app.BaseActivity;
 import l.files.ui.base.app.OptionsMenus;
 import l.files.ui.base.fs.OnOpenFileListener;
@@ -164,7 +163,7 @@ public final class FilesActivity extends BaseActivity implements
                 && getIntent().getData() != null
                 && getIntent().getData().getScheme() != null
                 && getIntent().getData().getScheme().equals(SCHEME_FILE)) {
-            dir = LocalPath.create(getIntent().getData().getPath()); // TODO
+            dir = Path.create(getIntent().getData().getPath()); // TODO
         }
         return dir == null ? DIR_HOME : dir;
     }

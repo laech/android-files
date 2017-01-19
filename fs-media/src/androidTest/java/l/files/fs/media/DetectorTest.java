@@ -1,19 +1,12 @@
 package l.files.fs.media;
 
-import java.io.File;
 import java.io.IOException;
 
 import l.files.fs.Path;
-import l.files.fs.local.LocalPath;
 import l.files.testing.fs.ExtendedPath;
 import l.files.testing.fs.PathBaseTest;
 
 public final class DetectorTest extends PathBaseTest {
-
-    @Override
-    protected Path create(File file) {
-        return LocalPath.create(file);
-    }
 
     private Detector detector() {
         return Detector.INSTANCE;

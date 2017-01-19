@@ -2,6 +2,9 @@ package l.files.testing.fs;
 
 import android.annotation.SuppressLint;
 
+import com.google.common.collect.ImmutableList;
+
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,6 +18,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import l.files.fs.AlreadyExist;
 import l.files.fs.LinkOption;
 import l.files.fs.Name;
@@ -25,14 +30,17 @@ import l.files.fs.event.Observation;
 import l.files.fs.event.Observer;
 
 import static com.google.common.base.Charsets.UTF_8;
+import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
 @SuppressLint("ParcelCreator")
-public final class ExtendedPath extends ForwardingPath {
+public final class ExtendedPath extends Path {
+
+    private final Path delegate;
 
     private ExtendedPath(Path delegate) {
-        super(delegate);
+        this.delegate = requireNonNull(delegate);
     }
 
     public static ExtendedPath wrap(Path path) {
@@ -42,11 +50,29 @@ public final class ExtendedPath extends ForwardingPath {
         return new ExtendedPath(path);
     }
 
-    public Path unwrap() {
-        if (delegate instanceof ExtendedPath) {
-            return ((ExtendedPath) delegate).unwrap();
+    @Nullable
+    @Override
+    public ExtendedPath parent() {
+        Path parent = delegate.parent();
+        if (parent == null) {
+            return null;
         }
-        return delegate;
+        return wrap(parent);
+    }
+
+    @Override
+    public boolean isHidden() {
+        return delegate.isHidden();
+    }
+
+    @Override
+    public boolean startsWith(Path prefix) {
+        return delegate.startsWith(prefix);
+    }
+
+    @Override
+    public Path rebase(Path oldPrefix, Path newPrefix) {
+        return delegate.rebase(oldPrefix, newPrefix);
     }
 
     @Override
@@ -55,8 +81,18 @@ public final class ExtendedPath extends ForwardingPath {
     }
 
     @Override
+    public void toByteArray(ByteArrayOutputStream out) {
+        delegate.toByteArray(out);
+    }
+
+    @Override
+    public Path toAbsolutePath() {
+        return delegate.toAbsolutePath();
+    }
+
+    @Override
     public ExtendedPath concat(Path path) {
-        return wrap(super.concat(path));
+        return wrap(delegate.concat(path));
     }
 
     @Override
@@ -67,6 +103,17 @@ public final class ExtendedPath extends ForwardingPath {
     @Override
     public ExtendedPath concat(byte[] path) {
         return wrap(super.concat(path));
+    }
+
+    @Override
+    public ImmutableList<Name> names() {
+        return delegate.names();
+    }
+
+    @Nullable
+    @Override
+    public Name name() {
+        return delegate.name();
     }
 
     @Override

@@ -14,7 +14,6 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import l.files.fs.Path;
-import l.files.fs.local.LocalPath;
 
 import static android.os.Environment.DIRECTORY_DCIM;
 import static android.os.Environment.DIRECTORY_DOWNLOADS;
@@ -35,13 +34,13 @@ final class BookmarkManagerImpl extends BookmarkManager {
 
     private Set<Path> createDefaultBookmarks() {
         Set<Path> defaults = new HashSet<>();
-        addIfExists(defaults, LocalPath.create(getExternalStorageDirectory()));
+        addIfExists(defaults, Path.create(getExternalStorageDirectory()));
         addIfExists(defaults, externalStoragePath(DIRECTORY_DCIM));
         addIfExists(defaults, externalStoragePath(DIRECTORY_MUSIC));
         addIfExists(defaults, externalStoragePath(DIRECTORY_MOVIES));
         addIfExists(defaults, externalStoragePath(DIRECTORY_PICTURES));
         addIfExists(defaults, externalStoragePath(DIRECTORY_DOWNLOADS));
-        addIfExists(defaults, LocalPath.create("/sdcard2"));
+        addIfExists(defaults, Path.create("/sdcard2"));
         return unmodifiableSet(defaults);
     }
 
@@ -59,7 +58,7 @@ final class BookmarkManagerImpl extends BookmarkManager {
     }
 
     private static Path externalStoragePath(String name) {
-        return LocalPath.create(new File(getExternalStorageDirectory(), name));
+        return Path.create(new File(getExternalStorageDirectory(), name));
     }
 
     private final Set<Path> bookmarks;
@@ -76,7 +75,7 @@ final class BookmarkManagerImpl extends BookmarkManager {
         Set<Path> paths = new HashSet<>();
         for (String uriString : uriStrings) {
             try {
-                Path path = LocalPath.create(new File(new URI(uriString)));
+                Path path = Path.create(new File(new URI(uriString)));
                 try {
                     if (exists(path)) {
                         paths.add(path);
@@ -108,7 +107,7 @@ final class BookmarkManagerImpl extends BookmarkManager {
     private static Path decode(String encoded) {
         String[] parts = encoded.split(":");
         if (parts.length == 2) {
-            return LocalPath.create(Base64.decode(parts[1], Base64.DEFAULT));
+            return Path.create(Base64.decode(parts[1], Base64.DEFAULT));
         } else {
             throw new IllegalArgumentException("Invalid bookmark: " + encoded);
         }

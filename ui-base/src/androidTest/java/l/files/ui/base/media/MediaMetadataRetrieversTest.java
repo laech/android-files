@@ -10,7 +10,6 @@ import java.io.InputStream;
 
 import l.files.base.Consumer;
 import l.files.fs.Path;
-import l.files.fs.local.LocalPath;
 import l.files.testing.fs.ExtendedPath;
 import l.files.ui.base.graphics.Rect;
 import l.files.ui.base.graphics.ScaledBitmap;
@@ -77,7 +76,7 @@ public final class MediaMetadataRetrieversTest extends AndroidTestCase {
     private Path createTestFile(String name) throws IOException {
         File file = createTempFile("MediaMetadataRetrieversTest", null);
         try {
-            Path path = LocalPath.create(file);
+            Path path = Path.create(file);
             InputStream in = getContext().getAssets().open(name);
             try {
                 ExtendedPath.wrap(path).copy(in);

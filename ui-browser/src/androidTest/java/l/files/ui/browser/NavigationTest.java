@@ -18,7 +18,6 @@ import l.files.fs.Instant;
 import l.files.fs.Path;
 import l.files.fs.Permission;
 import l.files.fs.Stat;
-import l.files.fs.local.LocalPath;
 import l.files.testing.fs.ExtendedPath;
 
 import static android.os.Build.VERSION.SDK_INT;
@@ -154,10 +153,10 @@ public final class NavigationTest extends BaseFilesActivityTest {
                 SDK_INT != 24);
 //                SDK_INT != N); // TODO Change to 'N' after upgrade to API 24
 
-        screen().selectFromNavigationMode(LocalPath.create("/"));
-        screen().clickInto(LocalPath.create("/proc"));
-        screen().clickInto(LocalPath.create("/proc/self"));
-        screen().clickInto(LocalPath.create("/proc/self/fdinfo"));
+        screen().selectFromNavigationMode(Path.create("/"));
+        screen().clickInto(Path.create("/proc"));
+        screen().clickInto(Path.create("/proc/self"));
+        screen().clickInto(Path.create("/proc/self/fdinfo"));
     }
 
     @Test

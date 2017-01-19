@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import l.files.fs.Path;
-
 final class FailureRecorder {
 
     private final List<Failure> failures;

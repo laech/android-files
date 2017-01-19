@@ -32,12 +32,12 @@
 }
 
 # Referenced from native code
--keepclassmembers class l.files.fs.local.LocalObservable {
+-keepclassmembers class l.files.fs.Observable {
   *** isClosed();
   *** onEvent(...);
 }
 
 # Referenced from l.files.fs.Paths
--keepclassmembers class l.files.fs.local.LocalFileSystem {
+-keepclassmembers class l.files.fs.FileSystem {
   *** INSTANCE;
 }

@@ -5,7 +5,6 @@ import java.io.IOException;
 import javax.annotation.Nullable;
 
 import l.files.fs.Name;
-import l.files.fs.Path;
 
 public interface Observer {
 

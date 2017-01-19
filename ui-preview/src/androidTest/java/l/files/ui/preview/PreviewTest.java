@@ -2,13 +2,11 @@ package l.files.ui.preview;
 
 import android.graphics.Bitmap;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
 import l.files.fs.Path;
 import l.files.fs.Stat;
-import l.files.fs.local.LocalPath;
 import l.files.testing.fs.ExtendedPath;
 import l.files.testing.fs.PathBaseTest;
 import l.files.ui.base.graphics.Rect;
@@ -24,11 +22,6 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 public final class PreviewTest extends PathBaseTest {
-
-    @Override
-    protected Path create(File file) {
-        return LocalPath.create(file);
-    }
 
     private Preview newPreview() {
         return new Preview(getContext(), dir2().concat(String.valueOf(nanoTime())));
@@ -93,7 +86,7 @@ public final class PreviewTest extends PathBaseTest {
     }
 
     public void test_preview_proc_cpuinfo() throws Throwable {
-        testPreviewSuccess(LocalPath.create("/proc/cpuinfo"));
+        testPreviewSuccess(Path.create("/proc/cpuinfo"));
     }
 
     public void test_preview_link() throws Throwable {

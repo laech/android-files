@@ -7,7 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import l.files.fs.local.LocalPath;
+import l.files.fs.Path;
 import l.files.testing.fs.ExtendedPath;
 import l.files.ui.base.graphics.Rect;
 import l.files.ui.base.graphics.ScaledBitmap;
@@ -33,7 +33,7 @@ public final class PdfThumbnailerTest extends AndroidTestCase {
     private ExtendedPath createTestPdf() throws IOException {
         File file = createTempFile("PdfThumbnailerTest", null);
         try {
-            ExtendedPath path = ExtendedPath.wrap(LocalPath.create(file));
+            ExtendedPath path = ExtendedPath.wrap(Path.create(file));
             InputStream in = openTestPdf();
             try {
                 path.copy(in);

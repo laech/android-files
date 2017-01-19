@@ -5,18 +5,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 import l.files.fs.Path;
-import l.files.fs.local.LocalPath;
 import l.files.testing.fs.PathBaseTest;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 
 public final class CountTest extends PathBaseTest {
-
-    @Override
-    protected Path create(File file) {
-        return LocalPath.create(file);
-    }
 
     public void test_count() throws Exception {
         dir1().concat("1/a.txt").createFiles();

@@ -24,7 +24,6 @@ import l.files.base.Throwables;
 import l.files.fs.Path;
 import l.files.fs.Permission;
 import l.files.fs.TraversalCallback;
-import l.files.fs.local.LocalPath;
 import l.files.testing.fs.ExtendedPath;
 
 import static android.content.Intent.ACTION_MAIN;
@@ -71,7 +70,7 @@ public class BaseFilesActivityTest {
 
     @Before
     public void setUp() throws Exception {
-        dir = ExtendedPath.wrap(LocalPath.create(createTempFolder()));
+        dir = ExtendedPath.wrap(Path.create(createTempFolder()));
         setActivityIntent(newIntent(dir));
         screen = new UiFileActivity(
                 getInstrumentation(),
@@ -187,7 +186,7 @@ public class BaseFilesActivityTest {
          * The bug: "a" gets renamed to "A", instead of displaying only
          * "A", both "a" and "A" are displayed.
          */
-        ExtendedPath dir = ExtendedPath.wrap(LocalPath.create(
+        ExtendedPath dir = ExtendedPath.wrap(Path.create(
                 getExternalStorageDirectory()).concat(name));
         ExtendedPath src = dir.concat("z");
         ExtendedPath dst = dir.concat("Z");

@@ -2,11 +2,9 @@ package l.files.bookmarks;
 
 import android.content.SharedPreferences;
 
-import java.io.File;
 import java.util.HashSet;
 
 import l.files.fs.Path;
-import l.files.fs.local.LocalPath;
 import l.files.testing.fs.PathBaseTest;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -21,11 +19,6 @@ public final class BookmarkManagerTest extends PathBaseTest {
 
     private BookmarkManagerImpl manager;
     private SharedPreferences pref;
-
-    @Override
-    protected Path create(File file) {
-        return LocalPath.create(file);
-    }
 
     @Override
     protected void setUp() throws Exception {
@@ -78,9 +71,9 @@ public final class BookmarkManagerTest extends PathBaseTest {
     }
 
     public void test_removes_non_existing_bookmarks() throws Exception {
-        Path file = dir1().concat("file").createFile().unwrap();
-        Path dir = dir1().concat("dir").createDir().unwrap();
-        Path link = dir1().concat("link").createSymbolicLink(file).unwrap();
+        Path file = dir1().concat("file").createFile();
+        Path dir = dir1().concat("dir").createDir();
+        Path link = dir1().concat("link").createSymbolicLink(file);
         manager.addBookmark(file);
         manager.addBookmark(dir);
         manager.addBookmark(link);

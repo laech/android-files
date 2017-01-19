@@ -1,14 +1,22 @@
 package l.files.fs;
 
 import android.net.Uri;
+import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.common.collect.ImmutableList;
 
+import org.apache.commons.lang3.ArrayUtils;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Set;
@@ -21,11 +29,61 @@ import l.files.fs.event.BatchObserverNotifier;
 import l.files.fs.event.Observation;
 import l.files.fs.event.Observer;
 
+import static com.google.common.base.Charsets.UTF_8;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
 public abstract class Path implements Parcelable {
 
-    public abstract byte[] toByteArray();
+    public static final Creator<Path> CREATOR = new Creator<Path>() {
+
+        @Override
+        public Path createFromParcel(Parcel source) {
+            return Path.create(source.createByteArray());
+        }
+
+        @Override
+        public Path[] newArray(int size) {
+            return new Path[size];
+        }
+    };
+
+    static final Charset ENCODING = UTF_8;
+
+    public static Path create(File file) {
+        return create(file.getPath());
+    }
+
+    public static Path create(String path) {
+        return create(path.getBytes(ENCODING));
+    }
+
+    public static Path create(byte[] path) {
+        RelativePath result = new RelativePath(getNames(path));
+        boolean absolute = path.length > 0 && path[0] == '/';
+        return absolute ? new AbsolutePath(result) : result;
+    }
+
+    private static ImmutableList<Name> getNames(byte[] path) {
+        ImmutableList.Builder<Name> names = ImmutableList.builder();
+        for (int start = 0, end; start < path.length; start = end + 1) {
+            end = ArrayUtils.indexOf(path, (byte) '/', start);
+            if (end == -1) {
+                end = path.length;
+            }
+            if (end > start) {
+                names.add(new Name(path, start, end));
+            }
+        }
+        return names.build();
+    }
+
+    public byte[] toByteArray() {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        toByteArray(out);
+        return out.toByteArray();
+    }
+
+    public abstract void toByteArray(ByteArrayOutputStream out);
 
     /**
      * Returns a string representation of this path.
@@ -33,15 +91,24 @@ public abstract class Path implements Parcelable {
      * This method always replaces malformed-input and unmappable-character
      * sequences with some default replacement string.
      */
-    @Override
-    public abstract String toString();
+    public String toString() {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        toByteArray(out);
+        try {
+            return out.toString(ENCODING.name());
+        } catch (UnsupportedEncodingException e) {
+            throw new AssertionError(e);
+        }
+    }
 
     /**
      * Converts this path to a URI,
      * this method always replaces malformed-input and unmappable-character
      * sequences with some default replacement string.
      */
-    public abstract Uri toUri();
+    public Uri toUri() {
+        return Uri.fromFile(new File(toString()));
+    }
 
     /**
      * If this is a relative path, converts it to an absolute path by
@@ -49,6 +116,34 @@ public abstract class Path implements Parcelable {
      * If this path is already an absolute path returns this.
      */
     public abstract Path toAbsolutePath();
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(toByteArray()); // TODO
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof Path &&
+                Arrays.equals(toByteArray(), ((Path) o).toByteArray());
+    }
+
+    /**
+     * Concatenates {@code path} onto the end of this path.
+     */
+    public abstract Path concat(Path path);
+
+    public Path concat(Name name) {
+        return concat(name.toPath());
+    }
+
+    public Path concat(String path) {
+        return concat(create(path));
+    }
+
+    public Path concat(byte[] path) {
+        return concat(create(path));
+    }
 
     /**
      * Gets all the file names of this path. For example:
@@ -58,22 +153,18 @@ public abstract class Path implements Parcelable {
      */
     public abstract ImmutableList<Name> names();
 
-    @Override
-    public abstract int hashCode();
-
-    @Override
-    public abstract boolean equals(Object o);
-
     /**
-     * Concatenates {@code path} onto the end of this path.
+     * Gets the name of this file, if any. For example:
+     * <pre>
+     *     "/a/b" ->  "b"
+     *     "/a"   ->  "a"
+     *     "/"    ->  null
+     *     "a"    ->  "a"
+     *     ""     ->  null
+     * </pre>
      */
-    public abstract Path concat(Path path);
-
-    public abstract Path concat(Name name);
-
-    public abstract Path concat(String path);
-
-    public abstract Path concat(byte[] path);
+    @Nullable // TODO old code expect not null
+    public abstract Name name();
 
     /**
      * Returns the parent file, if any. For example:
@@ -95,19 +186,6 @@ public abstract class Path implements Parcelable {
         }
         return hierarchy.build().reverse();
     }
-
-    /**
-     * Gets the name of this file, if any. For example:
-     * <pre>
-     *     "/a/b" ->  "b"
-     *     "/a"   ->  "a"
-     *     "/"    ->  null
-     *     "a"    ->  "a"
-     *     ""     ->  null
-     * </pre>
-     */
-    @Nullable // TODO old code expect not null
-    public abstract Name name();
 
     public abstract boolean isHidden();
 
@@ -133,14 +211,39 @@ public abstract class Path implements Parcelable {
         return 0;
     }
 
-    public abstract void setPermissions(Set<Permission> permissions)
-            throws IOException;
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeByteArray(toByteArray());
+    }
 
-    public abstract void setLastModifiedTime(LinkOption option, Instant instant)
-            throws IOException;
+    public void setPermissions(Set<Permission> permissions)
+            throws IOException {
+        FileSystem.INSTANCE.setPermissions(this, permissions);
+    }
 
-    public abstract Stat stat(LinkOption option)
-            throws IOException;
+    public void setLastModifiedTime(LinkOption option, Instant instant)
+            throws IOException {
+        FileSystem.INSTANCE.setLastModifiedTime(this, option, instant);
+    }
+
+    public Stat stat(LinkOption option) throws IOException {
+        return FileSystem.INSTANCE.stat(this, option);
+    }
+
+    public Path createDir() throws IOException {
+        FileSystem.INSTANCE.createDir(this);
+        return this;
+    }
+
+    /**
+     * Creates directory with specified permissions,
+     * the set of permissions with be restricted so
+     * the resulting permissions may not be the same.
+     */
+    public Path createDir(Set<Permission> permissions) throws IOException {
+        FileSystem.INSTANCE.createDir(this, permissions);
+        return this;
+    }
 
     /**
      * Creates this file and any missing parents as directories. This will
@@ -168,28 +271,22 @@ public abstract class Path implements Parcelable {
         return this;
     }
 
-    public abstract Path createDir()
-            throws IOException;
-
-    /**
-     * Creates directory with specified permissions,
-     * the set of permissions with be restricted so
-     * the resulting permissions may not be the same.
-     */
-    public abstract Path createDir(Set<Permission> permissions)
-            throws IOException;
-
-    public abstract Path createFile()
-            throws IOException;
+    public Path createFile() throws IOException {
+        FileSystem.INSTANCE.createFile(this);
+        return this;
+    }
 
     /**
      * @param target the target the link will point to
      */
-    public abstract Path createSymbolicLink(Path target)
-            throws IOException;
+    public Path createSymbolicLink(Path target) throws IOException {
+        FileSystem.INSTANCE.createSymbolicLink(this, target);
+        return this;
+    }
 
-    public abstract Path readSymbolicLink()
-            throws IOException;
+    public Path readSymbolicLink() throws IOException {
+        return FileSystem.INSTANCE.readSymbolicLink(this);
+    }
 
     /**
      * Moves this file tree to destination, destination must not exist.
@@ -197,14 +294,17 @@ public abstract class Path implements Parcelable {
      * If this is a link, the link itself is moved, link target file is
      * unaffected.
      */
-    public abstract void move(Path destination)
-            throws IOException;
+    public void move(Path destination) throws IOException {
+        FileSystem.INSTANCE.move(this, destination);
+    }
 
-    public abstract void delete()
-            throws IOException;
+    public void delete() throws IOException {
+        FileSystem.INSTANCE.delete(this);
+    }
 
-    public abstract boolean exists(LinkOption option)
-            throws IOException;
+    public boolean exists(LinkOption option) throws IOException {
+        return FileSystem.INSTANCE.exists(this, option);
+    }
 
     /**
      * Returns true if this file is readable, return false if not.
@@ -212,8 +312,9 @@ public abstract class Path implements Parcelable {
      * If this is a link, returns the result for the link target, not the link
      * itself.
      */
-    public abstract boolean isReadable()
-            throws IOException;
+    public boolean isReadable() throws IOException {
+        return FileSystem.INSTANCE.isReadable(this);
+    }
 
     /**
      * Returns true if this file is writable, return false if not.
@@ -221,8 +322,9 @@ public abstract class Path implements Parcelable {
      * If this is a link, returns the result for the link target, not the link
      * itself.
      */
-    public abstract boolean isWritable()
-            throws IOException;
+    public boolean isWritable() throws IOException {
+        return FileSystem.INSTANCE.isWritable(this);
+    }
 
     /**
      * Returns true if this file is executable, return false if not.
@@ -230,8 +332,9 @@ public abstract class Path implements Parcelable {
      * If this is a link, returns the result for the link target, not the link
      * itself.
      */
-    public abstract boolean isExecutable()
-            throws IOException;
+    public boolean isExecutable() throws IOException {
+        return FileSystem.INSTANCE.isExecutable(this);
+    }
 
     /**
      * Observes on this file for change events.
@@ -255,18 +358,28 @@ public abstract class Path implements Parcelable {
      * @param logTag           tag for debug logging
      * @param watchLimit       limit the number of watch descriptors, or -1
      */
-    public abstract Observation observe(
+    public Observation observe(
             LinkOption option,
             Observer observer,
             Consumer childrenConsumer,
             @Nullable String logTag,
             int watchLimit
-    ) throws IOException, InterruptedException;
+    ) throws IOException, InterruptedException {
+
+        return FileSystem.INSTANCE.observe(
+                this,
+                option,
+                observer,
+                childrenConsumer,
+                logTag,
+                watchLimit
+        );
+    }
 
     public Observation observe(
             LinkOption option,
             BatchObserver batchObserver,
-            Consumer childrenConsumer,
+            Path.Consumer childrenConsumer,
             long batchInterval,
             TimeUnit batchInternalUnit,
             boolean quickNotifyFirstEvent,
@@ -284,15 +397,15 @@ public abstract class Path implements Parcelable {
         ).start(this, option, childrenConsumer);
     }
 
-    public abstract void list(LinkOption option, Consumer consumer)
-            throws IOException;
-
+    public void list(LinkOption option, Consumer consumer) throws IOException {
+        FileSystem.INSTANCE.list(this, option, consumer);
+    }
 
     public <C extends Collection<? super Path>> C list(
             final LinkOption option,
             final C collection
     ) throws IOException {
-        list(option, new Consumer() {
+        list(option, new Path.Consumer() {
             @Override
             public boolean accept(Path path) throws IOException {
                 collection.add(path);
@@ -300,13 +413,6 @@ public abstract class Path implements Parcelable {
             }
         });
         return collection;
-    }
-
-    public void traverse(
-            LinkOption option,
-            TraversalCallback<? super Path> visitor
-    ) throws IOException {
-        traverse(option, visitor, null);
     }
 
     /**
@@ -339,11 +445,20 @@ public abstract class Path implements Parcelable {
         new Traverser(this, option, visitor, childrenComparator).traverse();
     }
 
-    public abstract InputStream newInputStream()
-            throws IOException;
+    public void traverse(
+            LinkOption option,
+            TraversalCallback<? super Path> visitor
+    ) throws IOException {
+        traverse(option, visitor, null);
+    }
 
-    public abstract OutputStream newOutputStream(boolean append)
-            throws IOException;
+    public InputStream newInputStream() throws IOException {
+        return FileSystem.INSTANCE.newInputStream(this);
+    }
+
+    public OutputStream newOutputStream(boolean append) throws IOException {
+        return FileSystem.INSTANCE.newOutputStream(this, append);
+    }
 
     public interface Consumer {
         /**
