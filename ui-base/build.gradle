@@ -19,7 +19,6 @@ android {
 
 dependencies {
 
-    compile project(':fs-local')
     compile project(':fs-media')
 
     compile "com.android.support:recyclerview-v7:$supportLibVersion"

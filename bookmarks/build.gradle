@@ -20,10 +20,8 @@ android {
 dependencies {
 
     compile project(':fs')
-    compile project(':fs-local')
 
     androidTestCompile project(':testing-fs')
-    androidTestCompile project(':fs-local')
 
     androidTestCompile 'org.mockito:mockito-core:1.10.19'
     androidTestCompile 'com.crittercism.dexmaker:dexmaker:1.4'

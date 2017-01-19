@@ -317,7 +317,7 @@ public final class FilesTest extends PathBaseTest {
         Path actual = dir1().concat("a");
         actual.createFile();
 
-        java.io.File expected = new java.io.File(dir1().toString(), "b");
+        File expected = new File(dir1().toString(), "b");
         assertTrue(expected.createNewFile());
 
         linux.Stat stat = new linux.Stat();
@@ -342,7 +342,7 @@ public final class FilesTest extends PathBaseTest {
         Path actual = dir1().concat("a");
         actual.createDir();
 
-        java.io.File expected = new java.io.File(dir1().toString(), "b");
+        File expected = new File(dir1().toString(), "b");
         assertTrue(expected.mkdir());
 
         linux.Stat stat = new linux.Stat();

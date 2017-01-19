@@ -102,7 +102,7 @@ android.applicationVariants.all { variant ->
 
 dependencies {
 
-    compile project(':fs-local')
+    compile project(':fs')
     compile project(':ui-browser')
 
 }
