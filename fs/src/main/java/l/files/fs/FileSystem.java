@@ -129,8 +129,8 @@ final class FileSystem extends Native {
             int nanos,
             boolean followLink) throws ErrnoException;
 
-    LocalStat stat(Path path, LinkOption option) throws IOException {
-        return LocalStat.stat(path, option);
+    Stat stat(Path path, LinkOption option) throws IOException {
+        return Stat.stat(path, option);
     }
 
     void createDir(Path path) throws IOException {

@@ -1,35 +1,196 @@
 package l.files.fs;
 
+import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.io.IOException;
 import java.util.Set;
 
-public interface Stat extends Parcelable {
+import javax.annotation.Nullable;
 
-    long size();
+import linux.ErrnoException;
 
-    long sizeOnDisk();
+import static l.files.base.Objects.requireNonNull;
+import static l.files.fs.FileSystem.permissionsFromMode;
+import static l.files.fs.LinkOption.FOLLOW;
+import static linux.Errno.EAGAIN;
+import static linux.Stat.S_ISBLK;
+import static linux.Stat.S_ISCHR;
+import static linux.Stat.S_ISDIR;
+import static linux.Stat.S_ISFIFO;
+import static linux.Stat.S_ISLNK;
+import static linux.Stat.S_ISREG;
+import static linux.Stat.S_ISSOCK;
 
-    boolean isRegularFile();
+public final class Stat implements Parcelable {
 
-    boolean isDirectory();
+    private final int mode;
+    private final long size;
+    private final long mtime;
+    private final int mtime_nsec;
+    private final long blocks;
 
-    boolean isSymbolicLink();
+    private Stat(
+            int mode,
+            long size,
+            long mtime,
+            int mtime_nsec,
+            long blocks) {
 
-    boolean isFifo();
+        this.mode = mode;
+        this.size = size;
+        this.mtime = mtime;
+        this.mtime_nsec = mtime_nsec;
+        this.blocks = blocks;
+    }
 
-    boolean isSocket();
+    public long size() {
+        return this.size;
+    }
 
-    boolean isBlockDevice();
+    static Stat stat(Path path, LinkOption option) throws IOException {
+        requireNonNull(option, "option");
 
-    boolean isCharacterDevice();
+        linux.Stat stat = new linux.Stat();
+        while (true) {
+            try {
 
-    Instant lastModifiedTime();
+                if (option == FOLLOW) {
+                    linux.Stat.stat(path.toByteArray(), stat);
+                } else {
+                    linux.Stat.lstat(path.toByteArray(), stat);
+                }
+                return new Stat(
+                        stat.st_mode,
+                        stat.st_size,
+                        stat.st_mtime,
+                        stat.st_mtime_nsec,
+                        stat.st_blocks);
 
-    long lastModifiedEpochSecond();
+            } catch (final ErrnoException e) {
+                if (e.errno != EAGAIN) {
+                    throw ErrnoExceptions.toIOException(e, path);
+                }
+            }
+        }
+    }
 
-    int lastModifiedNanoOfSecond();
+    public Instant lastModifiedTime() {
+        return Instant.of(mtime, mtime_nsec);
+    }
 
-    Set<Permission> permissions();
+    public long lastModifiedEpochSecond() {
+        return mtime;
+    }
 
+    public int lastModifiedNanoOfSecond() {
+        return mtime_nsec;
+    }
+
+    public long sizeOnDisk() {
+        return blocks * 512;
+    }
+
+    public boolean isSymbolicLink() {
+        return S_ISLNK(mode);
+    }
+
+    public boolean isRegularFile() {
+        return S_ISREG(mode);
+    }
+
+    public boolean isDirectory() {
+        return S_ISDIR(mode);
+    }
+
+    public boolean isFifo() {
+        return S_ISFIFO(mode);
+    }
+
+    public boolean isSocket() {
+        return S_ISSOCK(mode);
+    }
+
+    public boolean isBlockDevice() {
+        return S_ISBLK(mode);
+    }
+
+    public boolean isCharacterDevice() {
+        return S_ISCHR(mode);
+    }
+
+    public Set<Permission> permissions() {
+        return permissionsFromMode(mode);
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "{" +
+                "mode=" + mode +
+                ", size=" + size +
+                ", mtime=" + mtime +
+                ", mtime_nsec=" + mtime_nsec +
+                ", blocks=" + blocks +
+                '}';
+    }
+
+    @Override
+    public boolean equals(@Nullable Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Stat that = (Stat) o;
+
+        return mode == that.mode &&
+                size == that.size &&
+                mtime == that.mtime &&
+                mtime_nsec == that.mtime_nsec &&
+                blocks == that.blocks;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = mode;
+        result = 31 * result + (int) (size ^ (size >>> 32));
+        result = 31 * result + (int) (mtime ^ (mtime >>> 32));
+        result = 31 * result + mtime_nsec;
+        result = 31 * result + (int) (blocks ^ (blocks >>> 32));
+        return result;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mode);
+        dest.writeLong(size);
+        dest.writeLong(mtime);
+        dest.writeInt(mtime_nsec);
+        dest.writeLong(blocks);
+    }
+
+    public static final Creator<Stat> CREATOR = new Creator<Stat>() {
+
+        @Override
+        public Stat createFromParcel(Parcel source) {
+            int mode = source.readInt();
+            long size = source.readLong();
+            long mtime = source.readLong();
+            int mtimeNs = source.readInt();
+            long blocks = source.readLong();
+            return new Stat(mode, size, mtime, mtimeNs, blocks);
+        }
+
+        @Override
+        public Stat[] newArray(int size) {
+            return new Stat[size];
+        }
+    };
 }

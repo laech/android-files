@@ -40,11 +40,6 @@ import static org.junit.Assume.assumeTrue;
 @RunWith(AndroidJUnit4.class)
 public final class ObservableDownloadTest extends PathBaseTest {
 
-    @Override
-    protected Path create(File file) {
-        return Path.create(file);
-    }
-
     @Before
     @Override
     public void setUp() throws Exception {
