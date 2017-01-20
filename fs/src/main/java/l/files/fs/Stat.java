@@ -14,7 +14,7 @@ import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
 import static linux.Errno.EAGAIN;
 
-public final class Stat extends Native implements Parcelable {
+public class Stat extends Native implements Parcelable {
 
     static int placeholder() {
         return -1;
@@ -61,15 +61,15 @@ public final class Stat extends Native implements Parcelable {
 
     private static native void init();
 
-     static native Stat stat(byte[] path) throws ErrnoException;
+    static native Stat stat(byte[] path) throws ErrnoException;
 
-     static native Stat lstat(byte[] path) throws ErrnoException;
+    static native Stat lstat(byte[] path) throws ErrnoException;
 
-     static native Stat fstat(int fd) throws ErrnoException;
+    static native Stat fstat(int fd) throws ErrnoException;
 
-     static native void chmod(byte[] path, int mode) throws ErrnoException;
+    static native void chmod(byte[] path, int mode) throws ErrnoException;
 
-     static native void mkdir(byte[] path, int mode) throws ErrnoException;
+    static native void mkdir(byte[] path, int mode) throws ErrnoException;
 
     private final int mode;
     private final long size;

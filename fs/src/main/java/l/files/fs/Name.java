@@ -9,7 +9,7 @@ import com.google.common.primitives.Bytes;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 
-public final class Name implements Parcelable {
+public class Name implements Parcelable {
 
     /*
      * Binary representation of file name, normally it's whatever
