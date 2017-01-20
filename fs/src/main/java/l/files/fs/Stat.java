@@ -11,7 +11,6 @@ import javax.annotation.Nullable;
 import linux.ErrnoException;
 
 import static l.files.base.Objects.requireNonNull;
-import static l.files.fs.FileSystem.permissionsFromMode;
 import static l.files.fs.LinkOption.FOLLOW;
 import static linux.Errno.EAGAIN;
 
@@ -165,7 +164,7 @@ public final class Stat extends Native implements Parcelable {
     }
 
     public Set<Permission> permissions() {
-        return permissionsFromMode(mode);
+        return Permission.fromStatMode(mode);
     }
 
     @Override

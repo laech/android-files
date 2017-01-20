@@ -5,9 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -22,29 +19,11 @@ import linux.Fcntl;
 import linux.Stdio;
 import linux.Unistd;
 
-import static java.util.Collections.unmodifiableMap;
-import static java.util.Collections.unmodifiableSet;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.fs.Permission.GROUP_EXECUTE;
-import static l.files.fs.Permission.GROUP_READ;
-import static l.files.fs.Permission.GROUP_WRITE;
-import static l.files.fs.Permission.OTHERS_EXECUTE;
-import static l.files.fs.Permission.OTHERS_READ;
-import static l.files.fs.Permission.OTHERS_WRITE;
-import static l.files.fs.Permission.OWNER_EXECUTE;
-import static l.files.fs.Permission.OWNER_READ;
-import static l.files.fs.Permission.OWNER_WRITE;
-import static l.files.fs.Stat.S_IRGRP;
-import static l.files.fs.Stat.S_IROTH;
 import static l.files.fs.Stat.S_IRUSR;
 import static l.files.fs.Stat.S_IRWXU;
-import static l.files.fs.Stat.S_IWGRP;
-import static l.files.fs.Stat.S_IWOTH;
 import static l.files.fs.Stat.S_IWUSR;
-import static l.files.fs.Stat.S_IXGRP;
-import static l.files.fs.Stat.S_IXOTH;
-import static l.files.fs.Stat.S_IXUSR;
 import static l.files.fs.Stat.chmod;
 import static l.files.fs.Stat.mkdir;
 import static linux.Errno.EACCES;
@@ -60,49 +39,11 @@ final class FileSystem extends Native {
 
     public static final FileSystem INSTANCE = new FileSystem();
 
-    private static final Map<Permission, Integer> PERMISSION_BITS = permissionsToBits();
-
-    private static Map<Permission, Integer> permissionsToBits() {
-        Map<Permission, Integer> map = new EnumMap<>(Permission.class);
-        map.put(OWNER_READ, S_IRUSR);
-        map.put(OWNER_WRITE, S_IWUSR);
-        map.put(OWNER_EXECUTE, S_IXUSR);
-        map.put(GROUP_READ, S_IRGRP);
-        map.put(GROUP_WRITE, S_IWGRP);
-        map.put(GROUP_EXECUTE, S_IXGRP);
-        map.put(OTHERS_READ, S_IROTH);
-        map.put(OTHERS_WRITE, S_IWOTH);
-        map.put(OTHERS_EXECUTE, S_IXOTH);
-        return unmodifiableMap(map);
-    }
-
-    static Set<Permission> permissionsFromMode(int mode) {
-        Set<Permission> permissions = EnumSet.noneOf(Permission.class);
-        if ((mode & S_IRUSR) != 0) permissions.add(OWNER_READ);
-        if ((mode & S_IWUSR) != 0) permissions.add(OWNER_WRITE);
-        if ((mode & S_IXUSR) != 0) permissions.add(OWNER_EXECUTE);
-        if ((mode & S_IRGRP) != 0) permissions.add(GROUP_READ);
-        if ((mode & S_IWGRP) != 0) permissions.add(GROUP_WRITE);
-        if ((mode & S_IXGRP) != 0) permissions.add(GROUP_EXECUTE);
-        if ((mode & S_IROTH) != 0) permissions.add(OTHERS_READ);
-        if ((mode & S_IWOTH) != 0) permissions.add(OTHERS_WRITE);
-        if ((mode & S_IXOTH) != 0) permissions.add(OTHERS_EXECUTE);
-        return unmodifiableSet(permissions);
-    }
-
-    private static int permissionsToMode(Set<Permission> permissions) {
-        int mode = 0;
-        for (Permission permission : permissions) {
-            mode |= PERMISSION_BITS.get(permission);
-        }
-        return mode;
-    }
-
     void setPermissions(Path path, Set<Permission> permissions)
             throws IOException {
 
         try {
-            chmod(path.toByteArray(), permissionsToMode(permissions));
+            chmod(path.toByteArray(), Permission.toStatMode(permissions));
         } catch (ErrnoException e) {
             throw ErrnoExceptions.toIOException(e, path);
         }
@@ -144,7 +85,7 @@ final class FileSystem extends Native {
 
     void createDir(Path path, Set<Permission> permissions) throws IOException {
         try {
-            mkdir(path.toByteArray(), permissionsToMode(permissions));
+            mkdir(path.toByteArray(), Permission.toStatMode(permissions));
         } catch (ErrnoException e) {
             throw ErrnoExceptions.toIOException(e, path);
         }
