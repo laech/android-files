@@ -21,9 +21,9 @@ import static linux.Fcntl.O_RDONLY;
 import static linux.Fcntl.O_TRUNC;
 import static linux.Fcntl.O_WRONLY;
 
-final class LocalStreams {
+final class Streams {
 
-    private LocalStreams() {
+    private Streams() {
     }
 
     static FileInputStream newInputStream(Path path) throws IOException {
@@ -169,7 +169,7 @@ final class LocalStreams {
         @Override
         public void close() throws IOException {
             super.close();
-            LocalStreams.close(this);
+            Streams.close(this);
         }
 
         @Override
@@ -197,7 +197,7 @@ final class LocalStreams {
         @Override
         public void close() throws IOException {
             super.close();
-            LocalStreams.close(this);
+            Streams.close(this);
         }
 
         @Override

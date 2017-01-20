@@ -312,11 +312,11 @@ final class FileSystem extends Native {
     }
 
     InputStream newInputStream(Path path) throws IOException {
-        return LocalStreams.newInputStream(path);
+        return Streams.newInputStream(path);
     }
 
     OutputStream newOutputStream(Path path, boolean append) throws IOException {
-        return LocalStreams.newOutputStream(path, append);
+        return Streams.newOutputStream(path, append);
     }
 
 }
