@@ -13,14 +13,13 @@ import linux.Fcntl;
 import linux.Unistd;
 
 import static l.files.base.Throwables.addSuppressed;
+import static l.files.fs.Stat.fstat;
 import static linux.Errno.EISDIR;
 import static linux.Fcntl.O_APPEND;
 import static linux.Fcntl.O_CREAT;
 import static linux.Fcntl.O_RDONLY;
 import static linux.Fcntl.O_TRUNC;
 import static linux.Fcntl.O_WRONLY;
-import static linux.Stat.S_ISDIR;
-import static linux.Stat.fstat;
 
 final class LocalStreams {
 
@@ -96,9 +95,8 @@ final class LocalStreams {
     private static void checkNotDirectory(int fd) throws IOException {
         try {
 
-            linux.Stat stat = new linux.Stat();
-            fstat(fd, stat);
-            if (S_ISDIR(stat.st_mode)) {
+            Stat stat = fstat(fd);
+            if (stat.isDirectory()) {
                 throw new ErrnoException(EISDIR);
             }
 

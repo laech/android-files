@@ -2,13 +2,9 @@
 #include <sys/stat.h>
 #include "util.h"
 
-static jfieldID stat_mode;
-static jfieldID stat_size;
-static jfieldID stat_mtime;
-static jfieldID stat_mtime_nsec;
-static jfieldID stat_blocks;
+static jmethodID stat_constructor;
 
-void Java_linux_Stat_init(JNIEnv *env, jclass class) {
+void Java_l_files_fs_Stat_init(JNIEnv *env, jclass class) {
 
     init_int_field(env, class, "S_IFMT", S_IFMT);
     init_int_field(env, class, "S_IFSOCK", S_IFSOCK);
@@ -34,32 +30,26 @@ void Java_linux_Stat_init(JNIEnv *env, jclass class) {
     init_int_field(env, class, "S_IWOTH", S_IWOTH);
     init_int_field(env, class, "S_IXOTH", S_IXOTH);
 
-    stat_mode = (*env)->GetFieldID(env, class, "st_mode", "I");
-    stat_size = (*env)->GetFieldID(env, class, "st_size", "J");
-    stat_mtime = (*env)->GetFieldID(env, class, "st_mtime", "J");
-    stat_mtime_nsec = (*env)->GetFieldID(env, class, "st_mtime_nsec", "I");
-    stat_blocks = (*env)->GetFieldID(env, class, "st_blocks", "J");
-
+    stat_constructor = (*env)->GetMethodID(env, class, "<init>", "(IJJIJ)V");
 }
 
-void set_stat(JNIEnv *env, struct stat *stat, jobject jstat) {
-    (*env)->SetIntField(env, jstat, stat_mode, (*stat).st_mode);
-    (*env)->SetLongField(env, jstat, stat_size, (*stat).st_size);
-    (*env)->SetLongField(env, jstat, stat_mtime, (*stat).st_mtime);
-    (*env)->SetIntField(env, jstat, stat_mtime_nsec, (jint) (*stat).st_mtime_nsec);
-    (*env)->SetLongField(env, jstat, stat_blocks, (*stat).st_blocks);
+jobject new_stat(JNIEnv *env, jclass stat_class, struct stat *stat) {
+    return (*env)->NewObject(
+            env,
+            stat_class,
+            stat_constructor,
+            (*stat).st_mode,
+            (*stat).st_size,
+            (*stat).st_mtime,
+            (*stat).st_mtime_nsec,
+            (*stat).st_blocks);
 }
 
-void do_stat(JNIEnv *env, jclass class, jbyteArray jpath, jobject jstat, jboolean is_lstat) {
+jobject do_stat(JNIEnv *env, jclass class, jbyteArray jpath, jboolean is_lstat) {
 
     if (NULL == jpath) {
         throw_null_pointer_exception(env, "Path is null");
-        return;
-    }
-
-    if (NULL == jstat) {
-        throw_null_pointer_exception(env, "Stat is null");
-        return;
+        return NULL;
     }
 
     jsize len = (*env)->GetArrayLength(env, jpath);
@@ -72,39 +62,34 @@ void do_stat(JNIEnv *env, jclass class, jbyteArray jpath, jobject jstat, jboolea
 
     if (-1 == rc) {
         throw_errno_exception(env);
-        return;
+        return NULL;
     }
 
-    set_stat(env, &sb, jstat);
+    return new_stat(env, class, &sb);
 
 }
 
-void Java_linux_Stat_stat(JNIEnv *env, jclass class, jbyteArray jpath, jobject jstat) {
-    do_stat(env, class, jpath, jstat, JNI_FALSE);
+jobject Java_l_files_fs_Stat_stat(JNIEnv *env, jclass class, jbyteArray jpath) {
+    return do_stat(env, class, jpath, JNI_FALSE);
 }
 
-void Java_linux_Stat_lstat(JNIEnv *env, jclass class, jbyteArray jpath, jobject jstat) {
-    do_stat(env, class, jpath, jstat, JNI_TRUE);
+jobject Java_l_files_fs_Stat_lstat(JNIEnv *env, jclass class, jbyteArray jpath) {
+    return do_stat(env, class, jpath, JNI_TRUE);
 }
 
-void Java_linux_Stat_fstat(JNIEnv *env, jclass class, jint fd, jobject jstat) {
-
-    if (NULL == jstat) {
-        throw_null_pointer_exception(env, "Stat is null");
-        return;
-    }
+jobject Java_l_files_fs_Stat_fstat(JNIEnv *env, jclass class, jint fd) {
 
     struct stat sb;
     int rc = fstat(fd, &sb);
     if (-1 == rc) {
         throw_errno_exception(env);
-        return;
+        return NULL;
     }
 
-    set_stat(env, &sb, jstat);
+    return new_stat(env, class, &sb);
 }
 
-void Java_linux_Stat_chmod(JNIEnv *env, jclass class, jbyteArray jpath, jint mode) {
+void Java_l_files_fs_Stat_chmod(JNIEnv *env, jclass class, jbyteArray jpath, jint mode) {
 
     if (NULL == jpath) {
         throw_null_pointer_exception(env, "Path is null");
@@ -123,7 +108,7 @@ void Java_linux_Stat_chmod(JNIEnv *env, jclass class, jbyteArray jpath, jint mod
 
 }
 
-void Java_linux_Stat_mkdir(JNIEnv *env, jclass class, jbyteArray jpath, jint mode) {
+void Java_l_files_fs_Stat_mkdir(JNIEnv *env, jclass class, jbyteArray jpath, jint mode) {
 
     if (NULL == jpath) {
         throw_null_pointer_exception(env, "Path is null");

@@ -14,15 +14,63 @@ import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.FileSystem.permissionsFromMode;
 import static l.files.fs.LinkOption.FOLLOW;
 import static linux.Errno.EAGAIN;
-import static linux.Stat.S_ISBLK;
-import static linux.Stat.S_ISCHR;
-import static linux.Stat.S_ISDIR;
-import static linux.Stat.S_ISFIFO;
-import static linux.Stat.S_ISLNK;
-import static linux.Stat.S_ISREG;
-import static linux.Stat.S_ISSOCK;
 
-public final class Stat implements Parcelable {
+public final class Stat extends Native implements Parcelable {
+
+    static int placeholder() {
+        return -1;
+    }
+
+    private static final int S_IFMT = placeholder();
+    private static final int S_IFSOCK = placeholder();
+    private static final int S_IFLNK = placeholder();
+    private static final int S_IFREG = placeholder();
+    private static final int S_IFBLK = placeholder();
+    private static final int S_IFDIR = placeholder();
+    private static final int S_IFCHR = placeholder();
+    private static final int S_IFIFO = placeholder();
+    private static final int S_ISUID = placeholder();
+    private static final int S_ISGID = placeholder();
+    private static final int S_ISVTX = placeholder();
+
+    private static boolean S_ISLNK(int m) { return (((m) & S_IFMT) == S_IFLNK); }
+    private static boolean S_ISREG(int m) { return (((m) & S_IFMT) == S_IFREG); }
+    private static boolean S_ISDIR(int m) { return (((m) & S_IFMT) == S_IFDIR); }
+    private static boolean S_ISCHR(int m) { return (((m) & S_IFMT) == S_IFCHR); }
+    private static boolean S_ISBLK(int m) { return (((m) & S_IFMT) == S_IFBLK); }
+    private static boolean S_ISFIFO(int m) { return (((m) & S_IFMT) == S_IFIFO); }
+    private static boolean S_ISSOCK(int m) { return (((m) & S_IFMT) == S_IFSOCK); }
+
+    static final int S_IRWXU = placeholder();
+    static final int S_IRUSR = placeholder();
+    static final int S_IWUSR = placeholder();
+    static final int S_IXUSR = placeholder();
+
+    static final int S_IRWXG = placeholder();
+    static final int S_IRGRP = placeholder();
+    static final int S_IWGRP = placeholder();
+    static final int S_IXGRP = placeholder();
+
+    static final int S_IRWXO = placeholder();
+    static final int S_IROTH = placeholder();
+    static final int S_IWOTH = placeholder();
+    static final int S_IXOTH = placeholder();
+
+    static {
+        init();
+    }
+
+    private static native void init();
+
+     static native Stat stat(byte[] path) throws ErrnoException;
+
+     static native Stat lstat(byte[] path) throws ErrnoException;
+
+     static native Stat fstat(int fd) throws ErrnoException;
+
+     static native void chmod(byte[] path, int mode) throws ErrnoException;
+
+     static native void mkdir(byte[] path, int mode) throws ErrnoException;
 
     private final int mode;
     private final long size;
@@ -44,28 +92,17 @@ public final class Stat implements Parcelable {
         this.blocks = blocks;
     }
 
-    public long size() {
-        return this.size;
-    }
-
     static Stat stat(Path path, LinkOption option) throws IOException {
         requireNonNull(option, "option");
 
-        linux.Stat stat = new linux.Stat();
         while (true) {
             try {
 
                 if (option == FOLLOW) {
-                    linux.Stat.stat(path.toByteArray(), stat);
+                    return stat(path.toByteArray());
                 } else {
-                    linux.Stat.lstat(path.toByteArray(), stat);
+                    return lstat(path.toByteArray());
                 }
-                return new Stat(
-                        stat.st_mode,
-                        stat.st_size,
-                        stat.st_mtime,
-                        stat.st_mtime_nsec,
-                        stat.st_blocks);
 
             } catch (final ErrnoException e) {
                 if (e.errno != EAGAIN) {
@@ -73,6 +110,10 @@ public final class Stat implements Parcelable {
                 }
             }
         }
+    }
+
+    int mode() {
+        return mode;
     }
 
     public Instant lastModifiedTime() {
@@ -85,6 +126,10 @@ public final class Stat implements Parcelable {
 
     public int lastModifiedNanoOfSecond() {
         return mtime_nsec;
+    }
+
+    public long size() {
+        return this.size;
     }
 
     public long sizeOnDisk() {

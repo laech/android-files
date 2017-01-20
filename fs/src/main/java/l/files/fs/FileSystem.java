@@ -35,6 +35,18 @@ import static l.files.fs.Permission.OTHERS_WRITE;
 import static l.files.fs.Permission.OWNER_EXECUTE;
 import static l.files.fs.Permission.OWNER_READ;
 import static l.files.fs.Permission.OWNER_WRITE;
+import static l.files.fs.Stat.S_IRGRP;
+import static l.files.fs.Stat.S_IROTH;
+import static l.files.fs.Stat.S_IRUSR;
+import static l.files.fs.Stat.S_IRWXU;
+import static l.files.fs.Stat.S_IWGRP;
+import static l.files.fs.Stat.S_IWOTH;
+import static l.files.fs.Stat.S_IWUSR;
+import static l.files.fs.Stat.S_IXGRP;
+import static l.files.fs.Stat.S_IXOTH;
+import static l.files.fs.Stat.S_IXUSR;
+import static l.files.fs.Stat.chmod;
+import static l.files.fs.Stat.mkdir;
 import static linux.Errno.EACCES;
 import static linux.Errno.EAGAIN;
 import static linux.Fcntl.O_CREAT;
@@ -43,18 +55,6 @@ import static linux.Fcntl.O_EXCL;
 import static linux.Fcntl.O_NOFOLLOW;
 import static linux.Fcntl.O_RDWR;
 import static linux.Fcntl.open;
-import static linux.Stat.S_IRGRP;
-import static linux.Stat.S_IROTH;
-import static linux.Stat.S_IRUSR;
-import static linux.Stat.S_IRWXU;
-import static linux.Stat.S_IWGRP;
-import static linux.Stat.S_IWOTH;
-import static linux.Stat.S_IWUSR;
-import static linux.Stat.S_IXGRP;
-import static linux.Stat.S_IXOTH;
-import static linux.Stat.S_IXUSR;
-import static linux.Stat.chmod;
-import static linux.Stat.mkdir;
 
 final class FileSystem extends Native {
 

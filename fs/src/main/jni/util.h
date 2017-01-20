@@ -11,3 +11,7 @@
     _rc; })
 
 void throw_errno_exception(JNIEnv *env);
+
+void throw_null_pointer_exception(JNIEnv *env, const char *message);
+
+void init_int_field(JNIEnv *env, jclass class, const char *name, jint value);
