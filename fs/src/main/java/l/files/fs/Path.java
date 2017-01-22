@@ -439,7 +439,7 @@ public abstract class Path implements Parcelable {
     public void traverse(
             LinkOption option,
             TraversalCallback<? super Path> visitor,
-            @Nullable Comparator childrenComparator
+            @Nullable Comparator<? super Path> childrenComparator
     ) throws IOException {
 
         new Traverser(this, option, visitor, childrenComparator).traverse();

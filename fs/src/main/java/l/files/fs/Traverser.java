@@ -31,9 +31,9 @@ final class Traverser {
             Path root,
             LinkOption option,
             TraversalCallback<? super Path> visitor,
-            @Nullable Comparator<Path> childrenComparator
+            @Nullable Comparator<? super Path> childrenComparator
     ) {
-        this.childrenComparator = childrenComparator;
+        this.childrenComparator = (Comparator<Path>) childrenComparator;
         this.rootOption = requireNonNull(option, "option");
         this.root = requireNonNull(root, "root");
         this.visitor = (TraversalCallback<Path>) requireNonNull(visitor);
