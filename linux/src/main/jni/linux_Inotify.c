@@ -44,10 +44,7 @@ jint Java_linux_Inotify_inotify_1add_1watch(
         return -1;
     }
 
-    jsize len = (*env)->GetArrayLength(env, jpath);
-    char path[len + 1];
-    (*env)->GetByteArrayRegion(env, jpath, 0, len, (jbyte *) path);
-    path[len] = '\0';
+    JBYTE_ARRAY_TO_CHARS(env, path, jpath)
 
     int wd = inotify_add_watch(fd, path, (uint32_t) mask);
     if (wd == -1) {

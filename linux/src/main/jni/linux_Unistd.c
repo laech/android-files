@@ -32,15 +32,8 @@ void Java_linux_Unistd_symlink(JNIEnv *env, jclass class, jbyteArray jtarget, jb
         return;
     }
 
-    jsize targetlen = (*env)->GetArrayLength(env, jtarget);
-    char targetpath[targetlen + 1];
-    (*env)->GetByteArrayRegion(env, jtarget, 0, targetlen, (jbyte *) targetpath);
-    targetpath[targetlen] = '\0';
-
-    jsize linklen = (*env)->GetArrayLength(env, jlinkpath);
-    char linkpath[linklen + 1];
-    (*env)->GetByteArrayRegion(env, jlinkpath, 0, linklen, (jbyte *) linkpath);
-    linkpath[linklen] = '\0';
+    JBYTE_ARRAY_TO_CHARS(env, targetpath, jtarget)
+    JBYTE_ARRAY_TO_CHARS(env, linkpath, jlinkpath)
 
     int result = symlink(targetpath, linkpath);
     if (-1 == result) {
@@ -55,10 +48,7 @@ void Java_linux_Unistd_access(JNIEnv *env, jclass class, jbyteArray jpath, jint 
         return;
     }
 
-    jsize len = (*env)->GetArrayLength(env, jpath);
-    char path[len + 1];
-    (*env)->GetByteArrayRegion(env, jpath, 0, len, (jbyte *) path);
-    path[len] = '\0';
+    JBYTE_ARRAY_TO_CHARS(env, path, jpath)
 
     int result = access(path, mode);
     if (-1 == result) {
@@ -73,10 +63,7 @@ jbyteArray Java_linux_Unistd_readlink(JNIEnv *env, jclass class, jbyteArray jpat
         return NULL;
     }
 
-    jsize len = (*env)->GetArrayLength(env, jpath);
-    char path[len + 1];
-    (*env)->GetByteArrayRegion(env, jpath, 0, len, (jbyte *) path);
-    path[len] = '\0';
+    JBYTE_ARRAY_TO_CHARS(env, path, jpath)
 
     char buf[PATH_MAX];
     ssize_t count = readlink(path, buf, PATH_MAX - 1);

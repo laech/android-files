@@ -65,10 +65,7 @@ jobject Java_linux_Dirent_opendir(JNIEnv *env, jclass class, jbyteArray jpath) {
         return NULL;
     }
 
-    jsize len = (*env)->GetArrayLength(env, jpath);
-    char path[len + 1];
-    (*env)->GetByteArrayRegion(env, jpath, 0, len, (jbyte *) path);
-    path[len] = '\0';
+    JBYTE_ARRAY_TO_CHARS(env, path, jpath)
 
     DIR *dir = opendir(path);
     if (NULL == dir) {

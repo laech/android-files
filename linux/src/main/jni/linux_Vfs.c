@@ -86,10 +86,7 @@ void Java_linux_Vfs_statfs(JNIEnv *env, jclass class, jbyteArray jpath, jobject 
         return;
     }
 
-    jsize len = (*env)->GetArrayLength(env, jpath);
-    char path[len + 1];
-    (*env)->GetByteArrayRegion(env, jpath, 0, len, (jbyte *) path);
-    path[len] = '\0';
+    JBYTE_ARRAY_TO_CHARS(env, path, jpath)
 
     struct statfs sb;
     int result = statfs(path, &sb);
