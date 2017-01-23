@@ -2,7 +2,8 @@ package l.files.fs;
 
 import android.text.TextUtils;
 
-import java.io.File;
+import org.junit.Test;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -14,11 +15,11 @@ import static java.util.Arrays.asList;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static l.files.fs.LocalFileTraverseTest.TraversalOrder.POST;
+import static l.files.fs.LocalFileTraverseTest.TraversalOrder.PRE;
 import static l.files.fs.TraversalCallback.Result.CONTINUE;
 import static l.files.fs.TraversalCallback.Result.SKIP;
 import static l.files.fs.TraversalCallback.Result.TERMINATE;
-import static l.files.fs.LocalFileTraverseTest.TraversalOrder.POST;
-import static l.files.fs.LocalFileTraverseTest.TraversalOrder.PRE;
 
 public final class LocalFileTraverseTest extends PathBaseTest {
 
@@ -29,7 +30,8 @@ public final class LocalFileTraverseTest extends PathBaseTest {
         }
     };
 
-    public void test_traverse_noFollowLink() throws Exception {
+    @Test
+    public void traverse_noFollowLink() throws Exception {
         Path dir = dir1().concat("dir").createDir();
         Path link = dir1().concat("link").createSymbolicLink(dir);
         link.concat("a").createFile();
@@ -44,7 +46,8 @@ public final class LocalFileTraverseTest extends PathBaseTest {
         checkEquals(expected, recorder.events);
     }
 
-    public void test_traverse_followLink_rootOnly() throws Exception {
+    @Test
+    public void traverse_followLink_rootOnly() throws Exception {
         dir1().concat("dir").createDir();
         dir1().concat("dir/a").createFile();
         dir1().concat("dir/b").createDir();
@@ -70,7 +73,8 @@ public final class LocalFileTraverseTest extends PathBaseTest {
         checkEquals(expected, recorder.events);
     }
 
-    public void test_traverse_followLink() throws Exception {
+    @Test
+    public void traverse_followLink() throws Exception {
         Path dir = dir1().concat("dir").createDir();
         Path link = dir1().concat("link").createSymbolicLink(dir);
         Path a = link.concat("a").createFile();
@@ -86,7 +90,8 @@ public final class LocalFileTraverseTest extends PathBaseTest {
         checkEquals(expected, recorder.events);
     }
 
-    public void test_traverse_continuesIfExceptionHandlerDoesNotThrow_pre() throws Exception {
+    @Test
+    public void traverse_continuesIfExceptionHandlerDoesNotThrow_pre() throws Exception {
         dir1().concat("a").createDir();
         dir1().concat("b").createDir();
 
@@ -118,7 +123,8 @@ public final class LocalFileTraverseTest extends PathBaseTest {
         checkEquals(expected, recorder.events);
     }
 
-    public void test_traverse_continuesIfExceptionHandlerDoesNotThrow_post() throws Exception {
+    @Test
+    public void traverse_continuesIfExceptionHandlerDoesNotThrow_post() throws Exception {
         dir1().concat("a/1").createDirs();
         dir1().concat("a/1/i").createFile();
         dir1().concat("b").createDirs();
@@ -158,7 +164,8 @@ public final class LocalFileTraverseTest extends PathBaseTest {
         checkEquals(expected, recorder.events);
     }
 
-    public void test_traverse_continuesIfExceptionHandlerDoesNotThrow_noPermission() throws Exception {
+    @Test
+    public void traverse_continuesIfExceptionHandlerDoesNotThrow_noPermission() throws Exception {
         dir1().concat("a/1").createDirs();
         dir1().concat("a/1/i").createFile();
         dir1().concat("a/2").createDirs();
@@ -185,7 +192,8 @@ public final class LocalFileTraverseTest extends PathBaseTest {
         checkEquals(expected, recorder.events);
     }
 
-    public void test_traverse_order() throws Exception {
+    @Test
+    public void traverse_order() throws Exception {
         dir1().concat("a/1").createDirs();
         dir1().concat("a/1/i").createFile();
         dir1().concat("a/2").createDirs();
@@ -212,7 +220,8 @@ public final class LocalFileTraverseTest extends PathBaseTest {
         checkEquals(expected, recorder.events);
     }
 
-    public void test_traversal_skip() throws Exception {
+    @Test
+    public void traversal_skip() throws Exception {
         dir1().concat("a/1").createDirs();
         dir1().concat("a/1/i").createFile();
         dir1().concat("a/2").createDirs();
@@ -240,7 +249,8 @@ public final class LocalFileTraverseTest extends PathBaseTest {
         checkEquals(expected, recorder.events);
     }
 
-    public void test_traverse_termination() throws Exception {
+    @Test
+    public void traverse_termination() throws Exception {
         dir1().concat("a/1").createDirs();
         dir1().concat("a/1/i").createFile();
         dir1().concat("a/2").createDirs();

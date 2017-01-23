@@ -1,5 +1,7 @@
 package l.files.fs;
 
+import org.junit.Test;
+
 import java.util.Collections;
 import java.util.HashMap;
 
@@ -14,6 +16,7 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.event.Event.CREATE;
 import static l.files.fs.event.Event.DELETE;
 import static l.files.fs.event.Event.MODIFY;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -29,14 +32,15 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
 
     @Override
     @SuppressWarnings("unchecked")
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         observer = mock(BatchObserver.class);
         consumer = mock(Consumer.class);
         given(consumer.accept(any(Path.class))).willReturn(true);
     }
 
-    public void test_notifies_self_change() throws Exception {
+    @Test
+    public void notifies_self_change() throws Exception {
         Observation observation = dir1().observe(
                 NOFOLLOW,
                 observer,
@@ -61,7 +65,8 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
         }
     }
 
-    public void test_notifies_children_change() throws Exception {
+    @Test
+    public void notifies_children_change() throws Exception {
 
         final Path b = dir1().concat("b").createDir();
         final Path a = dir1().concat("a").createFile();
@@ -105,7 +110,8 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
         }
     }
 
-    public void test_notifies_latest_event() throws Exception {
+    @Test
+    public void notifies_latest_event() throws Exception {
 
         final Path file = dir1().concat("file").createFile();
         final Observation observation = dir1().observe(
@@ -136,7 +142,8 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
         }
     }
 
-    public void test_notifies_self_and_children_change() throws Exception {
+    @Test
+    public void notifies_self_and_children_change() throws Exception {
 
         final Path child = dir1().concat("a").createFile();
         final Observation observation = dir1().observe(

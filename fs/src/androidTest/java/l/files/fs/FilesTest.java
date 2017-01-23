@@ -2,6 +2,8 @@ package l.files.fs;
 
 import android.test.MoreAsserts;
 
+import org.junit.Test;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -36,6 +38,10 @@ import static l.files.fs.Permission.OWNER_READ;
 import static l.files.fs.Permission.OWNER_WRITE;
 import static l.files.fs.Stat.lstat;
 import static l.files.fs.Stat.stat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public final class FilesTest extends PathBaseTest {
 
@@ -43,7 +49,8 @@ public final class FilesTest extends PathBaseTest {
 
     private static final Random random = new Random();
 
-    public void test_can_handle_invalid_utf_8_path() throws Exception {
+    @Test
+    public void can_handle_invalid_utf_8_path() throws Exception {
 
         byte[] bytes = {-19, -96, -67, -19, -80, -117};
         assertFalse(Arrays.equals(bytes.clone(), new String(bytes, UTF_8).getBytes(UTF_8)));
@@ -62,34 +69,41 @@ public final class FilesTest extends PathBaseTest {
         assertFalse(Arrays.equals(bytes.clone(), dir.name().toString().getBytes(UTF_8)));
     }
 
-    public void test_isReadable_true() throws Exception {
+    @Test
+    public void isReadable_true() throws Exception {
         assertTrue(dir1().isReadable());
     }
 
-    public void test_isReadable_false() throws Exception {
+    @Test
+    public void isReadable_false() throws Exception {
         dir1().removePermissions(Permission.read());
         assertFalse(dir1().isReadable());
     }
 
-    public void test_isWritable_true() throws Exception {
+    @Test
+    public void isWritable_true() throws Exception {
         assertTrue(dir1().isWritable());
     }
 
-    public void test_isWritable_false() throws Exception {
+    @Test
+    public void isWritable_false() throws Exception {
         dir1().removePermissions(Permission.write());
         assertFalse(dir1().isWritable());
     }
 
-    public void test_isExecutable_true() throws Exception {
+    @Test
+    public void isExecutable_true() throws Exception {
         assertTrue(dir1().isExecutable());
     }
 
-    public void test_isExecutable_false() throws Exception {
+    @Test
+    public void isExecutable_false() throws Exception {
         dir1().removePermissions(Permission.execute());
         assertFalse(dir1().isExecutable());
     }
 
-    public void test_stat_symbolicLink() throws Exception {
+    @Test
+    public void stat_symbolicLink() throws Exception {
         Path file = dir1().concat("file").createFile();
         Path link = dir1().concat("link").createSymbolicLink(file);
         assertFalse(file.stat(NOFOLLOW).isSymbolicLink());
@@ -98,14 +112,16 @@ public final class FilesTest extends PathBaseTest {
         assertEquals(file.stat(NOFOLLOW), link.stat(FOLLOW));
     }
 
-    public void test_stat_modificationTime() throws Exception {
+    @Test
+    public void stat_modificationTime() throws Exception {
         Stat stat = stat(dir1().toByteArray());
         long expected = stat.lastModifiedEpochSecond();
         long actual = dir1().stat(NOFOLLOW).lastModifiedTime().seconds();
         assertEquals(expected, actual);
     }
 
-    public void test_stat_size() throws Exception {
+    @Test
+    public void stat_size() throws Exception {
         ExtendedPath file = dir1().concat("file").createFile();
         file.appendUtf8("hello world");
         Stat stat = stat(file.toByteArray());
@@ -114,16 +130,19 @@ public final class FilesTest extends PathBaseTest {
         assertEquals(expected, actual);
     }
 
-    public void test_stat_isDirectory() throws Exception {
+    @Test
+    public void stat_isDirectory() throws Exception {
         assertTrue(dir1().stat(NOFOLLOW).isDirectory());
     }
 
-    public void test_stat_isRegularFile() throws Exception {
+    @Test
+    public void stat_isRegularFile() throws Exception {
         Path dir = dir1().concat("dir").createFile();
         assertTrue(dir.stat(NOFOLLOW).isRegularFile());
     }
 
-    public void test_list_linkFollowSuccess() throws Exception {
+    @Test
+    public void list_linkFollowSuccess() throws Exception {
         Path dir = dir1().concat("dir").createDir();
         Path a = dir.concat("a").createFile();
         Path b = dir.concat("b").createDir();
@@ -140,7 +159,8 @@ public final class FilesTest extends PathBaseTest {
         assertEquals(expected, actual);
     }
 
-    public void test_list() throws Exception {
+    @Test
+    public void list() throws Exception {
         Path a = dir1().concat("a").createFile();
         Path b = dir1().concat("b").createDir();
         List<Path> expected = asList(a, b);
@@ -148,7 +168,8 @@ public final class FilesTest extends PathBaseTest {
         assertEquals(expected, actual);
     }
 
-    public void test_listDir_linkFollowSuccess() throws Exception {
+    @Test
+    public void listDir_linkFollowSuccess() throws Exception {
         Path dir = dir1().concat("dir").createDir();
         Path a = dir.concat("a").createFile();
         dir.concat("b").createDir();
@@ -160,7 +181,8 @@ public final class FilesTest extends PathBaseTest {
         assertEquals(expected, actual);
     }
 
-    public void test_listDir() throws Exception {
+    @Test
+    public void listDir() throws Exception {
         dir1().concat("a").createFile();
         dir1().concat("b").createDir();
         dir1().concat("c").createFile();
@@ -169,7 +191,8 @@ public final class FilesTest extends PathBaseTest {
         assertEquals(expected, actual);
     }
 
-    public void test_output_created_file_has_correct_permissions() throws Exception {
+    @Test
+    public void output_created_file_has_correct_permissions() throws Exception {
         Path a = dir1().concat("a");
         Path b = dir1().concat("b");
 
@@ -182,7 +205,8 @@ public final class FilesTest extends PathBaseTest {
         );
     }
 
-    public void test_output_append_false() throws Exception {
+    @Test
+    public void output_append_false() throws Exception {
         test_output("a", "b", "b", new OutputProvider() {
             @Override
             public OutputStream open(Path file) throws IOException {
@@ -191,7 +215,8 @@ public final class FilesTest extends PathBaseTest {
         });
     }
 
-    public void test_output_append_true() throws Exception {
+    @Test
+    public void output_append_true() throws Exception {
         test_output("a", "b", "ab", new OutputProvider() {
             @Override
             public OutputStream open(Path file) throws IOException {
@@ -221,7 +246,8 @@ public final class FilesTest extends PathBaseTest {
         OutputStream open(Path file) throws IOException;
     }
 
-    public void test_output_createWithCorrectPermission() throws Exception {
+    @Test
+    public void output_createWithCorrectPermission() throws Exception {
 
         ExtendedPath expected = dir1().concat("expected");
         ExtendedPath actual = dir1().concat("actual");
@@ -234,20 +260,23 @@ public final class FilesTest extends PathBaseTest {
         assertEquals(expectedStat.mode(), actualStat.mode());
     }
 
-    public void test_input() throws Exception {
+    @Test
+    public void input() throws Exception {
         ExtendedPath file = dir1().concat("a").createFile();
         String expected = "hello\nworld\n";
         file.appendUtf8(expected);
         assertEquals(expected, file.readAllUtf8());
     }
 
-    public void test_input_linkFollowSuccess() throws Exception {
+    @Test
+    public void input_linkFollowSuccess() throws Exception {
         Path target = dir1().concat("target").createFile();
         Path link = dir1().concat("link").createSymbolicLink(target);
         link.newInputStream().close();
     }
 
-    public void test_input_cannotUseAfterClose() throws Exception {
+    @Test
+    public void input_cannotUseAfterClose() throws Exception {
         Path file = dir1().concat("a").createFile();
         InputStream in = file.newInputStream();
         try {
@@ -268,15 +297,18 @@ public final class FilesTest extends PathBaseTest {
         }
     }
 
-    public void test_exists_true() throws Exception {
+    @Test
+    public void exists_true() throws Exception {
         assertTrue(dir1().exists(NOFOLLOW));
     }
 
-    public void test_exists_false() throws Exception {
+    @Test
+    public void exists_false() throws Exception {
         assertFalse(dir1().concat("a").exists(NOFOLLOW));
     }
 
-    public void test_exists_checkLinkNotTarget() throws Exception {
+    @Test
+    public void exists_checkLinkNotTarget() throws Exception {
         Path target = dir1().concat("target");
         Path link = dir1().concat("link").createSymbolicLink(target);
         assertFalse(target.exists(NOFOLLOW));
@@ -284,20 +316,23 @@ public final class FilesTest extends PathBaseTest {
         assertTrue(link.exists(NOFOLLOW));
     }
 
-    public void test_readString() throws Exception {
+    @Test
+    public void readString() throws Exception {
         ExtendedPath file = dir1().concat("file").createFile();
         String expected = "a\nb\tc";
         file.appendUtf8(expected);
         assertEquals(expected, file.readAllUtf8());
     }
 
-    public void test_createFile() throws Exception {
+    @Test
+    public void createFile() throws Exception {
         Path file = dir1().concat("a");
         file.createFile();
         assertTrue(file.stat(NOFOLLOW).isRegularFile());
     }
 
-    public void test_createFile_correctPermissions() throws Exception {
+    @Test
+    public void createFile_correctPermissions() throws Exception {
         Path actual = dir1().concat("a");
         actual.createFile();
 
@@ -312,13 +347,15 @@ public final class FilesTest extends PathBaseTest {
         assertEquals(stat.permissions(), actual.stat(NOFOLLOW).permissions());
     }
 
-    public void test_createDirectory() throws Exception {
+    @Test
+    public void createDirectory() throws Exception {
         Path dir = dir1().concat("a");
         dir.createDir();
         assertTrue(dir.stat(NOFOLLOW).isDirectory());
     }
 
-    public void test_createDirectory_correctDefaultPermissions() throws Exception {
+    @Test
+    public void createDirectory_correctDefaultPermissions() throws Exception {
         Path actual = dir1().concat("a");
         actual.createDir();
 
@@ -333,7 +370,8 @@ public final class FilesTest extends PathBaseTest {
         assertEquals(stat.permissions(), actual.stat(NOFOLLOW).permissions());
     }
 
-    public void test_createDirectory_withSpecifiedPermissions() throws Exception {
+    @Test
+    public void createDirectory_withSpecifiedPermissions() throws Exception {
 
         for (Set<Permission> permissions : asList(
                 Permission.none(),
@@ -349,20 +387,23 @@ public final class FilesTest extends PathBaseTest {
         }
     }
 
-    public void test_createDirectories() throws Exception {
+    @Test
+    public void createDirectories() throws Exception {
         dir1().concat("a/b/c").createDirs();
         assertTrue(dir1().concat("a/b/c").stat(NOFOLLOW).isDirectory());
         assertTrue(dir1().concat("a/b").stat(NOFOLLOW).isDirectory());
         assertTrue(dir1().concat("a/").stat(NOFOLLOW).isDirectory());
     }
 
-    public void test_createSymbolicLink() throws Exception {
+    @Test
+    public void createSymbolicLink() throws Exception {
         Path link = dir1().concat("link").createSymbolicLink(dir1());
         assertTrue(link.stat(NOFOLLOW).isSymbolicLink());
         assertEquals(dir1(), link.readSymbolicLink());
     }
 
-    public void test_stat_followLink() throws Exception {
+    @Test
+    public void stat_followLink() throws Exception {
         Path child = dir1().concat("a").createSymbolicLink(dir1());
         Stat expected = dir1().stat(NOFOLLOW);
         Stat actual = child.stat(FOLLOW);
@@ -371,7 +412,8 @@ public final class FilesTest extends PathBaseTest {
         assertEquals(expected, actual);
     }
 
-    public void test_stat_noFollowLink() throws Exception {
+    @Test
+    public void stat_noFollowLink() throws Exception {
         Path child = dir1().concat("a").createSymbolicLink(dir1());
         Stat actual = child.stat(NOFOLLOW);
         assertTrue(actual.isSymbolicLink());
@@ -379,7 +421,8 @@ public final class FilesTest extends PathBaseTest {
         assertNotEqual(dir1().stat(NOFOLLOW), actual);
     }
 
-    public void test_moveTo_moveLinkNotTarget() throws Exception {
+    @Test
+    public void moveTo_moveLinkNotTarget() throws Exception {
         Path target = dir1().concat("target").createFile();
         Path src = dir1().concat("src").createSymbolicLink(target);
         Path dst = dir1().concat("dst");
@@ -390,7 +433,8 @@ public final class FilesTest extends PathBaseTest {
         assertEquals(target, dst.readSymbolicLink());
     }
 
-    public void test_moveTo_fileToNonExistingFile() throws Exception {
+    @Test
+    public void moveTo_fileToNonExistingFile() throws Exception {
         ExtendedPath src = dir1().concat("src");
         ExtendedPath dst = dir1().concat("dst");
         src.appendUtf8("src");
@@ -400,7 +444,8 @@ public final class FilesTest extends PathBaseTest {
         assertEquals("src", dst.readAllUtf8());
     }
 
-    public void test_moveTo_directoryToNonExistingDirectory() throws Exception {
+    @Test
+    public void moveTo_directoryToNonExistingDirectory() throws Exception {
         Path src = dir1().concat("src");
         Path dst = dir1().concat("dst");
         src.concat("a").createDirs();
@@ -410,7 +455,8 @@ public final class FilesTest extends PathBaseTest {
         assertTrue(dst.concat("a").exists(NOFOLLOW));
     }
 
-    public void test_delete_symbolicLink() throws Exception {
+    @Test
+    public void delete_symbolicLink() throws Exception {
         Path link = dir1().concat("link");
         link.createSymbolicLink(dir1());
         assertTrue(link.exists(NOFOLLOW));
@@ -418,7 +464,8 @@ public final class FilesTest extends PathBaseTest {
         assertFalse(link.exists(NOFOLLOW));
     }
 
-    public void test_delete_file() throws Exception {
+    @Test
+    public void delete_file() throws Exception {
         Path file = dir1().concat("file");
         file.createFile();
         assertTrue(file.exists(NOFOLLOW));
@@ -426,7 +473,8 @@ public final class FilesTest extends PathBaseTest {
         assertFalse(file.exists(NOFOLLOW));
     }
 
-    public void test_delete_emptyDirectory() throws Exception {
+    @Test
+    public void delete_emptyDirectory() throws Exception {
         Path directory = dir1().concat("directory");
         directory.createDir();
         assertTrue(directory.exists(NOFOLLOW));
@@ -434,7 +482,8 @@ public final class FilesTest extends PathBaseTest {
         assertFalse(directory.exists(NOFOLLOW));
     }
 
-    public void test_deleteRecursive_symbolicLink() throws Exception {
+    @Test
+    public void deleteRecursive_symbolicLink() throws Exception {
         ExtendedPath dir = dir1().concat("dir").createDir();
         ExtendedPath a = dir.concat("a").createFile();
         ExtendedPath link = dir1().concat("link").createSymbolicLink(dir);
@@ -445,21 +494,24 @@ public final class FilesTest extends PathBaseTest {
         assertTrue(a.exists(NOFOLLOW));
     }
 
-    public void test_deleteRecursive_file() throws Exception {
+    @Test
+    public void deleteRecursive_file() throws Exception {
         ExtendedPath file = dir1().concat("file").createFile();
         assertTrue(file.exists(NOFOLLOW));
         file.deleteRecursive();
         assertFalse(file.exists(NOFOLLOW));
     }
 
-    public void test_deleteRecursive_emptyDirectory() throws Exception {
+    @Test
+    public void deleteRecursive_emptyDirectory() throws Exception {
         Path dir = dir1().concat("dir").createDir();
         assertTrue(dir.exists(NOFOLLOW));
         dir.delete();
         assertFalse(dir.exists(NOFOLLOW));
     }
 
-    public void test_deleteRecursive_nonEmptyDirectory() throws Exception {
+    @Test
+    public void deleteRecursive_nonEmptyDirectory() throws Exception {
         ExtendedPath dir = dir1().concat("dir").createDir();
         ExtendedPath sub = dir.concat("sub").createDir();
         ExtendedPath a = dir.concat("a").createFile();
@@ -472,25 +524,29 @@ public final class FilesTest extends PathBaseTest {
         assertFalse(dir.exists(NOFOLLOW));
     }
 
-    public void test_deleteIfExists_nonExist_willIgnore() throws Exception {
+    @Test
+    public void deleteIfExists_nonExist_willIgnore() throws Exception {
         dir1().concat("a").deleteIfExists();
     }
 
-    public void test_deleteIfExists_fileExist_willDelete() throws Exception {
+    @Test
+    public void deleteIfExists_fileExist_willDelete() throws Exception {
         ExtendedPath file = dir1().concat("a").createFile();
         assertTrue(file.exists(NOFOLLOW));
         file.deleteIfExists();
         assertFalse(file.exists(NOFOLLOW));
     }
 
-    public void test_deleteIfExists_emptyDirExist_willDelete() throws Exception {
+    @Test
+    public void deleteIfExists_emptyDirExist_willDelete() throws Exception {
         ExtendedPath dir = dir1().concat("a").createDir();
         assertTrue(dir.exists(NOFOLLOW));
         dir.deleteIfExists();
         assertFalse(dir.exists(NOFOLLOW));
     }
 
-    public void test_deleteIfExists_nonEmptyDirExist_willError() throws Exception {
+    @Test
+    public void deleteIfExists_nonEmptyDirExist_willError() throws Exception {
         ExtendedPath dir = dir1().concat("a").createDir();
         ExtendedPath file = dir.concat("1").createFile();
         assertTrue(dir.exists(NOFOLLOW));
@@ -502,11 +558,13 @@ public final class FilesTest extends PathBaseTest {
         assertTrue(file.exists(NOFOLLOW));
     }
 
-    public void test_deleteRecursiveIfExists_nonExistWillIgnore() throws Exception {
+    @Test
+    public void deleteRecursiveIfExists_nonExistWillIgnore() throws Exception {
         dir1().concat("nonExist").deleteRecursiveIfExists();
     }
 
-    public void test_deleteRecursiveIfExists_emptyDirWillDelete() throws Exception {
+    @Test
+    public void deleteRecursiveIfExists_emptyDirWillDelete() throws Exception {
 
         ExtendedPath dir = dir1().concat("dir").createDir();
         assertTrue(dir.exists(NOFOLLOW));
@@ -515,7 +573,8 @@ public final class FilesTest extends PathBaseTest {
         assertFalse(dir.exists(NOFOLLOW));
     }
 
-    public void test_deleteRecursiveIfExists_nonEmptyDirWillDelete() throws Exception {
+    @Test
+    public void deleteRecursiveIfExists_nonEmptyDirWillDelete() throws Exception {
 
         ExtendedPath dir = dir1().concat("dir").createDir();
         ExtendedPath file = dir.concat("child").createFile();
@@ -526,7 +585,8 @@ public final class FilesTest extends PathBaseTest {
         assertFalse(dir.exists(NOFOLLOW));
     }
 
-    public void test_deleteRecursiveIfExists_fileWillDelete() throws Exception {
+    @Test
+    public void deleteRecursiveIfExists_fileWillDelete() throws Exception {
 
         ExtendedPath file = dir1().concat("file").createFile();
         assertTrue(file.exists(NOFOLLOW));
@@ -535,7 +595,8 @@ public final class FilesTest extends PathBaseTest {
         assertFalse(file.exists(NOFOLLOW));
     }
 
-    public void test_deleteRecursiveIfExists_linkToFileWillDeleteNoFollow() throws Exception {
+    @Test
+    public void deleteRecursiveIfExists_linkToFileWillDeleteNoFollow() throws Exception {
 
         ExtendedPath file = dir1().concat("file").createFile();
         ExtendedPath link = dir1().concat("link").createSymbolicLink(file);
@@ -547,7 +608,8 @@ public final class FilesTest extends PathBaseTest {
         assertFalse(link.exists(NOFOLLOW));
     }
 
-    public void test_deleteRecursiveIfExists_linkToDirWillDeleteNoFollow() throws Exception {
+    @Test
+    public void deleteRecursiveIfExists_linkToDirWillDeleteNoFollow() throws Exception {
 
         ExtendedPath dir = dir1().concat("dir").createDir();
         ExtendedPath file = dir.concat("file").createFile();
@@ -562,14 +624,16 @@ public final class FilesTest extends PathBaseTest {
         assertFalse(link.exists(NOFOLLOW));
     }
 
-    public void test_setModificationTime() throws Exception {
+    @Test
+    public void setModificationTime() throws Exception {
         Instant expect = newInstant();
         dir1().setLastModifiedTime(NOFOLLOW, expect);
         Instant actual = getModificationTime(dir1(), NOFOLLOW);
         assertEquals(expect, actual);
     }
 
-    public void test_setModificationTime_linkFollow() throws Exception {
+    @Test
+    public void setModificationTime_linkFollow() throws Exception {
         Path file = dir1().concat("file").createFile();
         Path link = dir1().concat("link").createSymbolicLink(file);
 
@@ -582,7 +646,8 @@ public final class FilesTest extends PathBaseTest {
         assertNotEqual(fileTime, linkTime);
     }
 
-    public void test_setModificationTime_linkNoFollow() throws Exception {
+    @Test
+    public void setModificationTime_linkNoFollow() throws Exception {
         Path file = dir1().concat("file").createFile();
         Path link = dir1().concat("link").createSymbolicLink(file);
 
@@ -610,7 +675,8 @@ public final class FilesTest extends PathBaseTest {
         return file.stat(option).lastModifiedTime();
     }
 
-    public void test_setPermissions() throws Exception {
+    @Test
+    public void setPermissions() throws Exception {
         List<Set<Permission>> permissions = asList(
                 Permission.all(),
                 Permission.read(),
@@ -622,14 +688,16 @@ public final class FilesTest extends PathBaseTest {
         }
     }
 
-    public void test_setPermissions_rawBits() throws Exception {
+    @Test
+    public void setPermissions_rawBits() throws Exception {
         int expected = stat(dir1().toByteArray()).mode();
         dir1().setPermissions(dir1().stat(NOFOLLOW).permissions());
         int actual = stat(dir1().toByteArray()).mode();
         assertEquals(expected, actual);
     }
 
-    public void test_removePermissions() throws Exception {
+    @Test
+    public void removePermissions() throws Exception {
         List<Set<Permission>> combinations = asList(
                 Permission.all(),
                 Permission.read(),
@@ -646,7 +714,8 @@ public final class FilesTest extends PathBaseTest {
         }
     }
 
-    public void test_removePermissions_changeTargetNotLink() throws Exception {
+    @Test
+    public void removePermissions_changeTargetNotLink() throws Exception {
         Permission perm = OWNER_READ;
         ExtendedPath link = dir1().concat("link").createSymbolicLink(dir1());
         assertTrue(link.stat(FOLLOW).permissions().contains(perm));

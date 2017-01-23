@@ -6,14 +6,9 @@ import android.app.DownloadManager.Request;
 import android.database.Cursor;
 import android.net.Uri;
 import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 
@@ -34,23 +29,12 @@ import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.event.Event.CREATE;
-import static l.files.fs.ObservableTest.Recorder.observe;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
-@RunWith(AndroidJUnit4.class)
 public final class ObservableDownloadTest extends PathBaseTest {
-
-    @Before
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @After
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
 
     /*
      * TODO
