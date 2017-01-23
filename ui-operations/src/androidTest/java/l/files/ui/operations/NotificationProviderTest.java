@@ -5,7 +5,9 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
-import android.test.AndroidTestCase;
+
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -21,11 +23,14 @@ import l.files.operations.TaskNotFound;
 import l.files.operations.TaskState;
 import l.files.operations.Time;
 
+import static android.support.test.InstrumentationRegistry.getContext;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static l.files.operations.TaskKind.COPY;
 import static l.files.ui.operations.FailuresActivity.getFailures;
 import static l.files.ui.operations.FailuresActivity.getTitle;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.mock;
@@ -33,16 +38,15 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-public final class NotificationProviderTest extends AndroidTestCase {
+public final class NotificationProviderTest {
 
     private TaskState.Pending base;
     private Context context;
     private NotificationManager manager;
     private NotificationProvider provider;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         System.setProperty("dexmaker.dexcache", getContext().getCacheDir().getAbsolutePath());
         provider = new NotificationProvider();
         base = TaskState.pending(
@@ -69,27 +73,31 @@ public final class NotificationProviderTest extends AndroidTestCase {
         };
     }
 
-    public void test_cancel_on_task_not_found() throws Exception {
+    @Test
+    public void cancel_on_task_not_found() throws Exception {
 
         provider.onNotFound(context, TaskNotFound.create(1011));
         verify(manager).cancel(1011);
     }
 
-    public void test_cancel_notification_on_success() {
+    @Test
+    public void cancel_notification_on_success() {
 
         provider.onUpdate(context, base.running(Time.create(1, 1)).success(Time.create(2, 2)));
         verify(manager, timeout(1000)).cancel(base.task().id());
         verifyNoMoreInteractions(manager);
     }
 
-    public void test_notify_on_progress() {
+    @Test
+    public void notify_on_progress() {
 
         provider.onUpdate(context, base.running(Time.create(1, 1), Progress.NONE, Progress.NONE));
         verify(manager, timeout(1000)).notify(eq(base.task().id()), notNull(Notification.class));
         verifyNoMoreInteractions(manager);
     }
 
-    public void test_notify_on_failure() throws Exception {
+    @Test
+    public void notify_on_failure() throws Exception {
 
         Path file = mock(Path.class, "p");
         IOException err = new IOException("test");
@@ -102,7 +110,8 @@ public final class NotificationProviderTest extends AndroidTestCase {
         verify(manager, timeout(1000)).notify(eq(id), notNull(Notification.class));
     }
 
-    public void test_remove_notification_on_unknown_error() throws Exception {
+    @Test
+    public void remove_notification_on_unknown_error() throws Exception {
 
         provider.onUpdate(context, base
                 .running(Time.create(1, 1))
@@ -110,7 +119,8 @@ public final class NotificationProviderTest extends AndroidTestCase {
         verify(manager, timeout(1000)).cancel(base.task().id());
     }
 
-    public void test_create_failure_intent_with_correct_failure_data() throws Exception {
+    @Test
+    public void create_failure_intent_with_correct_failure_data() throws Exception {
 
         Path f1 = mock(Path.class, "1");
         Path f2 = mock(Path.class, "2");
