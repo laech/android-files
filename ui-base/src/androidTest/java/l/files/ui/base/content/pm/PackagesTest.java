@@ -1,7 +1,8 @@
 package l.files.ui.base.content.pm;
 
 import android.content.pm.PackageManager;
-import android.test.AndroidTestCase;
+
+import org.junit.Test;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -13,24 +14,29 @@ import l.files.base.Consumer;
 import l.files.ui.base.graphics.Rect;
 import l.files.ui.base.graphics.ScaledBitmap;
 
+import static android.support.test.InstrumentationRegistry.getContext;
 import static android.test.MoreAsserts.assertNotEqual;
 import static java.io.File.createTempFile;
 import static l.files.ui.base.content.pm.Packages.getApkIconBitmap;
-import static l.files.ui.base.content.pm.Packages.getApkIconDrawable;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
-public final class PackagesTest extends AndroidTestCase {
+public final class PackagesTest {
 
-    public void test_getApkIconDrawable() throws Exception {
+    @Test
+    public void getApkIconDrawable() throws Exception {
         testGetApkIcon(new Consumer<File>() {
             @Override
             public void accept(File file) {
                 String path = file.getPath();
-                assertNotNull(getApkIconDrawable(path, getPackageManager()));
+                assertNotNull(Packages.getApkIconDrawable(path, getPackageManager()));
             }
         });
     }
 
-    public void test_getApkIconBitmap_no_scale_needed() throws Exception {
+    @Test
+    public void getApkIconBitmap_no_scale_needed() throws Exception {
         testGetApkIcon(new Consumer<File>() {
             @Override
             public void accept(File file) {
@@ -41,7 +47,8 @@ public final class PackagesTest extends AndroidTestCase {
         });
     }
 
-    public void test_getApkIconBitmap_scale_to_fit() throws Exception {
+    @Test
+    public void getApkIconBitmap_scale_to_fit() throws Exception {
         testGetApkIcon(new Consumer<File>() {
             @Override
             public void accept(File file) {
