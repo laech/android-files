@@ -1,6 +1,7 @@
 package l.files.operations;
 
-import java.io.File;
+import org.junit.Test;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -9,10 +10,12 @@ import l.files.testing.fs.PathBaseTest;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
+import static org.junit.Assert.assertEquals;
 
 public final class CountTest extends PathBaseTest {
 
-    public void test_count() throws Exception {
+    @Test
+    public void count() throws Exception {
         dir1().concat("1/a.txt").createFiles();
         dir1().concat("3/4/c.txt").createFiles();
 

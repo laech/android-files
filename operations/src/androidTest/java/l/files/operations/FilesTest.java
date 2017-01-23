@@ -1,11 +1,14 @@
 package l.files.operations;
 
+import org.junit.Test;
+
 import java.io.IOException;
 
 import l.files.fs.Path;
 import l.files.testing.fs.PathBaseTest;
 
 import static l.files.operations.Files.getNonExistentDestinationFile;
+import static org.junit.Assert.assertEquals;
 
 public final class FilesTest extends PathBaseTest {
 
@@ -17,17 +20,20 @@ public final class FilesTest extends PathBaseTest {
         return dir1().concat(name).createDir();
     }
 
-    public void test_getNonExistentDestinationFile_largeNumberSuffix() throws Exception {
+    @Test
+    public void getNonExistentDestinationFile_largeNumberSuffix() throws Exception {
         String tooBig = Long.MAX_VALUE + "" + Long.MAX_VALUE;
         testExistent(createFile("a " + tooBig), "a " + tooBig + " 2");
     }
 
-    public void test_getNonExistentDestinationFile_numberOverflow() throws Exception {
+    @Test
+    public void getNonExistentDestinationFile_numberOverflow() throws Exception {
         String tooBig = String.valueOf(Long.MAX_VALUE);
         testExistent(createFile("a " + tooBig), "a " + tooBig + " 2");
     }
 
-    public void test_getNonExistentDestinationFile_file() throws Exception {
+    @Test
+    public void getNonExistentDestinationFile_file() throws Exception {
         testExistent(createFile("a"), "a 2");
         testExistent(createFile("b.txt"), "b 2.txt");
         testExistent(createFile("c 2.mp4"), "c 3.mp4");
@@ -36,7 +42,8 @@ public final class FilesTest extends PathBaseTest {
         testExistent(createFile("dir"), "x");
     }
 
-    public void test_getNonExistentDestinationFile_directory() throws Exception {
+    @Test
+    public void getNonExistentDestinationFile_directory() throws Exception {
         testExistent(createDir("a"), "a 2");
         testExistent(createDir("b.txt"), "b.txt 2");
         testExistent(createDir("c 2.png"), "c 2.png 2");
@@ -48,7 +55,8 @@ public final class FilesTest extends PathBaseTest {
         testExistent(createDir("dir"), "x");
     }
 
-    public void test_getNonExistentDestinationFile_hiddenResourceNoExtension() throws Exception {
+    @Test
+    public void getNonExistentDestinationFile_hiddenResourceNoExtension() throws Exception {
         testExistent(createDir(".a"), ".a 2");
         testExistent(createFile(".b"), ".b 2");
     }

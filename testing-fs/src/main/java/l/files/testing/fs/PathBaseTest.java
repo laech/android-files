@@ -1,6 +1,7 @@
 package l.files.testing.fs;
 
-import android.test.AndroidTestCase;
+import org.junit.After;
+import org.junit.Before;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,8 +17,9 @@ import static l.files.fs.Permission.OWNER_EXECUTE;
 import static l.files.fs.Permission.OWNER_READ;
 import static l.files.fs.Permission.OWNER_WRITE;
 import static l.files.fs.TraversalCallback.Result.CONTINUE;
+import static org.junit.Assert.assertTrue;
 
-public abstract class PathBaseTest extends AndroidTestCase {
+public abstract class PathBaseTest {
 
     @Nullable
     private ExtendedPath dir1;
@@ -25,15 +27,18 @@ public abstract class PathBaseTest extends AndroidTestCase {
     @Nullable
     private ExtendedPath dir2;
 
-    @Override
-    protected void tearDown() throws Exception {
+    @Before
+    public void setUp() throws Exception {
+    }
+
+    @After
+    public void tearDown() throws Exception {
         if (dir1 != null) {
             delete(dir1);
         }
         if (dir2 != null) {
             delete(dir2);
         }
-        super.tearDown();
     }
 
     private void delete(Path path) throws IOException {

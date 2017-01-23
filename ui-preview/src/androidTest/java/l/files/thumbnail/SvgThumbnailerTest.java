@@ -1,6 +1,6 @@
 package l.files.thumbnail;
 
-import android.test.AndroidTestCase;
+import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -8,11 +8,15 @@ import java.io.InputStream;
 import l.files.ui.base.graphics.Rect;
 import l.files.ui.base.graphics.ScaledBitmap;
 
+import static android.support.test.InstrumentationRegistry.getContext;
 import static com.google.common.base.Charsets.UTF_8;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
-public final class SvgThumbnailerTest extends AndroidTestCase {
+public final class SvgThumbnailerTest {
 
-    public void test_create_thumbnail_from_svg() throws Exception {
+    @Test
+    public void create_thumbnail_from_svg() throws Exception {
         InputStream in = new ByteArrayInputStream(("" +
                 "<svg" +
                 " fill=\"#000000\"" +

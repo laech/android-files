@@ -1,7 +1,8 @@
 package l.files.thumbnail;
 
 import android.content.res.AssetManager;
-import android.test.AndroidTestCase;
+
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,11 +13,16 @@ import l.files.testing.fs.ExtendedPath;
 import l.files.ui.base.graphics.Rect;
 import l.files.ui.base.graphics.ScaledBitmap;
 
+import static android.support.test.InstrumentationRegistry.getContext;
 import static java.io.File.createTempFile;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
-public final class PdfThumbnailerTest extends AndroidTestCase {
+public final class PdfThumbnailerTest {
 
-    public void test_create_thumbnail_from_pdf() throws Exception {
+    @Test
+    public void create_thumbnail_from_pdf() throws Exception {
         ExtendedPath path = createTestPdf();
         try {
             Rect max = Rect.of(10, 100);

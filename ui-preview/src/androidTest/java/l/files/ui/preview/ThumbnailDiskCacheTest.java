@@ -3,6 +3,8 @@ package l.files.ui.preview;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 
+import org.junit.Test;
+
 import l.files.fs.Instant;
 import l.files.fs.Path;
 import l.files.ui.base.graphics.Rect;
@@ -15,11 +17,17 @@ import static android.test.MoreAsserts.assertNotEqual;
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public final class ThumbnailDiskCacheTest
         extends CacheTest<ScaledBitmap, ThumbnailDiskCache> {
 
-    public void test_cache_file_stored_in_cache_dir() throws Exception {
+    @Test
+    public void cache_file_stored_in_cache_dir() throws Exception {
         Path cacheFilePath = cache.cacheFile(this.file, stat, newConstraint(), true);
         Path cacheDirPath = cache.cacheDir;
         assertTrue(
@@ -27,7 +35,8 @@ public final class ThumbnailDiskCacheTest
                 cacheFilePath.startsWith(cacheDirPath));
     }
 
-    public void test_cleans_old_cache_files_not_accessed_in_30_days() throws Exception {
+    @Test
+    public void cleans_old_cache_files_not_accessed_in_30_days() throws Exception {
         Rect constraint = newConstraint();
         ScaledBitmap value = newValue();
 
@@ -52,7 +61,8 @@ public final class ThumbnailDiskCacheTest
         assertFalse(cacheFile.parent().exists(NOFOLLOW));
     }
 
-    public void test_updates_modified_time_on_read() throws Exception {
+    @Test
+    public void updates_modified_time_on_read() throws Exception {
         Rect constraint = newConstraint();
         ScaledBitmap value = newValue();
 
@@ -69,7 +79,8 @@ public final class ThumbnailDiskCacheTest
         assertTrue(oldTime.to(DAYS) < newTime.to(DAYS));
     }
 
-    public void test_constraint_is_used_as_part_of_key() throws Exception {
+    @Test
+    public void constraint_is_used_as_part_of_key() throws Exception {
         Rect constraint = newConstraint();
         ScaledBitmap value = newValue();
         cache.put(file, stat, constraint, value);

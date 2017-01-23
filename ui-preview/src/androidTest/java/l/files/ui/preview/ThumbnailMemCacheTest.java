@@ -2,15 +2,20 @@ package l.files.ui.preview;
 
 import android.graphics.Bitmap;
 
+import org.junit.Test;
+
 import l.files.ui.base.graphics.Rect;
 
 import static android.graphics.Bitmap.Config.ARGB_8888;
 import static android.graphics.Bitmap.createBitmap;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public final class ThumbnailMemCacheTest
         extends MemCacheTest<Object, Bitmap, ThumbnailMemCache> {
 
-    public void test_constraint_is_used_as_part_of_key() throws Exception {
+    @Test
+    public void constraint_is_used_as_part_of_key() throws Exception {
         Rect constraint = newConstraint();
         Bitmap value = newValue();
         cache.put(file, stat, constraint, value);
