@@ -1,14 +1,15 @@
 package linux;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.lang.reflect.Field;
 
 import static android.test.MoreAsserts.assertNotEqual;
 
-public final class ErrnoTest extends TestCase {
+public final class ErrnoTest {
 
-    public void test_constants_are_initialized() throws Exception {
+    @Test
+    public void constants_are_initialized() throws Exception {
         Field[] fields = Errno.class.getFields();
         assertNotEqual(0, fields.length);
         for (Field field : fields) {

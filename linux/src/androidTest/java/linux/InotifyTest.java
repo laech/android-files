@@ -1,6 +1,6 @@
 package linux;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,10 +14,14 @@ import static linux.Inotify.inotify_add_watch;
 import static linux.Inotify.inotify_init;
 import static linux.Inotify.inotify_rm_watch;
 import static linux.Unistd.close;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-public final class InotifyTest extends TestCase {
+public final class InotifyTest {
 
-    public void test_constants_are_initialized() throws Exception {
+    @Test
+    public void constants_are_initialized() throws Exception {
         Field[] fields = Inotify.class.getFields();
         assertNotEqual(0, fields.length);
         for (Field field : fields) {
@@ -25,7 +29,8 @@ public final class InotifyTest extends TestCase {
         }
     }
 
-    public void test_cannot_use_fd_after_close() throws Exception {
+    @Test
+    public void cannot_use_fd_after_close() throws Exception {
 
         File dir = createTempFile(getClass().getSimpleName(), null);
         assertTrue(dir.delete());
@@ -50,7 +55,8 @@ public final class InotifyTest extends TestCase {
         }
     }
 
-    public void test_init_add_watch_then_remove_watch_gives_no_error() throws Exception {
+    @Test
+    public void init_add_watch_then_remove_watch_gives_no_error() throws Exception {
         int fd = inotify_init();
         try {
 
@@ -69,7 +75,8 @@ public final class InotifyTest extends TestCase {
         }
     }
 
-    public void test_inotify_add_watch_throws_NullPointerException_on_null_path_arg() throws Exception {
+    @Test
+    public void inotify_add_watch_throws_NullPointerException_on_null_path_arg() throws Exception {
         try {
             inotify_add_watch(-1, null, 0);
             fail();

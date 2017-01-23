@@ -1,6 +1,6 @@
 package linux;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -20,10 +20,14 @@ import static linux.Unistd.F_OK;
 import static linux.Unistd.R_OK;
 import static linux.Unistd.W_OK;
 import static linux.Unistd.X_OK;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-public final class UnistdTest extends TestCase {
+public final class UnistdTest {
 
-    public void test_constants_are_initialized() throws Exception {
+    @Test
+    public void constants_are_initialized() throws Exception {
         Field[] fields = Unistd.class.getFields();
         assertNotEqual(0, fields.length);
         for (Field field : fields) {
@@ -31,7 +35,8 @@ public final class UnistdTest extends TestCase {
         }
     }
 
-    public void test_close_cannot_use_fd_afterward() throws Exception {
+    @Test
+    public void close_cannot_use_fd_afterward() throws Exception {
 
         File file = createTempFile(getClass().getSimpleName(), null);
         try {
@@ -57,7 +62,8 @@ public final class UnistdTest extends TestCase {
         return (int) field.get(out.getFD());
     }
 
-    public void test_access_throws_NullPointerException_on_null_path() throws Exception {
+    @Test
+    public void access_throws_NullPointerException_on_null_path() throws Exception {
         try {
             Unistd.access(null, F_OK);
             fail();
@@ -66,7 +72,8 @@ public final class UnistdTest extends TestCase {
         }
     }
 
-    public void test_access_read() throws Exception {
+    @Test
+    public void access_read() throws Exception {
         File file = createTempFile(getClass().getSimpleName(), null);
         try {
 
@@ -86,7 +93,8 @@ public final class UnistdTest extends TestCase {
         }
     }
 
-    public void test_access_write() throws Exception {
+    @Test
+    public void access_write() throws Exception {
         File file = createTempFile(getClass().getSimpleName(), null);
         try {
 
@@ -106,7 +114,8 @@ public final class UnistdTest extends TestCase {
         }
     }
 
-    public void test_access_execute() throws Exception {
+    @Test
+    public void access_execute() throws Exception {
         File file = createTempFile(getClass().getSimpleName(), null);
         try {
 
@@ -126,7 +135,8 @@ public final class UnistdTest extends TestCase {
         }
     }
 
-    public void test_access_exist() throws Exception {
+    @Test
+    public void access_exist() throws Exception {
         File file = createTempFile(getClass().getSimpleName(), null);
         try {
 
@@ -144,7 +154,8 @@ public final class UnistdTest extends TestCase {
         }
     }
 
-    public void test_symlink_throws_NullPointerException_on_null_target_arg() throws Exception {
+    @Test
+    public void symlink_throws_NullPointerException_on_null_target_arg() throws Exception {
         try {
             Unistd.symlink(null, new byte[]{'/', 'a', 'b', 'c'});
             fail();
@@ -153,7 +164,8 @@ public final class UnistdTest extends TestCase {
         }
     }
 
-    public void test_symlink_throws_NullPointerException_on_null_link_arg() throws Exception {
+    @Test
+    public void symlink_throws_NullPointerException_on_null_link_arg() throws Exception {
         try {
             Unistd.symlink(new byte[]{'/'}, null);
             fail();
@@ -162,7 +174,8 @@ public final class UnistdTest extends TestCase {
         }
     }
 
-    public void test_symlink_to_target() throws Exception {
+    @Test
+    public void symlink_to_target() throws Exception {
 
         File file = createTempFile(getClass().getSimpleName(), null);
         File link = new File(file.getParent(), file.getName() + "-link");
@@ -193,7 +206,8 @@ public final class UnistdTest extends TestCase {
         return out.toString();
     }
 
-    public void test_readlink_throws_NullPointerException_on_null_path_arg() throws Exception {
+    @Test
+    public void readlink_throws_NullPointerException_on_null_path_arg() throws Exception {
         try {
             Unistd.readlink(null);
             fail();
@@ -202,7 +216,8 @@ public final class UnistdTest extends TestCase {
         }
     }
 
-    public void test_readlink_returns_target_path() throws Exception {
+    @Test
+    public void readlink_returns_target_path() throws Exception {
         File file = createTempFile(getClass().getSimpleName(), null);
         File link = new File(file.getParent(), file.getName() + "-link");
         Unistd.symlink(file.getPath().getBytes(), link.getPath().getBytes());

@@ -1,6 +1,6 @@
 package linux;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.lang.reflect.Field;
 
@@ -8,10 +8,13 @@ import static android.test.MoreAsserts.assertMatchesRegex;
 import static android.test.MoreAsserts.assertNotEqual;
 import static linux.Errno.*;
 import static linux.Str.strerror;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
-public final class StrTest extends TestCase {
+public final class StrTest {
 
-    public void test_strerror_returns_string_error() throws Exception {
+    @Test
+    public void strerror_returns_string_error() throws Exception {
         assertEquals("EPERM", "Operation not permitted", strerror(EPERM));
         assertEquals("ENOENT", "No such file or directory", strerror(ENOENT));
         assertEquals("ESRCH", "No such process", strerror(ESRCH));
@@ -145,7 +148,8 @@ public final class StrTest extends TestCase {
         assertEquals("ENOTRECOVERABLE", "State not recoverable", strerror(ENOTRECOVERABLE));
     }
 
-    public void test_strerror_can_handle_all_errno() throws Exception {
+    @Test
+    public void strerror_can_handle_all_errno() throws Exception {
         Field[] fields = Errno.class.getFields();
         assertNotEqual(0, fields.length);
         for (Field field : fields) {
