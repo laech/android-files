@@ -14,7 +14,7 @@ public final class FilesTest extends PathBaseTest {
     }
 
     private Path createDir(String name) throws IOException {
-        return dir1().concat(name).createDir();
+        return dir1().concat(name).createDirectory();
     }
 
     public void test_getNonExistentDestinationFile_largeNumberSuffix() throws Exception {

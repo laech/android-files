@@ -58,7 +58,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
         try {
 
-            Path src = dir.concat("a").createDir();
+            Path src = dir.concat("a").createDirectory();
             Path dst = dir.concat("A");
 
             screen().assertAllItemsDisplayedInOrder(src);
@@ -77,7 +77,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
     @Test
     public void can_start_from_data_uri() throws Exception {
-        Path dir = dir().concat("dir").createDirs();
+        Path dir = dir().concat("dir").createDirectories();
         Path file = dir.concat("file").createFile();
         setActivityIntent(new Intent().setData(dir.toUri()));
         screen()
@@ -87,7 +87,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
     @Test
     public void can_preview() throws Exception {
-        ExtendedPath dir = dir().concat("test_can_preview").createDir();
+        ExtendedPath dir = dir().concat("test_can_preview").createDirectory();
         ExtendedPath empty = dir.concat("empty").createFile();
         ExtendedPath file = dir.concat("file");
         ExtendedPath link = dir.concat("link").createSymbolicLink(file);
@@ -108,7 +108,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
                 new String(nonUtf8Name.clone(), UTF_8).getBytes(UTF_8)
         );
 
-        Path nonUtf8NamedDir = dir().concat(nonUtf8Name).createDir();
+        Path nonUtf8NamedDir = dir().concat(nonUtf8Name).createDirectory();
         Path child = nonUtf8NamedDir.concat("a").createFile();
 
         screen()
@@ -125,10 +125,10 @@ public final class NavigationTest extends BaseFilesActivityTest {
         assertFalse(Arrays.equals(notUtf8, utf8));
         assertEquals(new String(notUtf8, UTF_8), new String(utf8, UTF_8));
 
-        Path notUtf8Dir = dir().concat(notUtf8).createDir();
+        Path notUtf8Dir = dir().concat(notUtf8).createDirectory();
         Path notUtf8Child = notUtf8Dir.concat("notUtf8").createFile();
 
-        Path utf8Dir = dir().concat(utf8).createDir();
+        Path utf8Dir = dir().concat(utf8).createDirectory();
         Path utf8Child = utf8Dir.concat("utf8").createFile();
 
         screen()
@@ -171,7 +171,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
     @Test
     public void updates_navigation_list_when_going_into_a_new_dir() throws Exception {
         screen().assertNavigationModeHierarchy(dir());
-        Path dir = dir().concat("dir").createDir();
+        Path dir = dir().concat("dir").createDirectory();
         screen().clickInto(dir).assertNavigationModeHierarchy(dir);
     }
 
@@ -235,21 +235,21 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
     private void testDirectorySummary(
             String expected, long modifiedAt) throws Exception {
-        Path d = dir().concat("dir").createDir();
+        Path d = dir().concat("dir").createDirectory();
         d.setLastModifiedTime(NOFOLLOW, Instant.of(modifiedAt / 1000, 0));
         screen().assertSummary(d, expected);
     }
 
     @Test
     public void directory_view_is_disabled_if_no_read_permission() throws Exception {
-        ExtendedPath dir = dir().concat("dir").createDir();
+        ExtendedPath dir = dir().concat("dir").createDirectory();
         dir.removePermissions(Permission.read());
         screen().assertDisabled(dir);
     }
 
     @Test
     public void link_displayed() throws Exception {
-        Path dir = dir().concat("dir").createDir();
+        Path dir = dir().concat("dir").createDirectory();
         Path link = dir().concat("link").createSymbolicLink(dir);
 
         screen()
@@ -261,8 +261,8 @@ public final class NavigationTest extends BaseFilesActivityTest {
     public void can_see_changes_in_parent_directory() throws Exception {
 
         Path level1Dir = dir();
-        Path level2Dir = level1Dir.concat("level2Dir").createDir();
-        Path level3Dir = level2Dir.concat("level3Dir").createDir();
+        Path level2Dir = level1Dir.concat("level2Dir").createDirectory();
+        Path level3Dir = level2Dir.concat("level3Dir").createDirectory();
         screen()
                 .sort()
                 .by(NAME)
@@ -281,13 +281,13 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
     @Test
     public void can_see_changes_in_linked_directory() throws Exception {
-        Path dir = dir().concat("dir").createDir();
+        Path dir = dir().concat("dir").createDirectory();
         Path link = dir().concat("link").createSymbolicLink(dir);
         screen()
                 .clickInto(link)
                 .assertCurrentDirectory(link);
 
-        Path child = link.concat("child").createDir();
+        Path child = link.concat("child").createDirectory();
         screen()
                 .clickInto(child)
                 .assertCurrentDirectory(child);
@@ -295,7 +295,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
     @Test
     public void press_action_bar_up_indicator_will_go_back() throws Exception {
-        Path dir = dir().concat("dir").createDir();
+        Path dir = dir().concat("dir").createDirectory();
         Path parent = dir.parent();
         assert parent != null;
         screen()
@@ -308,7 +308,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
     @Test
     public void action_bar_title_shows_name_of_directory() throws Exception {
         screen()
-                .clickInto(dir().concat("a").createDir())
+                .clickInto(dir().concat("a").createDirectory())
                 .assertActionBarTitle("a");
     }
 
@@ -320,14 +320,14 @@ public final class NavigationTest extends BaseFilesActivityTest {
     @Test
     public void action_bar_shows_up_indicator_when_there_is_back_stack() throws Exception {
         screen()
-                .clickInto(dir().concat("dir").createDir())
+                .clickInto(dir().concat("dir").createDirectory())
                 .assertActionBarUpIndicatorIsVisible(true);
     }
 
     @Test
     public void action_bar_hides_up_indicator_when_there_is_no_back_stack_to_go_back_to() throws Exception {
         screen()
-                .clickInto(dir().concat("dir").createDir())
+                .clickInto(dir().concat("dir").createDirectory())
                 .pressBack()
                 .assertActionBarUpIndicatorIsVisible(false);
     }
@@ -335,16 +335,16 @@ public final class NavigationTest extends BaseFilesActivityTest {
     @Test
     public void long_press_back_will_clear_back_stack() throws Exception {
         screen()
-                .clickInto(dir().concat("a").createDir())
-                .clickInto(dir().concat("a/b").createDir())
-                .clickInto(dir().concat("a/b/c").createDir())
+                .clickInto(dir().concat("a").createDirectory())
+                .clickInto(dir().concat("a/b").createDirectory())
+                .clickInto(dir().concat("a/b/c").createDirectory())
                 .longPressBack()
                 .assertCurrentDirectory(dir());
     }
 
     @Test
     public void observes_on_current_directory_and_shows_added_deleted_files() throws Exception {
-        Path a = dir().concat("a").createDir();
+        Path a = dir().concat("a").createDirectory();
         screen().assertListViewContains(a, true);
 
         Path b = dir().concat("b").createFile();
@@ -360,7 +360,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
     @Test
     public void updates_view_on_child_directory_modified() throws Exception {
-        Path dir = dir().concat("a").createDir();
+        Path dir = dir().concat("a").createDirectory();
         testUpdatesDateViewOnChildModified(dir);
     }
 
@@ -420,7 +420,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
         Stat stat = file.stat(NOFOLLOW);
         Instant lastModifiedBefore = stat.lastModifiedTime();
         if (stat.isDirectory()) {
-            file.concat(String.valueOf(nanoTime())).createDir();
+            file.concat(String.valueOf(nanoTime())).createDirectory();
         } else {
             ExtendedPath.wrap(file).appendUtf8("test");
         }

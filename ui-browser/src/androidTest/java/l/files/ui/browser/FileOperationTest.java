@@ -26,8 +26,8 @@ public final class FileOperationTest extends BaseFilesActivityTest {
 
         final Path file = dir().concat("file").createFile();
         final Path link = dir().concat("link").createSymbolicLink(file);
-        final Path dir1 = dir().concat("dir1").createDir();
-        final Path dir2 = dir().concat("dir2").createDir();
+        final Path dir1 = dir().concat("dir1").createDirectory();
+        final Path dir2 = dir().concat("dir2").createDirectory();
         dir2.concat("a").createFile();
 
         screen()
@@ -54,7 +54,7 @@ public final class FileOperationTest extends BaseFilesActivityTest {
     public void cut_files() throws Exception {
 
         final Path file = dir().concat("a").createFile();
-        final Path dir = dir().concat("dir").createDir();
+        final Path dir = dir().concat("dir").createDirectory();
 
         screen()
                 .longClick(file)
@@ -75,13 +75,13 @@ public final class FileOperationTest extends BaseFilesActivityTest {
     @Test
     public void copy() throws Exception {
 
-        Path dstDir = dir().concat("dstDir").createDir();
+        Path dstDir = dir().concat("dstDir").createDirectory();
         Path srcFile = dir().concat("srcFile").createFile();
         Path srcLink = dir().concat("srcLink").createSymbolicLink(srcFile);
-        Path srcEmpty = dir().concat("srcEmpty").createDir();
-        Path srcFull = dir().concat("srcFull").createDir();
+        Path srcEmpty = dir().concat("srcEmpty").createDirectory();
+        Path srcFull = dir().concat("srcFull").createDirectory();
         srcFull.concat("a").createFile();
-        srcFull.concat("b").createDir();
+        srcFull.concat("b").createDirectory();
         srcFull.concat("c").createSymbolicLink(srcFull.concat("a"));
 
         screen()
@@ -121,7 +121,7 @@ public final class FileOperationTest extends BaseFilesActivityTest {
     public void paste_menu_is_disabled_inside_folder_being_copied()
             throws Exception {
 
-        Path dir = dir().concat("dir").createDir();
+        Path dir = dir().concat("dir").createDirectory();
 
         screen()
                 .longClick(dir)

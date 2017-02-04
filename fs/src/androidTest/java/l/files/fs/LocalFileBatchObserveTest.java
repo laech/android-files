@@ -63,13 +63,13 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
 
     public void test_notifies_children_change() throws Exception {
 
-        final Path b = dir1().concat("b").createDir();
+        final Path b = dir1().concat("b").createDirectory();
         final Path a = dir1().concat("a").createFile();
-        final Path c = dir1().concat("c").createDir();
+        final Path c = dir1().concat("c").createDirectory();
         final Path d = dir1().concat("d");
 
         dir1().concat("e").createFile();
-        dir1().concat("f").createDir();
+        dir1().concat("f").createDirectory();
 
         Observation observation = dir1().observe(
                 NOFOLLOW,

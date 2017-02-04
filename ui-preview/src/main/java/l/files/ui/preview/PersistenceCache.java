@@ -187,7 +187,7 @@ abstract class PersistenceCache<V> extends MemCache<Path, V> {
         Path file = cacheFile();
         Path parent = file.parent();
         assert parent != null;
-        parent.createDirs();
+        parent.createDirectories();
 
         Path tmp = parent.concat(file.name() + "-" + nanoTime());
         DataOutputStream out = newBufferedDataOutputStream(tmp);

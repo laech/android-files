@@ -2,7 +2,6 @@ package l.files.fs;
 
 import android.text.TextUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -30,7 +29,7 @@ public final class LocalFileTraverseTest extends PathBaseTest {
     };
 
     public void test_traverse_noFollowLink() throws Exception {
-        Path dir = dir1().concat("dir").createDir();
+        Path dir = dir1().concat("dir").createDirectory();
         Path link = dir1().concat("link").createSymbolicLink(dir);
         link.concat("a").createFile();
         link.concat("b").createFile();
@@ -45,9 +44,9 @@ public final class LocalFileTraverseTest extends PathBaseTest {
     }
 
     public void test_traverse_followLink_rootOnly() throws Exception {
-        dir1().concat("dir").createDir();
+        dir1().concat("dir").createDirectory();
         dir1().concat("dir/a").createFile();
-        dir1().concat("dir/b").createDir();
+        dir1().concat("dir/b").createDirectory();
         dir1().concat("dir/b/1").createFile();
         dir1().concat("dir/c").createSymbolicLink(dir1().concat("dir/b"));
         dir1().concat("link").createSymbolicLink(dir1().concat("dir"));
@@ -71,7 +70,7 @@ public final class LocalFileTraverseTest extends PathBaseTest {
     }
 
     public void test_traverse_followLink() throws Exception {
-        Path dir = dir1().concat("dir").createDir();
+        Path dir = dir1().concat("dir").createDirectory();
         Path link = dir1().concat("link").createSymbolicLink(dir);
         Path a = link.concat("a").createFile();
 
@@ -87,8 +86,8 @@ public final class LocalFileTraverseTest extends PathBaseTest {
     }
 
     public void test_traverse_continuesIfExceptionHandlerDoesNotThrow_pre() throws Exception {
-        dir1().concat("a").createDir();
-        dir1().concat("b").createDir();
+        dir1().concat("a").createDirectory();
+        dir1().concat("b").createDirectory();
 
         List<TraversalEvent> expected = asList(
                 TraversalEvent.of(PRE, dir1()),
@@ -119,9 +118,9 @@ public final class LocalFileTraverseTest extends PathBaseTest {
     }
 
     public void test_traverse_continuesIfExceptionHandlerDoesNotThrow_post() throws Exception {
-        dir1().concat("a/1").createDirs();
+        dir1().concat("a/1").createDirectories();
         dir1().concat("a/1/i").createFile();
-        dir1().concat("b").createDirs();
+        dir1().concat("b").createDirectories();
 
         List<TraversalEvent> expected = asList(
                 TraversalEvent.of(PRE, dir1()),
@@ -159,10 +158,10 @@ public final class LocalFileTraverseTest extends PathBaseTest {
     }
 
     public void test_traverse_continuesIfExceptionHandlerDoesNotThrow_noPermission() throws Exception {
-        dir1().concat("a/1").createDirs();
+        dir1().concat("a/1").createDirectories();
         dir1().concat("a/1/i").createFile();
-        dir1().concat("a/2").createDirs();
-        dir1().concat("b").createDirs();
+        dir1().concat("a/2").createDirectories();
+        dir1().concat("b").createDirectories();
         dir1().concat("a").setPermissions(Permission.none());
 
         List<TraversalEvent> expected = asList(
@@ -186,10 +185,10 @@ public final class LocalFileTraverseTest extends PathBaseTest {
     }
 
     public void test_traverse_order() throws Exception {
-        dir1().concat("a/1").createDirs();
+        dir1().concat("a/1").createDirectories();
         dir1().concat("a/1/i").createFile();
-        dir1().concat("a/2").createDirs();
-        dir1().concat("b").createDirs();
+        dir1().concat("a/2").createDirectories();
+        dir1().concat("b").createDirectories();
 
         List<TraversalEvent> expected = asList(
                 TraversalEvent.of(PRE, dir1()),
@@ -213,10 +212,10 @@ public final class LocalFileTraverseTest extends PathBaseTest {
     }
 
     public void test_traversal_skip() throws Exception {
-        dir1().concat("a/1").createDirs();
+        dir1().concat("a/1").createDirectories();
         dir1().concat("a/1/i").createFile();
-        dir1().concat("a/2").createDirs();
-        dir1().concat("b").createDirs();
+        dir1().concat("a/2").createDirectories();
+        dir1().concat("b").createDirectories();
 
         List<TraversalEvent> expected = asList(
                 TraversalEvent.of(PRE, dir1()),
@@ -241,10 +240,10 @@ public final class LocalFileTraverseTest extends PathBaseTest {
     }
 
     public void test_traverse_termination() throws Exception {
-        dir1().concat("a/1").createDirs();
+        dir1().concat("a/1").createDirectories();
         dir1().concat("a/1/i").createFile();
-        dir1().concat("a/2").createDirs();
-        dir1().concat("b").createDirs();
+        dir1().concat("a/2").createDirectories();
+        dir1().concat("b").createDirectories();
 
         List<TraversalEvent> expected = asList(
                 TraversalEvent.of(PRE, dir1()),

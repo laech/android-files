@@ -117,15 +117,15 @@ public final class ExtendedPath extends Path {
     }
 
     @Override
-    public ExtendedPath createDir() throws IOException {
-        super.createDir();
+    public ExtendedPath createDirectory() throws IOException {
+        super.createDirectory();
         return this;
     }
 
     @Override
-    public ExtendedPath createDir(Set<Permission> permissions)
+    public ExtendedPath createDirectory(Set<Permission> permissions)
             throws IOException {
-        super.createDir(permissions);
+        super.createDirectory(permissions);
         return this;
     }
 
@@ -180,8 +180,8 @@ public final class ExtendedPath extends Path {
     }
 
     @Override
-    public ExtendedPath createDirs() throws IOException {
-        return (ExtendedPath) super.createDirs();
+    public ExtendedPath createDirectories() throws IOException {
+        return (ExtendedPath) super.createDirectories();
     }
 
     /**
@@ -199,7 +199,7 @@ public final class ExtendedPath extends Path {
 
         ExtendedPath parent = parent();
         if (parent != null) {
-            parent.createDirs();
+            parent.createDirectories();
         }
 
         try {

@@ -32,7 +32,7 @@ public final class ManualInspectionTest extends InstrumentationTestCase {
     public void test() throws Exception {
         ExtendedPath dir = ExtendedPath.wrap(Path.create(
                 getExternalStorageDirectory()).concat("test"));
-        dir.createDirs();
+        dir.createDirectories();
         try {
             dir.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(currentTimeMillis()));
         } catch (IOException ignore) {
@@ -90,7 +90,7 @@ public final class ManualInspectionTest extends InstrumentationTestCase {
         } catch (FileNotFoundException ignored) {
         }
 
-        dir.createDir();
+        dir.createDirectory();
         child.createFile();
     }
 

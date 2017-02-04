@@ -230,7 +230,7 @@ public abstract class Path implements Parcelable {
         return FileSystem.INSTANCE.stat(this, option);
     }
 
-    public Path createDir() throws IOException {
+    public Path createDirectory() throws IOException {
         FileSystem.INSTANCE.createDir(this);
         return this;
     }
@@ -240,17 +240,18 @@ public abstract class Path implements Parcelable {
      * the set of permissions with be restricted so
      * the resulting permissions may not be the same.
      */
-    public Path createDir(Set<Permission> permissions) throws IOException {
+    public Path createDirectory(Set<Permission> permissions)
+            throws IOException {
         FileSystem.INSTANCE.createDir(this, permissions);
         return this;
     }
 
     /**
      * Creates this file and any missing parents as directories. This will
-     * throw the same exceptions as {@link Path#createDir()} except
+     * throw the same exceptions as {@link Path#createDirectory()} except
      * will not error if already exists as a directory.
      */
-    public Path createDirs() throws IOException {
+    public Path createDirectories() throws IOException {
         try {
             if (stat(NOFOLLOW).isDirectory()) {
                 return this;
@@ -260,11 +261,11 @@ public abstract class Path implements Parcelable {
 
         Path parent = parent();
         if (parent != null) {
-            parent.createDirs();
+            parent.createDirectories();
         }
 
         try {
-            createDir();
+            createDirectory();
         } catch (AlreadyExist ignore) {
         }
 

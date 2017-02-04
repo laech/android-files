@@ -4,7 +4,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -66,7 +65,7 @@ public final class OperationServiceTest extends PathBaseTest {
     public void test_moves_file() throws Exception {
 
         Path src = dir1().concat("a").createFile();
-        Path dst = dir1().concat("dst").createDir();
+        Path dst = dir1().concat("dst").createDirectory();
         CountDownListener listener = new CountDownListener(MOVE);
         service.listener = listener;
         service.onCreate();
@@ -81,7 +80,7 @@ public final class OperationServiceTest extends PathBaseTest {
     public void test_copies_file() throws Exception {
 
         Path src = dir1().concat("a").createFile();
-        Path dst = dir1().concat("dst").createDir();
+        Path dst = dir1().concat("dst").createDirectory();
         CountDownListener listener = new CountDownListener(COPY);
         service.listener = listener;
         service.onCreate();

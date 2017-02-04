@@ -12,7 +12,7 @@ public final class MoveTest extends PasteTest {
 
     public void test_movedCountInitialZero() throws Exception {
         Path src = dir1().concat("a").createFile();
-        Path dstDir = dir1().concat("b").createDir();
+        Path dstDir = dir1().concat("b").createDirectory();
         Move move = create(src, dstDir);
         assertEquals(move.getMovedItemCount(), 0);
     }
@@ -21,7 +21,7 @@ public final class MoveTest extends PasteTest {
         Path target = dir1().concat("target").createFile();
         Path link = dir1().concat("link").createSymbolicLink(target);
 
-        Move move = create(link, dir1().concat("moved").createDir());
+        Move move = create(link, dir1().concat("moved").createDirectory());
         move.execute();
 
         Path actual = dir1().concat("moved/link").readSymbolicLink();
@@ -31,7 +31,7 @@ public final class MoveTest extends PasteTest {
 
     public void test_movesFile() throws Exception {
         ExtendedPath srcFile = dir1().concat("a.txt").createFile();
-        ExtendedPath dstDir = dir1().concat("dst").createDir();
+        ExtendedPath dstDir = dir1().concat("dst").createDirectory();
         ExtendedPath dstFile = dstDir.concat("a.txt");
         srcFile.writeUtf8("Test");
 
@@ -44,8 +44,8 @@ public final class MoveTest extends PasteTest {
     }
 
     public void test_movesDirectory() throws Exception {
-        ExtendedPath srcDir = dir1().concat("a").createDir();
-        ExtendedPath dstDir = dir1().concat("dst").createDir();
+        ExtendedPath srcDir = dir1().concat("a").createDirectory();
+        ExtendedPath dstDir = dir1().concat("dst").createDirectory();
         ExtendedPath srcFile = srcDir.concat("test.txt");
         ExtendedPath dstFile = dstDir.concat("a/test.txt");
         srcFile.writeUtf8("Test");

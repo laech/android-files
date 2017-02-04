@@ -24,7 +24,7 @@ public final class InfoTest extends BaseFilesActivityTest {
     public void gets_info_of_multiple_files() throws Exception {
 
         Path child1 = dir().concat("1").createFile();
-        Path child2 = dir().concat("2").createDir();
+        Path child2 = dir().concat("2").createDirectory();
         Path child3 = dir().concat("3").createSymbolicLink(child2);
 
         Stat st1 = child1.stat(NOFOLLOW);
@@ -82,7 +82,7 @@ public final class InfoTest extends BaseFilesActivityTest {
     @Test
     public void gets_info_of_empty_dir() throws Exception {
 
-        Path dir = dir().concat("dir").createDir();
+        Path dir = dir().concat("dir").createDirectory();
         Stat stat = dir.stat(NOFOLLOW);
 
         screen()
@@ -97,8 +97,8 @@ public final class InfoTest extends BaseFilesActivityTest {
     @Test
     public void gets_info_of_non_empty_dir() throws Exception {
 
-        Path dir = dir().concat("dir").createDir();
-        Path child1 = dir.concat("dir").createDir();
+        Path dir = dir().concat("dir").createDirectory();
+        Path child1 = dir.concat("dir").createDirectory();
         Path child2 = dir.concat("file").createFile();
         Path child3 = dir.concat("link").createSymbolicLink(dir);
 

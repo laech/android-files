@@ -35,7 +35,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
         setActivityIntent(newIntent(dir(), watchLimit));
 
         for (int i = 0; i < watchLimit + 5; i++) {
-            dir().concat(String.valueOf(i)).createDir();
+            dir().concat(String.valueOf(i)).createDirectory();
         }
 
         screen()
@@ -77,7 +77,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
             throws IOException {
 
         dir.concat("file-" + nanoTime()).createFile();
-        dir.concat("dir-" + nanoTime()).createDir();
+        dir.concat("dir-" + nanoTime()).createDirectory();
         dir.concat("before-move-" + nanoTime())
                 .createFile()
                 .move(dir.concat("after-move-" + nanoTime()));
@@ -97,7 +97,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
     public void auto_detect_files_added_and_removed_while_loading() throws Exception {
 
         for (int i = 0; i < 10; i++) {
-            dir().concat(String.valueOf(i)).createDir();
+            dir().concat(String.valueOf(i)).createDirectory();
         }
 
         Thread thread = new Thread(new Runnable() {
@@ -108,7 +108,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
                     try {
 
                         deleteFiles(2);
-                        randomFile(dir()).createDir();
+                        randomFile(dir()).createDirectory();
                         randomFile(dir()).createFile();
 
                     } catch (IOException ignore) {
@@ -179,7 +179,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
         if (dir.exists(NOFOLLOW)) {
             dir.delete();
         } else {
-            dir.createDir();
+            dir.createDirectory();
         }
     }
 
@@ -198,7 +198,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
     }
 
     private void updateDirectoryChild(String name) throws IOException {
-        Path dir = dir().concat(name).createDirs();
+        Path dir = dir().concat(name).createDirectories();
         Path child = dir.concat("child");
         if (child.exists(NOFOLLOW)) {
             child.delete();

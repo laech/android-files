@@ -212,7 +212,7 @@ final class ThumbnailDiskCache extends Cache<ScaledBitmap> {
         Path cache = cacheFile(path, stat, constraint, true);
         Path parent = cache.parent();
         assert parent != null;
-        parent.createDirs();
+        parent.createDirectories();
 
         Path tmp = parent.concat(cache.name() + "-" + nanoTime());
         DataOutputStream out = newBufferedDataOutputStream(tmp);

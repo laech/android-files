@@ -21,7 +21,7 @@ public final class SortTest extends BaseFilesActivityTest {
 
     @Test
     public void updates_list_on_sort_option_change_on_back() throws Exception {
-        Path a = dir().concat("a").createDir();
+        Path a = dir().concat("a").createDirectory();
         Path aa = createFile("aa", "aa", Instant.of(1, 1), a);
         Path ab = createFile("ab", "ab", Instant.of(2, 1), a);
         Path b = createFile("b", "b", Instant.of(1, 1));

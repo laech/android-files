@@ -125,7 +125,7 @@ public final class NewDirFragment extends FileCreationFragment {
         @Override
         protected IOException doInBackground(Path... params) {
             try {
-                dir.createDir();
+                dir.createDirectory();
                 return null;
             } catch (IOException e) {
                 return e;

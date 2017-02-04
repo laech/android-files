@@ -14,7 +14,7 @@ public final class SelectAllTest extends BaseFilesActivityTest {
     public void selects_all() throws Exception {
         Path a = dir().concat("a").createFile();
         Path b = dir().concat("b").createFile();
-        Path c = dir().concat("c").createDir();
+        Path c = dir().concat("c").createDirectory();
 
         screen()
                 .longClick(a)

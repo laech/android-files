@@ -70,7 +70,7 @@ public final class DetectorTest extends PathBaseTest {
     }
 
     protected Path createDir(String name) throws IOException {
-        return dir1().concat(name).createDir();
+        return dir1().concat(name).createDirectory();
     }
 
     private Path createSymbolicLink(String name, Path target) throws IOException {

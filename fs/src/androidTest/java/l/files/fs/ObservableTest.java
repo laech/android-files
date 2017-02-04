@@ -67,7 +67,7 @@ public final class ObservableTest extends PathBaseTest {
         Path readableDir = dir1().concat("readable");
         Path unreadableDir = dir1().concat("unreadable");
 
-        readableDir.createDir();
+        readableDir.createDirectory();
         Recorder recorder = observe(dir1(), FOLLOW);
         try {
             recorder.awaitModifyByCreateFile(readableDir, "aa");
@@ -88,7 +88,7 @@ public final class ObservableTest extends PathBaseTest {
         observables.add(createRandomChildDir(dir1()));
         observables.add(createRandomChildDir(dir1()));
 
-        ExtendedPath unobservable = dir1().concat("unobservable").createDir();
+        ExtendedPath unobservable = dir1().concat("unobservable").createDirectory();
         unobservable.removePermissions(Permission.read());
 
         observables.add(createRandomChildDir(dir1()));
@@ -145,7 +145,7 @@ public final class ObservableTest extends PathBaseTest {
 
     public void test_release_watch_when_dir_moves_out() throws Exception {
 
-        Path src = dir1().concat("src").createDir();
+        Path src = dir1().concat("src").createDirectory();
         Path dst = dir2().concat("dst");
 
         Tracker tracker = registerMockTracker();
@@ -262,7 +262,7 @@ public final class ObservableTest extends PathBaseTest {
     private Path createRandomChildDir(Path dir) throws IOException {
         while (true) {
             try {
-                return dir.concat(String.valueOf(random())).createDir();
+                return dir.concat(String.valueOf(random())).createDirectory();
             } catch (AlreadyExist ignore) {
             }
         }
@@ -312,8 +312,8 @@ public final class ObservableTest extends PathBaseTest {
 
     public void test_releases_all_watches_on_close() throws Exception {
 
-        Path a = dir1().concat("a").createDir();
-        Path b = dir1().concat("b").createDir();
+        Path a = dir1().concat("a").createDirectory();
+        Path b = dir1().concat("b").createDirectory();
         Tracker tracker = registerMockTracker();
         try {
 
@@ -363,7 +363,7 @@ public final class ObservableTest extends PathBaseTest {
 
     public void test_observe_on_link_no_follow() throws Exception {
 
-        Path dir = dir1().concat("dir").createDir();
+        Path dir = dir1().concat("dir").createDirectory();
         Path link = dir1().concat("link").createSymbolicLink(dir);
         Path file = link.concat("file");
         Recorder observer = observe(link, NOFOLLOW);
@@ -385,9 +385,9 @@ public final class ObservableTest extends PathBaseTest {
 
     public void test_observe_on_link_follow() throws Exception {
 
-        Path dir = dir1().concat("dir").createDir();
+        Path dir = dir1().concat("dir").createDirectory();
         Path link = dir1().concat("link").createSymbolicLink(dir);
-        Path child = link.concat("dir").createDir();
+        Path child = link.concat("dir").createDirectory();
         Recorder observer = observe(link, FOLLOW);
         try {
             observer.awaitModifyByCreateFile(child, "a");
@@ -412,7 +412,7 @@ public final class ObservableTest extends PathBaseTest {
     }
 
     public void test_rename_dir() throws Exception {
-        Path src = dir1().concat("a").createDir();
+        Path src = dir1().concat("a").createDirectory();
         Path dst = dir1().concat("b");
         Recorder observer = observe(dir1());
         try {
@@ -442,7 +442,7 @@ public final class ObservableTest extends PathBaseTest {
 
     public void test_move_dir_in_then_move_file_out_of_it() throws Exception {
 
-        Path src = dir2().concat("a").createDir();
+        Path src = dir2().concat("a").createDirectory();
         Path dir = dir1().concat("a");
         Path child = dir.concat("b");
         Recorder observer = observe(dir1());
@@ -487,7 +487,7 @@ public final class ObservableTest extends PathBaseTest {
 
     public void test_move_self_out() throws Exception {
         Path file = dir1().concat("file").createFile();
-        Path dir = dir1().concat("dir").createDir();
+        Path dir = dir1().concat("dir").createDirectory();
         testMoveSelfOut(file, dir2().concat("a"));
         testMoveSelfOut(dir, dir2().concat("b"));
     }
@@ -524,7 +524,7 @@ public final class ObservableTest extends PathBaseTest {
 
     public void test_modify_permissions() throws Exception {
         Path file = dir1().concat("file").createFile();
-        Path dir = dir1().concat("dir").createDir();
+        Path dir = dir1().concat("dir").createDirectory();
         testModifyPermission(file, file);
         testModifyPermission(file, dir1());
         testModifyPermission(dir, dir);
@@ -557,7 +557,7 @@ public final class ObservableTest extends PathBaseTest {
 
     public void test_modify_mtime() throws Exception {
         Path file = dir1().concat("file").createFile();
-        Path dir = dir1().concat("dir").createDir();
+        Path dir = dir1().concat("dir").createDirectory();
         testModifyLastModifiedTime(file, file);
         testModifyLastModifiedTime(file, dir1());
         testModifyLastModifiedTime(dir, dir);
@@ -583,8 +583,8 @@ public final class ObservableTest extends PathBaseTest {
         Path dir = dir1().concat("dir");
         testDelete(file.createFile(), file);
         testDelete(file.createFile(), dir1());
-        testDelete(dir.createDir(), dir);
-        testDelete(dir.createDir(), dir1());
+        testDelete(dir.createDirectory(), dir);
+        testDelete(dir.createDirectory(), dir1());
     }
 
     private void testDelete(Path target, Path observable) throws Exception {
@@ -677,7 +677,7 @@ public final class ObservableTest extends PathBaseTest {
     public void test_observe_unreadable_child_dir_will_notify_incomplete_observation()
             throws Exception {
 
-        ExtendedPath dir = dir1().concat("dir").createDir();
+        ExtendedPath dir = dir1().concat("dir").createDirectory();
         dir.removePermissions(Permission.read());
         Recorder observer = observe(dir1());
         try {
@@ -776,7 +776,7 @@ public final class ObservableTest extends PathBaseTest {
     public void test_create_dir_then_move_file_into_it() throws Exception {
         Path parent = dir1().concat("parent");
         Path file = dir2().concat("file").createFile();
-        Path dir = dir2().concat("dir").createDir();
+        Path dir = dir2().concat("dir").createDirectory();
         Recorder observer = observe(dir1());
         try {
             observer.awaitCreateDir(parent);
@@ -863,7 +863,7 @@ public final class ObservableTest extends PathBaseTest {
         return new Callable<Void>() {
             @Override
             public Void call() throws Exception {
-                dir.createDir();
+                dir.createDirectory();
                 return null;
             }
         };
@@ -876,7 +876,7 @@ public final class ObservableTest extends PathBaseTest {
         return new Callable<Void>() {
             @Override
             public Void call() throws Exception {
-                dir.createDir(permissions);
+                dir.createDirectory(permissions);
                 return null;
             }
         };
@@ -1503,7 +1503,7 @@ public final class ObservableTest extends PathBaseTest {
 
     private void testMoveDirIn(PreAction pre, PostAction post) throws Exception {
         Path dst = dir1().concat("a");
-        Path src = dir2().concat("a").createDir();
+        Path src = dir2().concat("a").createDirectory();
         pre.action(src);
         Recorder observer = observe(dir1());
         try {

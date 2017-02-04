@@ -21,8 +21,8 @@ public abstract class PasteTest extends PathBaseTest {
      * destination, even if they are empty.
      */
     public void test_pastesEmptyDirectories() throws Exception {
-        Path src = dir1().concat("empty").createDir();
-        Path dstDir = dir1().concat("dst").createDir();
+        Path src = dir1().concat("empty").createDirectory();
+        Path dstDir = dir1().concat("dst").createDirectory();
         create(singleton(src), dstDir).execute();
         assertTrue(dir1().concat("dst/empty").exists(NOFOLLOW));
     }
@@ -37,7 +37,7 @@ public abstract class PasteTest extends PathBaseTest {
                 dir1().concat("a.txt").createFile(),
                 dir1().concat("b.mp4").createFile()
         );
-        dir1().concat("1").createDir();
+        dir1().concat("1").createDirectory();
         dir1().concat("1/a.txt").createFile();
         dir1().concat("1/b.mp4").createFile();
 
@@ -77,7 +77,7 @@ public abstract class PasteTest extends PathBaseTest {
                 dir1().concat("a/1.txt").createFiles(),
                 dir1().concat("a/2.txt").createFiles()
         );
-        final Path dstDir = dir1().concat("b").createDir();
+        final Path dstDir = dir1().concat("b").createDirectory();
 
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -101,8 +101,8 @@ public abstract class PasteTest extends PathBaseTest {
     }
 
     public void test_errorOnPastingSelfIntoSubDirectory() throws Exception {
-        Path parent = dir1().concat("parent").createDir();
-        Path child = dir1().concat("parent/child").createDir();
+        Path parent = dir1().concat("parent").createDirectory();
+        Path child = dir1().concat("parent/child").createDirectory();
         try {
             create(singleton(parent), child).execute();
             fail();
@@ -112,7 +112,7 @@ public abstract class PasteTest extends PathBaseTest {
     }
 
     public void test_errorOnPastingIntoSelf() throws Exception {
-        Path dir = dir1().concat("parent").createDir();
+        Path dir = dir1().concat("parent").createDirectory();
         try {
             create(singleton(dir), dir).execute();
             fail();

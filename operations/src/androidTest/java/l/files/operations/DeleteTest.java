@@ -1,6 +1,5 @@
 package l.files.operations;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -16,7 +15,7 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 public final class DeleteTest extends PathBaseTest {
 
     public void test_notifiesListener() throws Exception {
-        Path a = dir1().concat("a").createDir();
+        Path a = dir1().concat("a").createDirectory();
         Path b = dir1().concat("a/b").createFile();
 
         Set<Path> expected = new HashSet<>(asList(a, b));
@@ -34,7 +33,7 @@ public final class DeleteTest extends PathBaseTest {
     }
 
     public void test_deletesNonEmptyDirectory() throws Exception {
-        Path dir = dir1().concat("a").createDir();
+        Path dir = dir1().concat("a").createDirectory();
         Path file = dir1().concat("a/child.txt").createFile();
         delete(dir);
         assertFalse(file.exists(NOFOLLOW));
@@ -42,7 +41,7 @@ public final class DeleteTest extends PathBaseTest {
     }
 
     public void test_deletesEmptyDirectory() throws Exception {
-        Path dir = dir1().concat("a").createDir();
+        Path dir = dir1().concat("a").createDirectory();
         delete(dir);
         assertFalse(dir.exists(NOFOLLOW));
     }

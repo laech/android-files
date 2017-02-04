@@ -108,7 +108,7 @@ final class Copy extends Paste {
             Stat sourceStat,
             Path destinationPath) throws IOException {
 
-        destinationPath.createDir();
+        destinationPath.createDirectory();
         copiedByteCount.addAndGet(sourceStat.size());
         copiedItemCount.incrementAndGet();
     }

@@ -50,7 +50,7 @@ public final class FilesTest extends PathBaseTest {
 
         Path dir = dir1().concat(bytes.clone());
         Path file = dir.concat("a");
-        dir.createDir();
+        dir.createDirectory();
         file.createFile();
 
         assertTrue(dir.exists(NOFOLLOW));
@@ -124,9 +124,9 @@ public final class FilesTest extends PathBaseTest {
     }
 
     public void test_list_linkFollowSuccess() throws Exception {
-        Path dir = dir1().concat("dir").createDir();
+        Path dir = dir1().concat("dir").createDirectory();
         Path a = dir.concat("a").createFile();
-        Path b = dir.concat("b").createDir();
+        Path b = dir.concat("b").createDirectory();
         Path c = dir.concat("c").createSymbolicLink(a);
         Path link = dir1().concat("link").createSymbolicLink(dir);
 
@@ -142,30 +142,30 @@ public final class FilesTest extends PathBaseTest {
 
     public void test_list() throws Exception {
         Path a = dir1().concat("a").createFile();
-        Path b = dir1().concat("b").createDir();
+        Path b = dir1().concat("b").createDirectory();
         List<Path> expected = asList(a, b);
         List<Path> actual = sortByName(dir1().list(NOFOLLOW, new ArrayList<Path>()));
         assertEquals(expected, actual);
     }
 
     public void test_listDir_linkFollowSuccess() throws Exception {
-        Path dir = dir1().concat("dir").createDir();
+        Path dir = dir1().concat("dir").createDirectory();
         Path a = dir.concat("a").createFile();
-        dir.concat("b").createDir();
+        dir.concat("b").createDirectory();
         dir.concat("c").createSymbolicLink(a);
 
         ExtendedPath link = dir1().concat("link").createSymbolicLink(dir);
         List<Path> expected = Collections.<Path>singletonList(link.concat("b"));
-        List<Path> actual = sortByName(link.listDirs(FOLLOW, new ArrayList<Path>()));
+        List<Path> actual = sortByName(link.listDirectories(FOLLOW, new ArrayList<Path>()));
         assertEquals(expected, actual);
     }
 
     public void test_listDir() throws Exception {
         dir1().concat("a").createFile();
-        dir1().concat("b").createDir();
+        dir1().concat("b").createDirectory();
         dir1().concat("c").createFile();
         List<?> expected = singletonList(dir1().concat("b"));
-        List<?> actual = sortByName(dir1().listDirs(NOFOLLOW, new ArrayList<Path>()));
+        List<?> actual = sortByName(dir1().listDirectories(NOFOLLOW, new ArrayList<Path>()));
         assertEquals(expected, actual);
     }
 
@@ -314,13 +314,13 @@ public final class FilesTest extends PathBaseTest {
 
     public void test_createDirectory() throws Exception {
         Path dir = dir1().concat("a");
-        dir.createDir();
+        dir.createDirectory();
         assertTrue(dir.stat(NOFOLLOW).isDirectory());
     }
 
     public void test_createDirectory_correctDefaultPermissions() throws Exception {
         Path actual = dir1().concat("a");
-        actual.createDir();
+        actual.createDirectory();
 
         File expected = new File(dir1().toString(), "b");
         assertTrue(expected.mkdir());
@@ -343,14 +343,14 @@ public final class FilesTest extends PathBaseTest {
                 EnumSet.of(OWNER_READ, OWNER_WRITE, OWNER_EXECUTE))) {
 
             String name = String.valueOf(Math.random());
-            Path dir = dir1().concat(name).createDir(permissions);
+            Path dir = dir1().concat(name).createDirectory(permissions);
             Stat stat = dir.stat(NOFOLLOW);
             assertEquals(permissions, stat.permissions());
         }
     }
 
     public void test_createDirectories() throws Exception {
-        dir1().concat("a/b/c").createDirs();
+        dir1().concat("a/b/c").createDirectories();
         assertTrue(dir1().concat("a/b/c").stat(NOFOLLOW).isDirectory());
         assertTrue(dir1().concat("a/b").stat(NOFOLLOW).isDirectory());
         assertTrue(dir1().concat("a/").stat(NOFOLLOW).isDirectory());
@@ -403,7 +403,7 @@ public final class FilesTest extends PathBaseTest {
     public void test_moveTo_directoryToNonExistingDirectory() throws Exception {
         Path src = dir1().concat("src");
         Path dst = dir1().concat("dst");
-        src.concat("a").createDirs();
+        src.concat("a").createDirectories();
         src.move(dst);
         assertFalse(src.exists(NOFOLLOW));
         assertTrue(dst.exists(NOFOLLOW));
@@ -428,14 +428,14 @@ public final class FilesTest extends PathBaseTest {
 
     public void test_delete_emptyDirectory() throws Exception {
         Path directory = dir1().concat("directory");
-        directory.createDir();
+        directory.createDirectory();
         assertTrue(directory.exists(NOFOLLOW));
         directory.delete();
         assertFalse(directory.exists(NOFOLLOW));
     }
 
     public void test_deleteRecursive_symbolicLink() throws Exception {
-        ExtendedPath dir = dir1().concat("dir").createDir();
+        ExtendedPath dir = dir1().concat("dir").createDirectory();
         ExtendedPath a = dir.concat("a").createFile();
         ExtendedPath link = dir1().concat("link").createSymbolicLink(dir);
         assertTrue(link.exists(NOFOLLOW));
@@ -453,15 +453,15 @@ public final class FilesTest extends PathBaseTest {
     }
 
     public void test_deleteRecursive_emptyDirectory() throws Exception {
-        Path dir = dir1().concat("dir").createDir();
+        Path dir = dir1().concat("dir").createDirectory();
         assertTrue(dir.exists(NOFOLLOW));
         dir.delete();
         assertFalse(dir.exists(NOFOLLOW));
     }
 
     public void test_deleteRecursive_nonEmptyDirectory() throws Exception {
-        ExtendedPath dir = dir1().concat("dir").createDir();
-        ExtendedPath sub = dir.concat("sub").createDir();
+        ExtendedPath dir = dir1().concat("dir").createDirectory();
+        ExtendedPath sub = dir.concat("sub").createDirectory();
         ExtendedPath a = dir.concat("a").createFile();
         ExtendedPath b = sub.concat("b").createFile();
         assertTrue(dir.exists(NOFOLLOW));
@@ -484,14 +484,14 @@ public final class FilesTest extends PathBaseTest {
     }
 
     public void test_deleteIfExists_emptyDirExist_willDelete() throws Exception {
-        ExtendedPath dir = dir1().concat("a").createDir();
+        ExtendedPath dir = dir1().concat("a").createDirectory();
         assertTrue(dir.exists(NOFOLLOW));
         dir.deleteIfExists();
         assertFalse(dir.exists(NOFOLLOW));
     }
 
     public void test_deleteIfExists_nonEmptyDirExist_willError() throws Exception {
-        ExtendedPath dir = dir1().concat("a").createDir();
+        ExtendedPath dir = dir1().concat("a").createDirectory();
         ExtendedPath file = dir.concat("1").createFile();
         assertTrue(dir.exists(NOFOLLOW));
         try {
@@ -508,7 +508,7 @@ public final class FilesTest extends PathBaseTest {
 
     public void test_deleteRecursiveIfExists_emptyDirWillDelete() throws Exception {
 
-        ExtendedPath dir = dir1().concat("dir").createDir();
+        ExtendedPath dir = dir1().concat("dir").createDirectory();
         assertTrue(dir.exists(NOFOLLOW));
 
         dir.deleteRecursiveIfExists();
@@ -517,7 +517,7 @@ public final class FilesTest extends PathBaseTest {
 
     public void test_deleteRecursiveIfExists_nonEmptyDirWillDelete() throws Exception {
 
-        ExtendedPath dir = dir1().concat("dir").createDir();
+        ExtendedPath dir = dir1().concat("dir").createDirectory();
         ExtendedPath file = dir.concat("child").createFile();
         assertTrue(dir.exists(NOFOLLOW));
         assertTrue(file.exists(NOFOLLOW));
@@ -549,7 +549,7 @@ public final class FilesTest extends PathBaseTest {
 
     public void test_deleteRecursiveIfExists_linkToDirWillDeleteNoFollow() throws Exception {
 
-        ExtendedPath dir = dir1().concat("dir").createDir();
+        ExtendedPath dir = dir1().concat("dir").createDirectory();
         ExtendedPath file = dir.concat("file").createFile();
         ExtendedPath link = dir1().concat("link").createSymbolicLink(dir);
         assertTrue(dir.exists(NOFOLLOW));
