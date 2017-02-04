@@ -3,7 +3,7 @@ package l.files.ui.base.graphics;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -20,21 +20,25 @@ import static android.graphics.Bitmap.CompressFormat.PNG;
 import static android.graphics.Bitmap.Config.ARGB_8888;
 import static android.graphics.Color.BLUE;
 import static java.io.File.createTempFile;
-import static l.files.ui.base.graphics.Bitmaps.decodeBounds;
 import static l.files.ui.base.graphics.Bitmaps.decodeScaledDownBitmap;
 import static l.files.ui.base.graphics.Bitmaps.scaleDownBitmap;
 import static l.files.ui.base.graphics.Bitmaps.scaleDownOptions;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
-public final class BitmapsTest extends TestCase {
+public final class BitmapsTest {
 
-    public void test_decodeScaledDownBitmap_scale_to_fit() throws Exception {
+    @Test
+    public void decodeScaledDownBitmap_scale_to_fit() throws Exception {
         Bitmap src = createBitmap(100, 100, BLUE);
         Bitmap expected = createBitmap(99, 99, BLUE);
         Rect max = Rect.of(1000, 99);
         testDecodeScaledDownBitmap(src, max, expected);
     }
 
-    public void test_decodeScaledDownBitmap_no_scale_needed() throws Exception {
+    @Test
+    public void decodeScaledDownBitmap_no_scale_needed() throws Exception {
         Bitmap src = createBitmap(99, 66, BLUE);
         Rect max = Rect.of(1000, 1000);
         testDecodeScaledDownBitmap(src, max, src);
@@ -71,14 +75,16 @@ public final class BitmapsTest extends TestCase {
         }
     }
 
-    public void test_scaleDownBitmap_scale_to_fit() throws Exception {
+    @Test
+    public void scaleDownBitmap_scale_to_fit() throws Exception {
         Bitmap src = createBitmap(99, 66, BLUE);
         Bitmap expected = createBitmap(33, 22, BLUE);
         Rect max = Rect.of(1000, 22);
         testScaleDownBitmap(src, max, expected);
     }
 
-    public void test_scaleDownBitmap_no_scale_needed() throws Exception {
+    @Test
+    public void scaleDownBitmap_no_scale_needed() throws Exception {
         Bitmap src = createBitmap(99, 66, BLUE);
         Rect max = Rect.of(1000, 1000);
         testScaleDownBitmap(src, max, src);
@@ -96,18 +102,20 @@ public final class BitmapsTest extends TestCase {
         return src;
     }
 
-    public void test_scaleOptions() throws Exception {
+    @Test
+    public void scaleOptions() throws Exception {
         Rect size = Rect.of(20, 20);
         Rect max = Rect.of(10, 10);
         Options options = scaleDownOptions(size, max);
         assertEquals(2, options.inSampleSize);
     }
 
-    public void test_decodeBounds() throws Exception {
+    @Test
+    public void decodeBounds() throws Exception {
         final int width = 10;
         final int height = 11;
         final byte[] bytes = generateBitmapByteArray(width, height);
-        final Rect bounds = decodeBounds(new Callable<InputStream>() {
+        final Rect bounds = Bitmaps.decodeBounds(new Callable<InputStream>() {
             @Override
             public InputStream call() {
                 return new ByteArrayInputStream(bytes);

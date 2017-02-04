@@ -2,7 +2,8 @@ package l.files.ui.base.media;
 
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
-import android.test.AndroidTestCase;
+
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,19 +15,24 @@ import l.files.testing.fs.Paths;
 import l.files.ui.base.graphics.Rect;
 import l.files.ui.base.graphics.ScaledBitmap;
 
+import static android.support.test.InstrumentationRegistry.getContext;
 import static java.io.File.createTempFile;
-import static l.files.ui.base.media.MediaMetadataRetrievers.getEmbeddedThumbnail;
-import static l.files.ui.base.media.MediaMetadataRetrievers.getFrameAtAnyTimeThumbnail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
-public final class MediaMetadataRetrieversTest extends AndroidTestCase {
+public final class MediaMetadataRetrieversTest {
 
-    public void test_getFrameAtAnyTimeThumbnail() throws Exception {
+    @Test
+    public void getFrameAtAnyTimeThumbnail() throws Exception {
         String name = "MediaMetadataRetrieversTest.mp4";
         testGetThumbnail(name, new Consumer<MediaMetadataRetriever>() {
             @Override
             public void accept(MediaMetadataRetriever retriever) {
                 Rect max = Rect.of(72, 1000);
-                ScaledBitmap result = getFrameAtAnyTimeThumbnail(retriever, max);
+                ScaledBitmap result = MediaMetadataRetrievers
+                        .getFrameAtAnyTimeThumbnail(retriever, max);
                 assertNotNull(result);
                 assertFalse(result.bitmap().isRecycled());
                 assertEquals(Rect.of(720, 1280), result.originalSize());
@@ -35,7 +41,8 @@ public final class MediaMetadataRetrieversTest extends AndroidTestCase {
         });
     }
 
-    public void test_getEmbeddedThumbnail() throws Exception {
+    @Test
+    public void getEmbeddedThumbnail() throws Exception {
         String name = "MediaMetadataRetrieversTest.m4a";
         testGetThumbnail(name, new Consumer<MediaMetadataRetriever>() {
             @Override
@@ -43,7 +50,8 @@ public final class MediaMetadataRetrieversTest extends AndroidTestCase {
                 Rect max = Rect.of(10, 1000);
                 ScaledBitmap result;
                 try {
-                    result = getEmbeddedThumbnail(retriever, max);
+                    result = MediaMetadataRetrievers
+                            .getEmbeddedThumbnail(retriever, max);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }

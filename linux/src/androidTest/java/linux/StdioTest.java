@@ -1,16 +1,21 @@
 package linux;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.io.File;
 
 import static java.io.File.createTempFile;
 import static linux.Errno.EACCES;
 import static linux.Errno.ENOENT;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-public final class StdioTest extends TestCase {
+public final class StdioTest {
 
-    public void test_remove_throws_NullPointerException_on_null_path_arg() throws Exception {
+    @Test
+    public void remove_throws_NullPointerException_on_null_path_arg() throws Exception {
         try {
             Stdio.remove(null);
             fail();
@@ -19,7 +24,8 @@ public final class StdioTest extends TestCase {
         }
     }
 
-    public void test_remove_throws_ErrnoException_if_path_does_not_exists() throws Exception {
+    @Test
+    public void remove_throws_ErrnoException_if_path_does_not_exists() throws Exception {
         File file = createTempFile(getClass().getSimpleName(), null);
         assertTrue(file.delete());
         try {
@@ -30,7 +36,8 @@ public final class StdioTest extends TestCase {
         }
     }
 
-    public void test_remove_throws_ErrnoException_if_no_permission_to_delete() throws Exception {
+    @Test
+    public void remove_throws_ErrnoException_if_no_permission_to_delete() throws Exception {
         File dir = createTempFile(getClass().getSimpleName(), "dir");
         assertTrue(dir.delete());
         assertTrue(dir.mkdir());
@@ -52,7 +59,8 @@ public final class StdioTest extends TestCase {
         }
     }
 
-    public void test_remove_file() throws Exception {
+    @Test
+    public void remove_file() throws Exception {
         File file = createTempFile(getClass().getSimpleName(), null);
         assertEquals(true, file.exists());
         try {
@@ -65,7 +73,8 @@ public final class StdioTest extends TestCase {
         }
     }
 
-    public void test_rename_throws_NullPointerException_on_null_old_path_arg() throws Exception {
+    @Test
+    public void rename_throws_NullPointerException_on_null_old_path_arg() throws Exception {
         try {
             Stdio.rename(null, "/abc".getBytes());
             fail();
@@ -74,7 +83,8 @@ public final class StdioTest extends TestCase {
         }
     }
 
-    public void test_rename_throws_NullPointerException_on_null_new_path_arg() throws Exception {
+    @Test
+    public void rename_throws_NullPointerException_on_null_new_path_arg() throws Exception {
         try {
             Stdio.rename("/abc".getBytes(), null);
             fail();
@@ -83,7 +93,8 @@ public final class StdioTest extends TestCase {
         }
     }
 
-    public void test_rename_moves_file_to_new_location() throws Exception {
+    @Test
+    public void rename_moves_file_to_new_location() throws Exception {
         File oldFile = createTempFile(getClass().getSimpleName(), null);
         File newFile = new File(oldFile.getParent(), oldFile.getName() + "-new");
         try {
@@ -101,7 +112,8 @@ public final class StdioTest extends TestCase {
 
     }
 
-    public void test_rename_throws_ErrnoException_source_does_not_exits() throws Exception {
+    @Test
+    public void rename_throws_ErrnoException_source_does_not_exits() throws Exception {
         File oldFile = createTempFile(getClass().getSimpleName(), null);
         File newFile = new File(oldFile.getParent(), oldFile.getName() + "-new");
         try {

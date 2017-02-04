@@ -1,6 +1,6 @@
 package linux;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -17,10 +17,14 @@ import static android.test.MoreAsserts.assertNotEqual;
 import static linux.Errno.ENOENT;
 import static linux.Fcntl.O_WRONLY;
 import static linux.Fcntl.placeholder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-public final class FcntlTest extends TestCase {
+public final class FcntlTest {
 
-    public void test_constants_are_initialized() throws Exception {
+    @Test
+    public void constants_are_initialized() throws Exception {
         Field[] fields = Fcntl.class.getFields();
         assertNotEqual(0, fields.length);
         for (Field field : fields) {
@@ -28,7 +32,8 @@ public final class FcntlTest extends TestCase {
         }
     }
 
-    public void test_open_throws_ErrnoException_if_path_does_not_exist() throws Exception {
+    @Test
+    public void open_throws_ErrnoException_if_path_does_not_exist() throws Exception {
         try {
             Fcntl.open("/abcdef".getBytes(), 0, 0);
             fail();
@@ -37,7 +42,8 @@ public final class FcntlTest extends TestCase {
         }
     }
 
-    public void test_open_throws_NullPointerException_on_null_path_arg() throws Exception {
+    @Test
+    public void open_throws_NullPointerException_on_null_path_arg() throws Exception {
         try {
             Fcntl.open(null, 0, 0);
             fail();
@@ -46,7 +52,8 @@ public final class FcntlTest extends TestCase {
         }
     }
 
-    public void test_open_returns_fd() throws Exception {
+    @Test
+    public void open_returns_fd() throws Exception {
 
         File file = File.createTempFile(getClass().getSimpleName(), null);
         file.deleteOnExit();

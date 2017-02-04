@@ -1,15 +1,17 @@
 package l.files.ui.operations;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import static java.util.concurrent.TimeUnit.HOURS;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.ui.operations.RemainingTimeFormatter.INSTANCE;
+import static org.junit.Assert.assertEquals;
 
-public final class RemainingTimeFormatterTest extends TestCase {
+public final class RemainingTimeFormatterTest {
 
-    public void test_format_time_remaining() {
+    @Test
+    public void format_time_remaining() {
         // total=11, processed=1, elapsed=1 sec, speed=1/sec, left=10 sec
         assertEquals("0:10", INSTANCE.format(0, SECONDS.toMillis(1), 11, 1));
 

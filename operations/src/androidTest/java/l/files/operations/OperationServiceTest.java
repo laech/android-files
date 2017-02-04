@@ -4,6 +4,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 
+import org.junit.Test;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -15,6 +17,7 @@ import l.files.operations.OperationService.TaskListener;
 import l.files.testing.fs.PathBaseTest;
 import l.files.testing.fs.Paths;
 
+import static android.support.test.InstrumentationRegistry.getContext;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
@@ -29,6 +32,9 @@ import static l.files.operations.OperationService.newMoveIntent;
 import static l.files.operations.TaskKind.COPY;
 import static l.files.operations.TaskKind.DELETE;
 import static l.files.operations.TaskKind.MOVE;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -37,13 +43,14 @@ public final class OperationServiceTest extends PathBaseTest {
     private OperationService service;
 
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         service = new OperationService();
         service.foreground = false;
     }
 
-    public void test_cancel_intent() throws Exception {
+    @Test
+    public void cancel_intent() throws Exception {
 
         Intent intent = newCancelIntent(getContext(), 101);
         assertEquals(ACTION_CANCEL, intent.getAction());
@@ -52,7 +59,8 @@ public final class OperationServiceTest extends PathBaseTest {
                 intent.getComponent());
     }
 
-    public void test_cancel_task_not_found() throws Exception {
+    @Test
+    public void cancel_task_not_found() throws Exception {
 
         TaskListener listener = mock(TaskListener.class);
         service.listener = listener;
@@ -63,7 +71,8 @@ public final class OperationServiceTest extends PathBaseTest {
         verify(listener).onNotFound(service, TaskNotFound.create(1011));
     }
 
-    public void test_moves_file() throws Exception {
+    @Test
+    public void moves_file() throws Exception {
 
         Path src = dir1().concat("a").createFile();
         Path dst = dir1().concat("dst").createDirectory();
@@ -78,7 +87,8 @@ public final class OperationServiceTest extends PathBaseTest {
         assertTrue(dst.concat(src.name().toPath()).exists(NOFOLLOW));
     }
 
-    public void test_copies_file() throws Exception {
+    @Test
+    public void copies_file() throws Exception {
 
         Path src = dir1().concat("a").createFile();
         Path dst = dir1().concat("dst").createDirectory();
@@ -93,7 +103,8 @@ public final class OperationServiceTest extends PathBaseTest {
         assertTrue(dst.concat(src.name().toPath()).exists(NOFOLLOW));
     }
 
-    public void test_deletes_files() throws Exception {
+    @Test
+    public void deletes_files() throws Exception {
 
         Path a = dir1().concat("a");
         Path b = dir1().concat("b/c");
@@ -110,7 +121,8 @@ public final class OperationServiceTest extends PathBaseTest {
         assertFalse(b.exists(NOFOLLOW));
     }
 
-    public void test_task_start_time_is_correct() throws Exception {
+    @Test
+    public void task_start_time_is_correct() throws Exception {
 
         Path file1 = dir1().concat("a").createFile();
         Path file2 = dir1().concat("b").createFile();

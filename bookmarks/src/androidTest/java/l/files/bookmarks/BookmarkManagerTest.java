@@ -2,15 +2,21 @@ package l.files.bookmarks;
 
 import android.content.SharedPreferences;
 
+import org.junit.Test;
+
 import java.util.HashSet;
 
 import l.files.fs.Path;
 import l.files.testing.fs.PathBaseTest;
 
 import static android.content.Context.MODE_PRIVATE;
+import static android.support.test.InstrumentationRegistry.getContext;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static l.files.bookmarks.BookmarkManager.BookmarkChangedListener;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -21,19 +27,20 @@ public final class BookmarkManagerTest extends PathBaseTest {
     private SharedPreferences pref;
 
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         pref = getContext().getSharedPreferences("bookmark-test", MODE_PRIVATE);
         manager = new BookmarkManagerImpl(pref);
     }
 
     @Override
-    protected void tearDown() throws Exception {
+    public void tearDown() throws Exception {
         assertTrue(pref.edit().clear().commit());
         super.tearDown();
     }
 
-    public void test_can_add_bookmarks() throws Exception {
+    @Test
+    public void can_add_bookmarks() throws Exception {
         Path a = dir1().concat("a").createDirectory();
         Path b = dir2().concat("b").createDirectory();
         manager.addBookmark(a);
@@ -41,7 +48,8 @@ public final class BookmarkManagerTest extends PathBaseTest {
         assertTrue(manager.getBookmarks().containsAll(asList(a, b)));
     }
 
-    public void test_can_remove_bookmarks() throws Exception {
+    @Test
+    public void can_remove_bookmarks() throws Exception {
         Path a = dir1().concat("a").createDirectory();
         Path b = dir1().concat("b").createDirectory();
         Path c = dir1().concat("c").createDirectory();
@@ -55,14 +63,16 @@ public final class BookmarkManagerTest extends PathBaseTest {
         assertFalse(manager.hasBookmark(c));
     }
 
-    public void test_notifies_on_bookmark_change() throws Exception {
+    @Test
+    public void notifies_on_bookmark_change() throws Exception {
         BookmarkChangedListener listener = mock(BookmarkChangedListener.class);
         manager.registerBookmarkChangedListener(listener);
         manager.addBookmark(dir1());
         verify(listener).onBookmarkChanged(manager);
     }
 
-    public void test_does_not_notify_removed_listener() throws Exception {
+    @Test
+    public void does_not_notify_removed_listener() throws Exception {
         BookmarkChangedListener listener = mock(BookmarkChangedListener.class);
         manager.registerBookmarkChangedListener(listener);
         manager.unregisterBookmarkChangedListener(listener);
@@ -70,7 +80,8 @@ public final class BookmarkManagerTest extends PathBaseTest {
         verify(listener, never()).onBookmarkChanged(manager);
     }
 
-    public void test_removes_non_existing_bookmarks() throws Exception {
+    @Test
+    public void removes_non_existing_bookmarks() throws Exception {
         Path file = dir1().concat("file").createFile();
         Path dir = dir1().concat("dir").createDirectory();
         Path link = dir1().concat("link").createSymbolicLink(file);

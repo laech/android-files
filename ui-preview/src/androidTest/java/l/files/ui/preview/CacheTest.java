@@ -1,6 +1,6 @@
 package l.files.ui.preview;
 
-import junit.framework.TestCase;
+import org.junit.Before;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,8 +14,11 @@ import l.files.ui.base.graphics.Rect;
 import static java.io.File.createTempFile;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
-public abstract class CacheTest<V, C extends Cache<V>> extends TestCase {
+public abstract class CacheTest<V, C extends Cache<V>> {
 
     C cache;
     Random random;
@@ -32,9 +35,8 @@ public abstract class CacheTest<V, C extends Cache<V>> extends TestCase {
         return dir;
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
 
         tempDir = createTempDir();
 

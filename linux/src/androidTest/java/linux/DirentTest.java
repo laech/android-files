@@ -1,6 +1,8 @@
 package linux;
 
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +14,7 @@ import java.util.Set;
 import linux.Dirent.DIR;
 
 import static android.test.MoreAsserts.assertNotEqual;
+import static junit.framework.Assert.assertTrue;
 import static linux.Dirent.DT_DIR;
 import static linux.Dirent.DT_REG;
 import static linux.Dirent.closedir;
@@ -19,30 +22,29 @@ import static linux.Dirent.opendir;
 import static linux.Dirent.placeholder;
 import static linux.Dirent.readdir;
 import static linux.Errno.ENOENT;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
-public final class DirentTest extends TestCase {
+public final class DirentTest {
 
     private File tempDir;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         tempDir = createTempDir();
         tempDir.deleteOnExit();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        try {
-            super.tearDown();
-        } finally {
-            if (tempDir != null) {
-                assertTrue(tempDir.delete() || !tempDir.exists());
-            }
+    @After
+    public void tearDown() throws Exception {
+        if (tempDir != null) {
+            assertTrue(tempDir.delete() || !tempDir.exists());
         }
     }
 
-    public void test_constants_are_initialized() throws Exception {
+    @Test
+    public void constants_are_initialized() throws Exception {
         Field[] fields = Dirent.class.getFields();
         Set<Byte> values = new HashSet<>();
         for (Field field : fields) {
@@ -60,7 +62,8 @@ public final class DirentTest extends TestCase {
         return TempDir.createTempDir(getClass().getSimpleName());
     }
 
-    public void test_fdopendir_throws_ErrnoException_on_invalid_fd() throws Exception {
+    @Test
+    public void fdopendir_throws_ErrnoException_on_invalid_fd() throws Exception {
         try {
             Dirent.fdopendir(-1);
             fail();
@@ -69,7 +72,8 @@ public final class DirentTest extends TestCase {
         }
     }
 
-    public void test_fdopendir_returns_valid_dir() throws Exception {
+    @Test
+    public void fdopendir_returns_valid_dir() throws Exception {
         File tmp = createTempDir();
         try {
             int fd = Fcntl.open(tmp.getPath().getBytes(), 0, 0);
@@ -84,7 +88,8 @@ public final class DirentTest extends TestCase {
         }
     }
 
-    public void test_readdir_reads_entries_from_dir() throws Exception {
+    @Test
+    public void readdir_reads_entries_from_dir() throws Exception {
 
         File childFile = new File(tempDir, "child");
         assertTrue(childFile.createNewFile());
@@ -128,7 +133,8 @@ public final class DirentTest extends TestCase {
 
     }
 
-    public void test_readdir_throws_NullPointerException_on_null_dirent_arg() throws Exception {
+    @Test
+    public void readdir_throws_NullPointerException_on_null_dirent_arg() throws Exception {
 
         DIR dir = opendir(tempDir.getPath().getBytes("UTF-8"));
         try {
@@ -142,7 +148,8 @@ public final class DirentTest extends TestCase {
 
     }
 
-    public void test_readdir_throws_NullPointerException_on_null_dir_arg() throws Exception {
+    @Test
+    public void readdir_throws_NullPointerException_on_null_dir_arg() throws Exception {
         try {
             readdir(null, new Dirent());
             fail();
@@ -151,7 +158,8 @@ public final class DirentTest extends TestCase {
         }
     }
 
-    public void test_closedir_cannot_readdir_afterward_throws_IllegalStateException() throws Exception {
+    @Test
+    public void closedir_cannot_readdir_afterward_throws_IllegalStateException() throws Exception {
 
         DIR dir = opendir(tempDir.getPath().getBytes("UTF-8"));
         closedir(dir);
@@ -165,7 +173,8 @@ public final class DirentTest extends TestCase {
 
     }
 
-    public void test_closedir_called_multiple_times_will_throw_IllegalStateException() throws Exception {
+    @Test
+    public void closedir_called_multiple_times_will_throw_IllegalStateException() throws Exception {
 
         DIR dir = opendir(tempDir.getPath().getBytes("UTF-8"));
         closedir(dir);
@@ -179,7 +188,8 @@ public final class DirentTest extends TestCase {
 
     }
 
-    public void test_closedir_throws_NullPointerException_on_null_dir_arg() throws Exception {
+    @Test
+    public void closedir_throws_NullPointerException_on_null_dir_arg() throws Exception {
         try {
             closedir(null);
             fail();
@@ -188,7 +198,8 @@ public final class DirentTest extends TestCase {
         }
     }
 
-    public void test_open_throws_NullPointerException_on_null_path_arg() throws Exception {
+    @Test
+    public void open_throws_NullPointerException_on_null_path_arg() throws Exception {
         try {
             opendir(null);
             fail();
@@ -197,7 +208,8 @@ public final class DirentTest extends TestCase {
         }
     }
 
-    public void test_open_throws_ErrnoException_if_path_does_not_exist() throws Exception {
+    @Test
+    public void open_throws_ErrnoException_if_path_does_not_exist() throws Exception {
         try {
             opendir("/abcdef".getBytes());
             fail();

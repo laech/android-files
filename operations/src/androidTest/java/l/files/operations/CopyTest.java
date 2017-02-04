@@ -1,5 +1,7 @@
 package l.files.operations;
 
+import org.junit.Test;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
@@ -13,10 +15,14 @@ import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public final class CopyTest extends PasteTest {
 
-    public void test_copy_reports_summary() throws Exception {
+    @Test
+    public void copy_reports_summary() throws Exception {
         Path dstDir = dir1().concat("dir").createDirectory();
         Path srcDir = dir1().concat("a").createDirectory();
         Path srcFile = dir1().concat("a/file").createFile();
@@ -37,19 +43,22 @@ public final class CopyTest extends PasteTest {
         return size;
     }
 
-    public void test_preserves_timestamps_for_file() throws Exception {
+    @Test
+    public void preserves_timestamps_for_file() throws Exception {
         Path src = dir1().concat("a").createFile();
         Path dir = dir1().concat("dir").createDirectory();
         testCopyPreservesTimestamp(src, dir);
     }
 
-    public void test_preserves_timestamps_for_empty_dir() throws Exception {
+    @Test
+    public void preserves_timestamps_for_empty_dir() throws Exception {
         Path src = dir1().concat("dir1").createDirectory();
         Path dir = dir1().concat("dir2").createDirectory();
         testCopyPreservesTimestamp(src, dir);
     }
 
-    public void test_preserves_timestamps_for_full_dir() throws Exception {
+    @Test
+    public void preserves_timestamps_for_full_dir() throws Exception {
         Path dir = dir1().concat("dir2").createDirectory();
         Path src = dir1().concat("dir1").createDirectory();
         src.concat("a").createFile();
@@ -82,7 +91,8 @@ public final class CopyTest extends PasteTest {
         return srcFile.stat(NOFOLLOW).lastModifiedTime();
     }
 
-    public void test_copies_link() throws Exception {
+    @Test
+    public void copies_link() throws Exception {
         Path target = dir1().concat("target").createFile();
         Path link = dir1().concat("link").createSymbolicLink(target);
 
@@ -92,7 +102,8 @@ public final class CopyTest extends PasteTest {
         assertEquals(target, copied.readSymbolicLink());
     }
 
-    public void test_copies_directory() throws Exception {
+    @Test
+    public void copies_directory() throws Exception {
         Path srcDir = dir1().concat("a").createDirectory();
         Path dstDir = dir1().concat("dst").createDirectory();
         Path srcFile = srcDir.concat("test.txt");
@@ -104,14 +115,16 @@ public final class CopyTest extends PasteTest {
         assertEquals("Testing", Paths.readAllUtf8(dstFile));
     }
 
-    public void test_copies_empty_directory() throws Exception {
+    @Test
+    public void copies_empty_directory() throws Exception {
         Path src = dir1().concat("empty").createDirectory();
         Path dir = dir1().concat("dst").createDirectory();
         copy(src, dir);
         assertTrue(dir1().concat("dst/empty").exists(NOFOLLOW));
     }
 
-    public void test_copies_empty_file() throws Exception {
+    @Test
+    public void copies_empty_file() throws Exception {
         Path srcFile = dir1().concat("empty").createFile();
         Path dstDir = dir1().concat("dst").createDirectory();
 
@@ -119,7 +132,9 @@ public final class CopyTest extends PasteTest {
         assertTrue(dir1().concat("dst/empty").exists(NOFOLLOW));
     }
 
-    public void test_copies_file() throws Exception {
+
+    @Test
+    public void copies_file() throws Exception {
         Path srcFile = dir1().concat("test.txt").createFile();
         Path dstDir = dir1().concat("dst").createDirectory();
         Path dstFile = dstDir.concat("test.txt");

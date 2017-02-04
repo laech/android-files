@@ -1,5 +1,7 @@
 package l.files.operations;
 
+import org.junit.Test;
+
 import java.util.Set;
 
 import l.files.fs.Path;
@@ -7,17 +9,21 @@ import l.files.testing.fs.Paths;
 
 import static java.util.Collections.singleton;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 public final class MoveTest extends PasteTest {
 
-    public void test_movedCountInitialZero() throws Exception {
+    @Test
+    public void movedCountInitialZero() throws Exception {
         Path src = dir1().concat("a").createFile();
         Path dstDir = dir1().concat("b").createDirectory();
         Move move = create(src, dstDir);
         assertEquals(move.getMovedItemCount(), 0);
     }
 
-    public void test_movesSymlink() throws Exception {
+    @Test
+    public void movesSymlink() throws Exception {
         Path target = dir1().concat("target").createFile();
         Path link = dir1().concat("link").createSymbolicLink(target);
 
@@ -29,7 +35,8 @@ public final class MoveTest extends PasteTest {
         assertEquals(1, move.getMovedItemCount());
     }
 
-    public void test_movesFile() throws Exception {
+    @Test
+    public void movesFile() throws Exception {
         Path srcFile = dir1().concat("a.txt").createFile();
         Path dstDir = dir1().concat("dst").createDirectory();
         Path dstFile = dstDir.concat("a.txt");
@@ -43,7 +50,9 @@ public final class MoveTest extends PasteTest {
         assertEquals(move.getMovedItemCount(), 1);
     }
 
-    public void test_movesDirectory() throws Exception {
+
+    @Test
+    public void movesDirectory() throws Exception {
         Path srcDir = dir1().concat("a").createDirectory();
         Path dstDir = dir1().concat("dst").createDirectory();
         Path srcFile = srcDir.concat("test.txt");
