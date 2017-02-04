@@ -31,6 +31,10 @@
   *;
 }
 
+-keep class l.files.fs.Stat {
+  *;
+}
+
 # Referenced from native code
 -keepclassmembers class l.files.fs.Observable {
   *** isClosed();
