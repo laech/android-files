@@ -77,7 +77,7 @@ public final class ObservableDownloadTest extends PathBaseTest {
 
         assumeTrue("Skipping test on API 24 (Android N) due to no permission " +
                         "to observe on download directory.",
-                SDK_INT != 24);
+                SDK_INT < 24);
 //                SDK_INT != N); // TODO Change to 'N' after upgrade to API 24
 
         Path downloadDir = downloadsDir();
