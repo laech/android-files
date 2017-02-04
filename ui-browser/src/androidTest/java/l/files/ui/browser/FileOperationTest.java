@@ -66,7 +66,7 @@ public final class FileOperationTest extends BaseFilesActivityTest {
             @Override
             public void execute() throws Exception {
                 assertFalse(file.exists(NOFOLLOW));
-                assertTrue(dir.concat(file).exists(NOFOLLOW));
+                assertTrue(dir.concat(file.name()).exists(NOFOLLOW));
             }
         });
 
