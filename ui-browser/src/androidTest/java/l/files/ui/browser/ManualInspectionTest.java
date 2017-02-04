@@ -1,10 +1,6 @@
 package l.files.ui.browser;
 
-import android.support.test.runner.AndroidJUnit4;
-import android.test.InstrumentationTestCase;
-
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -16,6 +12,7 @@ import l.files.fs.Path;
 import l.files.testing.fs.Paths;
 
 import static android.os.Environment.getExternalStorageDirectory;
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
 import static android.test.MoreAsserts.assertNotEqual;
 import static com.google.common.base.Charsets.UTF_8;
 import static java.lang.System.currentTimeMillis;
@@ -25,8 +22,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
-@RunWith(AndroidJUnit4.class)
-public final class ManualInspectionTest extends InstrumentationTestCase {
+public final class ManualInspectionTest {
 
     @Test
     public void test() throws Exception {

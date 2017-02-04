@@ -36,7 +36,6 @@ import static android.view.KeyEvent.KEYCODE_BACK;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static java.util.Arrays.asList;
-import static java.util.Collections.reverse;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -533,8 +532,7 @@ final class UiFileActivity {
             @Override
             public void run() {
                 List<Path> actual = activity().hierarchy();
-                List<Path> expected = dir.hierarchy();
-                reverse(expected);
+                List<Path> expected = dir.hierarchy().reverse();
                 assertEquals(expected, actual);
                 assertEquals(dir, activity().title().getSelectedItem());
             }

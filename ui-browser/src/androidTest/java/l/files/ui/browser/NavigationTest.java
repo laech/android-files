@@ -150,7 +150,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
             throws Exception {
 
         assumeTrue("Skipping test, no permission to read /proc on Android N",
-                SDK_INT != 24);
+                SDK_INT < 24);
 //                SDK_INT != N); // TODO Change to 'N' after upgrade to API 24
 
         screen().selectFromNavigationMode(Path.create("/"));
