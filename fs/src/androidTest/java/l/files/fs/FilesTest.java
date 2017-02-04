@@ -511,8 +511,6 @@ public final class FilesTest extends PathBaseTest {
         assertFalse(dir.exists(NOFOLLOW));
     }
 
-    public void test_deleteRecursive_nonEmptyDirectory() throws Exception {
-
     @Test
     public void deleteRecursive_nonEmptyDirectory() throws Exception {
         Path dir = dir1().concat("dir").createDirectory();
