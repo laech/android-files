@@ -33,7 +33,7 @@ public final class FilesTest extends PathBaseTest {
         testExistent(createFile("c 2.mp4"), "c 3.mp4");
         testExistent(createFile("c2.mp4"), "c3.mp4");
         testExistent(createFile("d 2"), "d 3");
-        testExistent(createFile("dir"), "x");
+        testExistent(createFile("dir"), "dir 2");
     }
 
     public void test_getNonExistentDestinationFile_directory() throws Exception {
@@ -45,7 +45,7 @@ public final class FilesTest extends PathBaseTest {
         testExistent(createDir("a3"), "a4");
         testExistent(createDir("d 2"), "d 3");
         testExistent(createDir("d2"), "d3");
-        testExistent(createDir("dir"), "x");
+        testExistent(createDir("dir"), "dir 2");
     }
 
     public void test_getNonExistentDestinationFile_hiddenResourceNoExtension() throws Exception {
