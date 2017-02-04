@@ -13,7 +13,7 @@ import java.util.List;
 
 import l.files.fs.Instant;
 import l.files.fs.Path;
-import l.files.testing.fs.ExtendedPath;
+import l.files.testing.fs.Paths;
 
 import static android.os.Environment.getExternalStorageDirectory;
 import static android.test.MoreAsserts.assertNotEqual;
@@ -30,17 +30,16 @@ public final class ManualInspectionTest extends InstrumentationTestCase {
 
     @Test
     public void test() throws Exception {
-        ExtendedPath dir = ExtendedPath.wrap(Path.create(
-                getExternalStorageDirectory()).concat("test"));
+        Path dir = Path.create(getExternalStorageDirectory()).concat("test");
         dir.createDirectories();
         try {
             dir.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(currentTimeMillis()));
         } catch (IOException ignore) {
             // Older versions does not support changing mtime
         }
-        dir.concat(".nomedia").createFiles();
-        dir.concat("html.html").createFiles();
-        dir.concat("zip.zip").createFiles();
+        Paths.createFiles(dir.concat(".nomedia"));
+        Paths.createFiles(dir.concat("html.html"));
+        Paths.createFiles(dir.concat("zip.zip"));
         try {
             createNonUtf8Dir();
         } catch (IOException e) {
@@ -62,14 +61,14 @@ public final class ManualInspectionTest extends InstrumentationTestCase {
                 "test.svg");
 
         for (String res : resources) {
-            ExtendedPath file = dir.concat(res);
+            Path file = dir.concat(res);
             if (file.exists(NOFOLLOW)) {
                 continue;
             }
 
             InputStream in = getInstrumentation().getContext().getAssets().open(res);
             try {
-                file.copy(in);
+                Paths.copy(in, file);
             } finally {
                 in.close();
             }
@@ -86,7 +85,7 @@ public final class ManualInspectionTest extends InstrumentationTestCase {
         Path child = dir.concat("good we can see this dir");
 
         try {
-            ExtendedPath.wrap(dir).deleteRecursive();
+            Paths.deleteRecursive(dir);
         } catch (FileNotFoundException ignored) {
         }
 
@@ -94,21 +93,18 @@ public final class ManualInspectionTest extends InstrumentationTestCase {
         child.createFile();
     }
 
-    private void createFutureFiles(ExtendedPath dir) throws IOException {
-        dir.concat("future")
-                .createFiles()
+    private void createFutureFiles(Path dir) throws IOException {
+        Paths.createFiles(dir.concat("future"))
                 .setLastModifiedTime(
                         FOLLOW,
                         Instant.ofMillis(currentTimeMillis() + DAYS.toMillis(365)));
 
-        dir.concat("future3")
-                .createFiles()
+        Paths.createFiles(dir.concat("future3"))
                 .setLastModifiedTime(
                         FOLLOW,
                         Instant.ofMillis(currentTimeMillis() + DAYS.toMillis(2)));
 
-        dir.concat("future5")
-                .createFiles()
+        Paths.createFiles(dir.concat("future5"))
                 .setLastModifiedTime(
                         FOLLOW,
                         Instant.ofMillis(currentTimeMillis() + SECONDS.toMillis(5)));

@@ -3,12 +3,12 @@ package l.files.operations;
 import com.google.common.collect.ImmutableSet;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import l.files.fs.Path;
 import l.files.testing.fs.PathBaseTest;
+import l.files.testing.fs.Paths;
 
 import static java.lang.Thread.currentThread;
 import static java.util.Collections.singleton;
@@ -33,7 +33,7 @@ public abstract class PasteTest extends PathBaseTest {
      * pasted with new names.
      */
     public void test_doesNotOverrideExistingFile() throws Exception {
-        Set<Path> sources = ImmutableSet.<Path>of(
+        Set<Path> sources = ImmutableSet.of(
                 dir1().concat("a.txt").createFile(),
                 dir1().concat("b.mp4").createFile()
         );
@@ -57,11 +57,11 @@ public abstract class PasteTest extends PathBaseTest {
      * new directories will be pasted with new names.
      */
     public void test_doesNotOverrideExistingDirectory() throws Exception {
-        dir1().concat("a/1.txt").createFiles();
-        dir1().concat("a/b/2.txt").createFiles();
-        dir1().concat("a/b/3.txt").createFiles();
-        dir1().concat("b/a/1.txt").createFiles();
-        Set<Path> sources = Collections.<Path>singleton(dir1().concat("a"));
+        Paths.createFiles(dir1().concat("a/1.txt"));
+        Paths.createFiles(dir1().concat("a/b/2.txt"));
+        Paths.createFiles(dir1().concat("a/b/3.txt"));
+        Paths.createFiles(dir1().concat("b/a/1.txt"));
+        Set<Path> sources = singleton(dir1().concat("a"));
         Path dstDir = dir1().concat("b");
 
         create(sources, dstDir).execute();
@@ -73,9 +73,9 @@ public abstract class PasteTest extends PathBaseTest {
     }
 
     public void test_doesNothingIfAlreadyCancelledOnExecution() throws Exception {
-        final Set<Path> sources = ImmutableSet.<Path>of(
-                dir1().concat("a/1.txt").createFiles(),
-                dir1().concat("a/2.txt").createFiles()
+        final Set<Path> sources = ImmutableSet.of(
+                Paths.createFiles(dir1().concat("a/1.txt")),
+                Paths.createFiles(dir1().concat("a/2.txt"))
         );
         final Path dstDir = dir1().concat("b").createDirectory();
 

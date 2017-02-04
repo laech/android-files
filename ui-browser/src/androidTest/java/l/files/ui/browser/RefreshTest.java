@@ -12,7 +12,7 @@ import l.files.fs.Instant;
 import l.files.fs.Path;
 import l.files.fs.Path.Consumer;
 import l.files.fs.Permission;
-import l.files.testing.fs.ExtendedPath;
+import l.files.testing.fs.Paths;
 
 import static java.lang.System.currentTimeMillis;
 import static java.lang.System.nanoTime;
@@ -50,7 +50,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
     private void testRefreshInManualMode(Path dir) throws IOException {
 
-        ExtendedPath.wrap(dir).listDirs(FOLLOW, new Consumer() {
+        Paths.listDirectories(dir, FOLLOW, new Consumer() {
             @Override
             public boolean accept(Path childDir) throws IOException {
                 // Inotify don't notify child directory last modified time,
@@ -85,7 +85,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
         dir.list(FOLLOW, new Consumer() {
             @Override
             public boolean accept(Path file) throws IOException {
-                ExtendedPath.wrap(file).deleteRecursive();
+                Paths.deleteRecursive(file);
                 return false;
             }
         });
@@ -130,7 +130,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
             @Override
             public boolean accept(Path file) throws IOException {
-                ExtendedPath.wrap(file).deleteRecursive();
+                Paths.deleteRecursive(file);
                 count++;
                 return count < n;
             }
@@ -184,7 +184,8 @@ public final class RefreshTest extends BaseFilesActivityTest {
     }
 
     private void updatePermissions(String name) throws IOException {
-        Path res = dir().concat(name).createFiles();
+        Path res = dir().concat(name);
+        Paths.createFiles(res);
         if (res.isReadable()) {
             res.setPermissions(Permission.read());
         } else {
@@ -193,8 +194,9 @@ public final class RefreshTest extends BaseFilesActivityTest {
     }
 
     private void updateFileContent(String name) throws IOException {
-        ExtendedPath file = dir().concat(name).createFiles();
-        file.writeUtf8(String.valueOf(new Random().nextLong()));
+        Path file = dir().concat(name);
+        Paths.createFiles(file);
+        Paths.writeUtf8(file, String.valueOf(new Random().nextLong()));
     }
 
     private void updateDirectoryChild(String name) throws IOException {

@@ -18,7 +18,7 @@ import l.files.fs.Instant;
 import l.files.fs.Path;
 import l.files.fs.Permission;
 import l.files.fs.Stat;
-import l.files.testing.fs.ExtendedPath;
+import l.files.testing.fs.Paths;
 
 import static android.os.Build.VERSION.SDK_INT;
 import static android.test.MoreAsserts.assertNotEqual;
@@ -71,7 +71,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
                     .assertAllItemsDisplayedInOrder(dst);
 
         } finally {
-            ExtendedPath.wrap(dir).deleteRecursiveIfExists();
+            Paths.deleteRecursiveIfExists(dir);
         }
     }
 
@@ -87,11 +87,11 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
     @Test
     public void can_preview() throws Exception {
-        ExtendedPath dir = dir().concat("test_can_preview").createDirectory();
-        ExtendedPath empty = dir.concat("empty").createFile();
-        ExtendedPath file = dir.concat("file");
-        ExtendedPath link = dir.concat("link").createSymbolicLink(file);
-        file.writeUtf8("hello");
+        Path dir = dir().concat("test_can_preview").createDirectory();
+        Path empty = dir.concat("empty").createFile();
+        Path file = dir.concat("file");
+        Path link = dir.concat("link").createSymbolicLink(file);
+        Paths.writeUtf8(file, "hello");
         screen()
                 .clickInto(dir)
                 .assertThumbnailShown(file, true)
@@ -194,8 +194,8 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
     @Test
     public void shows_time_and_size_for_file() throws Exception {
-        ExtendedPath file = dir().concat("file").createFile();
-        file.appendUtf8(file.toString());
+        Path file = dir().concat("file").createFile();
+        Paths.appendUtf8(file, file.toString());
 
         Context c = getActivity();
         Stat stat = file.stat(NOFOLLOW);
@@ -242,8 +242,8 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
     @Test
     public void directory_view_is_disabled_if_no_read_permission() throws Exception {
-        ExtendedPath dir = dir().concat("dir").createDirectory();
-        dir.removePermissions(Permission.read());
+        Path dir = dir().concat("dir").createDirectory();
+        Paths.removePermissions(dir, Permission.read());
         screen().assertDisabled(dir);
     }
 
@@ -422,7 +422,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
         if (stat.isDirectory()) {
             file.concat(String.valueOf(nanoTime())).createDirectory();
         } else {
-            ExtendedPath.wrap(file).appendUtf8("test");
+            Paths.appendUtf8(file, "test");
         }
         Instant lastModifiedAfter = file.stat(NOFOLLOW).lastModifiedTime();
         assertNotEqual(lastModifiedBefore, lastModifiedAfter);

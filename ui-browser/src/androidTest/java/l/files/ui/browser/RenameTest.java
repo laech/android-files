@@ -8,7 +8,7 @@ import org.junit.runner.RunWith;
 
 import l.files.fs.Path;
 import l.files.fs.Permission;
-import l.files.testing.fs.ExtendedPath;
+import l.files.testing.fs.Paths;
 
 import static java.lang.Thread.sleep;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -49,14 +49,14 @@ public class RenameTest extends BaseFilesActivityTest {
                     .assertAllItemsDisplayedInOrder(dst);
 
         } finally {
-            ExtendedPath.wrap(dir).deleteRecursiveIfExists();
+            Paths.deleteRecursiveIfExists(dir);
         }
     }
 
     @Test
     public void shows_error_when_failed_to_rename() throws Exception {
         Path file = dir().concat("a").createFile();
-        dir().removePermissions(Permission.write());
+        Paths.removePermissions(dir(), Permission.write());
         rename(file)
                 .setFilename("abc")
                 .okExpectingFailure("Permission denied");

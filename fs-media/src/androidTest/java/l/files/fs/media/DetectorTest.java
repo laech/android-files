@@ -3,8 +3,8 @@ package l.files.fs.media;
 import java.io.IOException;
 
 import l.files.fs.Path;
-import l.files.testing.fs.ExtendedPath;
 import l.files.testing.fs.PathBaseTest;
+import l.files.testing.fs.Paths;
 
 public final class DetectorTest extends PathBaseTest {
 
@@ -84,8 +84,8 @@ public final class DetectorTest extends PathBaseTest {
     }
 
     private Path createTextFile(String name, String content) throws IOException {
-        ExtendedPath path = dir1().concat(name);
-        path.writeUtf8(content);
+        Path path = dir1().concat(name);
+        Paths.writeUtf8(path, content);
         return path;
     }
 

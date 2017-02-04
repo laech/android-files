@@ -9,7 +9,7 @@ import java.io.IOException;
 
 import l.files.fs.Instant;
 import l.files.fs.Path;
-import l.files.testing.fs.ExtendedPath;
+import l.files.testing.fs.Paths;
 
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.ui.browser.FileSort.MODIFIED;
@@ -59,8 +59,8 @@ public final class SortTest extends BaseFilesActivityTest {
             Instant modified,
             Path dir) throws IOException {
 
-        ExtendedPath file = ExtendedPath.wrap(dir.concat(name).createFile());
-        file.writeUtf8(content);
+        Path file = dir.concat(name).createFile();
+        Paths.writeUtf8(file, content);
         file.setLastModifiedTime(NOFOLLOW, modified);
         return file;
 

@@ -7,7 +7,7 @@ import org.junit.runner.RunWith;
 
 import l.files.fs.Path;
 import l.files.fs.Permission;
-import l.files.testing.fs.ExtendedPath;
+import l.files.testing.fs.Paths;
 
 import static l.files.ui.browser.FileSort.NAME;
 
@@ -16,8 +16,8 @@ public final class ActionModeTest extends BaseFilesActivityTest {
 
     @Test
     public void disabled_item_can_still_be_selected() throws Exception {
-        ExtendedPath a = dir().concat("a").createFile();
-        a.removePermissions(Permission.read());
+        Path a = dir().concat("a").createFile();
+        Paths.removePermissions(a, Permission.read());
         screen()
                 .longClick(a)
                 .assertActionModePresent(true)

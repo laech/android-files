@@ -13,6 +13,7 @@ import java.util.concurrent.CountDownLatch;
 import l.files.fs.Path;
 import l.files.operations.OperationService.TaskListener;
 import l.files.testing.fs.PathBaseTest;
+import l.files.testing.fs.Paths;
 
 import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.asList;
@@ -94,8 +95,10 @@ public final class OperationServiceTest extends PathBaseTest {
 
     public void test_deletes_files() throws Exception {
 
-        Path a = dir1().concat("a").createFiles();
-        Path b = dir1().concat("b/c").createFiles();
+        Path a = dir1().concat("a");
+        Path b = dir1().concat("b/c");
+        Paths.createFiles(a);
+        Paths.createFiles(b);
         CountDownListener listener = new CountDownListener(DELETE);
         service.listener = listener;
         service.onCreate();

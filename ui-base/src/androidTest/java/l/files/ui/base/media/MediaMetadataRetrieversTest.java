@@ -10,7 +10,7 @@ import java.io.InputStream;
 
 import l.files.base.Consumer;
 import l.files.fs.Path;
-import l.files.testing.fs.ExtendedPath;
+import l.files.testing.fs.Paths;
 import l.files.ui.base.graphics.Rect;
 import l.files.ui.base.graphics.ScaledBitmap;
 
@@ -69,7 +69,7 @@ public final class MediaMetadataRetrieversTest extends AndroidTestCase {
                 retriever.release();
             }
         } finally {
-            ExtendedPath.wrap(path).deleteIfExists();
+            Paths.deleteIfExists(path);
         }
     }
 
@@ -79,7 +79,7 @@ public final class MediaMetadataRetrieversTest extends AndroidTestCase {
             Path path = Path.create(file);
             InputStream in = getContext().getAssets().open(name);
             try {
-                ExtendedPath.wrap(path).copy(in);
+                Paths.copy(in, path);
             } finally {
                 in.close();
             }

@@ -23,8 +23,8 @@ import l.files.fs.Path.Consumer;
 import l.files.fs.event.Event;
 import l.files.fs.event.Observation;
 import l.files.fs.event.Observer;
-import l.files.testing.fs.ExtendedPath;
 import l.files.testing.fs.PathBaseTest;
+import l.files.testing.fs.Paths;
 
 import static java.lang.Integer.parseInt;
 import static java.lang.Math.random;
@@ -88,8 +88,8 @@ public final class ObservableTest extends PathBaseTest {
         observables.add(createRandomChildDir(dir1()));
         observables.add(createRandomChildDir(dir1()));
 
-        ExtendedPath unobservable = dir1().concat("unobservable").createDirectory();
-        unobservable.removePermissions(Permission.read());
+        Path unobservable = dir1().concat("unobservable").createDirectory();
+        Paths.removePermissions(unobservable, Permission.read());
 
         observables.add(createRandomChildDir(dir1()));
         observables.add(createRandomChildDir(dir1()));
@@ -174,9 +174,9 @@ public final class ObservableTest extends PathBaseTest {
         try {
 
             for (int i = 1; i < maxUserInstances + 10; i++) {
-                ExtendedPath child = dir1().concat(String.valueOf(i)).createFile();
+                Path child = dir1().concat(String.valueOf(i)).createFile();
                 Observer observer = mock(Observer.class);
-                Observation observation = child.observe(NOFOLLOW, observer);
+                Observation observation = Paths.observe(child, NOFOLLOW, observer);
                 observations.add(observation);
                 if (i <= maxUserInstances) {
                     assertFalse("Failed at " + i, observation.isClosed());
@@ -317,7 +317,7 @@ public final class ObservableTest extends PathBaseTest {
         Tracker tracker = registerMockTracker();
         try {
 
-            dir1().observe(NOFOLLOW, mock(Observer.class)).close();
+            Paths.observe(dir1(), NOFOLLOW, mock(Observer.class)).close();
 
             ArgumentCaptor<Integer> fd = ArgumentCaptor.forClass(Integer.class);
             ArgumentCaptor<Integer> wd = ArgumentCaptor.forClass(Integer.class);
@@ -347,7 +347,7 @@ public final class ObservableTest extends PathBaseTest {
         ArgumentCaptor<Integer> fd = ArgumentCaptor.forClass(Integer.class);
         Tracker tracker = registerMockTracker();
         try {
-            dir1().observe(NOFOLLOW, mock(Observer.class)).close();
+            Paths.observe(dir1(), NOFOLLOW, mock(Observer.class)).close();
             verify(tracker).onInit(fd.capture());
             verify(tracker).onClose(fd.getValue());
         } finally {
@@ -356,9 +356,8 @@ public final class ObservableTest extends PathBaseTest {
     }
 
     private int maxUserInstances() throws IOException {
-        ExtendedPath limitFile = ExtendedPath.wrap(Path.create(
-                "/proc/sys/fs/inotify/max_user_instances"));
-        return parseInt(limitFile.readAllUtf8().trim());
+        Path limitFile = Path.create("/proc/sys/fs/inotify/max_user_instances");
+        return parseInt(Paths.readAllUtf8(limitFile).trim());
     }
 
     public void test_observe_on_link_no_follow() throws Exception {
@@ -677,8 +676,8 @@ public final class ObservableTest extends PathBaseTest {
     public void test_observe_unreadable_child_dir_will_notify_incomplete_observation()
             throws Exception {
 
-        ExtendedPath dir = dir1().concat("dir").createDirectory();
-        dir.removePermissions(Permission.read());
+        Path dir = dir1().concat("dir").createDirectory();
+        Paths.removePermissions(dir, Permission.read());
         Recorder observer = observe(dir1());
         try {
             observer.awaitOnIncompleteObservation();
@@ -902,7 +901,7 @@ public final class ObservableTest extends PathBaseTest {
         return new Callable<Void>() {
             @Override
             public Void call() throws Exception {
-                ExtendedPath.wrap(file).writeUtf8(content);
+                Paths.writeUtf8(file, content);
                 return null;
             }
         };
@@ -972,7 +971,7 @@ public final class ObservableTest extends PathBaseTest {
             Tracker tracker = registerMockTracker();
             try {
                 Recorder observer = new Recorder(file);
-                observer.observation = ExtendedPath.wrap(file).observe(option, observer);
+                observer.observation = Paths.observe(file, option, observer);
                 if (verifyTracker) {
                     assertFalse(observer.observation.isClosed());
                     verifyTracker(observer, tracker, file, option);
@@ -1008,7 +1007,7 @@ public final class ObservableTest extends PathBaseTest {
 
             if (file.stat(option).isDirectory()) {
 
-                ExtendedPath.wrap(file).listDirs(option, new Consumer() {
+                Paths.listDirectories(file, option, new Consumer() {
                     @Override
                     public boolean accept(Path dir) throws IOException {
                         if (dir.isReadable()) {
@@ -1409,7 +1408,7 @@ public final class ObservableTest extends PathBaseTest {
             return add(new PreAction() {
                 @Override
                 public void action(Path src) throws Exception {
-                    ExtendedPath.wrap(src).removePermissions(Permission.read());
+                    Paths.removePermissions(src, Permission.read());
                 }
             });
         }

@@ -20,10 +20,10 @@ import static l.files.fs.TraversalCallback.Result.CONTINUE;
 public abstract class PathBaseTest extends AndroidTestCase {
 
     @Nullable
-    private ExtendedPath dir1;
+    private Path dir1;
 
     @Nullable
-    private ExtendedPath dir2;
+    private Path dir2;
 
     @Override
     protected void tearDown() throws Exception {
@@ -59,10 +59,10 @@ public abstract class PathBaseTest extends AndroidTestCase {
         });
     }
 
-    protected ExtendedPath dir1() {
+    protected Path dir1() {
         if (dir1 == null) {
             try {
-                dir1 = ExtendedPath.wrap(Path.create(createTempFolder()));
+                dir1 = Path.create(createTempFolder());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -70,10 +70,10 @@ public abstract class PathBaseTest extends AndroidTestCase {
         return dir1;
     }
 
-    protected ExtendedPath dir2() {
+    protected Path dir2() {
         if (dir2 == null) {
             try {
-                dir2 = ExtendedPath.wrap(Path.create(createTempFolder()));
+                dir2 = Path.create(createTempFolder());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

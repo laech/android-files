@@ -7,8 +7,8 @@ import java.io.InputStream;
 
 import l.files.fs.Path;
 import l.files.fs.Stat;
-import l.files.testing.fs.ExtendedPath;
 import l.files.testing.fs.PathBaseTest;
+import l.files.testing.fs.Paths;
 import l.files.ui.base.graphics.Rect;
 
 import static java.lang.System.nanoTime;
@@ -74,10 +74,10 @@ public final class PreviewTest extends PathBaseTest {
     }
 
     private void testPreviewSuccessForTestFile(String testFile, String dstFileName) throws Throwable {
-        ExtendedPath file = dir1().concat(dstFileName);
+        Path file = dir1().concat(dstFileName);
         InputStream in = getContext().getAssets().open(testFile);
         try {
-            file.copy(in);
+            Paths.copy(in, file);
         } finally {
             in.close();
         }
@@ -90,9 +90,9 @@ public final class PreviewTest extends PathBaseTest {
     }
 
     public void test_preview_link() throws Throwable {
-        ExtendedPath file = dir1().concat("file").createFile();
-        ExtendedPath link = dir1().concat("link").createSymbolicLink(file);
-        file.writeUtf8("hi");
+        Path file = dir1().concat("file").createFile();
+        Path link = dir1().concat("link").createSymbolicLink(file);
+        Paths.writeUtf8(file, "hi");
         testPreviewSuccess(file);
         testPreviewSuccess(file);
         testPreviewSuccess(link);
@@ -100,18 +100,18 @@ public final class PreviewTest extends PathBaseTest {
     }
 
     public void test_preview_link_modified_target() throws Throwable {
-        ExtendedPath file = dir1().concat("file").createFile();
-        ExtendedPath link = dir1().concat("link").createSymbolicLink(file);
+        Path file = dir1().concat("file").createFile();
+        Path link = dir1().concat("link").createSymbolicLink(file);
         testPreviewFailure(link);
 
-        file.writeUtf8("hi");
+        Paths.writeUtf8(file, "hi");
         testPreviewSuccess(link);
         testPreviewSuccess(link);
     }
 
     private void testPreviewSuccessForContent(String content) throws Throwable {
-        ExtendedPath file = dir1().concat(String.valueOf(nanoTime()));
-        file.writeUtf8(content);
+        Path file = dir1().concat(String.valueOf(nanoTime()));
+        Paths.writeUtf8(file, content);
         testPreviewSuccess(file);
         testPreviewSuccess(file);
     }

@@ -3,7 +3,7 @@ package l.files.operations;
 import java.util.Set;
 
 import l.files.fs.Path;
-import l.files.testing.fs.ExtendedPath;
+import l.files.testing.fs.Paths;
 
 import static java.util.Collections.singleton;
 import static l.files.fs.LinkOption.NOFOLLOW;
@@ -30,31 +30,31 @@ public final class MoveTest extends PasteTest {
     }
 
     public void test_movesFile() throws Exception {
-        ExtendedPath srcFile = dir1().concat("a.txt").createFile();
-        ExtendedPath dstDir = dir1().concat("dst").createDirectory();
-        ExtendedPath dstFile = dstDir.concat("a.txt");
-        srcFile.writeUtf8("Test");
+        Path srcFile = dir1().concat("a.txt").createFile();
+        Path dstDir = dir1().concat("dst").createDirectory();
+        Path dstFile = dstDir.concat("a.txt");
+        Paths.writeUtf8(srcFile, "Test");
 
         Move move = create(srcFile, dstDir);
         move.execute();
 
         assertFalse(srcFile.exists(NOFOLLOW));
-        assertEquals("Test", dstFile.readAllUtf8());
+        assertEquals("Test", Paths.readAllUtf8(dstFile));
         assertEquals(move.getMovedItemCount(), 1);
     }
 
     public void test_movesDirectory() throws Exception {
-        ExtendedPath srcDir = dir1().concat("a").createDirectory();
-        ExtendedPath dstDir = dir1().concat("dst").createDirectory();
-        ExtendedPath srcFile = srcDir.concat("test.txt");
-        ExtendedPath dstFile = dstDir.concat("a/test.txt");
-        srcFile.writeUtf8("Test");
+        Path srcDir = dir1().concat("a").createDirectory();
+        Path dstDir = dir1().concat("dst").createDirectory();
+        Path srcFile = srcDir.concat("test.txt");
+        Path dstFile = dstDir.concat("a/test.txt");
+        Paths.writeUtf8(srcFile, "Test");
 
         Move move = create(srcDir, dstDir);
         move.execute();
 
         assertFalse(srcDir.exists(NOFOLLOW));
-        assertEquals("Test", dstFile.readAllUtf8());
+        assertEquals("Test", Paths.readAllUtf8(dstFile));
         assertEquals(move.getMovedItemCount(), 1);
     }
 

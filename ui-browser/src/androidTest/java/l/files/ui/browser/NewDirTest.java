@@ -8,6 +8,7 @@ import org.junit.runner.RunWith;
 
 import l.files.base.Consumer;
 import l.files.fs.Permission;
+import l.files.testing.fs.Paths;
 
 import static org.junit.Assert.assertEquals;
 
@@ -19,7 +20,7 @@ public final class NewDirTest extends BaseFilesActivityTest {
     @Test
     public void shows_error_message_when_failed_to_create()
             throws Exception {
-        dir().removePermissions(Permission.write());
+        Paths.removePermissions(dir(), Permission.write());
         screen()
                 .newFolder()
                 .setFilename("a")

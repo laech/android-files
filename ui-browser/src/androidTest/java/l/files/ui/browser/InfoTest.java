@@ -7,7 +7,7 @@ import org.junit.runner.RunWith;
 
 import l.files.fs.Path;
 import l.files.fs.Stat;
-import l.files.testing.fs.ExtendedPath;
+import l.files.testing.fs.Paths;
 
 import static android.text.format.DateUtils.FORMAT_SHOW_DATE;
 import static android.text.format.DateUtils.FORMAT_SHOW_TIME;
@@ -50,8 +50,8 @@ public final class InfoTest extends BaseFilesActivityTest {
     @Test
     public void gets_info_of_file() throws Exception {
 
-        ExtendedPath path = dir().concat("test.txt");
-        path.writeUtf8("hello world");
+        Path path = dir().concat("test.txt");
+        Paths.writeUtf8(path, "hello world");
         Stat stat = path.stat(NOFOLLOW);
 
         screen()

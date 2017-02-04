@@ -24,7 +24,7 @@ import l.files.base.Throwables;
 import l.files.fs.Path;
 import l.files.fs.Permission;
 import l.files.fs.TraversalCallback;
-import l.files.testing.fs.ExtendedPath;
+import l.files.testing.fs.Paths;
 
 import static android.content.Intent.ACTION_MAIN;
 import static android.os.Build.VERSION.SDK_INT;
@@ -53,7 +53,7 @@ public class BaseFilesActivityTest {
 
 
     @Nullable
-    private ExtendedPath dir;
+    private Path dir;
 
     @Nullable
     private UiFileActivity screen;
@@ -70,7 +70,7 @@ public class BaseFilesActivityTest {
 
     @Before
     public void setUp() throws Exception {
-        dir = ExtendedPath.wrap(Path.create(createTempFolder()));
+        dir = Path.create(createTempFolder());
         setActivityIntent(newIntent(dir));
         screen = new UiFileActivity(
                 getInstrumentation(),
@@ -155,7 +155,7 @@ public class BaseFilesActivityTest {
         return screen;
     }
 
-    ExtendedPath dir() {
+    Path dir() {
         assert dir != null;
         return dir;
     }
@@ -186,14 +186,13 @@ public class BaseFilesActivityTest {
          * The bug: "a" gets renamed to "A", instead of displaying only
          * "A", both "a" and "A" are displayed.
          */
-        ExtendedPath dir = ExtendedPath.wrap(Path.create(
-                getExternalStorageDirectory()).concat(name));
-        ExtendedPath src = dir.concat("z");
-        ExtendedPath dst = dir.concat("Z");
+        Path dir = Path.create(getExternalStorageDirectory()).concat(name);
+        Path src = dir.concat("z");
+        Path dst = dir.concat("Z");
         try {
 
-            dir.deleteRecursiveIfExists();
-            src.createFiles();
+            Paths.deleteRecursiveIfExists(dir);
+            Paths.createFiles(src);
 
             assertTrue(src.exists(NOFOLLOW));
             assertTrue(
@@ -213,7 +212,7 @@ public class BaseFilesActivityTest {
 
         } catch (Throwable e) {
             try {
-                dir.deleteRecursiveIfExists();
+                Paths.deleteRecursiveIfExists(dir);
             } catch (Throwable sup) {
                 Throwables.addSuppressed(e, sup);
             }
@@ -222,12 +221,12 @@ public class BaseFilesActivityTest {
         } finally {
 
             try {
-                src.deleteIfExists();
+                Paths.deleteIfExists(src);
             } catch (IOException ignore) {
             }
 
             try {
-                dst.deleteIfExists();
+                Paths.deleteIfExists(dst);
             } catch (IOException ignore) {
             }
 

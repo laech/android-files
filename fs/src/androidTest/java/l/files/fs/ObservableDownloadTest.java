@@ -19,8 +19,8 @@ import java.util.concurrent.Callable;
 
 import l.files.testing.Executable;
 import l.files.testing.Tests;
-import l.files.testing.fs.ExtendedPath;
 import l.files.testing.fs.PathBaseTest;
+import l.files.testing.fs.Paths;
 
 import static android.app.DownloadManager.COLUMN_REASON;
 import static android.app.DownloadManager.COLUMN_STATUS;
@@ -92,7 +92,7 @@ public final class ObservableDownloadTest extends PathBaseTest {
                 observer.close();
             }
         } finally {
-            ExtendedPath.wrap(downloadFile).deleteIfExists();
+            Paths.deleteIfExists(downloadFile);
         }
     }
 
