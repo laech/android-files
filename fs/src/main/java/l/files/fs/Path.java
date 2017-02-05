@@ -28,6 +28,7 @@ import l.files.fs.event.BatchObserver;
 import l.files.fs.event.BatchObserverNotifier;
 import l.files.fs.event.Observation;
 import l.files.fs.event.Observer;
+import l.files.fs.exception.AlreadyExist;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static l.files.fs.LinkOption.NOFOLLOW;
@@ -266,7 +267,7 @@ public abstract class Path implements Parcelable {
 
         try {
             createDirectory();
-        } catch (AlreadyExist ignore) {
+        } catch (AlreadyExist ignore) { // TODO exists but is file?
         }
 
         return this;

@@ -13,7 +13,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import l.files.fs.AlreadyExist;
 import l.files.fs.LinkOption;
 import l.files.fs.Path;
 import l.files.fs.Path.Consumer;
@@ -21,6 +20,7 @@ import l.files.fs.Permission;
 import l.files.fs.TraversalCallback;
 import l.files.fs.event.Observation;
 import l.files.fs.event.Observer;
+import l.files.fs.exception.AlreadyExist;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static l.files.fs.LinkOption.FOLLOW;

@@ -15,11 +15,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import l.files.fs.DirectoryNotEmpty;
 import l.files.fs.Instant;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.fs.TraversalCallback;
+import l.files.fs.exception.DirectoryNotEmpty;
 import l.files.ui.base.graphics.Rect;
 import l.files.ui.base.graphics.ScaledBitmap;
 

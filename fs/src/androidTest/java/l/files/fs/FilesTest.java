@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import l.files.fs.exception.DirectoryNotEmpty;
 import l.files.testing.fs.PathBaseTest;
 import l.files.testing.fs.Paths;
 
@@ -36,7 +37,6 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Permission.OWNER_EXECUTE;
 import static l.files.fs.Permission.OWNER_READ;
 import static l.files.fs.Permission.OWNER_WRITE;
-import static l.files.fs.Stat.lstat;
 import static l.files.fs.Stat.stat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -323,52 +323,6 @@ public final class FilesTest extends PathBaseTest {
         String expected = "a\nb\tc";
         Paths.appendUtf8(file, expected);
         assertEquals(expected, Paths.readAllUtf8(file));
-    }
-
-    @Test
-    public void createFile() throws Exception {
-        Path file = dir1().concat("a");
-        file.createFile();
-        assertTrue(file.stat(NOFOLLOW).isRegularFile());
-    }
-
-    @Test
-    public void createFile_correctPermissions() throws Exception {
-        Path actual = dir1().concat("a");
-        actual.createFile();
-
-        File expected = new File(dir1().toString(), "b");
-        assertTrue(expected.createNewFile());
-
-        Stat stat = lstat(expected.getPath().getBytes());
-
-        assertEquals(expected.canRead(), actual.isReadable());
-        assertEquals(expected.canWrite(), actual.isWritable());
-        assertEquals(expected.canExecute(), actual.isExecutable());
-        assertEquals(stat.permissions(), actual.stat(NOFOLLOW).permissions());
-    }
-
-    @Test
-    public void createDirectory() throws Exception {
-        Path dir = dir1().concat("a");
-        dir.createDirectory();
-        assertTrue(dir.stat(NOFOLLOW).isDirectory());
-    }
-
-    @Test
-    public void createDirectory_correctDefaultPermissions() throws Exception {
-        Path actual = dir1().concat("a");
-        actual.createDirectory();
-
-        File expected = new File(dir1().toString(), "b");
-        assertTrue(expected.mkdir());
-
-        Stat stat = lstat(expected.getPath().getBytes());
-
-        assertEquals(expected.canRead(), actual.isReadable());
-        assertEquals(expected.canWrite(), actual.isWritable());
-        assertEquals(expected.canExecute(), actual.isExecutable());
-        assertEquals(stat.permissions(), actual.stat(NOFOLLOW).permissions());
     }
 
     @Test

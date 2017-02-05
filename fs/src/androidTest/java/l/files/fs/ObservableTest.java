@@ -24,6 +24,7 @@ import l.files.fs.Path.Consumer;
 import l.files.fs.event.Event;
 import l.files.fs.event.Observation;
 import l.files.fs.event.Observer;
+import l.files.fs.exception.AlreadyExist;
 import l.files.testing.fs.PathBaseTest;
 import l.files.testing.fs.Paths;
 

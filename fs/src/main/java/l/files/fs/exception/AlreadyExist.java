@@ -1,4 +1,4 @@
-package l.files.fs;
+package l.files.fs.exception;
 
 import java.io.IOException;
 
