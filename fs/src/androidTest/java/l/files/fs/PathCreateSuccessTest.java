@@ -24,7 +24,7 @@ public abstract class PathCreateSuccessTest extends PathBaseTest {
         this.subPath = subPath;
     }
 
-    @Parameters
+    @Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return asList(new Object[][]{
                 {"a"},

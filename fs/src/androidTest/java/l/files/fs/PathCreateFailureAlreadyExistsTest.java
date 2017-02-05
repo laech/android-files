@@ -25,7 +25,7 @@ public abstract class PathCreateFailureAlreadyExistsTest extends PathBaseTest {
 
     abstract PathCreation creation();
 
-    @Parameters
+    @Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return asList(new Object[][]{
                 {""},
