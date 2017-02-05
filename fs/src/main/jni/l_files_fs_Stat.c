@@ -38,11 +38,11 @@ jobject new_stat(JNIEnv *env, jclass stat_class, struct stat *stat) {
             env,
             stat_class,
             stat_constructor,
-            (*stat).st_mode,
-            (*stat).st_size,
-            (*stat).st_mtime,
-            (*stat).st_mtime_nsec,
-            (*stat).st_blocks);
+            (jint) (*stat).st_mode,
+            (jlong) (*stat).st_size,
+            (jlong) (*stat).st_mtime,
+            (jint) (*stat).st_mtime_nsec,
+            (jlong) (*stat).st_blocks);
 }
 
 jobject do_stat(JNIEnv *env, jclass class, jbyteArray jpath, jboolean is_lstat) {

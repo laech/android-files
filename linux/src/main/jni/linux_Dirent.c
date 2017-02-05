@@ -140,10 +140,10 @@ jobject Java_linux_Dirent_readdir(JNIEnv *env, jclass class, jobject jdir, jobje
 
     jbyteArray name = (*env)->GetObjectField(env, jentry, dirent_field_name);
     jint name_len = (jint) strlen(entry.d_name);
-    (*env)->SetIntField(env, jentry, dirent_field_name_len, name_len);
+    (*env)->SetIntField(env, jentry, dirent_field_name_len, (jint) name_len);
     (*env)->SetByteArrayRegion(env, name, 0, name_len, (const jbyte *) entry.d_name);
     (*env)->SetLongField(env, jentry, dirent_field_ino, (jlong) entry.d_ino);
-    (*env)->SetByteField(env, jentry, dirent_field_type, entry.d_type);
+    (*env)->SetByteField(env, jentry, dirent_field_type, (jbyte) entry.d_type);
 
     return jentry;
 

@@ -13,7 +13,7 @@ void throw_errno_exception(JNIEnv *env) {
         return;
     }
 
-    jobject exception = (*env)->NewObject(env, clazz, constructor, errno);
+    jobject exception = (*env)->NewObject(env, clazz, constructor, (jint) errno);
     if (NULL == exception) {
         return;
     }

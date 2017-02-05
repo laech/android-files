@@ -54,8 +54,8 @@ void Java_l_files_fs_Observable_observe(
                     env,
                     object,
                     method_onEvent,
-                    event->wd,
-                    event->mask,
+                    (jint) event->wd,
+                    (jint) event->mask,
                     path);
 
             if (path != NULL) {

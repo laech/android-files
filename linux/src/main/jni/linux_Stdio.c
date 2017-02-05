@@ -17,7 +17,11 @@ void Java_linux_Stdio_remove(JNIEnv *env, jclass clazz, jbyteArray jpath) {
     }
 }
 
-void Java_linux_Stdio_rename(JNIEnv *env, jclass clazz, jbyteArray joldpath, jbyteArray jnewpath) {
+void Java_linux_Stdio_rename(
+        JNIEnv *env,
+        jclass clazz,
+        jbyteArray joldpath,
+        jbyteArray jnewpath) {
 
     if (NULL == joldpath) {
         throw_null_pointer_exception(env, "Old path is null");
