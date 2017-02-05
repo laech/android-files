@@ -163,7 +163,7 @@ public final class FilesActivity extends BaseActivity implements
                 && getIntent().getData() != null
                 && getIntent().getData().getScheme() != null
                 && getIntent().getData().getScheme().equals(SCHEME_FILE)) {
-            dir = Path.create(getIntent().getData().getPath()); // TODO
+            dir = Path.of(getIntent().getData().getPath()); // TODO
         }
         return dir == null ? DIR_HOME : dir;
     }

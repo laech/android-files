@@ -34,13 +34,13 @@ final class BookmarkManagerImpl extends BookmarkManager {
 
     private Set<Path> createDefaultBookmarks() {
         Set<Path> defaults = new HashSet<>();
-        addIfExists(defaults, Path.create(getExternalStorageDirectory()));
+        addIfExists(defaults, Path.of(getExternalStorageDirectory()));
         addIfExists(defaults, externalStoragePath(DIRECTORY_DCIM));
         addIfExists(defaults, externalStoragePath(DIRECTORY_MUSIC));
         addIfExists(defaults, externalStoragePath(DIRECTORY_MOVIES));
         addIfExists(defaults, externalStoragePath(DIRECTORY_PICTURES));
         addIfExists(defaults, externalStoragePath(DIRECTORY_DOWNLOADS));
-        addIfExists(defaults, Path.create("/sdcard2"));
+        addIfExists(defaults, Path.of("/sdcard2"));
         return unmodifiableSet(defaults);
     }
 
@@ -58,7 +58,7 @@ final class BookmarkManagerImpl extends BookmarkManager {
     }
 
     private static Path externalStoragePath(String name) {
-        return Path.create(new File(getExternalStorageDirectory(), name));
+        return Path.of(new File(getExternalStorageDirectory(), name));
     }
 
     private final Set<Path> bookmarks;
@@ -75,7 +75,7 @@ final class BookmarkManagerImpl extends BookmarkManager {
         Set<Path> paths = new HashSet<>();
         for (String uriString : uriStrings) {
             try {
-                Path path = Path.create(new File(new URI(uriString)));
+                Path path = Path.of(new File(new URI(uriString)));
                 try {
                     if (exists(path)) {
                         paths.add(path);
@@ -107,7 +107,7 @@ final class BookmarkManagerImpl extends BookmarkManager {
     private static Path decode(String encoded) {
         String[] parts = encoded.split(":");
         if (parts.length == 2) {
-            return Path.create(Base64.decode(parts[1], Base64.DEFAULT));
+            return Path.of(Base64.decode(parts[1], Base64.DEFAULT));
         } else {
             throw new IllegalArgumentException("Invalid bookmark: " + encoded);
         }

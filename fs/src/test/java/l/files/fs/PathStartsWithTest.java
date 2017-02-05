@@ -18,8 +18,8 @@ public final class PathStartsWithTest {
     private final boolean result;
 
     public PathStartsWithTest(String path, String startsWith, boolean result) {
-        this.path = Path.create(path);
-        this.startsWith = Path.create(startsWith);
+        this.path = Path.of(path);
+        this.startsWith = Path.of(startsWith);
         this.result = result;
     }
 

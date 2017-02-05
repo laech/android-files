@@ -62,7 +62,7 @@ public final class TaskTest {
             @Override
             public void execute(Task task) throws FileException {
                 throw new FileException(singletonList(Failure.create(
-                        Path.create("a"), new IOException("Test")
+                        Path.of("a"), new IOException("Test")
                 )));
             }
         }));

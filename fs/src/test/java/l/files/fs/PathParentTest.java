@@ -17,7 +17,7 @@ public final class PathParentTest {
     private final String expectedParent;
 
     public PathParentTest(String path, String expectedParent) {
-        this.path = Path.create(path);
+        this.path = Path.of(path);
         this.expectedParent = expectedParent;
     }
 

@@ -39,7 +39,7 @@ public abstract class Path implements Parcelable {
 
         @Override
         public Path createFromParcel(Parcel source) {
-            return Path.create(source.createByteArray());
+            return Path.of(source.createByteArray());
         }
 
         @Override
@@ -50,15 +50,15 @@ public abstract class Path implements Parcelable {
 
     static final Charset ENCODING = UTF_8;
 
-    public static Path create(File file) {
-        return create(file.getPath());
+    public static Path of(File file) {
+        return of(file.getPath());
     }
 
-    public static Path create(String path) {
-        return create(path.getBytes(ENCODING));
+    public static Path of(String path) {
+        return of(path.getBytes(ENCODING));
     }
 
-    public static Path create(byte[] path) {
+    public static Path of(byte[] path) {
         RelativePath result = new RelativePath(getNames(path));
         boolean absolute = path.length > 0 && path[0] == '/';
         return absolute ? new AbsolutePath(result) : result;
@@ -139,11 +139,11 @@ public abstract class Path implements Parcelable {
     }
 
     public Path concat(String path) {
-        return concat(create(path));
+        return concat(of(path));
     }
 
     public Path concat(byte[] path) {
-        return concat(create(path));
+        return concat(of(path));
     }
 
     /**

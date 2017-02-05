@@ -17,7 +17,7 @@ public final class PathIsHiddenTest {
     private final boolean hidden;
 
     public PathIsHiddenTest(String path, boolean hidden) {
-        this.path = Path.create(path);
+        this.path = Path.of(path);
         this.hidden = hidden;
     }
 

@@ -39,15 +39,15 @@ public class Name implements Parcelable {
     /**
      * @throws IllegalArgumentException if name is empty, or contains '/', or contains '\0'
      */
-    static Name create(byte[] bytes) {
+    static Name of(byte[] bytes) {
         return new Name(bytes, 0, bytes.length);
     }
 
     /**
      * @throws IllegalArgumentException if name is empty, or contains '/', or contains '\0'
      */
-    public static Name create(String name) {
-        return create(name.getBytes(Path.ENCODING));
+    public static Name of(String name) {
+        return of(name.getBytes(Path.ENCODING));
     }
 
     private static byte[] validateName(byte[] bytes) {
@@ -176,7 +176,7 @@ public class Name implements Parcelable {
 
         @Override
         public Name createFromParcel(Parcel source) {
-            return create(source.createByteArray());
+            return of(source.createByteArray());
         }
 
         @Override

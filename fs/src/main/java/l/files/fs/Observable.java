@@ -13,7 +13,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nullable;
 
-import l.files.fs.Name;
 import l.files.fs.Path.Consumer;
 import l.files.fs.event.Event;
 import l.files.fs.event.Observation;
@@ -318,7 +317,7 @@ final class Observable extends Native
 
                         byte[] childPath = child.toByteArray();
                         int wd = inotify.addWatch(fd, childPath, CHILD_DIR_MASK);
-                        childDirs.put(wd, Name.create(name));
+                        childDirs.put(wd, Name.of(name));
 
                     } catch (ErrnoException e) {
                         handleAddChildDirWatchFailure(e);
@@ -527,7 +526,7 @@ final class Observable extends Native
 
             } else {
                 throw new RuntimeException(eventNames(event) + ": " +
-                        (child != null ? Name.create(child) : null));
+                        (child != null ? Name.of(child) : null));
             }
 
         } else {
@@ -544,7 +543,7 @@ final class Observable extends Native
     }
 
     private void observer(Event kind, @Nullable byte[] name) {
-        notifyEventOrClose(kind, name == null ? null : Name.create(name));
+        notifyEventOrClose(kind, name == null ? null : Name.of(name));
     }
 
     private void observer(Event kind, Name name) {
@@ -576,7 +575,7 @@ final class Observable extends Native
 
             byte[] path = child.toByteArray();
             int wd = inotify.addWatch(fd, path, CHILD_DIR_MASK);
-            childDirs.put(wd, Name.create(name));
+            childDirs.put(wd, Name.of(name));
 
         } catch (ErrnoException e) {
             handleAddChildDirWatchFailure(e);
@@ -615,7 +614,7 @@ final class Observable extends Native
     }
 
     private void removeChildWatch(byte[] child) {
-        Integer wd = childDirs.remove2(Name.create(child));
+        Integer wd = childDirs.remove2(Name.of(child));
         if (wd != null) {
             try {
                 inotify.removeWatch(fd, wd);

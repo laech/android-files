@@ -26,9 +26,9 @@ public final class PathRebaseInvalidTest {
             String oldPrefix,
             String newPrefix) {
 
-        this.oldPath = Path.create(oldPath);
-        this.oldPrefix = Path.create(oldPrefix);
-        this.newPrefix = Path.create(newPrefix);
+        this.oldPath = Path.of(oldPath);
+        this.oldPrefix = Path.of(oldPrefix);
+        this.newPrefix = Path.of(newPrefix);
     }
 
     @Parameters(name = "\"{0}\".rebase(\"{1}\", \"{2}\") throws IllegalArgumentException")

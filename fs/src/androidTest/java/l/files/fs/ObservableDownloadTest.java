@@ -140,7 +140,7 @@ public final class ObservableDownloadTest extends PathBaseTest {
     }
 
     private Path downloadsDir() {
-        return Path.create(getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS));
+        return Path.of(getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS));
     }
 
 }

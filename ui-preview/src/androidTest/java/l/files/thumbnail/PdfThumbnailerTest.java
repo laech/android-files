@@ -39,7 +39,7 @@ public final class PdfThumbnailerTest {
     private Path createTestPdf() throws IOException {
         File file = createTempFile("PdfThumbnailerTest", null);
         try {
-            Path path = Path.create(file);
+            Path path = Path.of(file);
             InputStream in = openTestPdf();
             try {
                 Paths.copy(in, path);

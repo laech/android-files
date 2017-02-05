@@ -36,7 +36,7 @@ final class RelativePath extends Path {
     }
 
     private AbsolutePath workingDirectoryPath() {
-        return (AbsolutePath) create(new File("").getAbsolutePath());
+        return (AbsolutePath) of(new File("").getAbsolutePath());
     }
 
     @Override

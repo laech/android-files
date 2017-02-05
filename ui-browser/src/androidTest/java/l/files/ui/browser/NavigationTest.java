@@ -153,10 +153,10 @@ public final class NavigationTest extends BaseFilesActivityTest {
                 SDK_INT < 24);
 //                SDK_INT != N); // TODO Change to 'N' after upgrade to API 24
 
-        screen().selectFromNavigationMode(Path.create("/"));
-        screen().clickInto(Path.create("/proc"));
-        screen().clickInto(Path.create("/proc/self"));
-        screen().clickInto(Path.create("/proc/self/fdinfo"));
+        screen().selectFromNavigationMode(Path.of("/"));
+        screen().clickInto(Path.of("/proc"));
+        screen().clickInto(Path.of("/proc/self"));
+        screen().clickInto(Path.of("/proc/self/fdinfo"));
     }
 
     @Test

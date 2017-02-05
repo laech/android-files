@@ -29,7 +29,7 @@ public final class Preview {
                 if (dir == null) {
                     dir = context.getCacheDir();
                 }
-                Path cacheDir = Path.create(dir);
+                Path cacheDir = Path.of(dir);
                 instance = new Preview(context.getApplicationContext(), cacheDir);
                 instance.cleanupAsync();
             }

@@ -19,8 +19,8 @@ public final class PathInequalityTest {
     private final Path path2;
 
     public PathInequalityTest(String path1, String path2) {
-        this.path1 = Path.create(path1);
-        this.path2 = Path.create(path2);
+        this.path1 = Path.of(path1);
+        this.path2 = Path.of(path2);
     }
 
     @Parameters(name = "!\"{0}\".equals(\"{1}\")")

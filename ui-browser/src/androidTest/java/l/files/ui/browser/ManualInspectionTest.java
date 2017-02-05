@@ -26,7 +26,7 @@ public final class ManualInspectionTest {
 
     @Test
     public void test() throws Exception {
-        Path dir = Path.create(getExternalStorageDirectory()).concat("test");
+        Path dir = Path.of(getExternalStorageDirectory()).concat("test");
         dir.createDirectories();
         try {
             dir.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(currentTimeMillis()));
@@ -77,7 +77,7 @@ public final class ManualInspectionTest {
         byte[] nonUtf8 = {-19, -96, -67, -19, -80, -117};
         assertNotEqual(nonUtf8.clone(), new String(nonUtf8.clone(), UTF_8).getBytes(UTF_8));
 
-        Path dir = Path.create(getExternalStorageDirectory()).concat(nonUtf8);
+        Path dir = Path.of(getExternalStorageDirectory()).concat(nonUtf8);
         Path child = dir.concat("good we can see this dir");
 
         try {

@@ -102,7 +102,7 @@ public final class PreviewTest extends PathBaseTest {
 
     @Test
     public void preview_proc_cpuinfo() throws Throwable {
-        testPreviewSuccess(Path.create("/proc/cpuinfo"));
+        testPreviewSuccess(Path.of("/proc/cpuinfo"));
     }
 
     @Test

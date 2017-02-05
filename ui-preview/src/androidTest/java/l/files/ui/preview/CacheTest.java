@@ -44,7 +44,7 @@ public abstract class CacheTest<V, C extends Cache<V>> {
         random = new Random();
 
         File localFile = createTempFile("123", null, tempDir);
-        file = Path.create(localFile);
+        file = Path.of(localFile);
         stat = file.stat(FOLLOW);
     }
 
@@ -89,6 +89,6 @@ public abstract class CacheTest<V, C extends Cache<V>> {
     }
 
     Path mockCacheDir() {
-        return Path.create(tempDir);
+        return Path.of(tempDir);
     }
 }

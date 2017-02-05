@@ -7,8 +7,6 @@ import org.junit.runners.Parameterized.Parameters;
 
 import java.util.Collection;
 
-import l.files.fs.Name;
-
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 
@@ -19,7 +17,7 @@ public final class NameBaseNameTest {
     private final String expectedBaseName;
 
     public NameBaseNameTest(String name, String expectedBaseName) {
-        this.name = Name.create(name);
+        this.name = Name.of(name);
         this.expectedBaseName = expectedBaseName;
     }
 

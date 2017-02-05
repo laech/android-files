@@ -21,7 +21,7 @@ public final class PathNameTest {
     private final String expectedName;
 
     public PathNameTest(String path, @Nullable String expectedName) {
-        this.path = Path.create(path);
+        this.path = Path.of(path);
         this.expectedName = expectedName;
     }
 

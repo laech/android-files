@@ -67,7 +67,7 @@ public abstract class PathBaseTest {
     protected Path dir1() {
         if (dir1 == null) {
             try {
-                dir1 = Path.create(createTempFolder());
+                dir1 = Path.of(createTempFolder());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -78,7 +78,7 @@ public abstract class PathBaseTest {
     protected Path dir2() {
         if (dir2 == null) {
             try {
-                dir2 = Path.create(createTempFolder());
+                dir2 = Path.of(createTempFolder());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

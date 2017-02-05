@@ -7,8 +7,6 @@ import org.junit.runners.Parameterized.Parameters;
 
 import java.util.Collection;
 
-import l.files.fs.Name;
-
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 
@@ -43,7 +41,7 @@ public final class NameDotExtensionTest {
 
     @Test
     public void dot_extension_is_expected() throws Exception {
-        Name nameObject = Name.create(name);
+        Name nameObject = Name.of(name);
         assertEquals(nameObject.base() + nameObject.dotExtension(), name);
     }
 }

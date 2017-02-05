@@ -84,7 +84,7 @@ public final class MediaMetadataRetrieversTest {
     private Path createTestFile(String name) throws IOException {
         File file = createTempFile("MediaMetadataRetrieversTest", null);
         try {
-            Path path = Path.create(file);
+            Path path = Path.of(file);
             InputStream in = getContext().getAssets().open(name);
             try {
                 Paths.copy(in, path);

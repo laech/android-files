@@ -120,7 +120,7 @@ public final class ObservableTest extends PathBaseTest {
         Tracker tracker = registerMockTracker();
         try {
             Recorder observer = observe(
-                    Path.create("/proc/self"), FOLLOW, false);
+                    Path.of("/proc/self"), FOLLOW, false);
             try {
                 assertTrue(observer.isClosed());
                 verifyZeroInteractions(tracker);
@@ -373,7 +373,7 @@ public final class ObservableTest extends PathBaseTest {
     }
 
     private int maxUserInstances() throws IOException {
-        Path limitFile = Path.create("/proc/sys/fs/inotify/max_user_instances");
+        Path limitFile = Path.of("/proc/sys/fs/inotify/max_user_instances");
         return parseInt(Paths.readAllUtf8(limitFile).trim());
     }
 
@@ -1076,7 +1076,7 @@ public final class ObservableTest extends PathBaseTest {
         public void onWatchAdded(int fd, byte[] path, int mask, int wd) {
             super.onWatchAdded(fd, path, mask, wd);
             if (this.fd == fd) {
-                this.allChildWds.put(Path.create(path), wd);
+                this.allChildWds.put(Path.of(path), wd);
                 this.validChildWds.add(wd);
             }
         }

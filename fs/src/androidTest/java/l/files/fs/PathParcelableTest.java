@@ -18,7 +18,7 @@ public final class PathParcelableTest {
     private final Path expected;
 
     public PathParcelableTest(String expected) {
-        this.expected = Path.create(expected);
+        this.expected = Path.of(expected);
     }
 
     @Parameters(name = "{0}")
