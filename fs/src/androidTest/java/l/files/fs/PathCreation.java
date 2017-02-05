@@ -10,31 +10,31 @@ enum PathCreation {
 
     FILE {
         @Override
-        void create(Path path) throws IOException {
+        void createUsingOurCode(Path path) throws IOException {
             path.createFile();
             assertTrue(path.stat(NOFOLLOW).isRegularFile());
         }
 
         @Override
-        void create(File path) throws IOException {
+        void createUsingSystemApi(File path) throws IOException {
             assertTrue(path.createNewFile());
         }
     },
 
     DIRECTORY {
         @Override
-        void create(Path path) throws IOException {
+        void createUsingOurCode(Path path) throws IOException {
             path.createDirectory();
             assertTrue(path.stat(NOFOLLOW).isDirectory());
         }
 
         @Override
-        void create(File path) throws IOException {
+        void createUsingSystemApi(File path) throws IOException {
             assertTrue(path.mkdir());
         }
     };
 
-    abstract void create(Path path) throws IOException;
+    abstract void createUsingOurCode(Path path) throws IOException;
 
-    abstract void create(File path) throws IOException;
+    abstract void createUsingSystemApi(File path) throws IOException;
 }

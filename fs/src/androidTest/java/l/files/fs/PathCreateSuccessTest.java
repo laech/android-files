@@ -37,7 +37,7 @@ public abstract class PathCreateSuccessTest extends PathBaseTest {
 
     @Test
     public void create_success() throws Exception {
-        creation().create(dir1().concat(subPath));
+        creation().createUsingOurCode(dir1().concat(subPath));
     }
 
     @Test
@@ -45,8 +45,8 @@ public abstract class PathCreateSuccessTest extends PathBaseTest {
 
         Path actual = dir1().concat(subPath);
         File expected = new File(dir1().toString(), subPath + "_expected");
-        creation().create(actual);
-        creation().create(expected);
+        creation().createUsingOurCode(actual);
+        creation().createUsingSystemApi(expected);
 
         Stat stat = lstat(expected.getPath().getBytes());
         assertEquals(expected.canRead(), actual.isReadable());
