@@ -21,6 +21,7 @@ import android.widget.Spinner;
 import java.io.IOException;
 import java.util.List;
 
+import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.app.BaseActivity;
@@ -331,9 +332,10 @@ public final class FilesActivity extends BaseActivity implements
             return;
         }
         FilesFragment f = FilesFragment.create(path, getWatchLimit());
+        Name name = path.toAbsolutePath().name();
         getSupportFragmentManager()
                 .beginTransaction()
-                .setBreadCrumbTitle(path.name().toString())
+                .setBreadCrumbTitle(String.valueOf(name == null ? path : name))
                 .setTransition(TRANSIT_FRAGMENT_OPEN)
                 .replace(R.id.content, f, FilesFragment.TAG)
                 .addToBackStack(null)
