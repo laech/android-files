@@ -1,7 +1,7 @@
 package l.files.fs;
 
 public final class PathCreateFileFailureAlreadyExistsTest
-        extends PathCreateSuccessTest {
+        extends PathCreateFailureAlreadyExistsTest {
 
     public PathCreateFileFailureAlreadyExistsTest(String subPath) {
         super(subPath);

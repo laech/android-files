@@ -1,6 +1,8 @@
 package l.files.fs;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import java.io.IOException;
@@ -15,6 +17,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+@RunWith(Parameterized.class)
 public abstract class PathCreateFailureAlreadyExistsTest extends PathBaseTest {
 
     private final String subPath;
@@ -25,7 +28,7 @@ public abstract class PathCreateFailureAlreadyExistsTest extends PathBaseTest {
 
     abstract PathCreation creation();
 
-    @Parameters(name = "{0}")
+    @Parameters(name = "\"{0}\"")
     public static Collection<Object[]> data() {
         return asList(new Object[][]{
                 {""},
