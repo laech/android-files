@@ -78,8 +78,8 @@ public abstract class PathCreateFailureAlreadyExistsTest extends PathBaseTest {
         try {
             creation().createUsingOurCode(path);
             fail("Expecting " + AlreadyExist.class.getName());
-        } catch (IOException e) {
-            assertEquals(AlreadyExist.class, e.getClass());
+        } catch (AlreadyExist e) {
+            // Pass
         }
     }
 
