@@ -12,6 +12,7 @@ import javax.annotation.Nullable;
 import l.files.fs.Path.Consumer;
 import l.files.fs.event.Observation;
 import l.files.fs.event.Observer;
+import l.files.fs.exception.AlreadyExist;
 import linux.Dirent;
 import linux.Dirent.DIR;
 import linux.ErrnoException;
@@ -28,6 +29,8 @@ import static l.files.fs.Stat.chmod;
 import static l.files.fs.Stat.mkdir;
 import static linux.Errno.EACCES;
 import static linux.Errno.EAGAIN;
+import static linux.Errno.EISDIR;
+import static linux.Errno.EROFS;
 import static linux.Fcntl.O_CREAT;
 import static linux.Fcntl.O_DIRECTORY;
 import static linux.Fcntl.O_EXCL;
@@ -95,6 +98,9 @@ final class FileSystem extends Native {
         try {
             createFileNative(path);
         } catch (ErrnoException e) {
+            if (e.errno == EISDIR) {
+                throw new AlreadyExist(path.toString(), e);
+            }
             throw ErrnoExceptions.toIOException(e, path);
         }
     }
@@ -176,7 +182,7 @@ final class FileSystem extends Native {
             Unistd.access(path.toByteArray(), mode);
             return true;
         } catch (ErrnoException e) {
-            if (e.errno == EACCES) {
+            if (e.errno == EACCES || e.errno == EROFS) {
                 return false;
             }
             throw ErrnoExceptions.toIOException(e, path);

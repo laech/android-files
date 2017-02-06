@@ -24,7 +24,7 @@ public abstract class PathCreateSuccessTest extends PathBaseTest {
         this.subPath = subPath;
     }
 
-    @Parameters(name = "{0}")
+    @Parameters(name = "\"{0}\"")
     public static Collection<Object[]> data() {
         return asList(new Object[][]{
                 {"a"},
@@ -37,7 +37,7 @@ public abstract class PathCreateSuccessTest extends PathBaseTest {
 
     @Test
     public void create_success() throws Exception {
-        creation().createUsingOurCode(dir1().concat(subPath));
+        creation().createUsingOurCodeAssertResult(dir1().concat(subPath));
     }
 
     @Test
@@ -45,7 +45,7 @@ public abstract class PathCreateSuccessTest extends PathBaseTest {
 
         Path actual = dir1().concat(subPath);
         File expected = new File(dir1().toString(), subPath + "_expected");
-        creation().createUsingOurCode(actual);
+        creation().createUsingOurCodeAssertResult(actual);
         creation().createUsingSystemApi(expected);
 
         Stat stat = lstat(expected.getPath().getBytes());

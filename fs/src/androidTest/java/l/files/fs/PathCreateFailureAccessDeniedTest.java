@@ -62,7 +62,7 @@ public abstract class PathCreateFailureAccessDeniedTest extends PathBaseTest {
 
     private void creationFailureAccessDenied(Path path) throws IOException {
         try {
-            creation().createUsingOurCode(path);
+            creation().createUsingOurCodeAssertResult(path);
             fail("Expecting " + AccessDenied.class.getName());
         } catch (AccessDenied e) {
             // Pass
