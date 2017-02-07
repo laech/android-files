@@ -284,6 +284,9 @@ public abstract class Path implements Parcelable {
             if (stat(NOFOLLOW).isDirectory()) {
                 return this;
             }
+            throw new AlreadyExist(
+                    "Exists but not a directory: " + this, null);
+
         } catch (FileNotFoundException ignore) {
         }
 
@@ -294,7 +297,11 @@ public abstract class Path implements Parcelable {
 
         try {
             createDirectory();
-        } catch (AlreadyExist ignore) { // TODO exists but is file?
+        } catch (AlreadyExist e) {
+            if (!stat(NOFOLLOW).isDirectory()) {
+                throw new AlreadyExist(
+                        "Exists but not a directory: " + this, null);
+            }
         }
 
         return this;
