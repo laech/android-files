@@ -14,6 +14,7 @@ import l.files.fs.exception.AccessDenied;
 import l.files.fs.exception.AlreadyExist;
 import l.files.fs.exception.NameTooLong;
 import l.files.fs.exception.NoSuchEntry;
+import l.files.fs.exception.NotDirectory;
 import l.files.fs.exception.TooManySymbolicLinks;
 import l.files.testing.fs.PathBaseTest;
 
@@ -94,6 +95,13 @@ public final class PathCreateFailureTest extends PathBaseTest {
             throws Exception {
         Path path = dir1().concat("non-existent").concat("child");
         createExpectingFailure(path, NoSuchEntry.class);
+    }
+
+    @Test
+    public void not_directory_failure_due_to_parent_not_directory()
+            throws Exception {
+        Path parent = dir1().concat("file").createFile();
+        createExpectingFailure(parent.concat("a"), NotDirectory.class);
     }
 
     private void createExpectingFailure(
