@@ -1,5 +1,7 @@
 package l.files.fs;
 
+import com.google.common.base.Strings;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -10,10 +12,12 @@ import java.io.IOException;
 
 import l.files.fs.exception.AccessDenied;
 import l.files.fs.exception.AlreadyExist;
+import l.files.fs.exception.NameTooLong;
 import l.files.fs.exception.TooManySymbolicLinks;
 import l.files.testing.fs.PathBaseTest;
 
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static linux.Limits.NAME_MAX;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -106,4 +110,14 @@ public final class PathCreateFailureTest extends PathBaseTest {
         }
     }
 
+    @Test
+    public void name_too_long_failure() throws Exception {
+        Path path = dir1().concat(Strings.repeat("a", NAME_MAX + 1));
+        try {
+            creation.createUsingOurCodeAssertResult(path);
+            fail("Expecting " + NameTooLong.class.getName());
+        } catch (NameTooLong e) {
+            // Pass
+        }
+    }
 }
