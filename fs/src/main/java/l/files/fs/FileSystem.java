@@ -75,7 +75,7 @@ final class FileSystem extends Native {
         return Stat.stat(path, option);
     }
 
-    void createDir(Path path) throws IOException {
+    void createDirectory(Path path) throws IOException {
         try {
             // Same permission bits as java.io.File.mkdir() on Android
             mkdir(path.toByteArray(), S_IRWXU);
@@ -84,7 +84,8 @@ final class FileSystem extends Native {
         }
     }
 
-    void createDir(Path path, Set<Permission> permissions) throws IOException {
+    void createDirectory(Path path, Set<Permission> permissions)
+            throws IOException {
         try {
             mkdir(path.toByteArray(), Permission.toStatMode(permissions));
         } catch (ErrnoException e) {

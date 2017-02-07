@@ -249,7 +249,7 @@ public abstract class Path implements Parcelable {
      * @throws IOException          other errors
      */
     public Path createDirectory() throws IOException {
-        FileSystem.INSTANCE.createDir(this);
+        FileSystem.INSTANCE.createDirectory(this);
         return this;
     }
 
@@ -260,7 +260,7 @@ public abstract class Path implements Parcelable {
      */
     public Path createDirectory(Set<Permission> permissions)
             throws IOException {
-        FileSystem.INSTANCE.createDir(this, permissions);
+        FileSystem.INSTANCE.createDirectory(this, permissions);
         return this;
     }
 
