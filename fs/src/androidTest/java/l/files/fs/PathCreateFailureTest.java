@@ -13,10 +13,10 @@ import java.io.IOException;
 import l.files.fs.exception.AccessDenied;
 import l.files.fs.exception.AlreadyExist;
 import l.files.fs.exception.NameTooLong;
+import l.files.fs.exception.NoSuchEntry;
 import l.files.fs.exception.TooManySymbolicLinks;
 import l.files.testing.fs.PathBaseTest;
 
-import static l.files.fs.LinkOption.NOFOLLOW;
 import static linux.Limits.NAME_MAX;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -41,7 +41,7 @@ public final class PathCreateFailureTest extends PathBaseTest {
 
         Path path = dir1().concat("a");
         assertTrue(new File(dir1().toString()).setWritable(false));
-        creationFailureAccessDenied(path);
+        createExpectingFailure(path, AccessDenied.class);
     }
 
     @Test
@@ -53,71 +53,60 @@ public final class PathCreateFailureTest extends PathBaseTest {
         assertTrue(new File(dir1().toString()).setExecutable(false));
 
         Path path = parent.concat("a");
-        creationFailureAccessDenied(path);
-    }
-
-    private void creationFailureAccessDenied(Path path) throws IOException {
-        try {
-            creation.createUsingOurCodeAssertResult(path);
-            fail("Expecting " + AccessDenied.class.getName());
-        } catch (AccessDenied e) {
-            // Pass
-        }
+        createExpectingFailure(path, AccessDenied.class);
     }
 
     @Test
     public void already_exists_failure_due_to_file_exists_at_path() throws Exception {
-
         Path path = dir1().concat("a").createFile();
-        creationFailureAlreadyExists(path);
+        createExpectingFailure(path, AlreadyExist.class);
     }
 
     @Test
     public void already_exists_failure_due_to_directory_exists_at_path()
             throws Exception {
-
         Path path = dir1().concat("a").createDirectory();
-        creationFailureAlreadyExists(path);
+        createExpectingFailure(path, AlreadyExist.class);
     }
 
     @Test
     public void already_exists_failure_due_to_symbolic_link_exists_at_path()
             throws Exception {
-
         Path path = dir1().concat("a").createSymbolicLink(dir2());
-        creationFailureAlreadyExists(path);
-    }
-
-    private void creationFailureAlreadyExists(Path path) throws IOException {
-        assertTrue(path.exists(NOFOLLOW));
-        try {
-            creation.createUsingOurCodeAssertResult(path);
-            fail("Expecting " + AlreadyExist.class.getName());
-        } catch (AlreadyExist e) {
-            // Pass
-        }
+        createExpectingFailure(path, AlreadyExist.class);
     }
 
     @Test
     public void too_many_symbolic_links_failure_due_to_loop() throws Exception {
         Path loop = dir1().concat("loop");
         loop.createSymbolicLink(loop);
-        try {
-            creation.createUsingOurCodeAssertResult(loop.concat("sub"));
-            fail("Expecting " + TooManySymbolicLinks.class.getName());
-        } catch (TooManySymbolicLinks e) {
-            // Pass
-        }
+        createExpectingFailure(loop.concat("sub"), TooManySymbolicLinks.class);
     }
 
     @Test
     public void name_too_long_failure() throws Exception {
         Path path = dir1().concat(Strings.repeat("a", NAME_MAX + 1));
+        createExpectingFailure(path, NameTooLong.class);
+    }
+
+    @Test
+    public void no_such_entry_failure_due_to_parent_does_not_exist()
+            throws Exception {
+        Path path = dir1().concat("non-existent").concat("child");
+        createExpectingFailure(path, NoSuchEntry.class);
+    }
+
+    private void createExpectingFailure(
+            Path path,
+            Class<? extends IOException> expected
+    ) throws IOException {
         try {
             creation.createUsingOurCodeAssertResult(path);
-            fail("Expecting " + NameTooLong.class.getName());
-        } catch (NameTooLong e) {
-            // Pass
+            fail("Expecting " + expected.getName());
+        } catch (IOException e) {
+            if (!expected.isInstance(e)) {
+                throw e;
+            }
         }
     }
 }
