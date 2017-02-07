@@ -8,7 +8,7 @@ import l.files.fs.exception.AccessDenied;
 import l.files.fs.exception.AlreadyExist;
 import l.files.fs.exception.DirectoryNotEmpty;
 import l.files.fs.exception.IsDirectory;
-import l.files.fs.exception.LoopEncountered;
+import l.files.fs.exception.TooManySymbolicLinks;
 import l.files.fs.exception.NameTooLong;
 import l.files.fs.exception.NoSuchEntry;
 import l.files.fs.exception.NotDirectory;
@@ -34,7 +34,7 @@ final class ErrnoExceptions {
         String message = TextUtils.join(", ", paths);
         if (cause.errno == EACCES) return new AccessDenied(message, cause);
         if (cause.errno == EEXIST) return new AlreadyExist(message, cause);
-        if (cause.errno == ELOOP) return new LoopEncountered(message, cause);
+        if (cause.errno == ELOOP) return new TooManySymbolicLinks(message, cause);
         if (cause.errno == ENAMETOOLONG) return new NameTooLong(message, cause);
         if (cause.errno == ENOENT) return new NoSuchEntry(message, cause);
         if (cause.errno == ENOTDIR) return new NotDirectory(message, cause);

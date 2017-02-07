@@ -10,6 +10,7 @@ import java.io.IOException;
 
 import l.files.fs.exception.AccessDenied;
 import l.files.fs.exception.AlreadyExist;
+import l.files.fs.exception.TooManySymbolicLinks;
 import l.files.testing.fs.PathBaseTest;
 
 import static l.files.fs.LinkOption.NOFOLLOW;
@@ -89,6 +90,18 @@ public final class PathCreateFailureTest extends PathBaseTest {
             creation.createUsingOurCodeAssertResult(path);
             fail("Expecting " + AlreadyExist.class.getName());
         } catch (AlreadyExist e) {
+            // Pass
+        }
+    }
+
+    @Test
+    public void too_many_symbolic_links_failure_due_to_loop() throws Exception {
+        Path loop = dir1().concat("loop");
+        loop.createSymbolicLink(loop);
+        try {
+            creation.createUsingOurCodeAssertResult(loop.concat("sub"));
+            fail("Expecting " + TooManySymbolicLinks.class.getName());
+        } catch (TooManySymbolicLinks e) {
             // Pass
         }
     }
