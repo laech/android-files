@@ -326,23 +326,6 @@ public final class FilesTest extends PathBaseTest {
     }
 
     @Test
-    public void createDirectory_withSpecifiedPermissions() throws Exception {
-
-        for (Set<Permission> permissions : asList(
-                Permission.none(),
-                EnumSet.of(OWNER_READ),
-                EnumSet.of(OWNER_WRITE),
-                EnumSet.of(OWNER_EXECUTE),
-                EnumSet.of(OWNER_READ, OWNER_WRITE, OWNER_EXECUTE))) {
-
-            String name = String.valueOf(Math.random());
-            Path dir = dir1().concat(name).createDirectory(permissions);
-            Stat stat = dir.stat(NOFOLLOW);
-            assertEquals(permissions, stat.permissions());
-        }
-    }
-
-    @Test
     public void createDirectories() throws Exception {
         dir1().concat("a/b/c").createDirectories();
         assertTrue(dir1().concat("a/b/c").stat(NOFOLLOW).isDirectory());
