@@ -254,9 +254,19 @@ public abstract class Path implements Parcelable {
     }
 
     /**
-     * Creates directory with specified permissions,
-     * the set of permissions with be restricted so
-     * the resulting permissions may not be the same.
+     * Creates directory with specified permissions, the set of permissions
+     * will be restricted so the resulting permissions may not be the same.
+     *
+     * @throws AccessDenied         parent directory does not allow write
+     *                              permission, or one of the ancestor
+     *                              directory does not allow search permission
+     * @throws AlreadyExist         an entry already exists at this path
+     * @throws NameTooLong          path name is too long
+     * @throws NoSuchEntry          one of the ancestors does not exist
+     * @throws NotDirectory         one of the ancestors is not a directory
+     * @throws TooManySymbolicLinks too many symbolic links were encountered
+     *                              when resolving this path
+     * @throws IOException          other errors
      */
     public Path createDirectory(Set<Permission> permissions)
             throws IOException {

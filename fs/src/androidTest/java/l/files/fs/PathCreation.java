@@ -1,6 +1,7 @@
 package l.files.fs;
 
 import android.annotation.SuppressLint;
+import android.system.Os;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,6 +12,7 @@ import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static java.util.Collections.unmodifiableList;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static l.files.fs.Permission.toStatMode;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
@@ -43,6 +45,25 @@ enum PathCreation {
         }
     },
 
+    DIRECTORY_WITH_PERMISSION {
+        @Override
+        void createUsingOurCodeAssertResult(Path path) throws IOException {
+            path.createDirectory(Permission.read());
+            assertTrue(path.stat(NOFOLLOW).isDirectory());
+        }
+
+        @Override
+        @SuppressLint("NewApi")
+        void createUsingSystemApi(File path) throws IOException {
+            assumeTrue("android.system.Os not available", SDK_INT >= LOLLIPOP);
+            try {
+                Os.mkdir("/", toStatMode(Permission.read()));
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
+    },
+
     SYMBOLIC_LINK {
         @Override
         void createUsingOurCodeAssertResult(Path path) throws IOException {
@@ -56,7 +77,7 @@ enum PathCreation {
         void createUsingSystemApi(File path) throws IOException {
             assumeTrue("android.system.Os not available", SDK_INT >= LOLLIPOP);
             try {
-                android.system.Os.symlink("/", path.getPath());
+                Os.symlink("/", path.getPath());
             } catch (Exception e) {
                 throw new IOException(e);
             }
