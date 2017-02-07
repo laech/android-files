@@ -4,9 +4,12 @@ import android.annotation.SuppressLint;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
+import static java.util.Collections.unmodifiableList;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -63,4 +66,12 @@ enum PathCreation {
     abstract void createUsingOurCodeAssertResult(Path path) throws IOException;
 
     abstract void createUsingSystemApi(File path) throws IOException;
+
+    static Iterable<PathCreation[]> valuesAsJUnitParameters() {
+        List<PathCreation[]> parameters = new ArrayList<>();
+        for (PathCreation value : values()) {
+            parameters.add(new PathCreation[]{value});
+        }
+        return unmodifiableList(parameters);
+    }
 }
