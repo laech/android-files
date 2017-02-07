@@ -28,7 +28,12 @@ import l.files.fs.event.BatchObserver;
 import l.files.fs.event.BatchObserverNotifier;
 import l.files.fs.event.Observation;
 import l.files.fs.event.Observer;
+import l.files.fs.exception.AccessDenied;
 import l.files.fs.exception.AlreadyExist;
+import l.files.fs.exception.NameTooLong;
+import l.files.fs.exception.NoSuchEntry;
+import l.files.fs.exception.NotDirectory;
+import l.files.fs.exception.TooManySymbolicLinks;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static l.files.fs.LinkOption.NOFOLLOW;
@@ -231,6 +236,18 @@ public abstract class Path implements Parcelable {
         return FileSystem.INSTANCE.stat(this, option);
     }
 
+    /**
+     * @throws AccessDenied         parent directory does not allow write
+     *                              permission, or one of the ancestor
+     *                              directory does not allow search permission
+     * @throws AlreadyExist         an entry already exists at this path
+     * @throws NameTooLong          path name is too long
+     * @throws NoSuchEntry          one of the ancestors does not exist
+     * @throws NotDirectory         one of the ancestors is not a directory
+     * @throws TooManySymbolicLinks too many symbolic links were encountered
+     *                              when resolving this path
+     * @throws IOException          other errors
+     */
     public Path createDirectory() throws IOException {
         FileSystem.INSTANCE.createDir(this);
         return this;
@@ -273,6 +290,18 @@ public abstract class Path implements Parcelable {
         return this;
     }
 
+    /**
+     * @throws AccessDenied         parent directory does not allow write
+     *                              permission, or one of the ancestor
+     *                              directory does not allow search permission
+     * @throws AlreadyExist         an entry already exists at this path
+     * @throws NameTooLong          path name is too long
+     * @throws NoSuchEntry          one of the ancestors does not exist
+     * @throws NotDirectory         one of the ancestors is not a directory
+     * @throws TooManySymbolicLinks too many symbolic links were encountered
+     *                              when resolving this path
+     * @throws IOException          other errors
+     */
     public Path createFile() throws IOException {
         FileSystem.INSTANCE.createFile(this);
         return this;
@@ -280,6 +309,16 @@ public abstract class Path implements Parcelable {
 
     /**
      * @param target the target the link will point to
+     * @throws AccessDenied         parent directory does not allow write
+     *                              permission, or one of the ancestor
+     *                              directory does not allow search permission
+     * @throws AlreadyExist         an entry already exists at this path
+     * @throws NameTooLong          path name is too long
+     * @throws NoSuchEntry          one of the ancestors does not exist
+     * @throws NotDirectory         one of the ancestors is not a directory
+     * @throws TooManySymbolicLinks too many symbolic links were encountered
+     *                              when resolving this path
+     * @throws IOException          other errors
      */
     public Path createSymbolicLink(Path target) throws IOException {
         FileSystem.INSTANCE.createSymbolicLink(this, target);
