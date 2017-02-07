@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -34,9 +33,7 @@ import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.fs.Permission.OWNER_EXECUTE;
 import static l.files.fs.Permission.OWNER_READ;
-import static l.files.fs.Permission.OWNER_WRITE;
 import static l.files.fs.Stat.stat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -331,13 +328,6 @@ public final class FilesTest extends PathBaseTest {
         assertTrue(dir1().concat("a/b/c").stat(NOFOLLOW).isDirectory());
         assertTrue(dir1().concat("a/b").stat(NOFOLLOW).isDirectory());
         assertTrue(dir1().concat("a/").stat(NOFOLLOW).isDirectory());
-    }
-
-    @Test
-    public void createSymbolicLink() throws Exception {
-        Path link = dir1().concat("link").createSymbolicLink(dir1());
-        assertTrue(link.stat(NOFOLLOW).isSymbolicLink());
-        assertEquals(dir1(), link.readSymbolicLink());
     }
 
     @Test
