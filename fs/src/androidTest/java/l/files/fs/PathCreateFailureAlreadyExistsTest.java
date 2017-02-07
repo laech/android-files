@@ -6,49 +6,32 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import java.io.IOException;
-import java.util.Collection;
 
 import l.files.fs.exception.AlreadyExist;
 import l.files.testing.fs.PathBaseTest;
 
-import static java.util.Arrays.asList;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 @RunWith(Parameterized.class)
-public abstract class PathCreateFailureAlreadyExistsTest extends PathBaseTest {
+public final class PathCreateFailureAlreadyExistsTest extends PathBaseTest {
 
-    private final String subPath;
+    private final PathCreation creation;
 
-    public PathCreateFailureAlreadyExistsTest(String subPath) {
-        this.subPath = subPath;
+    public PathCreateFailureAlreadyExistsTest(PathCreation creation) {
+        this.creation = creation;
     }
 
-    abstract PathCreation creation();
-
-    @Parameters(name = "\"{0}\"")
-    public static Collection<Object[]> data() {
-        return asList(new Object[][]{
-                {""},
-                {"."},
-                {".."},
-                {"abc"},
-                {" "},
-                {"\n"},
-                {"\t"},
-        });
+    @Parameters(name = "{0}")
+    public static Iterable<PathCreation[]> data() {
+        return PathCreation.valuesAsJUnitParameters();
     }
 
     @Test
     public void create_failure_due_to_file_exists_at_path() throws Exception {
 
-        Path path = dir1().concat(subPath);
-        if (!path.exists(NOFOLLOW)) {
-            path.createFile();
-        }
-
+        Path path = dir1().concat("a").createFile();
         creationFailureAlreadyExists(path);
     }
 
@@ -56,11 +39,7 @@ public abstract class PathCreateFailureAlreadyExistsTest extends PathBaseTest {
     public void create_failure_due_to_directory_exists_at_path()
             throws Exception {
 
-        Path path = dir1().concat(subPath);
-        if (!path.exists(NOFOLLOW)) {
-            path.createDirectory();
-        }
-
+        Path path = dir1().concat("a").createDirectory();
         creationFailureAlreadyExists(path);
     }
 
@@ -68,18 +47,14 @@ public abstract class PathCreateFailureAlreadyExistsTest extends PathBaseTest {
     public void create_failure_due_to_symbolic_link_exists_at_path()
             throws Exception {
 
-        Path path = dir1().concat(subPath);
-        if (!path.exists(NOFOLLOW)) {
-            path.createSymbolicLink(dir2());
-        }
-
+        Path path = dir1().concat("a").createSymbolicLink(dir2());
         creationFailureAlreadyExists(path);
     }
 
     private void creationFailureAlreadyExists(Path path) throws IOException {
         assertTrue(path.exists(NOFOLLOW));
         try {
-            creation().createUsingOurCodeAssertResult(path);
+            creation.createUsingOurCodeAssertResult(path);
             fail("Expecting " + AlreadyExist.class.getName());
         } catch (AlreadyExist e) {
             // Pass
