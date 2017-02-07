@@ -18,6 +18,8 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 
 final class Copy extends Paste {
 
+    // TODO copy file/directory permissions
+
     private static final int BUFFER_SIZE = 1024 * 8;
 
     private final AtomicLong copiedByteCount = new AtomicLong();
