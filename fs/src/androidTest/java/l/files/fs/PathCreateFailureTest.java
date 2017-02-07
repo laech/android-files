@@ -19,8 +19,10 @@ import l.files.fs.exception.TooManySymbolicLinks;
 import l.files.testing.fs.PathBaseTest;
 
 import static linux.Limits.NAME_MAX;
+import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeThat;
 
 @RunWith(Parameterized.class)
 public final class PathCreateFailureTest extends PathBaseTest {
@@ -66,6 +68,7 @@ public final class PathCreateFailureTest extends PathBaseTest {
     @Test
     public void already_exists_failure_due_to_directory_exists_at_path()
             throws Exception {
+        assumeThat(creation, not(PathCreation.DIRECTORIES));
         Path path = dir1().concat("a").createDirectory();
         createExpectingFailure(path, AlreadyExist.class);
     }
@@ -93,6 +96,7 @@ public final class PathCreateFailureTest extends PathBaseTest {
     @Test
     public void no_such_entry_failure_due_to_parent_does_not_exist()
             throws Exception {
+        assumeThat(creation, not(PathCreation.DIRECTORIES));
         Path path = dir1().concat("non-existent").concat("child");
         createExpectingFailure(path, NoSuchEntry.class);
     }

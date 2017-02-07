@@ -64,6 +64,19 @@ enum PathCreation {
         }
     },
 
+    DIRECTORIES {
+        @Override
+        void createUsingOurCodeAssertResult(Path path) throws IOException {
+            path.createDirectories();
+            assertTrue(path.stat(NOFOLLOW).isDirectory());
+        }
+
+        @Override
+        void createUsingSystemApi(File path) throws IOException {
+            assertTrue(path.mkdirs());
+        }
+    },
+
     SYMBOLIC_LINK {
         @Override
         void createUsingOurCodeAssertResult(Path path) throws IOException {
