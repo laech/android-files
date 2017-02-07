@@ -1,8 +1,6 @@
 package l.files.fs;
 
 import android.annotation.SuppressLint;
-import android.system.ErrnoException;
-import android.system.Os;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,10 +51,10 @@ enum PathCreation {
         @Override
         @SuppressLint("NewApi")
         void createUsingSystemApi(File path) throws IOException {
-            assumeTrue(SDK_INT >= LOLLIPOP);
+            assumeTrue("android.system.Os not available", SDK_INT >= LOLLIPOP);
             try {
-                Os.symlink("/", path.getPath());
-            } catch (ErrnoException e) {
+                android.system.Os.symlink("/", path.getPath());
+            } catch (Exception e) {
                 throw new IOException(e);
             }
         }
