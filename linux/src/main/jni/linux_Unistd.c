@@ -41,19 +41,20 @@ void Java_linux_Unistd_symlink(JNIEnv *env, jclass class, jbyteArray jtarget, jb
     }
 }
 
-void Java_linux_Unistd_access(JNIEnv *env, jclass class, jbyteArray jpath, jint mode) {
+jint Java_linux_Unistd_access(JNIEnv *env, jclass class, jbyteArray jpath, jint mode) {
 
     if (NULL == jpath) {
         throw_null_pointer_exception(env, "Path is null");
-        return;
+        return -1;
     }
 
     JBYTE_ARRAY_TO_CHARS(env, path, jpath)
 
     int result = access(path, mode);
     if (-1 == result) {
-        throw_errno_exception(env);
+        return errno;
     }
+    return 0;
 }
 
 jbyteArray Java_linux_Unistd_readlink(JNIEnv *env, jclass class, jbyteArray jpath) {

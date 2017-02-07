@@ -27,10 +27,8 @@ import static l.files.fs.Stat.S_IRWXU;
 import static l.files.fs.Stat.S_IWUSR;
 import static l.files.fs.Stat.chmod;
 import static l.files.fs.Stat.mkdir;
-import static linux.Errno.EACCES;
 import static linux.Errno.EAGAIN;
 import static linux.Errno.EISDIR;
-import static linux.Errno.EROFS;
 import static linux.Fcntl.O_CREAT;
 import static linux.Fcntl.O_DIRECTORY;
 import static linux.Fcntl.O_EXCL;
@@ -178,15 +176,7 @@ final class FileSystem extends Native {
     }
 
     private boolean accessible(Path path, int mode) throws IOException {
-        try {
-            Unistd.access(path.toByteArray(), mode);
-            return true;
-        } catch (ErrnoException e) {
-            if (e.errno == EACCES || e.errno == EROFS) {
-                return false;
-            }
-            throw ErrnoExceptions.toIOException(e, path);
-        }
+        return Unistd.access(path.toByteArray(), mode) == 0;
     }
 
     Observation observe(

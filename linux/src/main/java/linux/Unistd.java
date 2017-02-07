@@ -20,7 +20,10 @@ public final class Unistd extends Native {
 
     private static native void init();
 
-    public static native void access(byte[] path, int mode) throws ErrnoException;
+    /**
+     * Returns 0 if success, {@code errno} if not.
+     */
+    public static native int access(byte[] path, int mode);
 
     public static native void symlink(byte[] target, byte[] linkpath) throws ErrnoException;
 

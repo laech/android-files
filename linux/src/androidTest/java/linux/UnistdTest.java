@@ -16,6 +16,7 @@ import static android.test.MoreAsserts.assertNotEqual;
 import static java.io.File.createTempFile;
 import static linux.Errno.EACCES;
 import static linux.Errno.ENOENT;
+import static linux.Str.strerror;
 import static linux.Unistd.F_OK;
 import static linux.Unistd.R_OK;
 import static linux.Unistd.W_OK;
@@ -81,16 +82,18 @@ public final class UnistdTest {
             Unistd.access(file.getPath().getBytes(), R_OK);
 
             assertTrue(file.setReadable(false));
-            try {
-                Unistd.access(file.getPath().getBytes(), R_OK);
-                fail();
-            } catch (ErrnoException e) {
-                assertEquals(EACCES, e.errno);
-            }
+            int expected = EACCES;
+            int actual = Unistd.access(file.getPath().getBytes(), R_OK);
+            assertEquals(errnoToMessage(expected, actual), expected, actual);
 
         } finally {
             assertTrue(file.delete());
         }
+    }
+
+    private String errnoToMessage(int expectedErrno, int actualErrno) {
+        return "expected: " + strerror(expectedErrno) +
+                ", got: " + strerror(actualErrno);
     }
 
     @Test
@@ -102,12 +105,9 @@ public final class UnistdTest {
             Unistd.access(file.getPath().getBytes(), W_OK);
 
             assertTrue(file.setWritable(false));
-            try {
-                Unistd.access(file.getPath().getBytes(), W_OK);
-                fail();
-            } catch (ErrnoException e) {
-                assertEquals(EACCES, e.errno);
-            }
+            int expected = EACCES;
+            int actual = Unistd.access(file.getPath().getBytes(), W_OK);
+            assertEquals(errnoToMessage(expected, actual), expected, actual);
 
         } finally {
             assertTrue(file.delete());
@@ -123,12 +123,9 @@ public final class UnistdTest {
             Unistd.access(file.getPath().getBytes(), X_OK);
 
             assertTrue(file.setExecutable(false));
-            try {
-                Unistd.access(file.getPath().getBytes(), X_OK);
-                fail();
-            } catch (ErrnoException e) {
-                assertEquals(EACCES, e.errno);
-            }
+            int expected = EACCES;
+            int actual = Unistd.access(file.getPath().getBytes(), X_OK);
+            assertEquals(errnoToMessage(expected, actual), expected, actual);
 
         } finally {
             assertTrue(file.delete());
@@ -146,12 +143,9 @@ public final class UnistdTest {
             assertTrue(file.delete());
         }
 
-        try {
-            Unistd.access(file.getPath().getBytes(), F_OK);
-            fail();
-        } catch (ErrnoException e) {
-            assertEquals(ENOENT, e.errno);
-        }
+        int expected = ENOENT;
+        int actual = Unistd.access(file.getPath().getBytes(), F_OK);
+        assertEquals(errnoToMessage(expected, actual), expected, actual);
     }
 
     @Test
