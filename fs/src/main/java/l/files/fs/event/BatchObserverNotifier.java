@@ -8,6 +8,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Nullable;
 
@@ -38,10 +39,12 @@ public final class BatchObserverNotifier implements Observer, Observation, Runna
     private final TimeUnit batchInternalUnit;
 
     @Nullable
-    private Observation observation;
+    private volatile Observation observation;
 
     @Nullable
-    private ScheduledFuture<?> checker;
+    private volatile ScheduledFuture<?> checker;
+
+    private final AtomicBoolean started;
 
     /**
      * If true, will deliver the new event immediate instead of waiting for next
@@ -69,6 +72,7 @@ public final class BatchObserverNotifier implements Observer, Observation, Runna
         this.childrenChanged = new HashMap<>();
         this.tag = tag;
         this.watchLimit = watchLimit;
+        this.started = new AtomicBoolean(false);
     }
 
     public Observation start(
@@ -77,14 +81,15 @@ public final class BatchObserverNotifier implements Observer, Observation, Runna
             Consumer childrenConsumer
     ) throws IOException, InterruptedException {
 
-        if (observation != null) {
+        if (!started.compareAndSet(false, true)) {
             throw new IllegalStateException();
         }
 
         try {
 
-            observation = path.observe(option, this, childrenConsumer, tag, watchLimit);
-            if (!observation.isClosed()) {
+            Observation ob = path.observe(option, this, childrenConsumer, tag, watchLimit);
+            observation = ob;
+            if (!ob.isClosed()) {
                 checker = service.scheduleWithFixedDelay(
                         this, batchInterval, batchInterval, batchInternalUnit);
             }
@@ -162,17 +167,20 @@ public final class BatchObserverNotifier implements Observer, Observation, Runna
 
     @Override
     public void close() throws IOException {
-        if (checker != null) {
-            checker.cancel(true);
+        ScheduledFuture<?> ck = this.checker;
+        if (ck != null) {
+            ck.cancel(true);
         }
-        if (observation != null) {
-            observation.close();
+        Observation ob = this.observation;
+        if (ob != null) {
+            ob.close();
         }
     }
 
     @Override
     public boolean isClosed() {
-        return observation == null || observation.isClosed();
+        Observation ob = observation;
+        return ob == null || ob.isClosed();
     }
 
 }
