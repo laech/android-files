@@ -57,9 +57,9 @@ enum PathCreation {
         void createUsingSystemApi(File path) throws IOException {
             assumeTrue("android.system.Os not available", SDK_INT >= LOLLIPOP);
             try {
-                Os.mkdir("/", toStatMode(Permission.read()));
+                Os.mkdir(path.toString(), toStatMode(Permission.read()));
             } catch (Exception e) {
-                throw new IOException(e);
+                throw new IOException(path.toString(), e);
             }
         }
     },
@@ -92,7 +92,7 @@ enum PathCreation {
             try {
                 Os.symlink("/", path.getPath());
             } catch (Exception e) {
-                throw new IOException(e);
+                throw new IOException(path.toString(), e);
             }
         }
     };
