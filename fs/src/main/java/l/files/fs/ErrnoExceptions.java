@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import l.files.fs.exception.AccessDenied;
 import l.files.fs.exception.AlreadyExist;
+import l.files.fs.exception.CrossDevice;
 import l.files.fs.exception.DirectoryNotEmpty;
 import l.files.fs.exception.InvalidArgument;
 import l.files.fs.exception.IsDirectory;
@@ -24,6 +25,7 @@ import static linux.Errno.ENAMETOOLONG;
 import static linux.Errno.ENOENT;
 import static linux.Errno.ENOTDIR;
 import static linux.Errno.ENOTEMPTY;
+import static linux.Errno.EXDEV;
 
 final class ErrnoExceptions {
 
@@ -41,6 +43,7 @@ final class ErrnoExceptions {
         if (cause.errno == EISDIR) return new IsDirectory(message, cause);
         if (cause.errno == ENOTEMPTY) return new DirectoryNotEmpty(message, cause);
         if (cause.errno == EINVAL) return new InvalidArgument(message, cause);
+        if (cause.errno == EXDEV) return new CrossDevice(message, cause);
         return new IOException(message, cause);
     }
 

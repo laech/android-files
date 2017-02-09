@@ -30,7 +30,10 @@ import l.files.fs.event.Observation;
 import l.files.fs.event.Observer;
 import l.files.fs.exception.AccessDenied;
 import l.files.fs.exception.AlreadyExist;
+import l.files.fs.exception.CrossDevice;
+import l.files.fs.exception.DirectoryNotEmpty;
 import l.files.fs.exception.InvalidArgument;
+import l.files.fs.exception.IsDirectory;
 import l.files.fs.exception.NameTooLong;
 import l.files.fs.exception.NoSuchEntry;
 import l.files.fs.exception.NotDirectory;
@@ -363,6 +366,32 @@ public abstract class Path implements Parcelable {
      * <p>
      * If this is a link, the link itself is moved, link target file is
      * unaffected.
+     *
+     * @throws AccessDenied         if anyone of the following is true
+     *                              <ul>
+     *                              <li>source parent directory is not writable</li>
+     *                              <li>destination directory is not writable</li>
+     *                              <li>one of source parent directories is not searchable</li>
+     *                              <li>one of destination parent directories is not searchable</li>
+     *                              <li>this path is a directory and is not writable</li>
+     *                              </ul>
+     * @throws InvalidArgument      if destination is a subdirectory of this
+     * @throws IsDirectory          if destination is an existing directory but
+     *                              this path is not a directory
+     * @throws TooManySymbolicLinks too many symbolic links were encountered
+     *                              when resolving this path or destination path
+     * @throws NameTooLong          if this path name is too long,
+     *                              or destination path name is too long
+     * @throws NoSuchEntry          if anyone of the following is true
+     *                              <ul>
+     *                              <li>this path does not exist</li>
+     *                              <li>one of the parent directories of destination does not exist</li>
+     *                              <li>this path is empty</li>
+     *                              <li>destination path is empty</li>
+     *                              </ul>
+     * @throws DirectoryNotEmpty    if destination is a non-empty directory
+     * @throws CrossDevice          source and destination are not on the same mounted file system
+     * @throws IOException          other errors
      */
     public void move(Path destination) throws IOException {
         FileSystem.INSTANCE.move(this, destination);
