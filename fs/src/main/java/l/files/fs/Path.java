@@ -30,6 +30,7 @@ import l.files.fs.event.Observation;
 import l.files.fs.event.Observer;
 import l.files.fs.exception.AccessDenied;
 import l.files.fs.exception.AlreadyExist;
+import l.files.fs.exception.InvalidArgument;
 import l.files.fs.exception.NameTooLong;
 import l.files.fs.exception.NoSuchEntry;
 import l.files.fs.exception.NotDirectory;
@@ -342,6 +343,17 @@ public abstract class Path implements Parcelable {
         return this;
     }
 
+    /**
+     * @throws AccessDenied         one of the ancestor directory does not
+     *                              have search permission
+     * @throws InvalidArgument      if path is not a symbolic link
+     * @throws NameTooLong          path name is too long
+     * @throws NoSuchEntry          one of the ancestors does not exist
+     * @throws NotDirectory         one of the ancestors is not a directory
+     * @throws TooManySymbolicLinks too many symbolic links were encountered
+     *                              when resolving this path
+     * @throws IOException          other errors
+     */
     public Path readSymbolicLink() throws IOException {
         return FileSystem.INSTANCE.readSymbolicLink(this);
     }

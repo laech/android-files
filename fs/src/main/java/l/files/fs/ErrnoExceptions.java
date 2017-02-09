@@ -7,6 +7,7 @@ import java.io.IOException;
 import l.files.fs.exception.AccessDenied;
 import l.files.fs.exception.AlreadyExist;
 import l.files.fs.exception.DirectoryNotEmpty;
+import l.files.fs.exception.InvalidArgument;
 import l.files.fs.exception.IsDirectory;
 import l.files.fs.exception.NameTooLong;
 import l.files.fs.exception.NoSuchEntry;
@@ -16,6 +17,7 @@ import linux.ErrnoException;
 
 import static linux.Errno.EACCES;
 import static linux.Errno.EEXIST;
+import static linux.Errno.EINVAL;
 import static linux.Errno.EISDIR;
 import static linux.Errno.ELOOP;
 import static linux.Errno.ENAMETOOLONG;
@@ -38,6 +40,7 @@ final class ErrnoExceptions {
         if (cause.errno == ENOTDIR) return new NotDirectory(message, cause);
         if (cause.errno == EISDIR) return new IsDirectory(message, cause);
         if (cause.errno == ENOTEMPTY) return new DirectoryNotEmpty(message, cause);
+        if (cause.errno == EINVAL) return new InvalidArgument(message, cause);
         return new IOException(message, cause);
     }
 
