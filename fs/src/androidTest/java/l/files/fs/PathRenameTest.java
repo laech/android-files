@@ -7,21 +7,166 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 
+import javax.annotation.Nullable;
+
 import l.files.fs.exception.AccessDenied;
 import l.files.fs.exception.DirectoryNotEmpty;
 import l.files.fs.exception.InvalidArgument;
 import l.files.fs.exception.IsDirectory;
 import l.files.fs.exception.NameTooLong;
 import l.files.fs.exception.NoSuchEntry;
+import l.files.fs.exception.NotDirectory;
 import l.files.fs.exception.TooManySymbolicLinks;
 import l.files.testing.fs.PathBaseTest;
+import l.files.testing.fs.Paths;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.fail;
+import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.testing.fs.Paths.removePermissions;
 import static linux.Limits.NAME_MAX;
 
 public final class PathRenameTest extends PathBaseTest {
+
+    @Test
+    public void rename_symbolic_link_to_non_existing_destination_will_succeed()
+            throws Exception {
+        testRenameFromSymbolicLink(null);
+    }
+
+    @Test
+    public void rename_symbolic_link_will_replace_existing_destination_symbolic_link()
+            throws Exception {
+        testRenameFromSymbolicLink(PathCreation.SYMBOLIC_LINK);
+    }
+
+    @Test
+    public void rename_symbolic_link_will_replace_existing_destination_file()
+            throws Exception {
+        testRenameFromSymbolicLink(PathCreation.FILE);
+    }
+
+    private void testRenameFromSymbolicLink(
+            @Nullable PathCreation destinationCreationBeforeRename
+    ) throws Exception {
+
+        Path target = dir2();
+        Path sourceLink = dir1().concat("source").createSymbolicLink(dir2());
+        Path destinationLink = dir2().concat("destination");
+
+        if (destinationCreationBeforeRename != null) {
+            destinationCreationBeforeRename
+                    .createUsingOurCodeAssertResult(destinationLink);
+        }
+
+        sourceLink.rename(destinationLink);
+        assertEquals(target, destinationLink.readSymbolicLink());
+        assertFalse(sourceLink.exists(NOFOLLOW));
+    }
+
+    @Test
+    public void rename_file_to_non_existing_destination_will_succeed()
+            throws Exception {
+        testRenameFromFile(null);
+    }
+
+    @Test
+    public void rename_file_will_replace_existing_destination_symbolic_link()
+            throws Exception {
+        testRenameFromFile(PathCreation.SYMBOLIC_LINK);
+    }
+
+    @Test
+    public void rename_file_will_replace_existing_destination_file()
+            throws Exception {
+        testRenameFromFile(PathCreation.FILE);
+    }
+
+    private void testRenameFromFile(
+            @Nullable PathCreation destinationCreationBeforeRename
+    ) throws Exception {
+
+        String content = "hello world?\r\nhi\n你好、\n";
+        Path sourceFile = dir1().concat("source").createFile();
+        Paths.writeUtf8(sourceFile, content);
+        Path destinationFile = dir2().concat("destination");
+
+        if (destinationCreationBeforeRename != null) {
+            destinationCreationBeforeRename
+                    .createUsingOurCodeAssertResult(destinationFile);
+        }
+
+        sourceFile.rename(destinationFile);
+        assertEquals(content, Paths.readAllUtf8(destinationFile));
+        assertFalse(sourceFile.exists(NOFOLLOW));
+    }
+
+    @Test
+    public void rename_directory_to_non_existing_destination_will_succeed()
+            throws Exception {
+        testRenameFromDirectory(null);
+    }
+
+    @Test
+    public void rename_directory_will_replace_existing_empty_destination()
+            throws Exception {
+        testRenameFromDirectory(PathCreation.DIRECTORY);
+    }
+
+    private void testRenameFromDirectory(
+            @Nullable PathCreation destinationCreationBeforeRename
+    ) throws Exception {
+
+        Path sourceDirectory = dir1().concat("source").createDirectory();
+        Paths.writeUtf8(sourceDirectory.concat("file"), "hello");
+        Path destinationDirectory = dir2().concat("destination");
+
+        if (destinationCreationBeforeRename != null) {
+            destinationCreationBeforeRename
+                    .createUsingOurCodeAssertResult(destinationDirectory);
+        }
+
+        sourceDirectory.rename(destinationDirectory);
+        assertEquals("hello", Paths.readAllUtf8(destinationDirectory.concat("file")));
+        assertFalse(sourceDirectory.exists(NOFOLLOW));
+    }
+
+    @Test
+    public void not_directory_failure_when_parent_of_source_path_is_not_directory()
+            throws Exception {
+
+        Path source = dir1().concat("file").createFile().concat("invalid");
+        Path destination = dir2().concat("destination");
+        renameWillFail(source, destination, NotDirectory.class);
+    }
+
+    @Test
+    public void not_directory_failure_when_parent_of_destination_path_is_not_directory()
+            throws Exception {
+
+        Path source = dir1().concat("file").createFile();
+        Path destination = dir2().concat("file").createFile().concat("invalid");
+        renameWillFail(source, destination, NotDirectory.class);
+    }
+
+    @Test
+    public void not_directory_failure_when_source_is_directory_but_destination_is_file()
+            throws Exception {
+
+        Path source = dir1().concat("directory").createDirectory();
+        Path destination = dir2().concat("file").createFile();
+        renameWillFail(source, destination, NotDirectory.class);
+    }
+
+    @Test
+    public void not_directory_failure_when_source_is_directory_but_destination_is_symbolic_link()
+            throws Exception {
+
+        Path source = dir1().concat("directory").createDirectory();
+        Path destination = dir2().concat("link").createSymbolicLink(Path.of("/"));
+        renameWillFail(source, destination, NotDirectory.class);
+    }
 
     @Test
     public void invalid_argument_failure_when_trying_to_make_a_directory_a_subdirectory_of_itself()
@@ -29,16 +174,25 @@ public final class PathRenameTest extends PathBaseTest {
 
         Path parent = dir1().concat("parent").createDirectory();
         Path child = parent.concat("child").createDirectory();
-        moveWillFail(parent, child, InvalidArgument.class);
+        renameWillFail(parent, child, InvalidArgument.class);
     }
 
     @Test
-    public void is_directory_failure_if_new_path_is_directory_but_old_path_is_not_directory()
+    public void is_directory_failure_if_new_path_is_directory_but_old_path_is_file()
             throws Exception {
 
         Path dir = dir1().concat("dir").createDirectory();
         Path file = dir1().concat("file").createFile();
-        moveWillFail(file, dir, IsDirectory.class);
+        renameWillFail(file, dir, IsDirectory.class);
+    }
+
+    @Test
+    public void is_directory_failure_if_new_path_is_directory_but_old_path_is_symbolic_link()
+            throws Exception {
+
+        Path dir = dir1().concat("dir").createDirectory();
+        Path link = dir1().concat("file").createSymbolicLink(dir2());
+        renameWillFail(link, dir, IsDirectory.class);
     }
 
     @Test
@@ -48,7 +202,7 @@ public final class PathRenameTest extends PathBaseTest {
         Path loop = dir1().concat("loop");
         loop.createSymbolicLink(loop);
         Path source = loop.concat("source");
-        moveWillFail(source, dir2(), TooManySymbolicLinks.class);
+        renameWillFail(source, dir2(), TooManySymbolicLinks.class);
     }
 
     @Test
@@ -58,7 +212,7 @@ public final class PathRenameTest extends PathBaseTest {
         Path loop = dir1().concat("loop");
         loop.createSymbolicLink(loop);
         Path destination = loop.concat("destination");
-        moveWillFail(dir2(), destination, TooManySymbolicLinks.class);
+        renameWillFail(dir2(), destination, TooManySymbolicLinks.class);
     }
 
     @Test
@@ -66,7 +220,7 @@ public final class PathRenameTest extends PathBaseTest {
             throws Exception {
 
         Path nameTooLong = dir1().concat(Strings.repeat("a", NAME_MAX + 1));
-        moveWillFail(nameTooLong, dir2(), NameTooLong.class);
+        renameWillFail(nameTooLong, dir2(), NameTooLong.class);
     }
 
     @Test
@@ -74,7 +228,7 @@ public final class PathRenameTest extends PathBaseTest {
             throws Exception {
 
         Path nameTooLong = dir1().concat(Strings.repeat("a", NAME_MAX + 1));
-        moveWillFail(dir2(), nameTooLong, NameTooLong.class);
+        renameWillFail(dir2(), nameTooLong, NameTooLong.class);
     }
 
     @Test
@@ -82,36 +236,52 @@ public final class PathRenameTest extends PathBaseTest {
             throws Exception {
 
         Path missing = dir1().concat("missing");
-        moveWillFail(missing, dir2(), NoSuchEntry.class);
+        renameWillFail(missing, dir2(), NoSuchEntry.class);
     }
 
     @Test
     public void no_such_entry_failure_if_destination_parent_does_not_exist()
             throws Exception {
 
-        moveWillFail(dir1(), dir2().concat("missing/dir"), NoSuchEntry.class);
+        renameWillFail(dir1(), dir2().concat("missing/dir"), NoSuchEntry.class);
     }
 
     @Test
     public void no_such_entry_failure_if_source_is_empty()
             throws Exception {
 
-        moveWillFail(Path.of(""), dir1(), NoSuchEntry.class);
+        renameWillFail(Path.of(""), dir1(), NoSuchEntry.class);
     }
 
     @Test
     public void no_such_entry_failure_if_destination_is_empty()
             throws Exception {
 
-        moveWillFail(dir1(), Path.of(""), NoSuchEntry.class);
+        renameWillFail(dir1(), Path.of(""), NoSuchEntry.class);
     }
 
     @Test
-    public void directory_not_empty_failure_if_destination_is_non_empty_directory()
+    public void directory_not_empty_failure_if_source_is_file_destination_is_non_empty_directory()
             throws Exception {
 
         dir2().concat("a").createFile();
-        moveWillFail(dir1(), dir2(), DirectoryNotEmpty.class);
+        renameWillFail(dir1(), dir2(), DirectoryNotEmpty.class);
+    }
+
+    @Test
+    public void directory_not_empty_failure_if_source_is_symbolic_link_destination_is_non_empty_directory()
+            throws Exception {
+
+        dir2().concat("a").createSymbolicLink(Path.of("/"));
+        renameWillFail(dir1(), dir2(), DirectoryNotEmpty.class);
+    }
+
+    @Test
+    public void directory_not_empty_failure_if_source_is_directory_destination_is_non_empty_directory()
+            throws Exception {
+
+        dir2().concat("a").createDirectory();
+        renameWillFail(dir1(), dir2(), DirectoryNotEmpty.class);
     }
 
     @Test
@@ -127,7 +297,7 @@ public final class PathRenameTest extends PathBaseTest {
         assertSearchable(oldPath.parent(), true);
         assertSearchable(newPath.parent(), true);
 
-        moveWillFail(oldPath, newPath, AccessDenied.class);
+        renameWillFail(oldPath, newPath, AccessDenied.class);
     }
 
     @Test
@@ -143,7 +313,7 @@ public final class PathRenameTest extends PathBaseTest {
         assertSearchable(oldPath.parent(), true);
         assertSearchable(newPath.parent(), true);
 
-        moveWillFail(oldPath, newPath, AccessDenied.class);
+        renameWillFail(oldPath, newPath, AccessDenied.class);
     }
 
     @Test
@@ -159,7 +329,7 @@ public final class PathRenameTest extends PathBaseTest {
         assertWritable(oldPath.parent(), true);
         assertWritable(newPath.parent(), true);
 
-        moveWillFail(oldPath, newPath, AccessDenied.class);
+        renameWillFail(oldPath, newPath, AccessDenied.class);
     }
 
     @Test
@@ -175,7 +345,7 @@ public final class PathRenameTest extends PathBaseTest {
         assertWritable(oldPath.parent(), true);
         assertWritable(newPath.parent(), true);
 
-        moveWillFail(oldPath, newPath, AccessDenied.class);
+        renameWillFail(oldPath, newPath, AccessDenied.class);
     }
 
     @Test
@@ -192,7 +362,7 @@ public final class PathRenameTest extends PathBaseTest {
         assertSearchable(oldPath.parent(), true);
         assertSearchable(newPath.parent(), true);
 
-        moveWillFail(oldPath, newPath, AccessDenied.class);
+        renameWillFail(oldPath, newPath, AccessDenied.class);
     }
 
     private static void assertWritable(Path path, boolean writable) {
@@ -211,7 +381,7 @@ public final class PathRenameTest extends PathBaseTest {
         );
     }
 
-    private static void moveWillFail(
+    private static void renameWillFail(
             Path oldPath,
             Path newPath,
             Class<? extends IOException> expected
@@ -226,4 +396,5 @@ public final class PathRenameTest extends PathBaseTest {
             }
         }
     }
+
 }

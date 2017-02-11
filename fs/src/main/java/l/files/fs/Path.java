@@ -362,6 +362,27 @@ public abstract class Path implements Parcelable {
     }
 
     /**
+     * Renames this path to the destination.
+     * <p>
+     * Does nothing if source and destination are hard links to the same file.
+     * <p>
+     * If the destination exists, the following shows when this operation will
+     * succeed or fail:
+     * <pre>
+     * okay: link -> link
+     * okay: link -> file
+     * fail: link -> directory
+     *
+     * okay: file -> link
+     * okay: file -> file
+     * okay: file -> directory
+     *
+     * fail: directory -> link
+     * fail: directory -> file
+     * fail: directory -> non empty directory
+     * okay: directory -> empty directory
+     * </pre>
+     *
      * @throws AccessDenied         if anyone of the following is true
      *                              <ul>
      *                              <li>source parent directory is not writable</li>
@@ -383,6 +404,12 @@ public abstract class Path implements Parcelable {
      *                              <li>one of the parent directories of destination does not exist</li>
      *                              <li>this path is empty</li>
      *                              <li>destination path is empty</li>
+     *                              </ul>
+     * @throws NotDirectory         if:
+     *                              <ul>
+     *                              <li>a parent path of this path is not a directory</li>
+     *                              <li>a parent path of destination path is not a directory</li>
+     *                              <li>this path is directory and destination exists but is not a directory</li>
      *                              </ul>
      * @throws DirectoryNotEmpty    if destination is a non-empty directory
      * @throws CrossDevice          source and destination are not on the same mounted file system

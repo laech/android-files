@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
@@ -45,6 +46,9 @@ enum PathCreation {
         }
     },
 
+    /**
+     * @see Path#createDirectory(Set)
+     */
     DIRECTORY_WITH_PERMISSION {
         @Override
         void createUsingOurCodeAssertResult(Path path) throws IOException {
@@ -64,6 +68,9 @@ enum PathCreation {
         }
     },
 
+    /**
+     * @see Path#createDirectories()
+     */
     DIRECTORIES {
         @Override
         void createUsingOurCodeAssertResult(Path path) throws IOException {
@@ -77,6 +84,9 @@ enum PathCreation {
         }
     },
 
+    /**
+     * @see Path#createSymbolicLink(Path)
+     */
     SYMBOLIC_LINK {
         @Override
         void createUsingOurCodeAssertResult(Path path) throws IOException {
