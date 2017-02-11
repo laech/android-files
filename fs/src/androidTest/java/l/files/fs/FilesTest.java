@@ -354,7 +354,7 @@ public final class FilesTest extends PathBaseTest {
         Path target = dir1().concat("target").createFile();
         Path src = dir1().concat("src").createSymbolicLink(target);
         Path dst = dir1().concat("dst");
-        src.move(dst);
+        src.rename(dst);
         assertFalse(src.exists(NOFOLLOW));
         assertTrue(dst.exists(NOFOLLOW));
         assertTrue(target.exists(NOFOLLOW));
@@ -366,7 +366,7 @@ public final class FilesTest extends PathBaseTest {
         Path src = dir1().concat("src");
         Path dst = dir1().concat("dst");
         Paths.appendUtf8(src, "src");
-        src.move(dst);
+        src.rename(dst);
         assertFalse(src.exists(NOFOLLOW));
         assertTrue(dst.exists(NOFOLLOW));
         assertEquals("src", Paths.readAllUtf8(dst));
@@ -377,7 +377,7 @@ public final class FilesTest extends PathBaseTest {
         Path src = dir1().concat("src");
         Path dst = dir1().concat("dst");
         src.concat("a").createDirectories();
-        src.move(dst);
+        src.rename(dst);
         assertFalse(src.exists(NOFOLLOW));
         assertTrue(dst.exists(NOFOLLOW));
         assertTrue(dst.concat("a").exists(NOFOLLOW));

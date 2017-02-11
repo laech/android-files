@@ -199,7 +199,7 @@ public class BaseFilesActivityTest {
                     "Assuming the underlying file system is case insensitive",
                     dst.exists(NOFOLLOW));
 
-            src.move(dst);
+            src.rename(dst);
             List<Path> actual = dir.list(NOFOLLOW, new ArrayList<Path>());
             List<Path> expected = Collections.<Path>singletonList(dst);
             assertEquals(1, actual.size());

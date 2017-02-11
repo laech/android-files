@@ -874,7 +874,7 @@ public final class ObservableTest extends PathBaseTest {
         return new Callable<Void>() {
             @Override
             public Void call() throws Exception {
-                src.move(dst);
+                src.rename(dst);
                 return null;
             }
         };

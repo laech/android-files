@@ -234,7 +234,7 @@ final class ThumbnailDiskCache extends Cache<ScaledBitmap> {
             out.close();
         }
 
-        tmp.move(cache);
+        tmp.rename(cache);
 
         return null;
     }

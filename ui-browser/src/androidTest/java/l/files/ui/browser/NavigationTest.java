@@ -63,7 +63,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
             screen().assertAllItemsDisplayedInOrder(src);
 
-            src.move(dst);
+            src.rename(dst);
 
             screen()
                     .sort()

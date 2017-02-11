@@ -129,7 +129,7 @@ final class FileSystem extends Native {
         }
     }
 
-    void move(Path src, Path dst) throws IOException {
+    void rename(Path src, Path dst) throws IOException {
         try {
 
             Stdio.rename(src.toByteArray(), dst.toByteArray());

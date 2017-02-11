@@ -218,7 +218,7 @@ abstract class PersistenceCache<V> extends MemCache<Path, V> {
             out.close();
         }
 
-        tmp.move(file);
+        tmp.rename(file);
     }
 
     private DataOutputStream newBufferedDataOutputStream(Path path) throws IOException {

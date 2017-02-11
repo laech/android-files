@@ -80,7 +80,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
         dir.concat("dir-" + nanoTime()).createDirectory();
         dir.concat("before-move-" + nanoTime())
                 .createFile()
-                .move(dir.concat("after-move-" + nanoTime()));
+                .rename(dir.concat("after-move-" + nanoTime()));
 
         dir.list(FOLLOW, new Consumer() {
             @Override

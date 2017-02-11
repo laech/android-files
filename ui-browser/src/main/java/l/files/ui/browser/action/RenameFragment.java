@@ -174,7 +174,7 @@ public final class RenameFragment extends FileCreationFragment {
         @Override
         protected IOException doInBackground(Path... params) {
             try {
-                src.move(dst);
+                src.rename(dst);
                 return null;
             } catch (IOException e) {
                 return e;

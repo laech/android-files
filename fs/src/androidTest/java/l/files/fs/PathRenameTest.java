@@ -21,7 +21,7 @@ import static junit.framework.Assert.fail;
 import static l.files.testing.fs.Paths.removePermissions;
 import static linux.Limits.NAME_MAX;
 
-public final class PathMoveTest extends PathBaseTest {
+public final class PathRenameTest extends PathBaseTest {
 
     @Test
     public void invalid_argument_failure_when_trying_to_make_a_directory_a_subdirectory_of_itself()
@@ -218,7 +218,7 @@ public final class PathMoveTest extends PathBaseTest {
     ) throws IOException {
 
         try {
-            oldPath.move(newPath);
+            oldPath.rename(newPath);
             fail("Expected " + expected.getName());
         } catch (IOException e) {
             if (!expected.isInstance(e)) {

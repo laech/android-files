@@ -362,11 +362,6 @@ public abstract class Path implements Parcelable {
     }
 
     /**
-     * Moves this file tree to destination, destination must not exist.
-     * <p>
-     * If this is a link, the link itself is moved, link target file is
-     * unaffected.
-     *
      * @throws AccessDenied         if anyone of the following is true
      *                              <ul>
      *                              <li>source parent directory is not writable</li>
@@ -393,8 +388,8 @@ public abstract class Path implements Parcelable {
      * @throws CrossDevice          source and destination are not on the same mounted file system
      * @throws IOException          other errors
      */
-    public void move(Path destination) throws IOException {
-        FileSystem.INSTANCE.move(this, destination);
+    public void rename(Path destination) throws IOException {
+        FileSystem.INSTANCE.rename(this, destination);
     }
 
     public void delete() throws IOException {
