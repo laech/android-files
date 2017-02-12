@@ -323,14 +323,6 @@ public final class FilesTest extends PathBaseTest {
     }
 
     @Test
-    public void createDirectories() throws Exception {
-        dir1().concat("a/b/c").createDirectories();
-        assertTrue(dir1().concat("a/b/c").stat(NOFOLLOW).isDirectory());
-        assertTrue(dir1().concat("a/b").stat(NOFOLLOW).isDirectory());
-        assertTrue(dir1().concat("a/").stat(NOFOLLOW).isDirectory());
-    }
-
-    @Test
     public void stat_followLink() throws Exception {
         Path child = dir1().concat("a").createSymbolicLink(dir1());
         Stat expected = dir1().stat(NOFOLLOW);
@@ -347,40 +339,6 @@ public final class FilesTest extends PathBaseTest {
         assertTrue(actual.isSymbolicLink());
         assertFalse(actual.isDirectory());
         assertNotEqual(dir1().stat(NOFOLLOW), actual);
-    }
-
-    @Test
-    public void moveTo_moveLinkNotTarget() throws Exception {
-        Path target = dir1().concat("target").createFile();
-        Path src = dir1().concat("src").createSymbolicLink(target);
-        Path dst = dir1().concat("dst");
-        src.rename(dst);
-        assertFalse(src.exists(NOFOLLOW));
-        assertTrue(dst.exists(NOFOLLOW));
-        assertTrue(target.exists(NOFOLLOW));
-        assertEquals(target, dst.readSymbolicLink());
-    }
-
-    @Test
-    public void moveTo_fileToNonExistingFile() throws Exception {
-        Path src = dir1().concat("src");
-        Path dst = dir1().concat("dst");
-        Paths.appendUtf8(src, "src");
-        src.rename(dst);
-        assertFalse(src.exists(NOFOLLOW));
-        assertTrue(dst.exists(NOFOLLOW));
-        assertEquals("src", Paths.readAllUtf8(dst));
-    }
-
-    @Test
-    public void moveTo_directoryToNonExistingDirectory() throws Exception {
-        Path src = dir1().concat("src");
-        Path dst = dir1().concat("dst");
-        src.concat("a").createDirectories();
-        src.rename(dst);
-        assertFalse(src.exists(NOFOLLOW));
-        assertTrue(dst.exists(NOFOLLOW));
-        assertTrue(dst.concat("a").exists(NOFOLLOW));
     }
 
     @Test
