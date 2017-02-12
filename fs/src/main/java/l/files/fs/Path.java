@@ -44,6 +44,8 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 
 public abstract class Path implements Parcelable {
 
+    // TODO EROFS
+
     public static final Creator<Path> CREATOR = new Creator<Path>() {
 
         @Override
@@ -419,6 +421,21 @@ public abstract class Path implements Parcelable {
         FileSystem.INSTANCE.rename(this, destination);
     }
 
+    /**
+     * @throws AccessDenied         parent directory does not allow write
+     *                              permission, or one of the ancestor
+     *                              directory does not allow search permission
+     * @throws NameTooLong          path name is too long
+     * @throws TooManySymbolicLinks too many symbolic links were encountered
+     * @throws NotDirectory         if one of the parent path is not a directory
+     * @throws NoSuchEntry          if one of the follow is true:
+     *                              <ul>
+     *                              <li>this path does not exist</li>
+     *                              <li>one of the parent path is a dangling symbolic link</li>
+     *                              <li>this path is empty</li>
+     *                              </ul>
+     * @throws IOException          other errors
+     */
     public void delete() throws IOException {
         FileSystem.INSTANCE.delete(this);
     }
