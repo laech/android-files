@@ -84,10 +84,10 @@ final class FileSystem extends Native {
         }
     }
 
-    void createDirectory(Path path, Set<Permission> permissions)
+    void createDirectory(Path path, Set<Permission> permissionsHint)
             throws IOException {
         try {
-            mkdir(path.toByteArray(), Permission.toStatMode(permissions));
+            mkdir(path.toByteArray(), Permission.toStatMode(permissionsHint));
         } catch (ErrnoException e) {
             throw ErrnoExceptions.toIOException(e, path);
         }

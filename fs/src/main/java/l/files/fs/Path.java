@@ -274,9 +274,9 @@ public abstract class Path implements Parcelable {
      *                              when resolving this path
      * @throws IOException          other errors
      */
-    public Path createDirectory(Set<Permission> permissions)
+    public Path createDirectory(Set<Permission> permissionsHint)
             throws IOException {
-        FileSystem.INSTANCE.createDirectory(this, permissions);
+        FileSystem.INSTANCE.createDirectory(this, permissionsHint);
         return this;
     }
 
