@@ -40,6 +40,8 @@ import static l.files.fs.TraversalCallback.Result.CONTINUE;
 
 final class ThumbnailDiskCache extends Cache<ScaledBitmap> {
 
+    // TODO investigate using sqlite for this
+
     private static final ExecutorService executor =
             newFixedThreadPool(2, new ThreadFactory() {
 
