@@ -32,6 +32,7 @@ import l.files.fs.exception.AccessDenied;
 import l.files.fs.exception.AlreadyExist;
 import l.files.fs.exception.CrossDevice;
 import l.files.fs.exception.DirectoryNotEmpty;
+import l.files.fs.exception.FileSystemReadOnly;
 import l.files.fs.exception.InvalidArgument;
 import l.files.fs.exception.IsDirectory;
 import l.files.fs.exception.NameTooLong;
@@ -254,6 +255,7 @@ public abstract class Path implements Parcelable {
      * @throws NotDirectory         one of the ancestors is not a directory
      * @throws TooManySymbolicLinks too many symbolic links were encountered
      *                              when resolving this path
+     * @throws FileSystemReadOnly   this path is on a read only file system
      * @throws IOException          other errors
      */
     public Path createDirectory() throws IOException {
@@ -276,6 +278,7 @@ public abstract class Path implements Parcelable {
      * @throws NotDirectory         one of the ancestors is not a directory
      * @throws TooManySymbolicLinks too many symbolic links were encountered
      *                              when resolving this path
+     * @throws FileSystemReadOnly   this path is on a read only file system
      * @throws IOException          other errors
      */
     public Path createDirectory(Set<Permission> permissionsHint)
@@ -327,6 +330,7 @@ public abstract class Path implements Parcelable {
      * @throws NotDirectory         one of the ancestors is not a directory
      * @throws TooManySymbolicLinks too many symbolic links were encountered
      *                              when resolving this path
+     * @throws FileSystemReadOnly   this path is on a read only file system
      * @throws IOException          other errors
      */
     public Path createFile() throws IOException {
@@ -347,6 +351,7 @@ public abstract class Path implements Parcelable {
      * @throws NotDirectory         one of the ancestors is not a directory
      * @throws TooManySymbolicLinks too many symbolic links were encountered
      *                              when resolving this path
+     * @throws FileSystemReadOnly   this path is on a read only file system
      * @throws IOException          other errors
      */
     public Path createSymbolicLink(Path target) throws IOException {
@@ -424,6 +429,7 @@ public abstract class Path implements Parcelable {
      *                              </ul>
      * @throws DirectoryNotEmpty    if destination is a non-empty directory
      * @throws CrossDevice          source and destination are not on the same mounted file system
+     * @throws FileSystemReadOnly   path is on a read only file system
      * @throws IOException          other errors
      */
     public void rename(Path destination) throws IOException {
@@ -445,6 +451,7 @@ public abstract class Path implements Parcelable {
      *                              <li>one of the parent path is a dangling symbolic link</li>
      *                              <li>this path is empty</li>
      *                              </ul>
+     * @throws FileSystemReadOnly   this path is on a read only file system
      * @throws IOException          other errors
      */
     public void delete() throws IOException {
