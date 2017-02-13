@@ -12,9 +12,9 @@ buildscript {
     ext.minSdkVersion = 16
     // Cannot target API 24 yet, need to handle FileUriExposedException when clicking on a file
     ext.targetSdkVersion = 23
-    ext.compileSdkVersion = 23
+    ext.compileSdkVersion = 25
     ext.buildToolsVersion = '25.0.2'
-    ext.supportLibVersion = '24.2.1'
+    ext.supportLibVersion = '25.1.1'
     ext.guavaVersion = '19.0'
 
 }
