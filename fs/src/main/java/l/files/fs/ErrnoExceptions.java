@@ -25,6 +25,7 @@ import static linux.Errno.ENAMETOOLONG;
 import static linux.Errno.ENOENT;
 import static linux.Errno.ENOTDIR;
 import static linux.Errno.ENOTEMPTY;
+import static linux.Errno.EPERM;
 import static linux.Errno.EXDEV;
 
 final class ErrnoExceptions {
@@ -34,6 +35,7 @@ final class ErrnoExceptions {
 
     static IOException toIOException(ErrnoException cause, Object... paths) {
         String message = TextUtils.join(", ", paths);
+        if (cause.errno == EPERM) return new AccessDenied(message, cause);
         if (cause.errno == EACCES) return new AccessDenied(message, cause);
         if (cause.errno == EEXIST) return new AlreadyExist(message, cause);
         if (cause.errno == ELOOP) return new TooManySymbolicLinks(message, cause);

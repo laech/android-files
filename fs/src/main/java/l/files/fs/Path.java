@@ -245,7 +245,9 @@ public abstract class Path implements Parcelable {
     /**
      * @throws AccessDenied         parent directory does not allow write
      *                              permission, or one of the ancestor
-     *                              directory does not allow search permission
+     *                              directory does not allow search permission,
+     *                              or the file system containing this path
+     *                              does not support creation of directories
      * @throws AlreadyExist         an entry already exists at this path
      * @throws NameTooLong          path name is too long
      * @throws NoSuchEntry          one of the ancestors does not exist
@@ -265,7 +267,9 @@ public abstract class Path implements Parcelable {
      *
      * @throws AccessDenied         parent directory does not allow write
      *                              permission, or one of the ancestor
-     *                              directory does not allow search permission
+     *                              directory does not allow search permission,
+     *                              or the file system containing this path
+     *                              does not support creation of directories
      * @throws AlreadyExist         an entry already exists at this path
      * @throws NameTooLong          path name is too long
      * @throws NoSuchEntry          one of the ancestors does not exist
@@ -334,7 +338,9 @@ public abstract class Path implements Parcelable {
      * @param target the target the link will point to
      * @throws AccessDenied         parent directory does not allow write
      *                              permission, or one of the ancestor
-     *                              directory does not allow search permission
+     *                              directory does not allow search permission,
+     *                              or the file system containing this path
+     *                              does not support creation of symolic links
      * @throws AlreadyExist         an entry already exists at this path
      * @throws NameTooLong          path name is too long
      * @throws NoSuchEntry          one of the ancestors does not exist
@@ -392,6 +398,9 @@ public abstract class Path implements Parcelable {
      *                              <li>one of source parent directories is not searchable</li>
      *                              <li>one of destination parent directories is not searchable</li>
      *                              <li>this path is a directory and is not writable</li>
+     *                              <li>the file system containing this path does not
+     *                              support renaming of the type request</li>
+     *                              <li>this process is not privileged</li>
      *                              </ul>
      * @throws InvalidArgument      if destination is a subdirectory of this
      * @throws IsDirectory          if destination is an existing directory but
@@ -424,7 +433,9 @@ public abstract class Path implements Parcelable {
     /**
      * @throws AccessDenied         parent directory does not allow write
      *                              permission, or one of the ancestor
-     *                              directory does not allow search permission
+     *                              directory does not allow search permission,
+     *                              or this process is not privileged for this
+     *                              action
      * @throws NameTooLong          path name is too long
      * @throws TooManySymbolicLinks too many symbolic links were encountered
      * @throws NotDirectory         if one of the parent path is not a directory
