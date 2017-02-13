@@ -1,6 +1,7 @@
 package l.files.ui.browser;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
@@ -159,6 +160,12 @@ public final class FilesFragment
     public List<Object> items() {
         assert adapter != null;
         return adapter.items();
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        postponeEnterTransition();
     }
 
     @Override
