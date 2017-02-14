@@ -21,9 +21,7 @@ import static linux.Limits.NAME_MAX;
 public final class PathReadSymbolicLinkTest extends PathBaseTest {
 
     @Test
-    public void access_denied_failure_when_parent_has_no_search_permission()
-            throws Exception {
-
+    public void access_denied_failure_when_parent_has_no_search_permission() throws Exception {
         Path parent = dir1();
         Path link = parent.concat("link");
         Paths.removePermissions(parent, Permission.execute());
@@ -31,17 +29,13 @@ public final class PathReadSymbolicLinkTest extends PathBaseTest {
     }
 
     @Test
-    public void invalid_argument_failure_when_path_is_directory()
-            throws Exception {
-
+    public void invalid_argument_failure_when_path_is_directory() throws Exception {
         Path dir = dir1().concat("dir").createDirectory();
         readSymbolicLinkWillFail(dir, InvalidArgument.class);
     }
 
     @Test
-    public void invalid_argument_failure_when_path_is_file()
-            throws Exception {
-
+    public void invalid_argument_failure_when_path_is_file() throws Exception {
         Path file = dir1().concat("file").createFile();
         readSymbolicLinkWillFail(file, InvalidArgument.class);
     }
@@ -61,17 +55,13 @@ public final class PathReadSymbolicLinkTest extends PathBaseTest {
     }
 
     @Test
-    public void no_such_entry_failure_due_to_path_does_not_exist()
-            throws Exception {
-
+    public void no_such_entry_failure_due_to_path_does_not_exist() throws Exception {
         Path missing = dir1().concat("missing");
         readSymbolicLinkWillFail(missing, NoSuchEntry.class);
     }
 
     @Test
-    public void not_directory_failure_when_parent_is_not_directory()
-            throws Exception {
-
+    public void not_directory_failure_when_parent_is_not_directory() throws Exception {
         Path file = dir1().concat("file").createFile();
         Path invalid = file.concat("invalid");
         readSymbolicLinkWillFail(invalid, NotDirectory.class);

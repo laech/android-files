@@ -42,14 +42,12 @@ public final class PathDeleteFailureTest extends PathBaseTest {
     }
 
     @Test
-    public void access_denied_failure_if_parent_is_not_writable()
-            throws Exception {
+    public void access_denied_failure_if_parent_is_not_writable() throws Exception {
         deleteWillFailWithAccessDeniedDueToParentPermission(Permission.write());
     }
 
     @Test
-    public void access_denied_failure_if_parent_is_not_searchable()
-            throws Exception {
+    public void access_denied_failure_if_parent_is_not_searchable() throws Exception {
         deleteWillFailWithAccessDeniedDueToParentPermission(Permission.execute());
     }
 
@@ -64,9 +62,7 @@ public final class PathDeleteFailureTest extends PathBaseTest {
     }
 
     @Test
-    public void too_many_symbolic_links_failure_due_to_loop_in_parent()
-            throws Exception {
-
+    public void too_many_symbolic_links_failure_due_to_loop_in_parent() throws Exception {
         Path loop = dir1().concat("loop");
         loop.createSymbolicLink(loop);
         Path invalid = loop.concat("file");
@@ -80,17 +76,13 @@ public final class PathDeleteFailureTest extends PathBaseTest {
     }
 
     @Test
-    public void no_such_entry_failure_due_to_path_does_not_exist()
-            throws Exception {
-
+    public void no_such_entry_failure_due_to_path_does_not_exist() throws Exception {
         Path path = dir1().concat("a");
         deleteWillFail(path, NoSuchEntry.class);
     }
 
     @Test
-    public void no_such_entry_failure_due_to_parent_symbolic_link_target_does_not_exist()
-            throws Exception {
-
+    public void no_such_entry_failure_due_to_parent_symbolic_link_target_does_not_exist() throws Exception {
         Path target = dir2().concat("missing");
         Path link = dir1().concat("link").createSymbolicLink(target);
         deleteWillFail(link.concat("invalid"), NoSuchEntry.class);
@@ -102,9 +94,7 @@ public final class PathDeleteFailureTest extends PathBaseTest {
     }
 
     @Test
-    public void not_directory_failure_if_parent_is_not_directory()
-            throws Exception {
-
+    public void not_directory_failure_if_parent_is_not_directory() throws Exception {
         Path path = dir1().concat("parent").createFile().concat("a");
         deleteWillFail(path, NotDirectory.class);
     }

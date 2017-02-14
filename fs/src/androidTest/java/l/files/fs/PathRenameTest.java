@@ -30,20 +30,17 @@ import static linux.Limits.NAME_MAX;
 public final class PathRenameTest extends PathBaseTest {
 
     @Test
-    public void rename_symbolic_link_to_non_existing_destination_will_succeed()
-            throws Exception {
+    public void rename_symbolic_link_to_non_existing_destination_will_succeed() throws Exception {
         testRenameFromSymbolicLink(null);
     }
 
     @Test
-    public void rename_symbolic_link_will_replace_existing_destination_symbolic_link()
-            throws Exception {
+    public void rename_symbolic_link_will_replace_existing_destination_symbolic_link() throws Exception {
         testRenameFromSymbolicLink(PathCreation.SYMBOLIC_LINK);
     }
 
     @Test
-    public void rename_symbolic_link_will_replace_existing_destination_file()
-            throws Exception {
+    public void rename_symbolic_link_will_replace_existing_destination_file() throws Exception {
         testRenameFromSymbolicLink(PathCreation.FILE);
     }
 
@@ -66,20 +63,17 @@ public final class PathRenameTest extends PathBaseTest {
     }
 
     @Test
-    public void rename_file_to_non_existing_destination_will_succeed()
-            throws Exception {
+    public void rename_file_to_non_existing_destination_will_succeed() throws Exception {
         testRenameFromFile(null);
     }
 
     @Test
-    public void rename_file_will_replace_existing_destination_symbolic_link()
-            throws Exception {
+    public void rename_file_will_replace_existing_destination_symbolic_link() throws Exception {
         testRenameFromFile(PathCreation.SYMBOLIC_LINK);
     }
 
     @Test
-    public void rename_file_will_replace_existing_destination_file()
-            throws Exception {
+    public void rename_file_will_replace_existing_destination_file() throws Exception {
         testRenameFromFile(PathCreation.FILE);
     }
 
@@ -103,14 +97,12 @@ public final class PathRenameTest extends PathBaseTest {
     }
 
     @Test
-    public void rename_directory_to_non_existing_destination_will_succeed()
-            throws Exception {
+    public void rename_directory_to_non_existing_destination_will_succeed() throws Exception {
         testRenameFromDirectory(null);
     }
 
     @Test
-    public void rename_directory_will_replace_existing_empty_destination()
-            throws Exception {
+    public void rename_directory_will_replace_existing_empty_destination() throws Exception {
         testRenameFromDirectory(PathCreation.DIRECTORY);
     }
 
@@ -133,72 +125,56 @@ public final class PathRenameTest extends PathBaseTest {
     }
 
     @Test
-    public void not_directory_failure_when_parent_of_source_path_is_not_directory()
-            throws Exception {
-
+    public void not_directory_failure_when_parent_of_source_path_is_not_directory() throws Exception {
         Path source = dir1().concat("file").createFile().concat("invalid");
         Path destination = dir2().concat("destination");
         renameWillFail(source, destination, NotDirectory.class);
     }
 
     @Test
-    public void not_directory_failure_when_parent_of_destination_path_is_not_directory()
-            throws Exception {
-
+    public void not_directory_failure_when_parent_of_destination_path_is_not_directory() throws Exception {
         Path source = dir1().concat("file").createFile();
         Path destination = dir2().concat("file").createFile().concat("invalid");
         renameWillFail(source, destination, NotDirectory.class);
     }
 
     @Test
-    public void not_directory_failure_when_source_is_directory_but_destination_is_file()
-            throws Exception {
-
+    public void not_directory_failure_when_source_is_directory_but_destination_is_file() throws Exception {
         Path source = dir1().concat("directory").createDirectory();
         Path destination = dir2().concat("file").createFile();
         renameWillFail(source, destination, NotDirectory.class);
     }
 
     @Test
-    public void not_directory_failure_when_source_is_directory_but_destination_is_symbolic_link()
-            throws Exception {
-
+    public void not_directory_failure_when_source_is_directory_but_destination_is_symbolic_link() throws Exception {
         Path source = dir1().concat("directory").createDirectory();
         Path destination = dir2().concat("link").createSymbolicLink(Path.of("/"));
         renameWillFail(source, destination, NotDirectory.class);
     }
 
     @Test
-    public void invalid_argument_failure_when_trying_to_make_a_directory_a_subdirectory_of_itself()
-            throws Exception {
-
+    public void invalid_argument_failure_when_trying_to_make_a_directory_a_subdirectory_of_itself() throws Exception {
         Path parent = dir1().concat("parent").createDirectory();
         Path child = parent.concat("child").createDirectory();
         renameWillFail(parent, child, InvalidArgument.class);
     }
 
     @Test
-    public void is_directory_failure_if_new_path_is_directory_but_old_path_is_file()
-            throws Exception {
-
+    public void is_directory_failure_if_new_path_is_directory_but_old_path_is_file() throws Exception {
         Path dir = dir1().concat("dir").createDirectory();
         Path file = dir1().concat("file").createFile();
         renameWillFail(file, dir, IsDirectory.class);
     }
 
     @Test
-    public void is_directory_failure_if_new_path_is_directory_but_old_path_is_symbolic_link()
-            throws Exception {
-
+    public void is_directory_failure_if_new_path_is_directory_but_old_path_is_symbolic_link() throws Exception {
         Path dir = dir1().concat("dir").createDirectory();
         Path link = dir1().concat("file").createSymbolicLink(dir2());
         renameWillFail(link, dir, IsDirectory.class);
     }
 
     @Test
-    public void too_many_symbolic_links_failure_when_old_path_has_loop()
-            throws Exception {
-
+    public void too_many_symbolic_links_failure_when_old_path_has_loop() throws Exception {
         Path loop = dir1().concat("loop");
         loop.createSymbolicLink(loop);
         Path source = loop.concat("source");
@@ -206,9 +182,7 @@ public final class PathRenameTest extends PathBaseTest {
     }
 
     @Test
-    public void too_many_symbolic_links_failure_when_new_path_has_loop()
-            throws Exception {
-
+    public void too_many_symbolic_links_failure_when_new_path_has_loop() throws Exception {
         Path loop = dir1().concat("loop");
         loop.createSymbolicLink(loop);
         Path destination = loop.concat("destination");
@@ -216,78 +190,58 @@ public final class PathRenameTest extends PathBaseTest {
     }
 
     @Test
-    public void name_too_long_failure_if_old_path_name_too_long()
-            throws Exception {
-
+    public void name_too_long_failure_if_old_path_name_too_long() throws Exception {
         Path nameTooLong = dir1().concat(Strings.repeat("a", NAME_MAX + 1));
         renameWillFail(nameTooLong, dir2(), NameTooLong.class);
     }
 
     @Test
-    public void name_too_long_failure_if_new_path_name_too_long()
-            throws Exception {
-
+    public void name_too_long_failure_if_new_path_name_too_long() throws Exception {
         Path nameTooLong = dir1().concat(Strings.repeat("a", NAME_MAX + 1));
         renameWillFail(dir2(), nameTooLong, NameTooLong.class);
     }
 
     @Test
-    public void no_such_entry_failure_if_source_does_not_exist()
-            throws Exception {
-
+    public void no_such_entry_failure_if_source_does_not_exist() throws Exception {
         Path missing = dir1().concat("missing");
         renameWillFail(missing, dir2(), NoSuchEntry.class);
     }
 
     @Test
-    public void no_such_entry_failure_if_destination_parent_does_not_exist()
-            throws Exception {
-
+    public void no_such_entry_failure_if_destination_parent_does_not_exist() throws Exception {
         renameWillFail(dir1(), dir2().concat("missing/dir"), NoSuchEntry.class);
     }
 
     @Test
-    public void no_such_entry_failure_if_source_is_empty()
-            throws Exception {
-
+    public void no_such_entry_failure_if_source_is_empty() throws Exception {
         renameWillFail(Path.of(""), dir1(), NoSuchEntry.class);
     }
 
     @Test
-    public void no_such_entry_failure_if_destination_is_empty()
-            throws Exception {
-
+    public void no_such_entry_failure_if_destination_is_empty() throws Exception {
         renameWillFail(dir1(), Path.of(""), NoSuchEntry.class);
     }
 
     @Test
-    public void directory_not_empty_failure_if_source_is_file_destination_is_non_empty_directory()
-            throws Exception {
-
+    public void directory_not_empty_failure_if_source_is_file_destination_is_non_empty_directory() throws Exception {
         dir2().concat("a").createFile();
         renameWillFail(dir1(), dir2(), DirectoryNotEmpty.class);
     }
 
     @Test
-    public void directory_not_empty_failure_if_source_is_symbolic_link_destination_is_non_empty_directory()
-            throws Exception {
-
+    public void directory_not_empty_failure_if_source_is_symbolic_link_destination_is_non_empty_directory() throws Exception {
         dir2().concat("a").createSymbolicLink(Path.of("/"));
         renameWillFail(dir1(), dir2(), DirectoryNotEmpty.class);
     }
 
     @Test
-    public void directory_not_empty_failure_if_source_is_directory_destination_is_non_empty_directory()
-            throws Exception {
-
+    public void directory_not_empty_failure_if_source_is_directory_destination_is_non_empty_directory() throws Exception {
         dir2().concat("a").createDirectory();
         renameWillFail(dir1(), dir2(), DirectoryNotEmpty.class);
     }
 
     @Test
-    public void access_denied_failure_when_no_write_permission_on_old_parent()
-            throws Exception {
-
+    public void access_denied_failure_when_no_write_permission_on_old_parent() throws Exception {
         Path oldPath = dir1().concat("old-file").createFile();
         Path newPath = dir2().concat("new-file");
 
@@ -301,9 +255,7 @@ public final class PathRenameTest extends PathBaseTest {
     }
 
     @Test
-    public void access_denied_failure_when_no_write_permission_on_new_parent()
-            throws Exception {
-
+    public void access_denied_failure_when_no_write_permission_on_new_parent() throws Exception {
         Path oldPath = dir1().concat("old-file").createFile();
         Path newPath = dir2().concat("new-file");
 
@@ -317,9 +269,7 @@ public final class PathRenameTest extends PathBaseTest {
     }
 
     @Test
-    public void access_denied_failure_when_no_search_permission_on_old_parent()
-            throws Exception {
-
+    public void access_denied_failure_when_no_search_permission_on_old_parent() throws Exception {
         Path oldPath = dir1().concat("old-file").createFile();
         Path newPath = dir2().concat("new-file");
 
@@ -333,9 +283,7 @@ public final class PathRenameTest extends PathBaseTest {
     }
 
     @Test
-    public void access_denied_failure_when_no_search_permission_on_new_parent()
-            throws Exception {
-
+    public void access_denied_failure_when_no_search_permission_on_new_parent() throws Exception {
         Path oldPath = dir1().concat("old-file").createFile();
         Path newPath = dir2().concat("new-file");
 
@@ -349,9 +297,7 @@ public final class PathRenameTest extends PathBaseTest {
     }
 
     @Test
-    public void access_denied_failure_when_old_path_is_directory_with_no_write_permission()
-            throws Exception {
-
+    public void access_denied_failure_when_old_path_is_directory_with_no_write_permission() throws Exception {
         Path oldPath = dir1().concat("old-dir").createDirectory();
         Path newPath = dir2().concat("new-file");
 

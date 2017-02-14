@@ -39,18 +39,14 @@ public final class PathCreateFailureTest extends PathBaseTest {
     }
 
     @Test
-    public void access_denied_failure_due_to_no_write_permission_at_parent()
-            throws Exception {
-
+    public void access_denied_failure_due_to_no_write_permission_at_parent() throws Exception {
         Path path = dir1().concat("a");
         assertTrue(new File(dir1().toString()).setWritable(false));
         createExpectingFailure(path, AccessDenied.class);
     }
 
     @Test
-    public void access_denied_failure_due_to_no_execute_permission_at_ancestor()
-            throws Exception {
-
+    public void access_denied_failure_due_to_no_execute_permission_at_ancestor() throws Exception {
         Path parent = dir1().concat("sub");
         assertTrue(new File(parent.toString()).mkdir());
         assertTrue(new File(dir1().toString()).setExecutable(false));
@@ -66,16 +62,14 @@ public final class PathCreateFailureTest extends PathBaseTest {
     }
 
     @Test
-    public void already_exists_failure_due_to_directory_exists_at_path()
-            throws Exception {
+    public void already_exists_failure_due_to_directory_exists_at_path() throws Exception {
         assumeThat(creation, not(PathCreation.DIRECTORIES));
         Path path = dir1().concat("a").createDirectory();
         createExpectingFailure(path, AlreadyExist.class);
     }
 
     @Test
-    public void already_exists_failure_due_to_symbolic_link_exists_at_path()
-            throws Exception {
+    public void already_exists_failure_due_to_symbolic_link_exists_at_path() throws Exception {
         Path path = dir1().concat("a").createSymbolicLink(dir2());
         createExpectingFailure(path, AlreadyExist.class);
     }
@@ -94,16 +88,14 @@ public final class PathCreateFailureTest extends PathBaseTest {
     }
 
     @Test
-    public void no_such_entry_failure_due_to_parent_does_not_exist()
-            throws Exception {
+    public void no_such_entry_failure_due_to_parent_does_not_exist() throws Exception {
         assumeThat(creation, not(PathCreation.DIRECTORIES));
         Path path = dir1().concat("non-existent").concat("child");
         createExpectingFailure(path, NoSuchEntry.class);
     }
 
     @Test
-    public void not_directory_failure_due_to_parent_not_directory()
-            throws Exception {
+    public void not_directory_failure_due_to_parent_not_directory() throws Exception {
         Path parent = dir1().concat("file").createFile();
         createExpectingFailure(parent.concat("a"), NotDirectory.class);
     }
