@@ -47,6 +47,17 @@ public final class PathStatTest extends PathBaseTest {
     }
 
     @Test
+    public void no_such_entry_failure_if_self_does_not_exist() throws Exception {
+        Path path = dir1().concat("a");
+        statWillFail(path, NoSuchEntry.class);
+    }
+
+    @Test
+    public void no_such_entry_failure_if_path_is_empty() throws Exception {
+        statWillFail(Path.of(""), NoSuchEntry.class);
+    }
+
+    @Test
     public void not_directory_failure_if_parent_is_file() throws Exception {
         Path file = dir1().concat("file").createFile();
         statWillFail(file.concat("invalid"), NotDirectory.class);

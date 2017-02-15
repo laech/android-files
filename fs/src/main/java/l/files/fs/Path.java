@@ -10,7 +10,6 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -243,7 +242,7 @@ public abstract class Path implements Parcelable {
      * @throws TooManySymbolicLinks too many symbolic links were encountered
      *                              when resolving this path
      * @throws NameTooLong          path name is too long
-     * @throws NoSuchEntry          one of the ancestors does not exist
+     * @throws NoSuchEntry          path does not exist, or is empty
      * @throws NotDirectory         one of the ancestors is not a directory
      * @throws IOException          other erros
      */
@@ -308,7 +307,7 @@ public abstract class Path implements Parcelable {
             throw new AlreadyExist(
                     "Exists but not a directory: " + this, null);
 
-        } catch (FileNotFoundException ignore) {
+        } catch (NoSuchEntry ignore) {
         }
 
         Path parent = parent();
@@ -474,7 +473,7 @@ public abstract class Path implements Parcelable {
         try {
             stat(option);
             return true;
-        } catch (FileNotFoundException e) {
+        } catch (NoSuchEntry e) {
             return false;
         }
     }
