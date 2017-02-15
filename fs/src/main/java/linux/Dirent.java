@@ -1,5 +1,7 @@
 package linux;
 
+import l.files.fs.Native;
+
 import static linux.Limits.NAME_MAX;
 
 public final class Dirent extends Native {

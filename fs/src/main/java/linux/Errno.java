@@ -1,5 +1,7 @@
 package linux;
 
+import l.files.fs.Native;
+
 public final class Errno extends Native {
 
     private Errno() {

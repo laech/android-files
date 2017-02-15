@@ -1,5 +1,7 @@
 package linux;
 
+import l.files.fs.Native;
+
 public final class Limits extends Native {
 
     public static final int NAME_MAX = placeholder();

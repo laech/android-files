@@ -24,7 +24,6 @@ android {
 
 dependencies {
     compile project(':base')
-    compile project(':linux')
     compile "com.google.guava:guava:$guavaVersion"
     compile 'org.apache.commons:commons-lang3:3.5'
 

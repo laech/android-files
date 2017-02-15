@@ -1,5 +1,7 @@
 package linux;
 
+import l.files.fs.Native;
+
 public final class Inotify extends Native {
 
     static int placeholder() {

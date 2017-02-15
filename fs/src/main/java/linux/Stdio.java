@@ -1,5 +1,7 @@
 package linux;
 
+import l.files.fs.Native;
+
 public final class Stdio extends Native {
 
     private Stdio() {

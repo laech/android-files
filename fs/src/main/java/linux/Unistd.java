@@ -1,5 +1,7 @@
 package linux;
 
+import l.files.fs.Native;
+
 public final class Unistd extends Native {
 
     public static final byte R_OK = placeholder();

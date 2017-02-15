@@ -1,5 +1,7 @@
 package linux;
 
+import l.files.fs.Native;
+
 public final class Fcntl extends Native {
 
     public static final int O_ACCMODE = placeholder();

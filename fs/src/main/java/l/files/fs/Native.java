@@ -1,6 +1,6 @@
 package l.files.fs;
 
-class Native {
+public class Native { // TODO make not public
 
     static {
         System.loadLibrary("fs");

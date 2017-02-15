@@ -1,6 +1,8 @@
 package linux;
 
-public final class Vfs {
+import l.files.fs.Native;
+
+public final class Vfs extends Native {
 
     private Vfs() {
     }
