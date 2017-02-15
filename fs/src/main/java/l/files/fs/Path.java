@@ -45,8 +45,6 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 
 public abstract class Path implements Parcelable {
 
-    // TODO EROFS
-
     public static final Creator<Path> CREATOR = new Creator<Path>() {
 
         @Override
@@ -250,7 +248,7 @@ public abstract class Path implements Parcelable {
      * @throws IOException          other erros
      */
     public Stat stat(LinkOption option) throws IOException {
-        return FileSystem.INSTANCE.stat(this, option);
+        return Stat.stat(this, option);
     }
 
     /**
@@ -468,8 +466,17 @@ public abstract class Path implements Parcelable {
         FileSystem.INSTANCE.delete(this);
     }
 
+    /**
+     * Checks the existence of this file.
+     * Throws the same exceptions as {@link #stat(LinkOption)}
+     */
     public boolean exists(LinkOption option) throws IOException {
-        return FileSystem.INSTANCE.exists(this, option);
+        try {
+            stat(option);
+            return true;
+        } catch (FileNotFoundException e) {
+            return false;
+        }
     }
 
     /**

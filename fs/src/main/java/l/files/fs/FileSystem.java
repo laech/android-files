@@ -71,10 +71,6 @@ final class FileSystem extends Native {
             int nanos,
             boolean followLink) throws ErrnoException;
 
-    Stat stat(Path path, LinkOption option) throws IOException {
-        return Stat.stat(path, option);
-    }
-
     void createDirectory(Path path) throws IOException {
         try {
             // Same permission bits as java.io.File.mkdir() on Android
@@ -149,18 +145,6 @@ final class FileSystem extends Native {
                     throw ErrnoExceptions.toIOException(e, path);
                 }
             }
-        }
-    }
-
-    boolean exists(Path path, LinkOption option) throws IOException {
-        try {
-            // access() follows symbolic links
-            // faccessat(AT_SYMLINK_NOFOLLOW) doesn't work on android
-            // so use stat here
-            stat(path, option);
-            return true;
-        } catch (FileNotFoundException e) {
-            return false;
         }
     }
 
