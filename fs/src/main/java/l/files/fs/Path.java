@@ -239,6 +239,16 @@ public abstract class Path implements Parcelable {
         FileSystem.INSTANCE.setLastModifiedTime(this, option, instant);
     }
 
+    /**
+     * @throws AccessDenied         one of the ancestor directory does not
+     *                              allow search permission
+     * @throws TooManySymbolicLinks too many symbolic links were encountered
+     *                              when resolving this path
+     * @throws NameTooLong          path name is too long
+     * @throws NoSuchEntry          one of the ancestors does not exist
+     * @throws NotDirectory         one of the ancestors is not a directory
+     * @throws IOException          other erros
+     */
     public Stat stat(LinkOption option) throws IOException {
         return FileSystem.INSTANCE.stat(this, option);
     }
