@@ -191,7 +191,7 @@ public final class ObservableTest extends PathBaseTest {
                 Observer observer = mock(Observer.class);
                 Observation observation = Paths.observe(child, NOFOLLOW, observer);
                 observations.add(observation);
-                if (i <= maxUserInstances - 5) {
+                if (i <= maxUserInstances - 20) {
                     assertFalse("Failed at " + i, observation.isClosed());
                     verify(observer, never()).onIncompleteObservation(any(IOException.class));
                 } else if (i > maxUserInstances) {
