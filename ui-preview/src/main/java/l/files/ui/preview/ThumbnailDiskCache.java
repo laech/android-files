@@ -156,7 +156,7 @@ final class ThumbnailDiskCache extends Cache<ScaledBitmap> {
             in = newBufferedDataInputStream(cache);
             byte version = in.readByte();
             if (version != VERSION) {
-                return null;
+                return null;  // TODO return failure reason to make debugging easier
             }
 
             int originalWidth = in.readInt();
