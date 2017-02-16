@@ -234,7 +234,7 @@ public abstract class Path implements Parcelable {
      * @throws TooManySymbolicLinks too many symbolic links were encountered
      *                              when resolving this path
      * @throws NameTooLong          path name is too long
-     * @throws NoSuchEntry          file does not exist
+     * @throws NoSuchEntry          file does not exist, or is empty
      * @throws NotDirectory         a parent path is not a directory
      * @throws FileSystemReadOnly   the underlying file system is read only
      * @throws IOException          other errors
@@ -247,8 +247,17 @@ public abstract class Path implements Parcelable {
         }
     }
 
-    public void setLastModifiedTime(LinkOption option, Instant instant)
-            throws IOException {
+    /**
+     * @throws AccessDenied         no permission to perform this operation
+     * @throws TooManySymbolicLinks too many symbolic links were encountered
+     *                              when resolving this path
+     * @throws NameTooLong          path name is too long
+     * @throws NoSuchEntry          path does not exist, or is empty
+     * @throws NotDirectory         one of the ancestors is not a directory
+     * @throws FileSystemReadOnly   underlying file system is read only
+     * @throws IOException          other errors
+     */
+    public void setLastModifiedTime(LinkOption option, Instant instant) throws IOException {
         FileSystem.INSTANCE.setLastModifiedTime(this, option, instant);
     }
 

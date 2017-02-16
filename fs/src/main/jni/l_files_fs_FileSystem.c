@@ -9,10 +9,7 @@ void setTimes(
         const struct timespec times[2],
         jboolean followLink) {
 
-    jsize len = (*env)->GetArrayLength(env, jpath);
-    char path[len + 1];
-    (*env)->GetByteArrayRegion(env, jpath, 0, len, (jbyte *) path);
-    path[len] = '\0';
+    JBYTE_ARRAY_TO_CHARS(env, path, jpath)
 
     int flags = JNI_FALSE == followLink ? AT_SYMLINK_NOFOLLOW : 0;
     int result = utimensat(AT_FDCWD, path, times, flags);

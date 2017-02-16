@@ -17,15 +17,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 
 import l.files.fs.exception.DirectoryNotEmpty;
 import l.files.testing.fs.PathBaseTest;
 import l.files.testing.fs.Paths;
 
-import static android.os.Build.VERSION.SDK_INT;
-import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static android.test.MoreAsserts.assertNotEqual;
 import static com.google.common.base.Charsets.UTF_8;
 import static java.util.Arrays.asList;
@@ -43,8 +40,6 @@ import static org.junit.Assert.fail;
 public final class FilesTest extends PathBaseTest {
 
     // TODO turn this into PathTest
-
-    private static final Random random = new Random();
 
     @Test
     public void can_handle_invalid_utf_8_path() throws Exception {
@@ -508,57 +503,6 @@ public final class FilesTest extends PathBaseTest {
         assertTrue(dir.exists(NOFOLLOW));
         assertTrue(file.exists(NOFOLLOW));
         assertFalse(link.exists(NOFOLLOW));
-    }
-
-    @Test
-    public void setModificationTime() throws Exception {
-        Instant expect = newInstant();
-        dir1().setLastModifiedTime(NOFOLLOW, expect);
-        Instant actual = getModificationTime(dir1(), NOFOLLOW);
-        assertEquals(expect, actual);
-    }
-
-    @Test
-    public void setModificationTime_linkFollow() throws Exception {
-        Path file = dir1().concat("file").createFile();
-        Path link = dir1().concat("link").createSymbolicLink(file);
-
-        Instant fileTime = newInstant();
-        Instant linkTime = getModificationTime(link, NOFOLLOW);
-        link.setLastModifiedTime(FOLLOW, fileTime);
-
-        assertEquals(fileTime, getModificationTime(file, NOFOLLOW));
-        assertEquals(linkTime, getModificationTime(link, NOFOLLOW));
-        assertNotEqual(fileTime, linkTime);
-    }
-
-    @Test
-    public void setModificationTime_linkNoFollow() throws Exception {
-        Path file = dir1().concat("file").createFile();
-        Path link = dir1().concat("link").createSymbolicLink(file);
-
-        Instant fileTime = getModificationTime(file, NOFOLLOW);
-        Instant linkTime = newInstant();
-
-        link.setLastModifiedTime(NOFOLLOW, linkTime);
-
-        assertEquals(linkTime, getModificationTime(link, NOFOLLOW));
-        assertEquals(fileTime, getModificationTime(file, NOFOLLOW));
-        assertNotEqual(fileTime, linkTime);
-    }
-
-    private Instant newInstant() {
-        if (SDK_INT >= LOLLIPOP) {
-            return Instant.of(random.nextInt(1_000_000), random.nextInt(999_999) + 1);
-        } else {
-            return Instant.of(random.nextInt(1_000_000), 0); // Nanos not supported
-        }
-    }
-
-    private Instant getModificationTime(
-            Path file,
-            LinkOption option) throws IOException {
-        return file.stat(option).lastModifiedTime();
     }
 
     @Test

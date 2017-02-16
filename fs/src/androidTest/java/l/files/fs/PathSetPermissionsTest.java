@@ -59,6 +59,12 @@ public final class PathSetPermissionsTest extends PathBaseTest {
         setPermissionWillFail(path, NoSuchEntry.class);
     }
 
+
+    @Test
+    public void no_such_entry_failure_if_path_is_empty() throws Exception {
+        setPermissionWillFail(Path.of(""), NoSuchEntry.class);
+    }
+
     @Test
     public void not_directory_failure_if_parent_is_file() throws Exception {
         Path path = dir1().concat("file").createFile();
