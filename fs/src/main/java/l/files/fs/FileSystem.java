@@ -39,16 +39,6 @@ final class FileSystem extends Native {
 
     public static final FileSystem INSTANCE = new FileSystem();
 
-    void setPermissions(Path path, Set<Permission> permissions)
-            throws IOException {
-
-        try {
-            chmod(path.toByteArray(), Permission.toStatMode(permissions));
-        } catch (ErrnoException e) {
-            throw ErrnoExceptions.toIOException(e, path);
-        }
-    }
-
     void setLastModifiedTime(Path path, LinkOption option, Instant instant)
             throws IOException {
 

@@ -38,9 +38,11 @@ import l.files.fs.exception.NameTooLong;
 import l.files.fs.exception.NoSuchEntry;
 import l.files.fs.exception.NotDirectory;
 import l.files.fs.exception.TooManySymbolicLinks;
+import linux.ErrnoException;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static l.files.fs.Stat.chmod;
 
 public abstract class Path implements Parcelable {
 
@@ -226,9 +228,23 @@ public abstract class Path implements Parcelable {
         dest.writeByteArray(toByteArray());
     }
 
-    public void setPermissions(Set<Permission> permissions)
-            throws IOException {
-        FileSystem.INSTANCE.setPermissions(this, permissions);
+    /**
+     * @throws AccessDenied         search permission is denied for a parent path,
+     *                              or the process is not privileged for this operation
+     * @throws TooManySymbolicLinks too many symbolic links were encountered
+     *                              when resolving this path
+     * @throws NameTooLong          path name is too long
+     * @throws NoSuchEntry          file does not exist
+     * @throws NotDirectory         a parent path is not a directory
+     * @throws FileSystemReadOnly   the underlying file system is read only
+     * @throws IOException          other errors
+     */
+    public void setPermissions(Set<Permission> permissions) throws IOException {
+        try {
+            chmod(toByteArray(), Permission.toStatMode(permissions));
+        } catch (ErrnoException e) {
+            throw ErrnoExceptions.toIOException(e, this);
+        }
     }
 
     public void setLastModifiedTime(LinkOption option, Instant instant)

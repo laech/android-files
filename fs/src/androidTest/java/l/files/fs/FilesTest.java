@@ -562,27 +562,6 @@ public final class FilesTest extends PathBaseTest {
     }
 
     @Test
-    public void setPermissions() throws Exception {
-        List<Set<Permission>> permissions = asList(
-                Permission.all(),
-                Permission.read(),
-                Permission.write(),
-                Permission.execute());
-        for (Set<Permission> expected : permissions) {
-            dir1().setPermissions(expected);
-            assertEquals(expected, dir1().stat(NOFOLLOW).permissions());
-        }
-    }
-
-    @Test
-    public void setPermissions_rawBits() throws Exception {
-        int expected = stat(dir1().toByteArray()).mode();
-        dir1().setPermissions(dir1().stat(NOFOLLOW).permissions());
-        int actual = stat(dir1().toByteArray()).mode();
-        assertEquals(expected, actual);
-    }
-
-    @Test
     public void removePermissions() throws Exception {
         List<Set<Permission>> combinations = asList(
                 Permission.all(),
