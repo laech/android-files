@@ -272,7 +272,7 @@ final class Observable extends Native
 
         } catch (Throwable e) {
             try {
-                inotify.close(fd);
+                doClose();
             } catch (ErrnoException sup) {
                 addSuppressed(e, sup);
             }
