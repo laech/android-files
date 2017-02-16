@@ -144,7 +144,7 @@ final class Streams {
         try {
             Unistd.close(closingFd);
         } catch (ErrnoException e) {
-            throw ErrnoExceptions.toIOException(e);
+            throw ErrnoExceptions.toIOException(e, "fd = " + closingFd);
         }
     }
 
