@@ -39,6 +39,7 @@ import l.files.fs.exception.NoSuchEntry;
 import l.files.fs.exception.NotDirectory;
 import l.files.fs.exception.TooManySymbolicLinks;
 import linux.ErrnoException;
+import linux.Unistd;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static l.files.fs.LinkOption.NOFOLLOW;
@@ -387,7 +388,11 @@ public abstract class Path implements Parcelable {
      * @throws IOException          other errors
      */
     public Path createSymbolicLink(Path target) throws IOException {
-        FileSystem.INSTANCE.createSymbolicLink(this, target);
+        try {
+            Unistd.symlink(target.toByteArray(), toByteArray());
+        } catch (ErrnoException e) {
+            throw ErrnoExceptions.toIOException(e, this + " -> " + target);
+        }
         return this;
     }
 

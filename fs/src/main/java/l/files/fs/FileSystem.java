@@ -97,14 +97,6 @@ final class FileSystem extends Native {
         Unistd.close(fd);
     }
 
-    void createSymbolicLink(Path link, Path target) throws IOException {
-        try {
-            Unistd.symlink(target.toByteArray(), link.toByteArray());
-        } catch (ErrnoException e) {
-            throw ErrnoExceptions.toIOException(e, link + " -> " + target);
-        }
-    }
-
     Path readSymbolicLink(Path path) throws IOException {
         try {
             byte[] link = Unistd.readlink(path.toByteArray());
