@@ -1,8 +1,8 @@
 package l.files.fs;
 
-import android.text.TextUtils;
-
 import java.io.IOException;
+
+import javax.annotation.Nullable;
 
 import l.files.fs.exception.AccessDenied;
 import l.files.fs.exception.AlreadyExist;
@@ -35,8 +35,15 @@ final class ErrnoExceptions {
     private ErrnoExceptions() {
     }
 
-    static IOException toIOException(ErrnoException cause, Object... paths) {
-        String message = TextUtils.join(", ", paths);
+    static IOException toIOException(ErrnoException cause, Path path) {
+        return toIOException(cause, path.toString());
+    }
+
+    static IOException toIOException(ErrnoException cause) {
+        return toIOException(cause, (String) null);
+    }
+
+    static IOException toIOException(ErrnoException cause, @Nullable String message) {
         if (cause.errno == EPERM) return new AccessDenied(message, cause);
         if (cause.errno == EACCES) return new AccessDenied(message, cause);
         if (cause.errno == EEXIST) return new AlreadyExist(message, cause);

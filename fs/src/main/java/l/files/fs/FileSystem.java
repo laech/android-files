@@ -111,7 +111,7 @@ final class FileSystem extends Native {
         try {
             Unistd.symlink(target.toByteArray(), link.toByteArray());
         } catch (ErrnoException e) {
-            throw ErrnoExceptions.toIOException(e, target, link);
+            throw ErrnoExceptions.toIOException(e, link + " -> " + target);
         }
     }
 
@@ -130,7 +130,7 @@ final class FileSystem extends Native {
             Stdio.rename(src.toByteArray(), dst.toByteArray());
 
         } catch (ErrnoException e) {
-            throw ErrnoExceptions.toIOException(e, src, dst);
+            throw ErrnoExceptions.toIOException(e, src + " -> " + dst);
         }
     }
 
