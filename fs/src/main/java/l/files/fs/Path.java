@@ -39,11 +39,22 @@ import l.files.fs.exception.NoSuchEntry;
 import l.files.fs.exception.NotDirectory;
 import l.files.fs.exception.TooManySymbolicLinks;
 import linux.ErrnoException;
+import linux.Stdio;
 import linux.Unistd;
 
 import static com.google.common.base.Charsets.UTF_8;
+import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static l.files.fs.Stat.S_IRUSR;
+import static l.files.fs.Stat.S_IRWXU;
+import static l.files.fs.Stat.S_IWUSR;
 import static l.files.fs.Stat.chmod;
+import static l.files.fs.Stat.mkdir;
+import static linux.Errno.EISDIR;
+import static linux.Fcntl.O_CREAT;
+import static linux.Fcntl.O_EXCL;
+import static linux.Fcntl.O_RDWR;
+import static linux.Fcntl.open;
 
 public abstract class Path implements Parcelable {
 
@@ -259,8 +270,23 @@ public abstract class Path implements Parcelable {
      * @throws IOException          other errors
      */
     public void setLastModifiedTime(LinkOption option, Instant instant) throws IOException {
-        FileSystem.INSTANCE.setLastModifiedTime(this, option, instant);
+        try {
+            byte[] pathBytes = toByteArray();
+            long seconds = instant.seconds();
+            int nanos = instant.nanos();
+            boolean followLink = option == FOLLOW;
+            setModificationTime(pathBytes, seconds, nanos, followLink);
+        } catch (ErrnoException e) {
+            throw ErrnoExceptions.toIOException(e, this);
+        }
     }
+
+    private static native void setModificationTime(
+            byte[] path,
+            long seconds,
+            int nanos,
+            boolean followLink
+    ) throws ErrnoException;
 
     /**
      * @throws AccessDenied         one of the ancestor directory does not
@@ -292,7 +318,12 @@ public abstract class Path implements Parcelable {
      * @throws IOException          other errors
      */
     public Path createDirectory() throws IOException {
-        FileSystem.INSTANCE.createDirectory(this);
+        try {
+            // Same permission bits as java.io.File.mkdir() on Android
+            mkdir(toByteArray(), S_IRWXU);
+        } catch (ErrnoException e) {
+            throw ErrnoExceptions.toIOException(e, this);
+        }
         return this;
     }
 
@@ -314,9 +345,12 @@ public abstract class Path implements Parcelable {
      * @throws FileSystemReadOnly   this path is on a read only file system
      * @throws IOException          other errors
      */
-    public Path createDirectory(Set<Permission> permissionsHint)
-            throws IOException {
-        FileSystem.INSTANCE.createDirectory(this, permissionsHint);
+    public Path createDirectory(Set<Permission> permissionsHint) throws IOException {
+        try {
+            mkdir(toByteArray(), Permission.toStatMode(permissionsHint));
+        } catch (ErrnoException e) {
+            throw ErrnoExceptions.toIOException(e, this);
+        }
         return this;
     }
 
@@ -367,7 +401,20 @@ public abstract class Path implements Parcelable {
      * @throws IOException          other errors
      */
     public Path createFile() throws IOException {
-        FileSystem.INSTANCE.createFile(this);
+        try {
+
+            // Same flags and mode as java.io.File.createNewFile() on Android
+            int flags = O_RDWR | O_CREAT | O_EXCL;
+            int mode = S_IRUSR | S_IWUSR;
+            int fd = open(toByteArray(), flags, mode);
+            Unistd.close(fd);
+
+        } catch (ErrnoException e) {
+            if (e.errno == EISDIR) {
+                throw new AlreadyExist(toString(), e);
+            }
+            throw ErrnoExceptions.toIOException(e, this);
+        }
         return this;
     }
 
@@ -408,7 +455,12 @@ public abstract class Path implements Parcelable {
      * @throws IOException          other errors
      */
     public Path readSymbolicLink() throws IOException {
-        return FileSystem.INSTANCE.readSymbolicLink(this);
+        try {
+            byte[] link = Unistd.readlink(toByteArray());
+            return of(link);
+        } catch (ErrnoException e) {
+            throw ErrnoExceptions.toIOException(e, this);
+        }
     }
 
     /**
@@ -470,7 +522,11 @@ public abstract class Path implements Parcelable {
      * @throws IOException          other errors
      */
     public void rename(Path destination) throws IOException {
-        FileSystem.INSTANCE.rename(this, destination);
+        try {
+            Stdio.rename(toByteArray(), destination.toByteArray());
+        } catch (ErrnoException e) {
+            throw ErrnoExceptions.toIOException(e, this + " -> " + destination);
+        }
     }
 
     /**
@@ -492,7 +548,11 @@ public abstract class Path implements Parcelable {
      * @throws IOException          other errors
      */
     public void delete() throws IOException {
-        FileSystem.INSTANCE.delete(this);
+        try {
+            Stdio.remove(toByteArray());
+        } catch (ErrnoException e) {
+            throw ErrnoExceptions.toIOException(e, this);
+        }
     }
 
     /**
@@ -515,7 +575,7 @@ public abstract class Path implements Parcelable {
      * itself.
      */
     public boolean isReadable() throws IOException {
-        return FileSystem.INSTANCE.isReadable(this);
+        return accessible(this, Unistd.R_OK);
     }
 
     /**
@@ -525,7 +585,7 @@ public abstract class Path implements Parcelable {
      * itself.
      */
     public boolean isWritable() throws IOException {
-        return FileSystem.INSTANCE.isWritable(this);
+        return accessible(this, Unistd.W_OK);
     }
 
     /**
@@ -535,7 +595,11 @@ public abstract class Path implements Parcelable {
      * itself.
      */
     public boolean isExecutable() throws IOException {
-        return FileSystem.INSTANCE.isExecutable(this);
+        return accessible(this, Unistd.X_OK);
+    }
+
+    private boolean accessible(Path path, int mode) throws IOException {
+        return Unistd.access(path.toByteArray(), mode) == 0;
     }
 
     /**
@@ -568,14 +632,9 @@ public abstract class Path implements Parcelable {
             int watchLimit
     ) throws IOException, InterruptedException {
 
-        return FileSystem.INSTANCE.observe(
-                this,
-                option,
-                observer,
-                childrenConsumer,
-                logTag,
-                watchLimit
-        );
+        Observable observable = new Observable(this, observer, logTag);
+        observable.start(option, childrenConsumer, watchLimit);
+        return observable;
     }
 
     public Observation observe(
@@ -655,11 +714,11 @@ public abstract class Path implements Parcelable {
     }
 
     public InputStream newInputStream() throws IOException {
-        return FileSystem.INSTANCE.newInputStream(this);
+        return Streams.newInputStream(this);
     }
 
     public OutputStream newOutputStream(boolean append) throws IOException {
-        return FileSystem.INSTANCE.newOutputStream(this, append);
+        return Streams.newOutputStream(this, append);
     }
 
     public interface Consumer {
