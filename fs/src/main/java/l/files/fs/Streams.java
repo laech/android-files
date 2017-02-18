@@ -70,7 +70,7 @@ final class Streams {
 
             FileDescriptor descriptor = toFileDescriptor(fd);
             if (descriptor == null) {
-                return new FileOutputStream(path.toString());
+                return new FileOutputStream(path.toString(), append);
             } else {
                 return new LocalOutputStream(descriptor, fd);
             }
