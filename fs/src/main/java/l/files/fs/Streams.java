@@ -1,18 +1,17 @@
 package l.files.fs;
 
-import java.io.FileDescriptor;
+import android.os.ParcelFileDescriptor.AutoCloseInputStream;
+import android.os.ParcelFileDescriptor.AutoCloseOutputStream;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import linux.ErrnoException;
 import linux.Fcntl;
 import linux.Unistd;
 
+import static android.os.ParcelFileDescriptor.adoptFd;
 import static l.files.base.Throwables.addSuppressed;
 import static l.files.fs.Stat.fstat;
 import static linux.Errno.EISDIR;
@@ -21,6 +20,7 @@ import static linux.Fcntl.O_CREAT;
 import static linux.Fcntl.O_RDONLY;
 import static linux.Fcntl.O_TRUNC;
 import static linux.Fcntl.O_WRONLY;
+import static linux.Unistd.close;
 
 final class Streams {
 
@@ -33,17 +33,11 @@ final class Streams {
         try {
 
             checkNotDirectory(fd);
-
-            FileDescriptor descriptor = toFileDescriptor(fd);
-            if (descriptor == null) {
-                return new FileInputStream(path.toString());
-            } else {
-                return new LocalInputStream(descriptor, fd);
-            }
+            return new AutoCloseInputStream(adoptFd(fd));
 
         } catch (Throwable e) {
             try {
-                Unistd.close(fd);
+                close(fd);
             } catch (Throwable sup) {
                 addSuppressed(e, sup);
             }
@@ -67,13 +61,7 @@ final class Streams {
         try {
 
             checkNotDirectory(fd);
-
-            FileDescriptor descriptor = toFileDescriptor(fd);
-            if (descriptor == null) {
-                return new FileOutputStream(path.toString(), append);
-            } else {
-                return new LocalOutputStream(descriptor, fd);
-            }
+            return new AutoCloseOutputStream(adoptFd(fd));
 
         } catch (Throwable e) {
             try {
@@ -96,85 +84,12 @@ final class Streams {
     private static void checkNotDirectory(int fd) throws IOException {
         try {
 
-            Stat stat = fstat(fd);
-            if (stat.isDirectory()) {
+            if (fstat(fd).isDirectory()) {
                 throw new ErrnoException(EISDIR);
             }
 
         } catch (ErrnoException e) {
             throw ErrnoExceptions.toIOException(e);
-        }
-    }
-
-    private static FileDescriptor toFileDescriptor(int fd) {
-
-        try {
-            FileDescriptor descriptor = new FileDescriptor();
-            Method setter = FileDescriptor.class.getMethod("setInt$", int.class);
-            setter.setAccessible(true);
-            setter.invoke(descriptor, fd);
-            return descriptor;
-        } catch (NoSuchMethodException ignored) {
-        } catch (IllegalAccessException ignored) {
-        } catch (InvocationTargetException ignored) {
-        }
-
-        try {
-            FileDescriptor descriptor = new FileDescriptor();
-            Field field = FileDescriptor.class.getField("descriptor");
-            field.setAccessible(true);
-            field.set(descriptor, fd);
-            return descriptor;
-        } catch (NoSuchFieldException ignored) {
-        } catch (IllegalAccessException ignored) {
-        }
-
-        return null;
-    }
-
-    private static final class LocalInputStream extends FileInputStream {
-
-        private final AtomicBoolean closed = new AtomicBoolean(false);
-        private final int fd;
-
-        LocalInputStream(FileDescriptor descriptor, int fd) {
-            super(descriptor);
-            this.fd = fd;
-        }
-
-        @Override
-        public void close() throws IOException {
-            if (closed.compareAndSet(false, true)) {
-                super.close();
-                try {
-                    Unistd.close(fd);
-                } catch (ErrnoException e) {
-                    throw ErrnoExceptions.toIOException(e, "fd = " + fd);
-                }
-            }
-        }
-    }
-
-    private static final class LocalOutputStream extends FileOutputStream {
-
-        private final AtomicBoolean closed = new AtomicBoolean(false);
-        private final int fd;
-
-        LocalOutputStream(FileDescriptor descriptor, int fd) {
-            super(descriptor);
-            this.fd = fd;
-        }
-
-        @Override
-        public void close() throws IOException {
-            if (closed.compareAndSet(false, true)) {
-                super.close();
-                try {
-                    Unistd.close(fd);
-                } catch (ErrnoException e) {
-                    throw ErrnoExceptions.toIOException(e, "fd = " + fd);
-                }
-            }
         }
     }
 
