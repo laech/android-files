@@ -20,45 +20,29 @@ final class FileSystem extends Native {
     void list(
             Path path,
             LinkOption option,
-            Consumer consumer) throws IOException {
-
-        list(path, option, false, consumer);
-    }
-
-    private void list(
-            Path path,
-            LinkOption option,
-            boolean dirOnly,
             Consumer consumer
-    ) throws IOException {
+    ) throws IOException, ErrnoException {
 
         int flags = O_DIRECTORY;
         if (option == NOFOLLOW) {
             flags |= O_NOFOLLOW;
         }
 
+        int fd = Fcntl.open(path.toByteArray(), flags, 0);
+        DIR dir = Dirent.fdopendir(fd);
         try {
-            int fd = Fcntl.open(path.toByteArray(), flags, 0);
-            DIR dir = Dirent.fdopendir(fd);
-            try {
-                Dirent entry = new Dirent();
-                while ((entry = Dirent.readdir(dir, entry)) != null) {
-                    if (isSelfOrParent(entry)) {
-                        continue;
-                    }
-                    if (dirOnly && (entry.d_type != Dirent.DT_DIR)) {
-                        continue;
-                    }
-                    byte[] name = Arrays.copyOfRange(entry.d_name, 0, entry.d_name_len);
-                    if (!consumer.accept(path.concat(name))) {
-                        break;
-                    }
+            Dirent entry = new Dirent();
+            while ((entry = Dirent.readdir(dir, entry)) != null) {
+                if (isSelfOrParent(entry)) {
+                    continue;
                 }
-            } finally {
-                Dirent.closedir(dir);
+                byte[] name = Arrays.copyOfRange(entry.d_name, 0, entry.d_name_len);
+                if (!consumer.accept(path.concat(name))) {
+                    break;
+                }
             }
-        } catch (ErrnoException e) {
-            throw ErrnoExceptions.toIOException(e, path);
+        } finally {
+            Dirent.closedir(dir);
         }
     }
 

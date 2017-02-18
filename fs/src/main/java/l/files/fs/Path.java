@@ -659,7 +659,11 @@ public abstract class Path implements Parcelable {
     }
 
     public void list(LinkOption option, Consumer consumer) throws IOException {
-        FileSystem.INSTANCE.list(this, option, consumer);
+        try {
+            FileSystem.INSTANCE.list(this, option, consumer);
+        } catch (ErrnoException e) {
+            throw ErrnoExceptions.toIOException(e, this);
+        }
     }
 
     public <C extends Collection<? super Path>> C list(
