@@ -42,26 +42,6 @@ public final class FilesTest extends PathBaseTest {
     // TODO turn this into PathTest
 
     @Test
-    public void can_handle_invalid_utf_8_path() throws Exception {
-
-        byte[] bytes = {-19, -96, -67, -19, -80, -117};
-        assertFalse(Arrays.equals(bytes.clone(), new String(bytes, UTF_8).getBytes(UTF_8)));
-
-        Path dir = dir1().concat(bytes.clone());
-        Path file = dir.concat("a");
-        dir.createDirectory();
-        file.createFile();
-
-        assertTrue(dir.exists(NOFOLLOW));
-        assertTrue(file.exists(NOFOLLOW));
-        assertEquals(singleton(file), dir.list(FOLLOW, new HashSet<>()));
-
-        MoreAsserts.assertEquals(bytes.clone(), dir.name().toByteArray());
-        assertEquals(new String(bytes.clone(), UTF_8), dir.name().toString());
-        assertFalse(Arrays.equals(bytes.clone(), dir.name().toString().getBytes(UTF_8)));
-    }
-
-    @Test
     public void isReadable_true() throws Exception {
         assertTrue(dir1().isReadable());
     }
