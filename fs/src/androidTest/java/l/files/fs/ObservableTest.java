@@ -28,6 +28,7 @@ import l.files.fs.exception.AlreadyExist;
 import l.files.testing.fs.PathBaseTest;
 import l.files.testing.fs.Paths;
 
+import static com.google.common.base.Throwables.getStackTraceAsString;
 import static java.lang.Integer.parseInt;
 import static java.lang.Math.random;
 import static java.lang.Thread.sleep;
@@ -1015,7 +1016,9 @@ public final class ObservableTest extends PathBaseTest {
                 Recorder observer = new Recorder(file);
                 observer.observation = Paths.observe(file, option, observer);
                 if (verifyTracker) {
-                    assertFalse(observer.observation.isClosed());
+                    if (observer.observation.isClosed()) {
+                        fail(getStackTraceAsString(observer.observation.closeReason()));
+                    }
                     verifyTracker(observer, tracker, file, option);
                 }
 
