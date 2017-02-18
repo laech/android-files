@@ -4,7 +4,6 @@ import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -34,33 +33,6 @@ public final class UnistdTest {
         for (Field field : fields) {
             assertNotEqual(field.getName(), Unistd.placeholder(), field.getByte(null));
         }
-    }
-
-    @Test
-    public void close_cannot_use_fd_afterward() throws Exception {
-
-        File file = createTempFile(getClass().getSimpleName(), null);
-        try {
-
-            FileOutputStream out = new FileOutputStream(file);
-            out.write(1);
-            Unistd.close(getFd(out));
-            try {
-                out.write(1); // Error closed
-                fail();
-            } catch (IOException e) {
-                // Pass
-            }
-
-        } finally {
-            assertTrue(file.delete());
-        }
-    }
-
-    private int getFd(FileOutputStream out) throws Exception {
-        Field field = FileDescriptor.class.getDeclaredField("descriptor");
-        field.setAccessible(true);
-        return (int) field.get(out.getFD());
     }
 
     @Test
