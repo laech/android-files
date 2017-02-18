@@ -27,11 +27,19 @@ public final class SortTest extends BaseFilesActivityTest {
         Path b = createFile("b", "b", Instant.of(1, 1));
         Path c = createFile("c", "c", Instant.of(6, 1));
         screen()
-                .sort().by(NAME).assertAllItemsDisplayedInOrder(a, b, c)
+                .sort().by(NAME)
+                .assertAllItemsDisplayedInOrder(a, b, c)
+
                 .clickInto(a)
-                .sort().by(NAME).assertAllItemsDisplayedInOrder(aa, ab)
-                .sort().by(MODIFIED).assertAllItemsDisplayedInOrder(ab, aa)
-                .pressBack().assertAllItemsDisplayedInOrder(a, c, b);
+                .sort().by(NAME)
+                .assertAllItemsDisplayedInOrder(aa, ab)
+
+                .sort().by(MODIFIED)
+                .assertAllItemsDisplayedInOrder(ab, aa)
+
+                .pressBack()
+                .assertCurrentDirectory(dir())
+                .assertAllItemsDisplayedInOrder(a, c, b);
     }
 
     @Test
