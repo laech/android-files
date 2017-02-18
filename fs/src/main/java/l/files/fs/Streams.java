@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import linux.ErrnoException;
 import linux.Fcntl;
@@ -131,35 +132,10 @@ final class Streams {
         return null;
     }
 
-    private static void close(InvalidateFd instance) throws IOException {
-        // Make sure we don't close someone else's FD
-        // on subsequent calls
-        int closingFd = instance.getFd();
-        instance.setFd(-1);
+    private static final class LocalInputStream extends FileInputStream {
 
-        if (closingFd == -1) {
-            return;
-        }
-
-        try {
-            Unistd.close(closingFd);
-        } catch (ErrnoException e) {
-            throw ErrnoExceptions.toIOException(e, "fd = " + closingFd);
-        }
-    }
-
-    private interface InvalidateFd {
-
-        int getFd();
-
-        void setFd(int fd);
-
-    }
-
-
-    private static final class LocalInputStream extends FileInputStream implements InvalidateFd {
-
-        private int fd;
+        private final AtomicBoolean closed = new AtomicBoolean(false);
+        private final int fd;
 
         LocalInputStream(FileDescriptor descriptor, int fd) {
             super(descriptor);
@@ -168,46 +144,37 @@ final class Streams {
 
         @Override
         public void close() throws IOException {
-            super.close();
-            Streams.close(this);
+            if (closed.compareAndSet(false, true)) {
+                super.close();
+                try {
+                    Unistd.close(fd);
+                } catch (ErrnoException e) {
+                    throw ErrnoExceptions.toIOException(e, "fd = " + fd);
+                }
+            }
         }
-
-        @Override
-        public int getFd() {
-            return fd;
-        }
-
-        @Override
-        public void setFd(int fd) {
-            this.fd = fd;
-        }
-
     }
 
-    private static final class LocalOutputStream extends FileOutputStream implements InvalidateFd {
+    private static final class LocalOutputStream extends FileOutputStream {
 
-        private int fd;
+        private final AtomicBoolean closed = new AtomicBoolean(false);
+        private final int fd;
 
         LocalOutputStream(FileDescriptor descriptor, int fd) {
             super(descriptor);
             this.fd = fd;
         }
 
-
         @Override
         public void close() throws IOException {
-            super.close();
-            Streams.close(this);
-        }
-
-        @Override
-        public int getFd() {
-            return fd;
-        }
-
-        @Override
-        public void setFd(int fd) {
-            this.fd = fd;
+            if (closed.compareAndSet(false, true)) {
+                super.close();
+                try {
+                    Unistd.close(fd);
+                } catch (ErrnoException e) {
+                    throw ErrnoExceptions.toIOException(e, "fd = " + fd);
+                }
+            }
         }
     }
 
