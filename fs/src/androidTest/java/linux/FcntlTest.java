@@ -1,6 +1,8 @@
 package linux;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestName;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -22,6 +24,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public final class FcntlTest {
+
+    @Rule
+    public final TestName testName = new TestName();
 
     @Test
     public void constants_are_initialized() throws Exception {
@@ -55,8 +60,8 @@ public final class FcntlTest {
     @Test
     public void open_returns_fd() throws Exception {
 
-        File file = File.createTempFile(getClass().getSimpleName(), null);
-        file.deleteOnExit();
+        File file = File.createTempFile(getClass().getSimpleName()
+                + "." + testName.getMethodName(), null);
         try {
 
             int fd = Fcntl.open(file.getPath().getBytes("UTF-8"), O_WRONLY, 0);
@@ -64,7 +69,8 @@ public final class FcntlTest {
             try {
                 out.write("hello".getBytes("UTF-8"));
             } finally {
-                out.close();
+                // FileOutputStream doesn't close fd because it doesn't own it
+                Unistd.close(fd);
             }
 
             assertEquals("hello", readAllUtf8(file));

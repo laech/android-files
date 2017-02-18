@@ -2,6 +2,8 @@ package l.files.testing.fs;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TestName;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,6 +22,9 @@ import static l.files.fs.TraversalCallback.Result.CONTINUE;
 import static org.junit.Assert.assertTrue;
 
 public abstract class PathBaseTest {
+
+    @Rule
+    public final TestName testName = new TestName();
 
     @Nullable
     private Path dir1;
@@ -87,7 +92,8 @@ public abstract class PathBaseTest {
     }
 
     private File createTempFolder() throws IOException {
-        File dir = File.createTempFile(getClass().getSimpleName(), null);
+        File dir = File.createTempFile(getClass().getSimpleName()
+                + "." + testName.getMethodName(), null);
         assertTrue(dir.delete());
         assertTrue(dir.mkdirs());
         return dir;
