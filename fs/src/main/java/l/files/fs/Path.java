@@ -2,6 +2,9 @@ package l.files.fs;
 
 import android.net.Uri;
 import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
+import android.os.ParcelFileDescriptor.AutoCloseInputStream;
+import android.os.ParcelFileDescriptor.AutoCloseOutputStream;
 import android.os.Parcelable;
 
 import com.google.common.collect.ImmutableList;
@@ -39,22 +42,29 @@ import l.files.fs.exception.NoSuchEntry;
 import l.files.fs.exception.NotDirectory;
 import l.files.fs.exception.TooManySymbolicLinks;
 import linux.ErrnoException;
+import linux.Fcntl;
 import linux.Stdio;
 import linux.Unistd;
 
+import static android.os.ParcelFileDescriptor.adoptFd;
 import static com.google.common.base.Charsets.UTF_8;
+import static l.files.base.Throwables.addSuppressed;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Stat.S_IRUSR;
 import static l.files.fs.Stat.S_IRWXU;
 import static l.files.fs.Stat.S_IWUSR;
 import static l.files.fs.Stat.chmod;
+import static l.files.fs.Stat.fstat;
 import static l.files.fs.Stat.mkdir;
 import static linux.Errno.EISDIR;
+import static linux.Fcntl.O_APPEND;
 import static linux.Fcntl.O_CREAT;
 import static linux.Fcntl.O_EXCL;
+import static linux.Fcntl.O_RDONLY;
 import static linux.Fcntl.O_RDWR;
-import static linux.Fcntl.open;
+import static linux.Fcntl.O_TRUNC;
+import static linux.Fcntl.O_WRONLY;
 
 public abstract class Path implements Parcelable {
 
@@ -406,7 +416,7 @@ public abstract class Path implements Parcelable {
             // Same flags and mode as java.io.File.createNewFile() on Android
             int flags = O_RDWR | O_CREAT | O_EXCL;
             int mode = S_IRUSR | S_IWUSR;
-            int fd = open(toByteArray(), flags, mode);
+            int fd = Fcntl.open(toByteArray(), flags, mode);
             Unistd.close(fd);
 
         } catch (ErrnoException e) {
@@ -718,11 +728,61 @@ public abstract class Path implements Parcelable {
     }
 
     public InputStream newInputStream() throws IOException {
-        return Streams.newInputStream(this);
+
+        ParcelFileDescriptor fd = adoptFd(open(O_RDONLY, 0));
+        try {
+
+            checkNotDirectory(fd.getFd());
+            return new AutoCloseInputStream(fd);
+
+        } catch (Throwable e) {
+            try {
+                fd.close();
+            } catch (Throwable sup) {
+                addSuppressed(e, sup);
+            }
+            throw e;
+        }
     }
 
     public OutputStream newOutputStream(boolean append) throws IOException {
-        return Streams.newOutputStream(this, append);
+
+        // Same flags and mode as java.io.FileOutputStream on Android
+        int flags = O_WRONLY | O_CREAT | (append ? O_APPEND : O_TRUNC);
+
+        // noinspection OctalInteger
+        ParcelFileDescriptor fd = adoptFd(open(flags, 0600));
+        try {
+
+            checkNotDirectory(fd.getFd());
+            return new AutoCloseOutputStream(fd);
+
+        } catch (Throwable e) {
+            try {
+                fd.close();
+            } catch (Throwable sup) {
+                addSuppressed(e, sup);
+            }
+            throw e;
+        }
+    }
+
+    private int open(int flags, int mode) throws IOException {
+        try {
+            return Fcntl.open(toByteArray(), flags, mode);
+        } catch (ErrnoException e) {
+            throw ErrnoExceptions.toIOException(e, this);
+        }
+    }
+
+    private void checkNotDirectory(int fd) throws IOException {
+        try {
+            if (fstat(fd).isDirectory()) {
+                throw new ErrnoException(EISDIR);
+            }
+        } catch (ErrnoException e) {
+            throw ErrnoExceptions.toIOException(e);
+        }
     }
 
     public interface Consumer {
