@@ -194,7 +194,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
             }
         }
 
-        List<Path> children;
+        List<Name> children;
         try {
             if (observe) {
                 children = observe();
@@ -214,8 +214,8 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         return buildResult();
     }
 
-    private List<Path> observe() throws IOException, InterruptedException {
-        List<Path> children = new ArrayList<>();
+    private List<Name> observe() throws IOException, InterruptedException {
+        List<Name> children = new ArrayList<>();
         observation = root.observe(
                 FOLLOW,
                 listener,
@@ -228,19 +228,19 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         return children;
     }
 
-    private List<Path> visit() throws IOException {
-        final List<Path> children = new ArrayList<>();
+    private List<Name> visit() throws IOException {
+        final List<Name> children = new ArrayList<>();
         root.list(FOLLOW, new Path.Consumer() {
             @Override
             public boolean accept(Path child) {
-                checkedAdd(children, child);
+                checkedAdd(children, child.name());
                 return true;
             }
         });
         return children;
     }
 
-    private void checkedAdd(List<Path> children, Path child) {
+    private void checkedAdd(List<Name> children, Name child) {
         checkCancel();
 
         /*
@@ -253,18 +253,18 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         children.add(child);
     }
 
-    private Path.Consumer collectInto(final List<Path> children) {
+    private Path.Consumer collectInto(final List<Name> children) {
         return new Path.Consumer() {
             @Override
             public boolean accept(Path child) {
-                checkedAdd(children, child);
+                checkedAdd(children, child.name());
                 return true;
             }
         };
     }
 
-    private void update(List<Path> children) {
-        for (Path child : children) {
+    private void update(List<Name> children) {
+        for (Name child : children) {
             checkCancel();
             update(child, null);
         }
