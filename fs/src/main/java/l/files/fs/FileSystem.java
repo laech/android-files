@@ -63,13 +63,10 @@ final class FileSystem extends Native {
     }
 
     static boolean isSelfOrParent(Dirent entry) {
-        if (entry.d_name_len == 1 && entry.d_name[0] == '.') {
-            return true;
-        }
-        if (entry.d_name_len == 2 && entry.d_name[0] == '.' && entry.d_name[1] == '.') {
-            return true;
-        }
-        return false;
+        int len = entry.d_name_len;
+        byte[] name = entry.d_name;
+        return (len == 1 && name[0] == '.') ||
+                (len == 2 && name[0] == '.' && name[1] == '.');
     }
 
 }
