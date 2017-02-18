@@ -227,7 +227,7 @@ final class Observable extends Native
             fd = -1;
             wd = -1;
             suppressedClose(e);
-            notifyIncompleteObservationOrClose(ErrnoExceptions.toIOException(e));
+            notifyIncompleteObservationOrClose(e, root);
             return;
         }
 
@@ -321,7 +321,7 @@ final class Observable extends Native
                         childDirs.put(wd, Name.of(name));
 
                     } catch (ErrnoException e) {
-                        handleAddChildDirWatchFailure(e);
+                        handleAddChildDirWatchFailure(e, child);
                     }
 
                     if (currentThread().isInterrupted()) {
@@ -332,7 +332,7 @@ final class Observable extends Native
                 Dirent.closedir(dir);
             }
         } catch (ErrnoException e) {
-            throw ErrnoExceptions.toIOException(e, root);
+            throw e.toIOException(root);
         }
 
         if (currentThread().isInterrupted()) {
@@ -363,7 +363,7 @@ final class Observable extends Native
         try {
             doClose(new IOException("close() called"));
         } catch (ErrnoException e) {
-            throw ErrnoExceptions.toIOException(e);
+            throw e.toIOException(root);
         }
     }
 
@@ -432,7 +432,7 @@ final class Observable extends Native
         }
     }
 
-    private void releaseChildWatches(ErrnoException cause) {
+    private void releaseChildWatches(ErrnoException cause, Path path) {
         released.set(true);
         for (int wd : childDirs.keySet()) {
             try {
@@ -445,7 +445,7 @@ final class Observable extends Native
             }
         }
         childDirs.clear();
-        notifyIncompleteObservationOrClose(ErrnoExceptions.toIOException(cause));
+        notifyIncompleteObservationOrClose(cause, path);
     }
 
     @Override
@@ -587,31 +587,35 @@ final class Observable extends Native
             childDirs.put(wd, Name.of(name));
 
         } catch (ErrnoException e) {
-            handleAddChildDirWatchFailure(e);
+            handleAddChildDirWatchFailure(e, child);
         }
     }
 
-    private void handleAddChildDirWatchFailure(ErrnoException e) throws ErrnoException {
+    private void handleAddChildDirWatchFailure(
+            ErrnoException e,
+            Path path
+    ) throws ErrnoException {
+
         if (e.errno == ENOENT) {
             // Ignore
 
         } else if (e.errno == ENOSPC || e.errno == ENOMEM) {
 
-            releaseChildWatches(e);
+            releaseChildWatches(e, path);
 
         } else if (e.errno == EACCES) {
 
-            notifyIncompleteObservationOrClose(ErrnoExceptions.toIOException(e));
+            notifyIncompleteObservationOrClose(e, path);
 
         } else {
             throw e;
         }
     }
 
-    private void notifyIncompleteObservationOrClose(IOException cause) {
+    private void notifyIncompleteObservationOrClose(ErrnoException cause, Path path) {
         Observer observer = observerRef.get();
         if (observer != null) {
-            observer.onIncompleteObservation(cause);
+            observer.onIncompleteObservation(cause.toIOException(path));
         } else {
             try {
                 doClose(cause);

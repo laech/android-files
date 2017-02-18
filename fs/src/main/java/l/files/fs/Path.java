@@ -265,7 +265,7 @@ public abstract class Path implements Parcelable {
         try {
             chmod(toByteArray(), Permission.toStatMode(permissions));
         } catch (ErrnoException e) {
-            throw ErrnoExceptions.toIOException(e, this);
+            throw e.toIOException(this);
         }
     }
 
@@ -287,7 +287,7 @@ public abstract class Path implements Parcelable {
             boolean followLink = option == FOLLOW;
             setModificationTime(pathBytes, seconds, nanos, followLink);
         } catch (ErrnoException e) {
-            throw ErrnoExceptions.toIOException(e, this);
+            throw e.toIOException(this);
         }
     }
 
@@ -332,7 +332,7 @@ public abstract class Path implements Parcelable {
             // Same permission bits as java.io.File.mkdir() on Android
             mkdir(toByteArray(), S_IRWXU);
         } catch (ErrnoException e) {
-            throw ErrnoExceptions.toIOException(e, this);
+            throw e.toIOException(this);
         }
         return this;
     }
@@ -359,7 +359,7 @@ public abstract class Path implements Parcelable {
         try {
             mkdir(toByteArray(), Permission.toStatMode(permissionsHint));
         } catch (ErrnoException e) {
-            throw ErrnoExceptions.toIOException(e, this);
+            throw e.toIOException(this);
         }
         return this;
     }
@@ -423,7 +423,7 @@ public abstract class Path implements Parcelable {
             if (e.errno == EISDIR) {
                 throw new AlreadyExist(toString(), e);
             }
-            throw ErrnoExceptions.toIOException(e, this);
+            throw e.toIOException(this);
         }
         return this;
     }
@@ -448,7 +448,7 @@ public abstract class Path implements Parcelable {
         try {
             Unistd.symlink(target.toByteArray(), toByteArray());
         } catch (ErrnoException e) {
-            throw ErrnoExceptions.toIOException(e, this + " -> " + target);
+            throw e.toIOException(this + " -> " + target);
         }
         return this;
     }
@@ -469,7 +469,7 @@ public abstract class Path implements Parcelable {
             byte[] link = Unistd.readlink(toByteArray());
             return of(link);
         } catch (ErrnoException e) {
-            throw ErrnoExceptions.toIOException(e, this);
+            throw e.toIOException(this);
         }
     }
 
@@ -535,7 +535,7 @@ public abstract class Path implements Parcelable {
         try {
             Stdio.rename(toByteArray(), destination.toByteArray());
         } catch (ErrnoException e) {
-            throw ErrnoExceptions.toIOException(e, this + " -> " + destination);
+            throw e.toIOException(this + " -> " + destination);
         }
     }
 
@@ -561,7 +561,7 @@ public abstract class Path implements Parcelable {
         try {
             Stdio.remove(toByteArray());
         } catch (ErrnoException e) {
-            throw ErrnoExceptions.toIOException(e, this);
+            throw e.toIOException(this);
         }
     }
 
@@ -672,7 +672,7 @@ public abstract class Path implements Parcelable {
         try {
             FileSystem.INSTANCE.list(this, option, consumer);
         } catch (ErrnoException e) {
-            throw ErrnoExceptions.toIOException(e, this);
+            throw e.toIOException(this);
         }
     }
 
@@ -732,7 +732,7 @@ public abstract class Path implements Parcelable {
         ParcelFileDescriptor fd = adoptFd(open(O_RDONLY, 0));
         try {
 
-            checkNotDirectory(fd.getFd());
+            checkNotDirectory(fd.getFd(), this);
             return new AutoCloseInputStream(fd);
 
         } catch (Throwable e) {
@@ -754,7 +754,7 @@ public abstract class Path implements Parcelable {
         ParcelFileDescriptor fd = adoptFd(open(flags, 0600));
         try {
 
-            checkNotDirectory(fd.getFd());
+            checkNotDirectory(fd.getFd(), this);
             return new AutoCloseOutputStream(fd);
 
         } catch (Throwable e) {
@@ -771,17 +771,17 @@ public abstract class Path implements Parcelable {
         try {
             return Fcntl.open(toByteArray(), flags, mode);
         } catch (ErrnoException e) {
-            throw ErrnoExceptions.toIOException(e, this);
+            throw e.toIOException(this);
         }
     }
 
-    private void checkNotDirectory(int fd) throws IOException {
+    private void checkNotDirectory(int fd, Path path) throws IOException {
         try {
             if (fstat(fd).isDirectory()) {
                 throw new ErrnoException(EISDIR);
             }
         } catch (ErrnoException e) {
-            throw ErrnoExceptions.toIOException(e);
+            throw e.toIOException(path);
         }
     }
 

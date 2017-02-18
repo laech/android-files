@@ -105,7 +105,7 @@ public class Stat extends Native implements Parcelable {
 
             } catch (final ErrnoException e) {
                 if (e.errno != EAGAIN) {
-                    throw ErrnoExceptions.toIOException(e, path);
+                    throw e.toIOException(path);
                 }
             }
         }
