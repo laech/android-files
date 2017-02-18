@@ -183,4 +183,11 @@ public final class BatchObserverNotifier implements Observer, Observation, Runna
         return ob == null || ob.isClosed();
     }
 
+    @Nullable
+    @Override
+    public Throwable closeReason() {
+        Observation ob = this.observation;
+        return ob == null ? null : ob.closeReason();
+    }
+
 }

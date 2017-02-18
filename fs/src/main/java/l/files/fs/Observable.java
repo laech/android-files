@@ -189,7 +189,7 @@ final class Observable extends Native
      * Background thread that polls for events.
      */
     private final AtomicReference<Thread> thread;
-
+    private final AtomicReference<Throwable> closeReason;
     private final AtomicBoolean closed;
     private final AtomicBoolean released;
 
@@ -202,6 +202,7 @@ final class Observable extends Native
         this.observerRef = new WeakReference<>(requireNonNull(observer));
         this.thread = new AtomicReference<>(null);
         this.closed = new AtomicBoolean(false);
+        this.closeReason = new AtomicReference<>(null);
         this.released = new AtomicBoolean(false);
         this.tag = tag;
     }
@@ -220,7 +221,7 @@ final class Observable extends Native
                 fd = inotify.init(watchLimit);
                 wd = inotifyAddWatchWillCloseOnError(option);
             } else {
-                doClose();
+                doClose(new IOException("procfs not supported"));
             }
         } catch (ErrnoException e) {
             fd = -1;
@@ -272,7 +273,7 @@ final class Observable extends Native
 
         } catch (Throwable e) {
             try {
-                doClose();
+                doClose(e);
             } catch (ErrnoException sup) {
                 addSuppressed(e, sup);
             }
@@ -351,10 +352,16 @@ final class Observable extends Native
         return closed.get();
     }
 
+    @Nullable
+    @Override
+    public Throwable closeReason() {
+        return closeReason.get();
+    }
+
     @Override
     public void close() throws IOException {
         try {
-            doClose();
+            doClose(new IOException("close() called"));
         } catch (ErrnoException e) {
             throw ErrnoExceptions.toIOException(e);
         }
@@ -362,16 +369,18 @@ final class Observable extends Native
 
     private void suppressedClose(Throwable e) {
         try {
-            doClose();
+            doClose(e);
         } catch (Throwable sup) {
             addSuppressed(e, sup);
         }
     }
 
-    private void doClose() throws ErrnoException {
+    private void doClose(Throwable cause) throws ErrnoException {
         if (!closed.compareAndSet(false, true)) {
             return;
         }
+
+        closeReason.set(cause);
 
         Thread t = thread.get();
         if (t != null) {
@@ -512,7 +521,7 @@ final class Observable extends Native
                 observer(DELETE, child);
 
             } else if (isSelfDeleted(event, child)) {
-                doClose();
+                doClose(new IOException("file is deleted"));
                 observer(DELETE, (byte[]) null);
 
             } else if (isChildModified(event, child)) {
@@ -556,7 +565,7 @@ final class Observable extends Native
             observer.onEvent(kind, name);
         } else {
             try {
-                doClose();
+                doClose(new IOException("observer is gone"));
             } catch (ErrnoException e) {
                 Log.w(getClass().getSimpleName(),
                         "Failed to close on notify event, "
@@ -605,7 +614,7 @@ final class Observable extends Native
             observer.onIncompleteObservation(cause);
         } else {
             try {
-                doClose();
+                doClose(cause);
             } catch (ErrnoException e) {
                 Log.w(getClass().getSimpleName(),
                         "Failed to close on incomplete observation.", e);
