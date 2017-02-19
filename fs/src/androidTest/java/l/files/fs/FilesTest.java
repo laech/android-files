@@ -112,33 +112,6 @@ public final class FilesTest extends PathBaseTest {
     }
 
     @Test
-    public void list_linkFollowSuccess() throws Exception {
-        Path dir = dir1().concat("dir").createDirectory();
-        Path a = dir.concat("a").createFile();
-        Path b = dir.concat("b").createDirectory();
-        Path c = dir.concat("c").createSymbolicLink(a);
-        Path link = dir1().concat("link").createSymbolicLink(dir);
-
-        List<Path> expected = asList(
-                a.rebase(dir, link),
-                b.rebase(dir, link),
-                c.rebase(dir, link)
-        );
-
-        List<Path> actual = sortByName(link.list(new ArrayList<Path>()));
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void list() throws Exception {
-        Path a = dir1().concat("a").createFile();
-        Path b = dir1().concat("b").createDirectory();
-        List<Path> expected = asList(a, b);
-        List<Path> actual = sortByName(dir1().list(new ArrayList<Path>()));
-        assertEquals(expected, actual);
-    }
-
-    @Test
     public void listDir_linkFollowSuccess() throws Exception {
         Path dir = dir1().concat("dir").createDirectory();
         Path a = dir.concat("a").createFile();

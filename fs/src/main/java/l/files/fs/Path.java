@@ -661,6 +661,17 @@ public abstract class Path implements Parcelable {
         ).start(this, option, childrenConsumer);
     }
 
+    /**
+     * Lists the content of this directory, follows symbolic link.
+     *
+     * @throws AccessDenied no permission
+     * @throws NoSuchEntry  directory does not exist,
+     *                      or path is symbolic link but target directory does not exist,
+     *                      or path is empty,
+     * @throws NotDirectory if path is not a directory
+     *                      and not a symbolic link to a directory
+     * @throws IOException  other errors
+     */
     public void list(Consumer consumer) throws IOException {
         try {
             FileSystem.INSTANCE.list(this, consumer);
@@ -669,6 +680,11 @@ public abstract class Path implements Parcelable {
         }
     }
 
+    /**
+     * Collects the content of this directory to the collection.
+     *
+     * @see #list(Consumer)
+     */
     public <C extends Collection<? super Path>> C list(
             final C collection
     ) throws IOException {
