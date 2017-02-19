@@ -104,7 +104,7 @@ public abstract class PasteTest extends PathBaseTest {
         thread.start();
         thread.join();
 
-        List<Path> actual = dstDir.list(NOFOLLOW, new ArrayList<Path>());
+        List<Path> actual = dstDir.list(new ArrayList<Path>());
         assertTrue(actual.isEmpty());
     }
 

@@ -20,7 +20,6 @@ import l.files.fs.event.Observer;
 import linux.Dirent;
 import linux.Dirent.DIR;
 import linux.ErrnoException;
-import linux.Fcntl;
 import linux.Vfs.Statfs;
 
 import static android.os.Looper.getMainLooper;
@@ -38,8 +37,6 @@ import static linux.Errno.EINVAL;
 import static linux.Errno.ENOENT;
 import static linux.Errno.ENOMEM;
 import static linux.Errno.ENOSPC;
-import static linux.Fcntl.O_DIRECTORY;
-import static linux.Fcntl.O_NOFOLLOW;
 import static linux.Inotify.IN_ACCESS;
 import static linux.Inotify.IN_ATTRIB;
 import static linux.Inotify.IN_CLOSE_NOWRITE;
@@ -288,13 +285,8 @@ final class Observable extends Native
 
         boolean limitReached = fd == -1;
 
-        int flags = O_DIRECTORY;
-        if (option == NOFOLLOW) {
-            flags |= O_NOFOLLOW;
-        }
-
         try {
-            DIR dir = Dirent.fdopendir(Fcntl.open(root.toByteArray(), flags, 0));
+            DIR dir = Dirent.opendir(root.toByteArray());
             try {
                 Dirent entry = new Dirent();
                 while ((entry = Dirent.readdir(dir, entry)) != null) {

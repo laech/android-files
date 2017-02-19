@@ -7,11 +7,6 @@ import l.files.fs.Path.Consumer;
 import linux.Dirent;
 import linux.Dirent.DIR;
 import linux.ErrnoException;
-import linux.Fcntl;
-
-import static l.files.fs.LinkOption.NOFOLLOW;
-import static linux.Fcntl.O_DIRECTORY;
-import static linux.Fcntl.O_NOFOLLOW;
 
 final class FileSystem extends Native {
 
@@ -19,17 +14,10 @@ final class FileSystem extends Native {
 
     void list(
             Path path,
-            LinkOption option,
             Consumer consumer
     ) throws IOException, ErrnoException {
 
-        int flags = O_DIRECTORY;
-        if (option == NOFOLLOW) {
-            flags |= O_NOFOLLOW;
-        }
-
-        int fd = Fcntl.open(path.toByteArray(), flags, 0);
-        DIR dir = Dirent.fdopendir(fd);
+        DIR dir = Dirent.opendir(path.toByteArray());
         try {
             Dirent entry = new Dirent();
             while ((entry = Dirent.readdir(dir, entry)) != null) {

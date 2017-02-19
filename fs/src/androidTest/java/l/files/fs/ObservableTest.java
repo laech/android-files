@@ -1052,7 +1052,7 @@ public final class ObservableTest extends PathBaseTest {
 
             if (file.stat(option).isDirectory()) {
 
-                Paths.listDirectories(file, option, new Consumer() {
+                Paths.listDirectories(file, new Consumer() {
                     @Override
                     public boolean accept(Path dir) throws IOException {
                         if (dir.isReadable()) {

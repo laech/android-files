@@ -132,7 +132,7 @@ final class ThumbnailDiskCache extends Cache<ScaledBitmap> {
     Path cacheFile(Path path, Stat stat, Rect constraint, boolean matchTime) throws IOException {
         if (!matchTime) {
             final Path[] result = {null};
-            cacheDir(path, constraint).list(NOFOLLOW, new Path.Consumer() {
+            cacheDir(path, constraint).list(new Path.Consumer() {
                 @Override
                 public boolean accept(Path path) {
                     result[0] = path;
@@ -244,7 +244,7 @@ final class ThumbnailDiskCache extends Cache<ScaledBitmap> {
     private void purgeOldCacheFiles(Path path, Rect constraint) throws IOException {
         try {
 
-            cacheDir(path, constraint).list(FOLLOW, new Path.Consumer() {
+            cacheDir(path, constraint).list(new Path.Consumer() {
                 @Override
                 public boolean accept(Path path) {
                     try {

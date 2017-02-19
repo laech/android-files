@@ -200,7 +200,7 @@ public class BaseFilesActivityTest {
                     dst.exists(NOFOLLOW));
 
             src.rename(dst);
-            List<Path> actual = dir.list(NOFOLLOW, new ArrayList<Path>());
+            List<Path> actual = dir.list(new ArrayList<Path>());
             List<Path> expected = Collections.<Path>singletonList(dst);
             assertEquals(1, actual.size());
             if (!expected.equals(actual)) {

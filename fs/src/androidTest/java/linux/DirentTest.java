@@ -23,7 +23,6 @@ import static linux.Dirent.placeholder;
 import static linux.Dirent.readdir;
 import static linux.Errno.ENOENT;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 public final class DirentTest {
@@ -60,32 +59,6 @@ public final class DirentTest {
 
     private File createTempDir() throws IOException {
         return TempDir.createTempDir(getClass().getSimpleName());
-    }
-
-    @Test
-    public void fdopendir_throws_ErrnoException_on_invalid_fd() throws Exception {
-        try {
-            Dirent.fdopendir(-1);
-            fail();
-        } catch (ErrnoException e) {
-            // Pass
-        }
-    }
-
-    @Test
-    public void fdopendir_returns_valid_dir() throws Exception {
-        File tmp = createTempDir();
-        try {
-            int fd = Fcntl.open(tmp.getPath().getBytes(), 0, 0);
-            DIR dir = Dirent.fdopendir(fd);
-            try {
-                assertNotNull(Dirent.readdir(dir, new Dirent()));
-            } finally {
-                Dirent.closedir(dir);
-            }
-        } finally {
-            assertTrue(tmp.delete() || !tmp.exists());
-        }
     }
 
     @Test

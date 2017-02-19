@@ -18,7 +18,6 @@ import static java.lang.System.currentTimeMillis;
 import static java.lang.System.nanoTime;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.ui.browser.FileSort.MODIFIED;
 import static l.files.ui.browser.FilesLoader.BATCH_UPDATE_MILLIS;
@@ -50,7 +49,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
     private void testRefreshInManualMode(Path dir) throws IOException {
 
-        Paths.listDirectories(dir, FOLLOW, new Consumer() {
+        Paths.listDirectories(dir, new Consumer() {
             @Override
             public boolean accept(Path childDir) throws IOException {
                 // Inotify don't notify child directory last modified time,
@@ -82,7 +81,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
                 .createFile()
                 .rename(dir.concat("after-move-" + nanoTime()));
 
-        dir.list(FOLLOW, new Consumer() {
+        dir.list(new Consumer() {
             @Override
             public boolean accept(Path file) throws IOException {
                 Paths.deleteRecursive(file);
@@ -124,7 +123,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
     }
 
     private void deleteFiles(final int n) throws IOException {
-        dir().list(FOLLOW, new Consumer() {
+        dir().list(new Consumer() {
 
             int count = 0;
 
@@ -163,7 +162,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
     private void updateAttributes() throws IOException {
 
         final Random r = new Random();
-        dir().list(NOFOLLOW, new Consumer() {
+        dir().list(new Consumer() {
             @Override
             public boolean accept(Path child) throws IOException {
                 child.setLastModifiedTime(NOFOLLOW, Instant.of(

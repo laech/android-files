@@ -1,7 +1,5 @@
 package l.files.fs;
 
-import android.test.MoreAsserts;
-
 import org.junit.Test;
 
 import java.io.File;
@@ -12,7 +10,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -128,7 +125,7 @@ public final class FilesTest extends PathBaseTest {
                 c.rebase(dir, link)
         );
 
-        List<Path> actual = sortByName(link.list(FOLLOW, new ArrayList<Path>()));
+        List<Path> actual = sortByName(link.list(new ArrayList<Path>()));
         assertEquals(expected, actual);
     }
 
@@ -137,7 +134,7 @@ public final class FilesTest extends PathBaseTest {
         Path a = dir1().concat("a").createFile();
         Path b = dir1().concat("b").createDirectory();
         List<Path> expected = asList(a, b);
-        List<Path> actual = sortByName(dir1().list(NOFOLLOW, new ArrayList<Path>()));
+        List<Path> actual = sortByName(dir1().list(new ArrayList<Path>()));
         assertEquals(expected, actual);
     }
 
@@ -150,7 +147,7 @@ public final class FilesTest extends PathBaseTest {
 
         Path link = dir1().concat("link").createSymbolicLink(dir);
         List<Path> expected = singletonList(link.concat("b"));
-        List<Path> actual = sortByName(Paths.listDirectories(link, FOLLOW, new ArrayList<Path>()));
+        List<Path> actual = sortByName(Paths.listDirectories(link, new ArrayList<Path>()));
         assertEquals(expected, actual);
     }
 
@@ -160,7 +157,7 @@ public final class FilesTest extends PathBaseTest {
         dir1().concat("b").createDirectory();
         dir1().concat("c").createFile();
         List<?> expected = singletonList(dir1().concat("b"));
-        List<?> actual = sortByName(Paths.listDirectories(dir1(), NOFOLLOW, new ArrayList<Path>()));
+        List<?> actual = sortByName(Paths.listDirectories(dir1(), new ArrayList<Path>()));
         assertEquals(expected, actual);
     }
 

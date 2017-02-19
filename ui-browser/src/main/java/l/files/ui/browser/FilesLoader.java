@@ -230,7 +230,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     private List<Name> visit() throws IOException {
         final List<Name> children = new ArrayList<>();
-        root.list(FOLLOW, new Path.Consumer() {
+        root.list(new Path.Consumer() {
             @Override
             public boolean accept(Path child) {
                 checkedAdd(children, child.name());

@@ -47,11 +47,10 @@ public final class Paths {
 
     public static void listDirectories(
             final Path path,
-            final LinkOption option,
             final Consumer consumer
     ) throws IOException {
 
-        path.list(option, new Consumer() {
+        path.list(new Consumer() {
             @Override
             public boolean accept(Path entry) throws IOException {
                 return !entry.stat(NOFOLLOW).isDirectory() ||
@@ -62,11 +61,10 @@ public final class Paths {
 
     public static <C extends Collection<? super Path>> C listDirectories(
             final Path path,
-            final LinkOption option,
             final C collection
     ) throws IOException {
 
-        listDirectories(path, option, new Consumer() {
+        listDirectories(path, new Consumer() {
             @Override
             public boolean accept(Path entry) throws IOException {
                 collection.add(entry);

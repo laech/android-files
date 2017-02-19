@@ -661,19 +661,18 @@ public abstract class Path implements Parcelable {
         ).start(this, option, childrenConsumer);
     }
 
-    public void list(LinkOption option, Consumer consumer) throws IOException {
+    public void list(Consumer consumer) throws IOException {
         try {
-            FileSystem.INSTANCE.list(this, option, consumer);
+            FileSystem.INSTANCE.list(this, consumer);
         } catch (ErrnoException e) {
             throw e.toIOException(this);
         }
     }
 
     public <C extends Collection<? super Path>> C list(
-            final LinkOption option,
             final C collection
     ) throws IOException {
-        list(option, new Path.Consumer() {
+        list(new Path.Consumer() {
             @Override
             public boolean accept(Path path) throws IOException {
                 collection.add(path);

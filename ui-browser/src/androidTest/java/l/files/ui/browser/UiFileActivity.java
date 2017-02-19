@@ -44,7 +44,6 @@ import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 import static l.files.base.Objects.requireNonNull;
-import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.ui.base.view.Views.find;
 import static l.files.ui.browser.Instrumentations.await;
@@ -558,7 +557,7 @@ final class UiFileActivity {
 
                 final SimpleArrayMap<Path, Stat> filesInView = filesInView();
 
-                dir.list(FOLLOW, new Path.Consumer() {
+                dir.list(new Path.Consumer() {
                     @Override
                     public boolean accept(Path child) throws IOException {
                         Stat oldStat = filesInView.remove(child);

@@ -16,7 +16,6 @@ import l.files.testing.fs.Paths;
 import static com.google.common.base.Charsets.UTF_8;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
-import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -77,7 +76,7 @@ public final class PathInvalidUtf8Test extends PathBaseTest {
 
         assertTrue(dir.exists(NOFOLLOW));
         assertTrue(file.exists(NOFOLLOW));
-        assertEquals(singleton(file), dir.list(FOLLOW, new HashSet<>()));
+        assertEquals(singleton(file), dir.list(new HashSet<>()));
 
         Name name = dir.name();
         MoreAsserts.assertEquals(invalidUtf8.clone(), name.toByteArray());
