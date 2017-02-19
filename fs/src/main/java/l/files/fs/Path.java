@@ -285,18 +285,11 @@ public abstract class Path implements Parcelable {
             long seconds = instant.seconds();
             int nanos = instant.nanos();
             boolean followLink = option == FOLLOW;
-            setModificationTime(pathBytes, seconds, nanos, followLink);
+            Native.setModificationTime(pathBytes, seconds, nanos, followLink);
         } catch (ErrnoException e) {
             throw e.toIOException(this);
         }
     }
-
-    private static native void setModificationTime(
-            byte[] path,
-            long seconds,
-            int nanos,
-            boolean followLink
-    ) throws ErrnoException;
 
     /**
      * @throws AccessDenied         one of the ancestor directory does not
@@ -790,5 +783,15 @@ public abstract class Path implements Parcelable {
          * @return true to continue, false to stop for multi-item callbacks
          */
         boolean accept(Path path) throws IOException;
+    }
+
+    private static final class Native extends l.files.fs.Native {
+
+        private static native void setModificationTime(
+                byte[] path,
+                long seconds,
+                int nanos,
+                boolean followLink
+        ) throws ErrnoException;
     }
 }

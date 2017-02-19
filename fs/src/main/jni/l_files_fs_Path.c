@@ -3,13 +3,14 @@
 #include <ftw.h>
 #include "util.h"
 
-void Java_l_files_fs_Path_setModificationTime(
+void Java_l_files_fs_Path_00024Native_setModificationTime(
         JNIEnv *env,
-        jclass clazz,
+        jclass class,
         jbyteArray jpath,
         jlong seconds,
         jint nanos,
-        jboolean followLink) {
+        jboolean followLink
+) {
 
     struct timespec times[2];
     times[0].tv_nsec = UTIME_OMIT;
