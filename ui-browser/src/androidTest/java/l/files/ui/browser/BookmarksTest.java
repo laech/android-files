@@ -50,7 +50,7 @@ public final class BookmarksTest extends BaseFilesActivityTest {
                 .openBookmarksDrawer()
                 .click(a)
                 .activityObject()
-                .assertCurrentDirectory(b)
+                .assertCurrentDirectory(a)
                 .assertBookmarksSidebarIsClosed();
 
     }
