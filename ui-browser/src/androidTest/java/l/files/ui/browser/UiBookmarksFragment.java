@@ -41,6 +41,7 @@ final class UiBookmarksFragment {
     }
 
     UiBookmarksFragment click(Path bookmark) {
+        assertDrawerIsOpened(true);
         clickItemOnMainThread(context.instrumentation(), recycler(), bookmark);
         return this;
     }

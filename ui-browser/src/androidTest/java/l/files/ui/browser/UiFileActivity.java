@@ -185,14 +185,9 @@ final class UiFileActivity {
     }
 
     UiFileActivity pressBack() {
-        awaitOnMainThread(instrument, new Runnable() {
-            @Override
-            public void run() {
-                // This is to wait for existing messages on the main thread
-                // queue to be cleared first
-            }
-        });
+        instrument.waitForIdleSync();
         instrument.sendKeyDownUpSync(KEYCODE_BACK);
+        instrument.waitForIdleSync();
         return this;
     }
 

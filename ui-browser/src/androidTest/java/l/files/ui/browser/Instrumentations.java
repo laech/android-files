@@ -18,8 +18,9 @@ import static android.os.SystemClock.sleep;
 import static android.support.v7.widget.RecyclerView.NO_POSITION;
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.MINUTES;
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 final class Instrumentations {
 
@@ -51,7 +52,9 @@ final class Instrumentations {
             };
 
             if (instrumentation != null && getMainLooper() != myLooper()) {
+                instrumentation.waitForIdleSync();
                 instrumentation.runOnMainSync(code);
+                instrumentation.waitForIdleSync();
             } else {
                 code.run();
             }
@@ -146,7 +149,7 @@ final class Instrumentations {
         findItemOnMainThread(in, recycler, itemId, new Consumer<View>() {
             @Override
             public void accept(View input) {
-                input.performClick();
+                assertTrue(input.performClick());
             }
         });
     }
@@ -159,7 +162,7 @@ final class Instrumentations {
             @Override
             public void accept(View input) {
                 assertTrue(input.isEnabled());
-                input.performLongClick();
+                assertTrue(input.performLongClick());
             }
         });
     }
