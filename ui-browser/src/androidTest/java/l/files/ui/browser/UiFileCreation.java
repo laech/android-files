@@ -3,6 +3,7 @@ package l.files.ui.browser;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 
 import org.mockito.invocation.InvocationOnMock;
@@ -53,7 +54,12 @@ abstract class UiFileCreation<T extends UiFileCreation> {
         awaitOnMainThread(context.instrumentation(), new Runnable() {
             @Override
             public void run() {
-                assertTrue(dialog().getButton(BUTTON_POSITIVE).performClick());
+                AlertDialog dialog = dialog();
+                Button button = dialog.getButton(BUTTON_POSITIVE);
+                assertTrue(dialog.isShowing());
+                assertTrue(button.isEnabled());
+                assertTrue(button.isClickable());
+                assertTrue(button.performClick());
             }
         });
         return context;
