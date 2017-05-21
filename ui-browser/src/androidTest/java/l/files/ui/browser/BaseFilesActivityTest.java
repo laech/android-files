@@ -31,6 +31,7 @@ import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.M;
 import static android.os.Environment.getExternalStorageDirectory;
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
+import static java.lang.System.currentTimeMillis;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.TraversalCallback.Result.CONTINUE;
 import static l.files.ui.browser.FilesActivity.EXTRA_DIRECTORY;
@@ -62,7 +63,12 @@ public class BaseFilesActivityTest {
     private Intent activityIntent;
 
     private File createTempFolder() throws IOException {
-        File dir = File.createTempFile(getClass().getSimpleName(), null);
+        // On Nexus S it was observed that File.createTempFile(prefix, null)
+        // could return the name directory as the previous run of the test,
+        // so add a suffix to make it more randomized
+        String prefix = getClass().getSimpleName();
+        String suffix = String.valueOf(currentTimeMillis());
+        File dir = File.createTempFile(prefix, suffix);
         assertTrue(dir.delete());
         assertTrue(dir.mkdir());
         return dir;
