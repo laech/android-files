@@ -42,9 +42,6 @@ public final class RenameFragment extends FileCreationFragment {
     private AsyncTask<?, ?, ?> highlight;
 
     @Nullable
-    private AsyncTask<?, ?, ?> rename;
-
-    @Nullable
     private Path path;
 
     @Override
@@ -59,9 +56,6 @@ public final class RenameFragment extends FileCreationFragment {
 
         if (highlight != null) {
             highlight.cancel(true);
-        }
-        if (rename != null) {
-            rename.cancel(true);
         }
     }
 
@@ -114,6 +108,9 @@ public final class RenameFragment extends FileCreationFragment {
         @Override
         protected void onPostExecute(@Nullable Pair<Path, Stat> pair) {
             super.onPostExecute(pair);
+            if (isCancelled()) {
+                return;
+            }
             if (pair != null) {
                 Path path = pair.first;
                 Stat stat = pair.second;
@@ -151,8 +148,7 @@ public final class RenameFragment extends FileCreationFragment {
 
     private void rename() {
         Path dst = parent().concat(getFilename());
-        rename = new Rename(path(), dst)
-                .executeOnExecutor(THREAD_POOL_EXECUTOR);
+        new Rename(path(), dst).executeOnExecutor(THREAD_POOL_EXECUTOR);
 
         ActionMode mode = ((BaseActivity) getActivity()).currentActionMode();
         if (mode != null) {
