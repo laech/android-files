@@ -38,7 +38,7 @@ public final class DrawablesTest {
         ScaledBitmap result = toBitmap(toDrawable(src), max);
         assertNotNull(result);
         assertTrue(result.bitmap().sameAs(expected));
-        assertEquals(Rect.of(expected), result.originalSize());
+        assertEquals(Rect.of(src), result.originalSize());
     }
 
     private Bitmap createBitmap(int width, int height, int color) {
