@@ -47,6 +47,12 @@ public final class TextThumbnailer implements Thumbnailer<InputStream> {
             return null;
         }
         Bitmap bitmap = draw(text, max, context);
+        // TODO this returns bitmaps of different sizes and aspect ratio
+        // when on portrait and on landscape, this causes problem since
+        // the size of the bitmap is used as the originalSize and saved,
+        // so when we are in portrait, the saved size is used which maybe
+        // of different aspect ratio then the later loaded thumbnail causing
+        // view to flicker
         return new ScaledBitmap(bitmap, Rect.of(bitmap));
     }
 
