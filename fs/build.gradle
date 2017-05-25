@@ -24,7 +24,6 @@ android {
 
 dependencies {
     compile project(':base')
-    compile 'org.apache.commons:commons-lang3:3.5'
 
     androidTestCompile project(':testing')
     androidTestCompile 'junit:junit:4.12'

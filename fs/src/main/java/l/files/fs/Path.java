@@ -7,8 +7,6 @@ import android.os.ParcelFileDescriptor.AutoCloseInputStream;
 import android.os.ParcelFileDescriptor.AutoCloseOutputStream;
 import android.os.Parcelable;
 
-import org.apache.commons.lang3.ArrayUtils;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
 
+import l.files.base.Bytes;
 import l.files.fs.event.BatchObserver;
 import l.files.fs.event.BatchObserverNotifier;
 import l.files.fs.event.Observation;
@@ -102,7 +101,7 @@ public abstract class Path implements Parcelable {
     private static List<Name> getNames(byte[] path) {
         List<Name> names = new ArrayList<>();
         for (int start = 0, end; start < path.length; start = end + 1) {
-            end = ArrayUtils.indexOf(path, (byte) '/', start);
+            end = Bytes.indexOf(path, (byte) '/', start);
             if (end == -1) {
                 end = path.length;
             }

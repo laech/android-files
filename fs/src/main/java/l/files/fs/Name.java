@@ -3,10 +3,10 @@ package l.files.fs;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import org.apache.commons.lang3.ArrayUtils;
-
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
+
+import l.files.base.Bytes;
 
 import static java.util.Collections.singletonList;
 
@@ -65,7 +65,7 @@ public class Name implements Parcelable {
     }
 
     private static void ensureContainsNoPathSeparator(byte[] name) {
-        if (ArrayUtils.indexOf(name, (byte) '/') >= 0) {
+        if (Bytes.indexOf(name, (byte) '/') >= 0) {
             throw new IllegalArgumentException(
                     "Path separator '/' is not allowed in file name: " +
                             new String(name, Path.ENCODING));
@@ -73,7 +73,7 @@ public class Name implements Parcelable {
     }
 
     private static void ensureContainsNoNullByte(byte[] name) {
-        int i = ArrayUtils.indexOf(name, (byte) '\0');
+        int i = Bytes.indexOf(name, (byte) '\0');
         if (i >= 0) {
             throw new IllegalArgumentException(
                     "Null character (index=" + i + ") is not allowed in file name: " +
@@ -114,7 +114,7 @@ public class Name implements Parcelable {
     }
 
     private int indexOfExtensionSeparator(int defaultValue) {
-        int i = ArrayUtils.lastIndexOf(bytes, (byte) '.');
+        int i = Bytes.lastIndexOf(bytes, (byte) '.');
         return (i <= 0 || i == bytes.length - 1) ? defaultValue : i;
     }
 
