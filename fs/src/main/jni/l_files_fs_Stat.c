@@ -40,8 +40,8 @@ jobject new_stat(JNIEnv *env, jclass stat_class, struct stat *stat) {
             stat_constructor,
             (jint) (*stat).st_mode,
             (jlong) (*stat).st_size,
-            (jlong) (*stat).st_mtime,
-            (jint) (*stat).st_mtime_nsec,
+            (jlong) (*stat).st_mtim.tv_sec,
+            (jint) (*stat).st_mtim.tv_nsec,
             (jlong) (*stat).st_blocks);
 }
 

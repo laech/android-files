@@ -57,7 +57,6 @@ void Java_linux_Vfs_init(JNIEnv *env, jclass class) {
     init_long_field(env, class, "VXFS_SUPER_MAGIC", VXFS_SUPER_MAGIC);
     init_long_field(env, class, "XENIX_SUPER_MAGIC", XENIX_SUPER_MAGIC);
     init_long_field(env, class, "XFS_SUPER_MAGIC", XFS_SUPER_MAGIC);
-    init_long_field(env, class, "_XIAFS_SUPER_MAGIC", _XIAFS_SUPER_MAGIC);
 
     jclass statfs_class = (*env)->FindClass(env, "linux/Vfs$Statfs");
     if (NULL != statfs_class) {
