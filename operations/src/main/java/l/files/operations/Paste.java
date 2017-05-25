@@ -1,6 +1,7 @@
 package l.files.operations;
 
 import java.io.IOException;
+import java.util.Collection;
 
 import l.files.fs.Path;
 
@@ -11,7 +12,7 @@ abstract class Paste extends AbstractOperation {
 
     private final Path destinationDir;
 
-    Paste(Iterable<? extends Path> sourcePaths, Path destinationDir) {
+    Paste(Collection<? extends Path> sourcePaths, Path destinationDir) {
         super(sourcePaths);
         this.destinationDir = requireNonNull(destinationDir, "destinationDir");
     }

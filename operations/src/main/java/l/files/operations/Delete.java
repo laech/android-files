@@ -1,6 +1,7 @@
 package l.files.operations;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -13,7 +14,7 @@ final class Delete extends AbstractOperation {
     private final AtomicInteger deletedItemCount = new AtomicInteger();
     private final AtomicLong deletedByteCount = new AtomicLong();
 
-    Delete(Iterable<? extends Path> sourcePaths) {
+    Delete(Collection<? extends Path> sourcePaths) {
         super(sourcePaths);
     }
 

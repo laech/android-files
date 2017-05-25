@@ -22,7 +22,7 @@ import l.files.fs.event.Observation;
 import l.files.fs.event.Observer;
 import l.files.fs.exception.AlreadyExist;
 
-import static com.google.common.base.Charsets.UTF_8;
+import static l.files.base.io.Charsets.UTF_8;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 

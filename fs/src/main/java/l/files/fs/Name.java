@@ -3,11 +3,12 @@ package l.files.fs;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.primitives.Bytes;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
+
+import static java.util.Collections.singletonList;
 
 public class Name implements Parcelable {
 
@@ -64,7 +65,7 @@ public class Name implements Parcelable {
     }
 
     private static void ensureContainsNoPathSeparator(byte[] name) {
-        if (Bytes.indexOf(name, (byte) '/') >= 0) {
+        if (ArrayUtils.indexOf(name, (byte) '/') >= 0) {
             throw new IllegalArgumentException(
                     "Path separator '/' is not allowed in file name: " +
                             new String(name, Path.ENCODING));
@@ -72,7 +73,7 @@ public class Name implements Parcelable {
     }
 
     private static void ensureContainsNoNullByte(byte[] name) {
-        int i = Bytes.indexOf(name, (byte) '\0');
+        int i = ArrayUtils.indexOf(name, (byte) '\0');
         if (i >= 0) {
             throw new IllegalArgumentException(
                     "Null character (index=" + i + ") is not allowed in file name: " +
@@ -101,7 +102,7 @@ public class Name implements Parcelable {
     }
 
     public RelativePath toPath() {
-        return new RelativePath(ImmutableList.of(this));
+        return new RelativePath(singletonList(this));
     }
 
     public boolean isHidden() {
@@ -113,7 +114,7 @@ public class Name implements Parcelable {
     }
 
     private int indexOfExtensionSeparator(int defaultValue) {
-        int i = Bytes.lastIndexOf(bytes, (byte) '.');
+        int i = ArrayUtils.lastIndexOf(bytes, (byte) '.');
         return (i <= 0 || i == bytes.length - 1) ? defaultValue : i;
     }
 

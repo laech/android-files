@@ -1,19 +1,18 @@
 package l.files.fs;
 
-import com.google.common.collect.ImmutableList;
-
 import java.io.ByteArrayOutputStream;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static l.files.base.Objects.requireNonNull;
 
 final class AbsolutePath extends Path {
 
     private final RelativePath path;
 
     AbsolutePath(RelativePath path) {
-        this.path = checkNotNull(path);
+        this.path = requireNonNull(path);
     }
 
     @Override
@@ -28,7 +27,7 @@ final class AbsolutePath extends Path {
     }
 
     @Override
-    public ImmutableList<Name> names() {
+    public List<Name> names() {
         return path.names();
     }
 

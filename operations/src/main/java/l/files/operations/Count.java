@@ -1,6 +1,7 @@
 package l.files.operations;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import l.files.fs.Path;
@@ -9,7 +10,7 @@ class Count extends AbstractOperation {
 
     private final AtomicInteger count = new AtomicInteger();
 
-    Count(Iterable<? extends Path> sourcePaths) {
+    Count(Collection<? extends Path> sourcePaths) {
         super(sourcePaths);
     }
 

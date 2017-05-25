@@ -13,7 +13,7 @@ import java.util.HashSet;
 import l.files.testing.fs.PathBaseTest;
 import l.files.testing.fs.Paths;
 
-import static com.google.common.base.Charsets.UTF_8;
+import static l.files.base.io.Charsets.UTF_8;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static l.files.fs.LinkOption.NOFOLLOW;

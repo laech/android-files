@@ -1,14 +1,15 @@
 package l.files.operations;
 
-import com.google.common.collect.ImmutableSet;
-
 import java.io.IOException;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 import l.files.fs.Path;
 import l.files.fs.TraversalCallback;
 
 import static java.lang.Thread.currentThread;
+import static java.util.Collections.unmodifiableSet;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.TraversalCallback.Result.CONTINUE;
 import static l.files.fs.TraversalCallback.Result.TERMINATE;
@@ -25,8 +26,8 @@ abstract class AbstractOperation implements FileOperation {
     private final Set<Path> paths;
     private final FailureRecorder recorder;
 
-    AbstractOperation(Iterable<? extends Path> paths) {
-        this.paths = ImmutableSet.copyOf(paths);
+    AbstractOperation(Collection<? extends Path> paths) {
+        this.paths = unmodifiableSet(new HashSet<>(paths));
         this.recorder = new FailureRecorder(ERROR_LIMIT);
     }
 
