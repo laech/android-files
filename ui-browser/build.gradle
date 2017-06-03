@@ -31,6 +31,7 @@ dependencies {
     compile project(':ui-preview')
     compile project(':ui-operations')
     compile project(':ui-bookmarks')
+    compile 'com.google.firebase:firebase-ads:10.2.6'
 
     androidTestCompile project(':testing-fs')
 

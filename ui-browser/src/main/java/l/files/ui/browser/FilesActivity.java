@@ -1,6 +1,5 @@
 package l.files.ui.browser;
 
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,6 +16,11 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Spinner;
+
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 
 import java.io.IOException;
 import java.util.List;
@@ -64,6 +68,7 @@ public final class FilesActivity extends BaseActivity implements
     private Toolbar toolbar;
     private Spinner title;
     private DrawerArrowDrawable navigationIcon;
+    private AdView adView;
 
     public List<Path> hierarchy() {
         return hierarchy.get();
@@ -132,17 +137,35 @@ public final class FilesActivity extends BaseActivity implements
             }
         });
 
+        initAdView();
+    }
+
+    private void initAdView() {
+        MobileAds.initialize(this, "ca-app-pub-3251738373408970~7732248243");
+        adView = find(R.id.adView, this);
+        adView.setAdListener(new AdListener() {
+            @Override
+            public void onAdLoaded() {
+                super.onAdLoaded();
+                if (adView.getVisibility() != VISIBLE) {
+                    adView.setVisibility(VISIBLE);
+                    adView.setAlpha(0);
+                    adView.animate().alpha(1);
+                }
+            }
+        });
+        adView.loadAd(new AdRequest.Builder()
+                .addTestDevice("9B671274D97DB09FED7E73F04C23EF21") // Nexus 5X
+                .addTestDevice("C30D27509816043FE18E3D2859175A61") // Nexus S
+                .addTestDevice("9024A3F0F3A31DB1A51170245F7901B2") // Galaxy Nexus
+                .build());
     }
 
     @Override
     protected void onDestroy() {
+        adView.destroy();
         getSupportFragmentManager().removeOnBackStackChangedListener(this);
         super.onDestroy();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -175,8 +198,15 @@ public final class FilesActivity extends BaseActivity implements
 
     @Override
     protected void onPause() {
+        adView.pause();
         Preview.get(this).writeCacheAsyncIfNeeded();
         super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        adView.resume();
     }
 
     @Override

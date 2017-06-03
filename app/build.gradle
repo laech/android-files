@@ -104,5 +104,8 @@ dependencies {
 
     compile project(':fs')
     compile project(':ui-browser')
+    compile 'com.google.firebase:firebase-core:10.2.6'
 
 }
+
+apply plugin: 'com.google.gms.google-services'
