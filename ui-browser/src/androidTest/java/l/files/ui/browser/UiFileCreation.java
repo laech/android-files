@@ -6,22 +6,19 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import l.files.base.Consumer;
 
 import static android.content.DialogInterface.BUTTON_POSITIVE;
+import static java.util.Collections.singletonList;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.ui.browser.Instrumentations.awaitOnMainThread;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 abstract class UiFileCreation<T extends UiFileCreation> {
 
@@ -69,15 +66,14 @@ abstract class UiFileCreation<T extends UiFileCreation> {
         @SuppressWarnings("unchecked")
         final Consumer<String>[] original = new Consumer[1];
 
-        @SuppressWarnings("unchecked")
-        final Consumer<String> consumer = mock(Consumer.class);
-        doAnswer(new Answer<Void>() {
+        final List<String> messages = new CopyOnWriteArrayList<>();
+        final Consumer<String> consumer = new Consumer<String>() {
             @Override
-            public Void answer(final InvocationOnMock i) throws Throwable {
-                original[0].accept((String) i.getArguments()[0]);
-                return null;
+            public void accept(String input) {
+                original[0].accept(input);
+                messages.add(input);
             }
-        }).when(consumer).accept(anyString());
+        };
 
         awaitOnMainThread(context.instrumentation(), new Runnable() {
             @Override
@@ -92,7 +88,7 @@ abstract class UiFileCreation<T extends UiFileCreation> {
         awaitOnMainThread(context.instrumentation(), new Runnable() {
             @Override
             public void run() {
-                verify(consumer).accept(message);
+                assertEquals(singletonList(message), messages);
             }
         });
 
