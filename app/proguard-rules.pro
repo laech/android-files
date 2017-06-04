@@ -23,8 +23,6 @@
 
 -dontwarn com.google.common.**
 
--keep class com.google.android.gms.**
-
 # Defined as l_files_operations_listeners
 -keep class l.files.ui.operations.NotificationProvider
 
