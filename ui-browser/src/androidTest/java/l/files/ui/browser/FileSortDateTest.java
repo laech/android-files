@@ -1,22 +1,22 @@
 package l.files.ui.browser;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.IOException;
 import java.util.Locale;
 
 import l.files.fs.Instant;
-import l.files.fs.LinkOption;
-import l.files.fs.Name;
 import l.files.fs.Path;
-import l.files.fs.Stat;
 
+import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.ui.browser.FileSort.MODIFIED;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
 
 public final class FileSortDateTest extends FileSortTest {
+
+    @Rule
+    public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Test
     public void sort_by_date_desc() throws Exception {
@@ -46,20 +46,15 @@ public final class FileSortDateTest extends FileSortTest {
         return createModified(name, instant, true);
     }
 
-    private Path createModified(String nameStr, Instant instant, boolean dir)
-            throws IOException {
-        Stat stat = mock(Stat.class);
-        Path file = mock(Path.class);
-        Name name = mock(Name.class, nameStr);
-        given(name.toString()).willReturn(nameStr);
-        given(stat.lastModifiedTime()).willReturn(instant);
-        given(stat.lastModifiedEpochSecond()).willReturn(instant.seconds());
-        given(stat.lastModifiedNanoOfSecond()).willReturn(instant.nanos());
-        given(stat.isDirectory()).willReturn(dir);
-        given(stat.isRegularFile()).willReturn(!dir);
-        given(file.stat(any(LinkOption.class))).willReturn(stat);
-        given(file.name()).willReturn(name);
-        return file;
+    private Path createModified(String name, Instant instant, boolean dir) throws IOException {
+        Path path;
+        if (dir) {
+            path = Path.of(temporaryFolder.newFolder(name));
+        } else {
+            path = Path.of(temporaryFolder.newFile(name));
+        }
+        path.setLastModifiedTime(NOFOLLOW, instant);
+        return path;
     }
 
 }

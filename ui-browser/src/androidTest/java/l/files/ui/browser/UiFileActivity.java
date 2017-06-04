@@ -50,7 +50,6 @@ import static l.files.ui.browser.Instrumentations.await;
 import static l.files.ui.browser.Instrumentations.awaitOnMainThread;
 import static l.files.ui.browser.Instrumentations.clickItemOnMainThread;
 import static l.files.ui.browser.Instrumentations.longClickItemOnMainThread;
-import static l.files.ui.browser.Mocks.mockMenuItem;
 
 final class UiFileActivity {
 
@@ -206,7 +205,7 @@ final class UiFileActivity {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
-                MenuItem item = mockMenuItem(android.R.id.home);
+                MenuItem item = new TestMenuItem(android.R.id.home);
                 assertTrue(activity().onOptionsItemSelected(item));
             }
         });

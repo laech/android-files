@@ -1,21 +1,23 @@
 package l.files.ui.browser;
 
+import com.google.common.base.Strings;
+
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.IOException;
 import java.util.Locale;
 
-import l.files.fs.LinkOption;
-import l.files.fs.Name;
 import l.files.fs.Path;
-import l.files.fs.Stat;
+import l.files.testing.fs.Paths;
 
 import static l.files.ui.browser.FileSort.SIZE;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 
 public final class FileSortSizeTest extends FileSortTest {
+
+    @Rule
+    public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Test
     public void sorts_files_by_size() throws Exception {
@@ -53,23 +55,17 @@ public final class FileSortSizeTest extends FileSortTest {
         testSortMatches(Locale.getDefault(), SIZE.comparator(), a, b);
     }
 
-    protected Path createFile(String name, long size) throws IOException {
-        Stat stat = mock(Stat.class);
-        Path file = mock(Path.class);
-        doReturn(size).when(stat).size();
-        doReturn(true).when(stat).isRegularFile();
-        doReturn(stat).when(file).stat(any(LinkOption.class));
-        doReturn(mock(Name.class, name)).when(file).name();
-        return file;
+    private Path createFile(String name, int size) throws IOException {
+        if (size > 10) {
+            throw new IllegalArgumentException("size to big: " + size);
+        }
+        Path path = Path.of(temporaryFolder.newFile(name));
+        Paths.writeUtf8(path, Strings.repeat("a", size));
+        return path;
     }
 
-    protected Path createDir(String name) throws IOException {
-        Stat stat = mock(Stat.class);
-        Path file = mock(Path.class);
-        doReturn(true).when(stat).isDirectory();
-        doReturn(stat).when(file).stat(any(LinkOption.class));
-        doReturn(mock(Name.class, name)).when(file).name();
-        return file;
+    private Path createDir(String name) throws IOException {
+        return Path.of(temporaryFolder.newFolder(name));
     }
 
 }

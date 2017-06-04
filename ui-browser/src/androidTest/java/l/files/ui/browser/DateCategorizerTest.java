@@ -4,10 +4,11 @@ import android.annotation.SuppressLint;
 import android.content.res.Resources;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
+import org.junit.rules.TemporaryFolder;
 
+import java.io.IOException;
 import java.text.Collator;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -17,24 +18,23 @@ import java.util.GregorianCalendar;
 import java.util.List;
 
 import l.files.fs.Instant;
-import l.files.fs.Name;
 import l.files.fs.Path;
-import l.files.fs.Stat;
 import l.files.ui.base.fs.FileInfo;
 
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
 import static java.util.Arrays.asList;
 import static java.util.Calendar.JUNE;
 import static java.util.Calendar.YEAR;
 import static java.util.Collections.unmodifiableList;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.concurrent.TimeUnit.HOURS;
+import static l.files.fs.LinkOption.NOFOLLOW;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 
 public final class DateCategorizerTest {
+
+    @Rule
+    public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     private Resources res;
     private Calendar midnight;
@@ -50,13 +50,7 @@ public final class DateCategorizerTest {
         now.add(Calendar.HOUR_OF_DAY, 8);
         categorizer = new DateCategorizer(now.getTimeInMillis());
         collator = Collator.getInstance();
-        res = mock(Resources.class);
-        given(res.getString(anyInt())).willAnswer(new Answer<String>() {
-            @Override
-            public String answer(InvocationOnMock invocation) throws Throwable {
-                return invocation.getArguments()[0].toString();
-            }
-        });
+        res = getInstrumentation().getContext().getResources();
     }
 
     @Test
@@ -182,7 +176,7 @@ public final class DateCategorizerTest {
     }
 
     @Test
-    public void modified7Days() {
+    public void modified7Days() throws Exception {
         assertCategory(
                 res.getString(R.string.previous_7_days),
                 file(millis(midnight) - DAYS.toMillis(1) - 1),
@@ -192,7 +186,7 @@ public final class DateCategorizerTest {
     }
 
     @Test
-    public void modified30Days() {
+    public void modified30Days() throws Exception {
         assertCategory(
                 res.getString(R.string.previous_30_days),
                 file(millis(midnight) - DAYS.toMillis(7) - 1),
@@ -202,7 +196,7 @@ public final class DateCategorizerTest {
     }
 
     @Test
-    public void modifiedThisYear() {
+    public void modifiedThisYear() throws Exception {
         Calendar month0 = calendar(millis(midnight) - monthMillis() - 1);
         Calendar month1 = calendar(millis(midnight) - monthMillis());
         Calendar month2 = calendar(millis(midnight) - monthMillis() * 2);
@@ -226,7 +220,7 @@ public final class DateCategorizerTest {
         return new SimpleDateFormat("MMMM").format(calendar.getTime());
     }
 
-    private void assertShowMonthOnly(Calendar month) {
+    private void assertShowMonthOnly(Calendar month) throws IOException {
         String actual = label(file(month));
         String expected = formatMonth(month);
         assertEquals(expected, actual);
@@ -238,7 +232,7 @@ public final class DateCategorizerTest {
     }
 
     @Test
-    public void modifiedYearsAgo() {
+    public void modifiedYearsAgo() throws Exception {
         Calendar year2 = calendar(millis(midnight) - yearMillis() * 2);
         Calendar year1 = calendar(millis(midnight) - yearMillis());
         Calendar year0 = calendar(millis(midnight));
@@ -254,32 +248,27 @@ public final class DateCategorizerTest {
         return DAYS.toMillis(365);
     }
 
-    private void assertShowYearOnly(Calendar year) {
+    private void assertShowYearOnly(Calendar year) throws IOException {
         String expected = String.valueOf(year.get(YEAR));
         String actual = label(file(year));
         assertEquals(expected, actual);
     }
 
     @Test
-    public void modifiedUnknownFuture() {
+    public void modifiedUnknownFuture() throws Exception {
         assertCategory(
                 res.getString(R.string.future),
                 file(millis(midnight) + DAYS.toMillis(1)));
     }
 
-    private FileInfo file(Calendar time) {
+    private FileInfo file(Calendar time) throws IOException {
         return file(time.getTimeInMillis());
     }
 
-    private FileInfo file(long time) {
-        Stat stat = mock(Stat.class);
-        Path file = mock(Path.class);
-        doReturn(mock(Name.class, String.valueOf(time))).when(file).name();
-        Instant instant = Instant.ofMillis(time);
-        given(stat.lastModifiedTime()).willReturn(instant);
-        given(stat.lastModifiedEpochSecond()).willReturn(instant.seconds());
-        given(stat.lastModifiedNanoOfSecond()).willReturn(instant.nanos());
-        return FileInfo.create(file, stat, null, null, collator);
+    private FileInfo file(long time) throws IOException {
+        Path path = Path.of(temporaryFolder.newFile());
+        path.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(time));
+        return FileInfo.create(path, path.stat(NOFOLLOW), null, null, collator);
     }
 
     private void assertCategory(String expected, FileInfo... stats) {
