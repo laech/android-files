@@ -34,18 +34,12 @@ public final class NewDirFragment extends FileCreationFragment {
     @Nullable
     private AsyncTask<?, ?, ?> suggestion;
 
-    @Nullable
-    private AsyncTask<?, ?, ?> creation;
-
     @Override
     public void onDestroy() {
         super.onDestroy();
 
         if (suggestion != null) {
             suggestion.cancel(true);
-        }
-        if (creation != null) {
-            creation.cancel(true);
         }
     }
 
@@ -110,7 +104,8 @@ public final class NewDirFragment extends FileCreationFragment {
     }
 
     private void createDir(Path dir) {
-        creation = new CreateDir(dir).executeOnExecutor(THREAD_POOL_EXECUTOR);
+        // Don't cancel this onDestroy for directory to be created
+        new CreateDir(dir).executeOnExecutor(THREAD_POOL_EXECUTOR);
     }
 
     private class CreateDir extends AsyncTask<Path, Void, IOException> {
