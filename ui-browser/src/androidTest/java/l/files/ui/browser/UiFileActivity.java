@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -525,7 +526,8 @@ final class UiFileActivity {
             @Override
             public void run() {
                 List<Path> actual = activity().hierarchy();
-                List<Path> expected = dir.hierarchy().reverse();
+                List<Path> expected = new ArrayList<>(dir.hierarchy());
+                Collections.reverse(expected);
                 assertEquals(expected, actual);
                 assertEquals(dir, activity().title().getSelectedItem());
             }
