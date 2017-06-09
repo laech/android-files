@@ -1,7 +1,5 @@
 package l.files.ui.browser;
 
-import com.google.common.base.Strings;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -10,6 +8,7 @@ import java.io.IOException;
 import java.util.Locale;
 
 import l.files.fs.Path;
+import l.files.fs.Strings;
 import l.files.testing.fs.Paths;
 
 import static l.files.ui.browser.FileSort.SIZE;
