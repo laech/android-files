@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.Locale;
 
 import l.files.fs.Path;
-import l.files.fs.Strings;
 import l.files.testing.fs.Paths;
 
 import static l.files.ui.browser.FileSort.SIZE;
@@ -59,8 +58,16 @@ public final class FileSortSizeTest extends FileSortTest {
             throw new IllegalArgumentException("size to big: " + size);
         }
         Path path = Path.of(temporaryFolder.newFile(name));
-        Paths.writeUtf8(path, Strings.repeat("a", size));
+        Paths.writeUtf8(path, repeat("a", size));
         return path;
+    }
+
+    private String repeat(String s, int n) {
+        StringBuilder builder = new StringBuilder(s.length() * n);
+        for (int i = 0; i < n; i++) {
+            builder.append(s);
+        }
+        return builder.toString();
     }
 
     private Path createDir(String name) throws IOException {
