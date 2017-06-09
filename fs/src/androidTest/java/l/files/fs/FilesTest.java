@@ -21,7 +21,7 @@ import l.files.testing.fs.PathBaseTest;
 import l.files.testing.fs.Paths;
 
 import static android.test.MoreAsserts.assertNotEqual;
-import static com.google.common.base.Charsets.UTF_8;
+import static l.files.base.io.Charsets.UTF_8;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;

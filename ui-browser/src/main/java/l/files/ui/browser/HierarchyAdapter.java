@@ -7,6 +7,8 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -21,6 +23,7 @@ import static android.graphics.PorterDuff.Mode.SRC_ATOP;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.unmodifiableList;
 import static l.files.ui.base.fs.UserDirs.DIR_HOME;
 import static l.files.ui.base.view.Views.find;
 
@@ -33,7 +36,9 @@ final class HierarchyAdapter extends BaseAdapter {
 
     void set(Path dir) {
         directory = dir;
-        hierarchy = dir.hierarchy().reverse();
+        hierarchy = new ArrayList<>(dir.hierarchy());
+        Collections.reverse(hierarchy);
+        hierarchy = unmodifiableList(hierarchy);
         notifyDataSetChanged();
     }
 

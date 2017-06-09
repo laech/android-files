@@ -1,7 +1,5 @@
 package l.files.fs;
 
-import com.google.common.base.Strings;
-
 import org.junit.Test;
 
 import java.io.IOException;
@@ -16,7 +14,7 @@ import l.files.fs.exception.TooManySymbolicLinks;
 import l.files.testing.fs.PathBaseTest;
 import l.files.testing.fs.Paths;
 
-import static com.google.common.collect.Sets.powerSet;
+import static java.util.Arrays.asList;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Permission.OWNER_READ;
 import static l.files.fs.Permission.OWNER_WRITE;
@@ -28,7 +26,12 @@ public final class PathSetPermissionsTest extends PathBaseTest {
 
     @Test
     public void sets_correct_permissions() throws Exception {
-        for (Set<Permission> permissions : powerSet(Permission.all())) {
+        for (Set<Permission> permissions : asList(
+                Permission.all(),
+                Permission.read(),
+                Permission.write(),
+                Permission.execute()
+        )) {
             dir1().setPermissions(permissions);
             assertEquals(permissions, dir1().stat(NOFOLLOW).permissions());
         }

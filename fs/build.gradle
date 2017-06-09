@@ -10,9 +10,11 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        ndk {
-            moduleName 'fs'
-            ldLibs 'log'
+    }
+
+    externalNativeBuild {
+        cmake {
+            path 'CMakeLists.txt'
         }
     }
 
@@ -24,8 +26,6 @@ android {
 
 dependencies {
     compile project(':base')
-    compile "com.google.guava:guava:$guavaVersion"
-    compile 'org.apache.commons:commons-lang3:3.5'
 
     androidTestCompile project(':testing')
     androidTestCompile 'junit:junit:4.12'

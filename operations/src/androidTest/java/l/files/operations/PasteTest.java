@@ -1,10 +1,9 @@
 package l.files.operations;
 
-import com.google.common.collect.ImmutableSet;
-
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -13,6 +12,7 @@ import l.files.testing.fs.PathBaseTest;
 import l.files.testing.fs.Paths;
 
 import static java.lang.Thread.currentThread;
+import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static org.junit.Assert.assertTrue;
@@ -39,10 +39,10 @@ public abstract class PasteTest extends PathBaseTest {
      */
     @Test
     public void doesNotOverrideExistingFile() throws Exception {
-        Set<Path> sources = ImmutableSet.of(
+        Set<Path> sources = new HashSet<>(asList(
             dir1().concat("a.txt").createFile(),
             dir1().concat("b.mp4").createFile()
-        );
+        ));
         dir1().concat("1").createDirectory();
         dir1().concat("1/a.txt").createFile();
         dir1().concat("1/b.mp4").createFile();
@@ -81,10 +81,10 @@ public abstract class PasteTest extends PathBaseTest {
 
     @Test
     public void doesNothingIfAlreadyCancelledOnExecution() throws Exception {
-        final Set<Path> sources = ImmutableSet.of(
+        final Set<Path> sources = new HashSet<>(asList(
                 Paths.createFiles(dir1().concat("a/1.txt")),
                 Paths.createFiles(dir1().concat("a/2.txt"))
-        );
+        ));
         final Path dstDir = dir1().concat("b").createDirectory();
 
         Thread thread = new Thread(new Runnable() {

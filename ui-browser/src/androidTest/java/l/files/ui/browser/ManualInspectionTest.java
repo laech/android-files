@@ -14,7 +14,7 @@ import l.files.testing.fs.Paths;
 import static android.os.Environment.getExternalStorageDirectory;
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
 import static android.test.MoreAsserts.assertNotEqual;
-import static com.google.common.base.Charsets.UTF_8;
+import static l.files.base.io.Charsets.UTF_8;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.asList;
 import static java.util.concurrent.TimeUnit.DAYS;

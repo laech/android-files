@@ -7,10 +7,6 @@ import android.os.ParcelFileDescriptor.AutoCloseInputStream;
 import android.os.ParcelFileDescriptor.AutoCloseOutputStream;
 import android.os.Parcelable;
 
-import com.google.common.collect.ImmutableList;
-
-import org.apache.commons.lang3.ArrayUtils;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -18,14 +14,17 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
 
+import l.files.base.Bytes;
 import l.files.fs.event.BatchObserver;
 import l.files.fs.event.BatchObserverNotifier;
 import l.files.fs.event.Observation;
@@ -47,8 +46,10 @@ import linux.Stdio;
 import linux.Unistd;
 
 import static android.os.ParcelFileDescriptor.adoptFd;
-import static com.google.common.base.Charsets.UTF_8;
+import static java.util.Collections.reverse;
+import static java.util.Collections.unmodifiableList;
 import static l.files.base.Throwables.addSuppressed;
+import static l.files.base.io.Charsets.UTF_8;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Stat.S_IRUSR;
@@ -97,10 +98,10 @@ public abstract class Path implements Parcelable {
         return absolute ? new AbsolutePath(result) : result;
     }
 
-    private static ImmutableList<Name> getNames(byte[] path) {
-        ImmutableList.Builder<Name> names = ImmutableList.builder();
+    private static List<Name> getNames(byte[] path) {
+        List<Name> names = new ArrayList<>();
         for (int start = 0, end; start < path.length; start = end + 1) {
-            end = ArrayUtils.indexOf(path, (byte) '/', start);
+            end = Bytes.indexOf(path, (byte) '/', start);
             if (end == -1) {
                 end = path.length;
             }
@@ -108,7 +109,7 @@ public abstract class Path implements Parcelable {
                 names.add(new Name(path, start, end));
             }
         }
-        return names.build();
+        return unmodifiableList(names);
     }
 
     public byte[] toByteArray() {
@@ -185,7 +186,7 @@ public abstract class Path implements Parcelable {
      *     "/a/b/c" -> ["a", "b", "c"]
      * </pre>
      */
-    public abstract ImmutableList<Name> names();
+    public abstract List<Name> names();
 
     /**
      * Gets the name of this file, if any. For example:
@@ -213,12 +214,13 @@ public abstract class Path implements Parcelable {
     @Nullable
     public abstract Path parent();
 
-    public ImmutableList<Path> hierarchy() {
-        ImmutableList.Builder<Path> hierarchy = ImmutableList.builder();
+    public List<Path> hierarchy() {
+        List<Path> hierarchy = new ArrayList<>();
         for (Path p = this; p != null; p = p.parent()) {
             hierarchy.add(p);
         }
-        return hierarchy.build().reverse();
+        reverse(hierarchy);
+        return unmodifiableList(hierarchy);
     }
 
     public abstract boolean isHidden();

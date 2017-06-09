@@ -1,27 +1,27 @@
 package l.files.fs;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.UnmodifiableIterator;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Collections.unmodifiableList;
 
 final class RelativePath extends Path {
 
-    private final ImmutableList<Name> names;
+    private final List<Name> names;
 
     @SuppressWarnings("unchecked")
-    RelativePath(ImmutableList<? extends Name> names) {
-        this.names = (ImmutableList<Name>) checkNotNull(names);
+    RelativePath(List<? extends Name> names) {
+        this.names = unmodifiableList(new ArrayList<>(names));
     }
 
     @Override
     public void toByteArray(ByteArrayOutputStream out) {
-        UnmodifiableIterator<Name> iterator = names.iterator();
+        Iterator<Name> iterator = names.iterator();
         while (iterator.hasNext()) {
             iterator.next().appendTo(out);
             if (iterator.hasNext()) {
@@ -40,16 +40,16 @@ final class RelativePath extends Path {
     }
 
     @Override
-    public ImmutableList<Name> names() {
+    public List<Name> names() {
         return names;
     }
 
     @Override
     public RelativePath concat(Path path) {
-        return new RelativePath(ImmutableList.<Name>builder()
-                .addAll(names)
-                .addAll(path.names())
-                .build());
+        List<Name> names = new ArrayList<>();
+        names.addAll(this.names);
+        names.addAll(path.names());
+        return new RelativePath(names);
     }
 
     @Nullable
@@ -58,7 +58,7 @@ final class RelativePath extends Path {
         return names.isEmpty() ? null : new RelativePath(parentNames());
     }
 
-    private ImmutableList<Name> parentNames() {
+    private List<Name> parentNames() {
         return names.subList(0, names.size() - 1);
     }
 
@@ -82,7 +82,7 @@ final class RelativePath extends Path {
                 prefix.names().equals(namesToLengthOf(prefix));
     }
 
-    private ImmutableList<Name> namesToLengthOf(Path prefix) {
+    private List<Name> namesToLengthOf(Path prefix) {
         return names.subList(0, prefix.names().size());
     }
 
@@ -104,7 +104,7 @@ final class RelativePath extends Path {
         return new RelativePath(namesFromLengthOf(prefix));
     }
 
-    private ImmutableList<Name> namesFromLengthOf(Path prefix) {
+    private List<Name> namesFromLengthOf(Path prefix) {
         return names.subList(prefix.names().size(), names.size());
     }
 }

@@ -50,7 +50,6 @@ public final class Vfs extends Native {
     public static final long VXFS_SUPER_MAGIC = placeholder();
     public static final long XENIX_SUPER_MAGIC = placeholder();
     public static final long XFS_SUPER_MAGIC = placeholder();
-    public static final long _XIAFS_SUPER_MAGIC = placeholder();
 
     static long placeholder() {
         return -1;

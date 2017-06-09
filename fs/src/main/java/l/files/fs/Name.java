@@ -3,11 +3,12 @@ package l.files.fs;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.primitives.Bytes;
-
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
+
+import l.files.base.Bytes;
+
+import static java.util.Collections.singletonList;
 
 public class Name implements Parcelable {
 
@@ -101,7 +102,7 @@ public class Name implements Parcelable {
     }
 
     public RelativePath toPath() {
-        return new RelativePath(ImmutableList.of(this));
+        return new RelativePath(singletonList(this));
     }
 
     public boolean isHidden() {

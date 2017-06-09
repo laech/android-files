@@ -1,6 +1,7 @@
 package l.files.ui.preview;
 
 import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,14 +49,16 @@ public abstract class CacheTest<V, C extends Cache<V>> {
         stat = file.stat(FOLLOW);
     }
 
-    public void test_gets_what_has_put_in() throws Exception {
+    @Test
+    public void gets_what_has_put_in() throws Exception {
         Rect constraint = newConstraint();
         V value = newValue();
         cache.put(file, stat, constraint, value);
         assertValueEquals(value, cache.get(file, stat, constraint, true));
     }
 
-    public void test_gets_null_when_time_changes() throws Exception {
+    @Test
+    public void gets_null_when_time_changes() throws Exception {
         Rect constraint = newConstraint();
         V value = newValue();
         cache.put(file, stat, constraint, value);
@@ -64,7 +67,8 @@ public abstract class CacheTest<V, C extends Cache<V>> {
         assertNull(cache.get(file, file.stat(NOFOLLOW), constraint, true));
     }
 
-    public void test_gets_old_value_if_stat_not_provided() throws Exception {
+    @Test
+    public void gets_old_value_if_stat_not_provided() throws Exception {
 
         Rect constraint = newConstraint();
         V value = newValue();

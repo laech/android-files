@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.nio.channels.ClosedByInterruptException;
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -25,7 +26,7 @@ final class Copy extends Paste {
     private final AtomicLong copiedByteCount = new AtomicLong();
     private final AtomicInteger copiedItemCount = new AtomicInteger();
 
-    Copy(Iterable<? extends Path> sourcePaths, Path destinationDir) {
+    Copy(Collection<? extends Path> sourcePaths, Path destinationDir) {
         super(sourcePaths, destinationDir);
     }
 

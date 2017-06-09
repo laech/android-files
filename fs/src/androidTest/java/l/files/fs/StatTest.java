@@ -2,7 +2,9 @@ package l.files.fs;
 
 import android.os.Parcel;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -20,8 +22,6 @@ import l.files.testing.fs.PathBaseTest;
 import linux.ErrnoException;
 
 import static android.test.MoreAsserts.assertNotEqual;
-import static com.google.common.io.Files.createTempDir;
-import static java.io.File.createTempFile;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Stat.chmod;
 import static l.files.fs.Stat.fstat;
@@ -38,6 +38,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public final class StatTest extends PathBaseTest {
+
+    @Rule
+    public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Test
     public void can_create_from_parcel() throws Exception {
@@ -72,18 +75,11 @@ public final class StatTest extends PathBaseTest {
         assertNotEqual(0, values.size());
     }
 
-    private static File createNonEmptyFile() throws IOException {
-
-        File file = createTempFile(StatTest.class.getSimpleName(), null);
-        file.deleteOnExit();
-
-        OutputStream out = new FileOutputStream(file);
-        try {
+    private File createNonEmptyFile() throws IOException {
+        File file = temporaryFolder.newFile();
+        try (OutputStream out = new FileOutputStream(file)) {
             out.write(new byte[1 << 16]);
-        } finally {
-            out.close();
         }
-
         return file;
     }
 
@@ -91,43 +87,30 @@ public final class StatTest extends PathBaseTest {
     public void fstat_returns_correct_information_for_file() throws Exception {
 
         File file = createNonEmptyFile();
-        try {
 
-            FileInputStream in = new FileInputStream(file);
-            try {
+        try (FileInputStream in = new FileInputStream(file)) {
 
-                Field field = FileDescriptor.class.getDeclaredField("descriptor");
-                field.setAccessible(true);
-                int fd = field.getInt(in.getFD());
+            Field field = FileDescriptor.class.getDeclaredField("descriptor");
+            field.setAccessible(true);
+            int fd = field.getInt(in.getFD());
 
-                Stat stat = fstat(fd);
-                assertStat(file, stat);
-
-            } finally {
-                in.close();
-            }
-
-        } finally {
-            assertTrue(file.delete());
+            Stat stat = fstat(fd);
+            assertStat(file, stat);
         }
     }
 
     @Test
     public void fstat_returns_correct_information_for_directory() throws Exception {
 
-        File dir = createTempDir();
+        File dir = temporaryFolder.newFolder();
+        int fd = open(dir.getPath().getBytes(), 0, 0);
         try {
-            int fd = open(dir.getPath().getBytes(), 0, 0);
-            try {
 
-                Stat stat = fstat(fd);
-                assertStat(dir, stat);
+            Stat stat = fstat(fd);
+            assertStat(dir, stat);
 
-            } finally {
-                close(fd);
-            }
         } finally {
-            assertTrue(dir.delete() || !dir.exists());
+            close(fd);
         }
     }
 
@@ -143,12 +126,7 @@ public final class StatTest extends PathBaseTest {
 
     @Test
     public void stat_returns_correct_information_for_file() throws Exception {
-        File file = createNonEmptyFile();
-        try {
-            assertStat(file);
-        } finally {
-            assertTrue(file.delete());
-        }
+        assertStat(createNonEmptyFile());
     }
 
     @Test
@@ -158,21 +136,10 @@ public final class StatTest extends PathBaseTest {
 
     @Test
     public void stat_returns_correct_information_for_symlink() throws Exception {
-
         File file = createNonEmptyFile();
-        try {
-
-            File link = new File(file.getParent(), file.getName() + "-link");
-            symlink(file.getPath().getBytes(), link.getPath().getBytes());
-            try {
-                assertStat(link);
-            } finally {
-                assertTrue(link.delete());
-            }
-
-        } finally {
-            assertTrue(file.delete());
-        }
+        File link = new File(file.getParent(), file.getName() + "-link");
+        symlink(file.getPath().getBytes(), link.getPath().getBytes());
+        assertStat(link);
     }
 
     private static void assertStat(File file) throws ErrnoException {
@@ -208,12 +175,7 @@ public final class StatTest extends PathBaseTest {
 
     @Test
     public void lstat_returns_correct_information_for_file() throws Exception {
-        File file = createNonEmptyFile();
-        try {
-            assertLstat(file);
-        } finally {
-            assertTrue(file.delete());
-        }
+        assertLstat(createNonEmptyFile());
     }
 
     @Test
@@ -223,25 +185,12 @@ public final class StatTest extends PathBaseTest {
 
     @Test
     public void lstat_returns_correct_information_for_symlink() throws Exception {
-
         File file = createNonEmptyFile();
-        try {
-
-            File link = new File(file.getParent(), file.getName() + "-link");
-            symlink(file.getPath().getBytes(), link.getPath().getBytes());
-            try {
-
-                Stat stat = lstat(link.getPath().getBytes());
-                assertEquals(true, stat.isSymbolicLink());
-                assertNotEqual(file.length(), stat.size());
-
-            } finally {
-                assertTrue(link.delete());
-            }
-
-        } finally {
-            assertTrue(file.delete());
-        }
+        File link = new File(file.getParent(), file.getName() + "-link");
+        symlink(file.getPath().getBytes(), link.getPath().getBytes());
+        Stat stat = lstat(link.getPath().getBytes());
+        assertEquals(true, stat.isSymbolicLink());
+        assertNotEqual(file.length(), stat.size());
     }
 
     @Test
@@ -267,26 +216,22 @@ public final class StatTest extends PathBaseTest {
     @Test
     public void chmod_updates_permission() throws Exception {
 
-        File file = createTempFile(getClass().getSimpleName(), null);
-        try {
+        File file = temporaryFolder.newFile();
 
-            assertTrue(file.setReadable(true));
-            assertTrue(file.setWritable(true));
-            assertTrue(file.setExecutable(true));
+        assertTrue(file.setReadable(true));
+        assertTrue(file.setWritable(true));
+        assertTrue(file.setExecutable(true));
 
-            assertTrue(file.canRead());
-            assertTrue(file.canWrite());
-            assertTrue(file.canExecute());
+        assertTrue(file.canRead());
+        assertTrue(file.canWrite());
+        assertTrue(file.canExecute());
 
-            chmod(file.getPath().getBytes(), 0);
+        chmod(file.getPath().getBytes(), 0);
 
-            assertFalse(file.canRead());
-            assertFalse(file.canWrite());
-            assertFalse(file.canExecute());
+        assertFalse(file.canRead());
+        assertFalse(file.canWrite());
+        assertFalse(file.canExecute());
 
-        } finally {
-            assertTrue(file.delete());
-        }
     }
 
     @Test
@@ -314,26 +259,19 @@ public final class StatTest extends PathBaseTest {
     @Test
     @SuppressWarnings("OctalInteger")
     public void mkdir_creates_new_dir() throws Exception {
-        File dir = createTempFile(getClass().getSimpleName(), null);
-        try {
+        File dir = new File(temporaryFolder.getRoot(), "dir");
 
-            assertTrue(dir.delete());
-            assertFalse(dir.exists());
+        mkdir(dir.getPath().getBytes(), 0700);
+        assertTrue(dir.exists());
+        assertTrue(dir.isDirectory());
 
-            mkdir(dir.getPath().getBytes(), 0700);
-            assertTrue(dir.exists());
-            assertTrue(dir.isDirectory());
+        Stat stat = stat(dir.getPath().getBytes());
+        assertEquals(
+                EnumSet.of(
+                        Permission.OWNER_READ,
+                        Permission.OWNER_WRITE,
+                        Permission.OWNER_EXECUTE),
+                stat.permissions());
 
-            Stat stat = stat(dir.getPath().getBytes());
-            assertEquals(
-                    EnumSet.of(
-                            Permission.OWNER_READ,
-                            Permission.OWNER_WRITE,
-                            Permission.OWNER_EXECUTE),
-                    stat.permissions());
-
-        } finally {
-            assertTrue(!dir.exists() || dir.delete());
-        }
     }
 }

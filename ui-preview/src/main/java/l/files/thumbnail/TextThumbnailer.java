@@ -26,7 +26,7 @@ import static android.util.TypedValue.applyDimension;
 import static android.view.View.MeasureSpec.AT_MOST;
 import static android.view.View.MeasureSpec.UNSPECIFIED;
 import static android.view.View.MeasureSpec.makeMeasureSpec;
-import static com.google.common.base.Charsets.UTF_8;
+import static l.files.base.io.Charsets.UTF_8;
 import static java.lang.Math.min;
 
 public final class TextThumbnailer implements Thumbnailer<InputStream> {

@@ -7,7 +7,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import java.util.Collection;
 
-import static com.google.common.base.Charsets.UTF_8;
+import static l.files.base.io.Charsets.UTF_8;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 

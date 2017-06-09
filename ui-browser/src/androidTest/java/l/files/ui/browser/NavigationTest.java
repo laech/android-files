@@ -29,7 +29,7 @@ import static android.text.format.DateUtils.FORMAT_NO_YEAR;
 import static android.text.format.DateUtils.FORMAT_SHOW_DATE;
 import static android.text.format.DateUtils.formatDateTime;
 import static android.text.format.Formatter.formatShortFileSize;
-import static com.google.common.base.Charsets.UTF_8;
+import static l.files.base.io.Charsets.UTF_8;
 import static java.lang.System.currentTimeMillis;
 import static java.lang.System.nanoTime;
 import static java.util.concurrent.TimeUnit.DAYS;

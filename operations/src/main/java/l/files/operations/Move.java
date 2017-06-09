@@ -1,6 +1,7 @@
 package l.files.operations;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import l.files.fs.Path;
@@ -9,7 +10,7 @@ final class Move extends Paste {
 
     private final AtomicInteger movedItemCount = new AtomicInteger();
 
-    Move(Iterable<? extends Path> sourcePaths, Path destinationPath) {
+    Move(Collection<? extends Path> sourcePaths, Path destinationPath) {
         super(sourcePaths, destinationPath);
     }
 
