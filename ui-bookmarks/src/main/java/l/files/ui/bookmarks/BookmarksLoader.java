@@ -13,6 +13,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import l.files.bookmarks.BookmarkManager;
+import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.ui.base.text.CollationKey;
 
@@ -50,8 +51,10 @@ final class BookmarksLoader extends AsyncTaskLoader<List<Path>> {
     private List<Entry> collateBookmarks(Collator collator) {
         List<Entry> collation = new ArrayList<>();
         for (Path bookmark : manager.getBookmarks()) {
-            CollationKey key = CollationKey.create(collator, bookmark.name().toString());
-            collation.add(new Entry(bookmark, key));
+            Name name = bookmark.name();
+            collation.add(new Entry(bookmark, name == null
+                    ? CollationKey.create(collator, "")
+                    : CollationKey.create(collator, name.toString())));
         }
         Collections.sort(collation, new Comparator<Entry>() {
             @Override
