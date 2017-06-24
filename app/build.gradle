@@ -9,8 +9,8 @@ android {
         applicationId 'l.files'
         minSdkVersion project.minSdkVersion
         targetSdkVersion project.targetSdkVersion
-        versionCode 27
-        versionName '4.5.1'
+        versionCode 29
+        versionName '4.6.1'
     }
 
     compileOptions {
@@ -104,5 +104,8 @@ dependencies {
 
     compile project(':fs')
     compile project(':ui-browser')
+    compile 'com.google.firebase:firebase-core:10.2.6'
 
 }
+
+apply plugin: 'com.google.gms.google-services'
