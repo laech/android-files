@@ -526,6 +526,7 @@ final class Observable extends Native
                 onObserverStopped(wd);
 
             } else {
+                // FIXME
                 throw new RuntimeException(eventNames(event) + ": " +
                         (child != null ? Name.of(child) : null));
             }
