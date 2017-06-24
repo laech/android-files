@@ -3,6 +3,8 @@ package l.files.fs;
 import android.os.Handler;
 import android.util.Log;
 
+import com.google.firebase.crash.FirebaseCrash;
+
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -526,8 +528,9 @@ final class Observable extends Native
                 onObserverStopped(wd);
 
             } else {
-                throw new RuntimeException(eventNames(event) + ": " +
-                        (child != null ? Name.of(child) : null));
+                // FIXME
+                FirebaseCrash.log("Unknown event: " + eventNames(event) + " child == null: " + (child == null));
+                // Not logging the name of people's privacy files
             }
 
         } else {
@@ -684,6 +687,9 @@ final class Observable extends Native
         if (0 != (event & IN_Q_OVERFLOW)) events.add("IN_Q_OVERFLOW");
         if (0 != (event & IN_UNMOUNT)) events.add("IN_UNMOUNT");
         if (0 != (event & IN_ISDIR)) events.add("IN_ISDIR");
+        if (events.isEmpty()) {
+            events.add("UNKNOWN:" + String.valueOf(event));
+        }
         return events;
     }
 
