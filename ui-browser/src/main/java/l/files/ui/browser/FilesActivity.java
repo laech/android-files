@@ -228,6 +228,10 @@ public final class FilesActivity extends BaseActivity implements
         if (fragment == null) {
             return;
         }
+        Path directory = fragment().directory();
+        if (directory == null) {
+            return;
+        }
         int backStacks = getSupportFragmentManager().getBackStackEntryCount();
         if (backStacks == 0) {
             navigationIcon.setProgress(0);
@@ -235,7 +239,7 @@ public final class FilesActivity extends BaseActivity implements
             navigationIcon.setProgress(1);
         }
         hierarchy.set(fragment.directory());
-        title.setSelection(hierarchy.indexOf(fragment().directory()));
+        title.setSelection(hierarchy.indexOf(directory));
     }
 
     @Override
