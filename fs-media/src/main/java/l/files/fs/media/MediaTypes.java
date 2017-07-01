@@ -40,7 +40,7 @@ public final class MediaTypes {
             Context context,
             Path path,
             Stat stat) throws IOException {
-        return Detector.INSTANCE.detect(context, path, stat).intern();
+        return Detector.INSTANCE.detect(context, path, stat);
     }
 
 }
