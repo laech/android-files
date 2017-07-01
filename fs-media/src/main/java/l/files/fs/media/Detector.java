@@ -14,6 +14,7 @@ import java.io.InputStream;
 
 import javax.annotation.Nullable;
 
+import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 
@@ -111,7 +112,10 @@ final class Detector {
             Path path) throws IOException {
 
         Metadata meta = new Metadata();
-        meta.add(RESOURCE_NAME_KEY, path.name().toString());
+        Name name = path.name();
+        if (name != null) {
+            meta.add(RESOURCE_NAME_KEY, name.toString());
+        }
         InputStream in = new BufferedInputStream(path.newInputStream());
         try {
             return types.detect(in, meta).getBaseType().toString();
