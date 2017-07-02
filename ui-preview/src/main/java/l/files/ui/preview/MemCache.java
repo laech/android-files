@@ -16,7 +16,7 @@ abstract class MemCache<K, V> extends Cache<V> {
 
     @Override
     V get(Path path, Stat stat, Rect constraint, boolean matchTime) {
-        K key = getKey(path, stat, constraint);
+        K key = getKey(path, constraint);
         Snapshot<V> value = delegate().get(key);
         if (value == null) {
             return null;
@@ -27,17 +27,17 @@ abstract class MemCache<K, V> extends Cache<V> {
         return value.get();
     }
 
-    abstract K getKey(Path path, Stat stat, Rect constraint);
+    abstract K getKey(Path path, Rect constraint);
 
     @Override
     Snapshot<V> put(Path path, Stat stat, Rect constraint, V value) {
         return delegate().put(
-                getKey(path, stat, constraint),
+                getKey(path, constraint),
                 Snapshot.of(value, lastModifiedTime(stat)));
     }
 
-    Snapshot<V> remove(Path path, Stat stat, Rect constraint) {
-        return delegate().remove(getKey(path, stat, constraint));
+    Snapshot<V> remove(Path path, Rect constraint) {
+        return delegate().remove(getKey(path, constraint));
     }
 
     abstract LruCache<K, Snapshot<V>> delegate();

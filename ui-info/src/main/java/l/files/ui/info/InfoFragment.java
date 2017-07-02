@@ -146,7 +146,7 @@ public final class InfoFragment
             if (size != null) {
                 setImageViewMinSize(size);
             }
-            preview.get(file, stat, constraint, this);
+            preview.get(file, stat, constraint, this, getContext());
         }
     }
 

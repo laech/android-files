@@ -8,7 +8,6 @@ import android.support.v4.util.LruCache;
 import java.util.AbstractMap.SimpleImmutableEntry;
 
 import l.files.fs.Path;
-import l.files.fs.Stat;
 import l.files.ui.base.graphics.Rect;
 
 import static android.content.Context.ACTIVITY_SERVICE;
@@ -58,7 +57,7 @@ final class ThumbnailMemCache extends MemCache<Object, Bitmap> {
     }
 
     @Override
-    Object getKey(Path path, Stat stat, Rect constraint) {
+    Object getKey(Path path, Rect constraint) {
         return keyIncludeConstraint
                 ? new SimpleImmutableEntry<>(path, constraint)
                 : path;

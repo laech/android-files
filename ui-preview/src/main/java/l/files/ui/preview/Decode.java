@@ -1,5 +1,6 @@
 package l.files.ui.preview;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -83,19 +84,22 @@ public final class Decode extends AsyncTask<Object, Object, Object> {
     private final Rect constraint;
     private final Preview preview;
     private final Preview.Callback callback;
+    private final Context context;
 
     Decode(
             Path path,
             Stat stat,
             Rect constraint,
             Preview.Callback callback,
-            Preview preview
+            Preview preview,
+            Context context
     ) {
         this.path = requireNonNull(path);
         this.stat = requireNonNull(stat);
         this.constraint = requireNonNull(constraint);
         this.callback = requireNonNull(callback);
         this.preview = requireNonNull(preview);
+        this.context = requireNonNull(context).getApplicationContext();
     }
 
     public void cancelAll() {
@@ -106,7 +110,7 @@ public final class Decode extends AsyncTask<Object, Object, Object> {
         }
     }
 
-    public void awaitAll(long timeout, TimeUnit unit)
+    void awaitAll(long timeout, TimeUnit unit)
             throws InterruptedException, ExecutionException, TimeoutException {
 
         get(timeout, unit);
@@ -119,7 +123,7 @@ public final class Decode extends AsyncTask<Object, Object, Object> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        if (isDebugBuild(preview.context)) {
+        if (isDebugBuild(context)) {
             Log.i(getClass().getSimpleName(), "Decode enqueued" +
                     ", current queue size " + queue.size() +
                     ", " + path);
@@ -140,7 +144,7 @@ public final class Decode extends AsyncTask<Object, Object, Object> {
             checkThumbnailDiskCache();
             checkIsPreviewable();
             checkIsNotCacheFile();
-            decode();
+            decode(context);
 
         } catch (Stop ignored) {
         } catch (Throwable e) {
@@ -151,7 +155,7 @@ public final class Decode extends AsyncTask<Object, Object, Object> {
         return null;
     }
 
-    private void decode() throws Exception {
+    private void decode(Context context) throws Exception {
         if (isCancelled()) {
             return;
         }
@@ -159,15 +163,15 @@ public final class Decode extends AsyncTask<Object, Object, Object> {
         String mediaType = decodeMediaType();
         for (Thumbnailer<Path> thumbnailer : thumbnailers) {
             if (thumbnailer.accepts(path, mediaType.toLowerCase())) {
-                decode(thumbnailer);
+                decode(thumbnailer, context);
                 break;
             }
         }
         publishProgress(NoPreview.DECODE_RETURNED_NULL);
     }
 
-    private void decode(Thumbnailer<Path> thumbnailer) throws Exception {
-        ScaledBitmap result = thumbnailer.create(path, constraint, preview.context);
+    private void decode(Thumbnailer<Path> thumbnailer, Context context) throws Exception {
+        ScaledBitmap result = thumbnailer.create(path, constraint, context);
         if (result != null) {
             publishProgress(result);
             saveThumbnailToDiskTask = preview.putThumbnailToDiskAsync(
@@ -178,9 +182,9 @@ public final class Decode extends AsyncTask<Object, Object, Object> {
     }
 
     private String decodeMediaType() throws IOException {
-        String mediaType = preview.getMediaType(path, stat, constraint, true);
+        String mediaType = preview.getMediaType(path, stat, constraint);
         if (mediaType == null) {
-            mediaType = MediaTypes.detect(preview.context, path, stat);
+            mediaType = MediaTypes.detect(context, path, stat);
             preview.putMediaType(path, stat, constraint, mediaType);
         }
         return mediaType;
@@ -213,7 +217,7 @@ public final class Decode extends AsyncTask<Object, Object, Object> {
     private void checkThumbnailDiskCache() {
         ScaledBitmap thumbnail = null;
         try {
-            thumbnail = preview.getThumbnailFromDisk(path, stat, constraint, true);
+            thumbnail = preview.getThumbnailFromDisk(path, stat, constraint);
         } catch (IOException e) {
             Log.w(getClass().getSimpleName(),
                     "Failed to get disk thumbnail for " + path, e);

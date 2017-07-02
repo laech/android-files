@@ -231,7 +231,7 @@ public final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo
         runWhenUiIsIdle(file, canInterruptScrollState, new Runnable() {
             @Override
             public void run() {
-                task = decorator.get(file, stat, constraint, FileViewHolder.this);
+                task = decorator.get(file, stat, constraint, FileViewHolder.this, context());
             }
         });
 

@@ -7,7 +7,7 @@ final class Snapshot<V> {
     private final V value;
     private final long time;
 
-    Snapshot(V value, long time) {
+    private Snapshot(V value, long time) {
         this.value = requireNonNull(value);
         this.time = time;
     }

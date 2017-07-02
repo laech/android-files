@@ -2,7 +2,6 @@ package l.files.ui.preview;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.util.DisplayMetrics;
 
 import java.io.IOException;
 import java.util.concurrent.Future;
@@ -44,14 +43,10 @@ public final class Preview {
     private final ThumbnailMemCache thumbnailMemCache;
     private final ThumbnailDiskCache thumbnailDiskCache;
 
-    final DisplayMetrics displayMetrics;
     final Path cacheDir;
-    final Context context;
 
     Preview(Context context, Path cacheDir) {
-        this.context = requireNonNull(context);
         this.cacheDir = requireNonNull(cacheDir);
-        this.displayMetrics = requireNonNull(context).getResources().getDisplayMetrics();
         this.sizeCache = new RectCache(cacheDir);
         this.mediaTypeCache = new MediaTypeCache(cacheDir);
         this.noPreviewCache = new NoPreviewCache(cacheDir);
@@ -96,12 +91,8 @@ public final class Preview {
     }
 
     @Nullable
-    ScaledBitmap getThumbnailFromDisk(
-            Path path,
-            Stat stat,
-            Rect constraint,
-            boolean matchTime) throws IOException {
-        return thumbnailDiskCache.get(path, stat, constraint, matchTime);
+    ScaledBitmap getThumbnailFromDisk(Path path, Stat stat, Rect constraint) throws IOException {
+        return thumbnailDiskCache.get(path, stat, constraint, true);
     }
 
     Future<?> putThumbnailToDiskAsync(
@@ -122,15 +113,15 @@ public final class Preview {
     }
 
     @Nullable
-    String getMediaType(Path path, Stat stat, Rect constraint, boolean matchTime) {
-        return mediaTypeCache.get(path, stat, constraint, matchTime);
+    String getMediaType(Path path, Stat stat, Rect constraint) {
+        return mediaTypeCache.get(path, stat, constraint, true);
     }
 
     void putMediaType(Path path, Stat stat, Rect constraint, String media) {
         mediaTypeCache.put(path, stat, constraint, media);
     }
 
-    public NoPreview getNoPreviewReason(Path path, Stat stat, Rect constraint) {
+    NoPreview getNoPreviewReason(Path path, Stat stat, Rect constraint) {
 
         if (!stat.isRegularFile()) {
             return NoPreview.NOT_REGULAR_FILE;
@@ -157,7 +148,7 @@ public final class Preview {
 
     void putPreviewable(Path path, Stat stat, Rect constraint, boolean previewable) {
         if (previewable) {
-            noPreviewCache.remove(path, stat, constraint);
+            noPreviewCache.remove(path, constraint);
         } else {
             noPreviewCache.put(path, stat, constraint, true);
         }
@@ -168,13 +159,15 @@ public final class Preview {
             Path path,
             Stat stat,
             Rect constraint,
-            Callback callback) {
+            Callback callback,
+            Context context
+    ) {
 
         if (!isPreviewable(path, stat, constraint)) {
             return null;
         }
 
-        return new Decode(path, stat, constraint, callback, this)
+        return new Decode(path, stat, constraint, callback, this, context)
                 .executeOnPreferredExecutor();
     }
 
