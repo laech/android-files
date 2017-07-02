@@ -38,7 +38,7 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 public abstract class FileCreationFragment extends AppCompatDialogFragment
         implements OnClickListener {
 
-    public static final String ARG_PARENT_PATH = "parent";
+    protected static final String ARG_PARENT_PATH = "parent";
 
     private static final int LOADER_CHECKER =
             identityHashCode(FileCreationFragment.class);
@@ -213,7 +213,7 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
         }
     }
 
-    class FileTextWatcher implements TextWatcher {
+    private class FileTextWatcher implements TextWatcher {
 
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {

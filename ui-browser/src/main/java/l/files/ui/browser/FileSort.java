@@ -107,7 +107,7 @@ public enum FileSort {
         }
     };
 
-    private int labelId;
+    private final int labelId;
 
     FileSort(int labelId) {
         this.labelId = labelId;

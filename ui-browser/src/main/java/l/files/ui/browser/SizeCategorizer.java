@@ -48,7 +48,7 @@ final class SizeCategorizer extends BaseCategorizer {
     }
 
     @Override
-    public String label(FileInfo file, Resources res, int id) {
+    public String label(Resources res, int id) {
         if (id == -1) {
             return "";
         }

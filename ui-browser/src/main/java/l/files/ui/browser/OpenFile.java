@@ -53,7 +53,7 @@ final class OpenFile extends AsyncTask<Void, Void, Object> {
         }
     }
 
-    public void showException(IOException exception) {
+    private void showException(IOException exception) {
         String msg = message(exception);
         makeText(context, msg, LENGTH_SHORT).show();
     }

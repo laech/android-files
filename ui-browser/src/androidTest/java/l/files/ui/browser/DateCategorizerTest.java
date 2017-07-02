@@ -228,7 +228,7 @@ public final class DateCategorizerTest {
 
     private String label(FileInfo file) {
         int id = categorizer.id(file);
-        return categorizer.label(file, res, id);
+        return categorizer.label(res, id);
     }
 
     @Test
