@@ -18,8 +18,8 @@ import l.files.ui.base.view.Views;
 
 public final class FailuresActivity extends AppCompatActivity {
 
-    static final String EXTRA_FAILURES = "failures";
-    static final String EXTRA_TITLE = "title";
+    private static final String EXTRA_FAILURES = "failures";
+    private static final String EXTRA_TITLE = "title";
 
     public static String getTitle(Intent intent) {
         return intent.getStringExtra(EXTRA_TITLE);

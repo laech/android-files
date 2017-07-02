@@ -25,12 +25,12 @@ abstract class ProgressViewer implements TaskStateViewer {
     }
 
     @Override
-    public final String getContentTitle(Context context, TaskState.Pending state) {
+    public final String getContentTitlePending(Context context) {
         return context.getString(R.string.pending);
     }
 
     @Override
-    public final String getContentTitle(Context context, TaskState.Running state) {
+    public final String getContentTitleRunning(Context context, TaskState.Running state) {
         if (state.items().isDone() || state.bytes().isDone()) {
             return context.getString(R.string.cleaning_up);
         }
@@ -46,7 +46,7 @@ abstract class ProgressViewer implements TaskStateViewer {
     }
 
     @Override
-    public String getContentTitle(Context context, TaskState.Failed state) {
+    public String getContentTitleFailed(Context context, TaskState.Failed state) {
         return context.getResources()
                 .getQuantityString(getTitleFailed(), state.failures().size());
     }
@@ -87,7 +87,7 @@ abstract class ProgressViewer implements TaskStateViewer {
     }
 
     @Override
-    public final float getProgress(Context context, TaskState.Running value) {
+    public final float getProgress(TaskState.Running value) {
         return getWork(value).getProcessedPercentage();
     }
 
