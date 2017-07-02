@@ -17,7 +17,7 @@ public final class Bitmaps {
     }
 
     @Nullable
-    public static Rect decodeBounds(InputStream in) {
+    private static Rect decodeBounds(InputStream in) {
         Options options = new Options();
         options.inJustDecodeBounds = true;
         decodeStream(in, null, options);
@@ -28,7 +28,7 @@ public final class Bitmaps {
     }
 
     @Nullable
-    public static Rect decodeBounds(Callable<InputStream> provider)
+    static Rect decodeBounds(Callable<InputStream> provider)
             throws Exception {
 
         InputStream in = provider.call();
@@ -80,7 +80,7 @@ public final class Bitmaps {
      * it fits within {@code max} while maintaining original
      * aspect ratio.
      */
-    public static Options scaleDownOptions(Rect size, Rect max) {
+    static Options scaleDownOptions(Rect size, Rect max) {
         Rect scaled = size.scaleDown(max);
         float scale = scaled.width() / (float) size.width();
         Options options = new Options();

@@ -1,5 +1,6 @@
 package l.files.ui.base.app;
 
+import android.annotation.SuppressLint;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.view.Menu;
@@ -11,6 +12,7 @@ import l.files.ui.base.view.ActionModeProvider;
 
 import static l.files.base.Objects.requireNonNull;
 
+@SuppressLint("Registered")
 public class BaseActivity extends AppCompatActivity
         implements ActionModeProvider {
 
