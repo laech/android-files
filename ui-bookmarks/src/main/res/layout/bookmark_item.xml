@@ -13,7 +13,8 @@
         android:layout_gravity="center_vertical"
         android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
-        android:alpha="0.54" />
+        android:alpha="0.54"
+        android:contentDescription="@null" />
 
     <TextView
         android:id="@+id/title"
