@@ -249,7 +249,7 @@ final class Observable extends Native
             }
 
             if (root.stat(option).isDirectory()) {
-                traverseChildren(option, childrenConsumer);
+                traverseChildren(childrenConsumer);
             }
 
         } catch (Throwable e) {
@@ -281,7 +281,6 @@ final class Observable extends Native
     }
 
     private void traverseChildren(
-            LinkOption option,
             Consumer childrenConsumer
     ) throws IOException, InterruptedException {
 

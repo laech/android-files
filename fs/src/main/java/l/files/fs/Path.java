@@ -118,7 +118,7 @@ public abstract class Path implements Parcelable {
         return out.toByteArray();
     }
 
-    public abstract void toByteArray(ByteArrayOutputStream out);
+    protected abstract void toByteArray(ByteArrayOutputStream out);
 
     /**
      * Returns a string representation of this path.
@@ -186,7 +186,7 @@ public abstract class Path implements Parcelable {
      *     "/a/b/c" -> ["a", "b", "c"]
      * </pre>
      */
-    public abstract List<Name> names();
+    protected abstract List<Name> names();
 
     /**
      * Gets the name of this file, if any. For example:
