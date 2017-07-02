@@ -66,7 +66,7 @@ final class ThumbnailDiskCache extends Cache<ScaledBitmap> {
         this.cacheDir = cacheDir.concat("thumbnails");
     }
 
-    public void cleanupAsync() {
+    void cleanupAsync() {
         executor.execute(new Runnable() {
             @Override
             public void run() {
@@ -259,7 +259,7 @@ final class ThumbnailDiskCache extends Cache<ScaledBitmap> {
         }
     }
 
-    public Future<?> putAsync(Path path, Stat stat, Rect constraint, ScaledBitmap thumbnail) {
+    Future<?> putAsync(Path path, Stat stat, Rect constraint, ScaledBitmap thumbnail) {
         return executor.submit(new WriteThumbnail(
                 path, stat, constraint, new WeakReference<>(thumbnail)));
     }
