@@ -39,8 +39,8 @@ public final class OperationService extends Service {
 
     static final String ACTION_CANCEL = "l.files.operations.CANCEL";
     static final String EXTRA_TASK_ID = "task_id";
-    static final String EXTRA_PATHS = "paths";
-    static final String EXTRA_DESTINATION = "destination";
+    private static final String EXTRA_PATHS = "paths";
+    private static final String EXTRA_DESTINATION = "destination";
 
     private static final ExecutorService executor = newFixedThreadPool(5);
 
@@ -175,7 +175,7 @@ public final class OperationService extends Service {
                 .newTask(intent, id, handler, callback);
     }
 
-    void cancelTask(Intent intent) {
+    private void cancelTask(Intent intent) {
         int startId = intent.getIntExtra(EXTRA_TASK_ID, -1);
         AsyncTask<?, ?, ?> task = tasks.remove(startId);
         if (task != null) {
@@ -218,7 +218,7 @@ public final class OperationService extends Service {
             }
         };
 
-        private String action;
+        private final String action;
 
         FileAction(String action) {
             this.action = action;

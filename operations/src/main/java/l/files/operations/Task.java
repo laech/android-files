@@ -72,12 +72,8 @@ abstract class Task extends AsyncTask<Void, TaskState, Void> {
 
                 if (e instanceof Error) {
                     throw (Error) e;
-
-                } else if (e instanceof RuntimeException) {
-                    throw (RuntimeException) e;
-
                 } else {
-                    throw new RuntimeException(e);
+                    throw (RuntimeException) e;
                 }
             }
 
