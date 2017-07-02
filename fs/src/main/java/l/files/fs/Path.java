@@ -649,7 +649,7 @@ public abstract class Path implements Parcelable {
             long batchInterval,
             TimeUnit batchInternalUnit,
             boolean quickNotifyFirstEvent,
-            String tag,
+            @Nullable String tag,
             int watchLimit
     ) throws IOException, InterruptedException {
 

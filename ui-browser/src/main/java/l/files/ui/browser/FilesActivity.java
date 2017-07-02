@@ -224,21 +224,14 @@ public final class FilesActivity extends BaseActivity implements
     }
 
     private void updateToolBar() {
-        FilesFragment fragment = fragment();
-        if (fragment == null) {
-            return;
-        }
         Path directory = fragment().directory();
-        if (directory == null) {
-            return;
-        }
         int backStacks = getSupportFragmentManager().getBackStackEntryCount();
         if (backStacks == 0) {
             navigationIcon.setProgress(0);
         } else {
             navigationIcon.setProgress(1);
         }
-        hierarchy.set(fragment.directory());
+        hierarchy.set(directory);
         title.setSelection(hierarchy.indexOf(directory));
     }
 
