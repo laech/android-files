@@ -1,5 +1,7 @@
 <resources>
 
+    <string name="thumbnail">Thumbnail</string>
+
     <string name="__">——</string>
     <string name="info">Info</string>
     <string name="info_modified_label">Modified:</string>

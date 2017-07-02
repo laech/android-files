@@ -117,8 +117,8 @@ final class CalculateSizeLoader
         return currentSizeOnDisk;
     }
 
-    boolean finished() {
-        return result != null;
+    boolean isRunning() {
+        return isStarted() && result == null;
     }
 
     static final class Size {

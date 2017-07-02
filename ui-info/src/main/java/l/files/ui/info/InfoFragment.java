@@ -15,6 +15,7 @@ import java.util.ArrayList;
 
 import javax.annotation.Nullable;
 
+import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.graphics.Rect;
@@ -71,17 +72,17 @@ public final class InfoFragment
         return date;
     }
 
-    public View getRootView() {
+    private View getRootView() {
         assert root != null;
         return root;
     }
 
-    public ImageView getImageView() {
+    private ImageView getImageView() {
         assert image != null;
         return image;
     }
 
-    public Rect getConstraint() {
+    private Rect getConstraint() {
         assert constraint != null;
         return constraint;
     }
@@ -108,7 +109,12 @@ public final class InfoFragment
 
         name = find(R.id.name, this);
         name.setMaxWidth(constraint.width());
-        name.setText(file.name().toString());
+        Name fileName = file.name();
+        if (fileName != null) {
+            name.setText(fileName.toString());
+        } else {
+            name.setText(file.toString());
+        }
 
         date = find(R.id.modified, this);
         if (stat != null) {
