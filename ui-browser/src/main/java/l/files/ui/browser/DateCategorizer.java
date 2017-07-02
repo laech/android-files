@@ -76,7 +76,7 @@ final class DateCategorizer extends BaseCategorizer {
     }
 
     @Override
-    public String label(FileInfo file, Resources res, int id) {
+    public String label(Resources res, int id) {
         if (id > 0) {
             try {
                 return res.getString(id);

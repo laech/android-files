@@ -46,7 +46,7 @@ public abstract class ProgressViewerTest {
     protected abstract ProgressViewer create(Context context, Clock clock);
 
     /**
-     * Sets {@link TaskStateViewer#getProgress(Context, TaskState.Running)} to return the
+     * Sets {@link TaskStateViewer#getProgress(TaskState.Running)} to return the
      * given value.
      */
     protected abstract TaskState.Running setProgress(
@@ -101,7 +101,7 @@ public abstract class ProgressViewerTest {
     @Test
     public void getContentTitle_Pending() throws Exception {
         assertEquals(res.getString(R.string.pending),
-                viewer.getContentTitle(context, pending));
+                viewer.getContentTitlePending(context));
     }
 
     @Test
@@ -111,7 +111,7 @@ public abstract class ProgressViewerTest {
                 Failure.create(mock(Path.class, "b"), new IOException("2"))
         ));
         String expected = res.getQuantityString(getTitleFailed(), 2);
-        String actual = viewer.getContentTitle(context, state);
+        String actual = viewer.getContentTitleFailed(context, state);
         assertEquals(expected, actual);
     }
 
@@ -124,7 +124,7 @@ public abstract class ProgressViewerTest {
         );
         String expected = res.getQuantityString(
                 getTitlePreparing(), 100, 100, state.target().dstDir());
-        String actual = viewer.getContentTitle(context, state);
+        String actual = viewer.getContentTitleRunning(context, state);
         assertEquals(expected, actual);
     }
 
@@ -136,7 +136,7 @@ public abstract class ProgressViewerTest {
                 state.bytes()
         );
 
-        String actual = viewer.getContentTitle(context, state);
+        String actual = viewer.getContentTitleRunning(context, state);
         String expected = res.getQuantityString(
                 getTitleRunning(), 100, 100, state.target().dstDir());
         assertEquals(expected, actual);
@@ -148,7 +148,7 @@ public abstract class ProgressViewerTest {
                 Progress.create(1, 1),
                 Progress.create(1, 1)
         );
-        String actual = viewer.getContentTitle(context, state);
+        String actual = viewer.getContentTitleRunning(context, state);
         String expected = res.getString(R.string.cleaning_up);
         assertEquals(expected, actual);
     }
@@ -156,7 +156,7 @@ public abstract class ProgressViewerTest {
     @Test
     public void getProgress() throws Exception {
         TaskState.Running state = setProgress(running, Progress.create(100, 1));
-        float actual = viewer.getProgress(context, state);
+        float actual = viewer.getProgress(state);
         float expected = 1 / (float) 100;
         assertThat(actual, is(expected));
     }

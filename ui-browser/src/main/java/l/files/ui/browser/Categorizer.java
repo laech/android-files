@@ -21,7 +21,7 @@ interface Categorizer {
         }
 
         @Override
-        public String label(FileInfo item, Resources res, int id) {
+        public String label(Resources res, int id) {
             return "";
         }
 
@@ -33,7 +33,7 @@ interface Categorizer {
 
     int id(FileInfo item);
 
-    String label(FileInfo item, Resources res, int id);
+    String label(Resources res, int id);
 
     List<Object> categorize(Resources res, List<FileInfo> items);
 }

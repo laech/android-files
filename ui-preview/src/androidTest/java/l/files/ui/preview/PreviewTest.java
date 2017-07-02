@@ -140,7 +140,7 @@ public final class PreviewTest extends PathBaseTest {
         Stat stat = file.stat(FOLLOW);
         Preview preview = newPreview();
         Rect max = Rect.of(100, 100);
-        Decode task = preview.get(file, stat, max, callback);
+        Decode task = preview.get(file, stat, max, callback, getContext());
         assertNotNull(task);
 
         int millis = 60000;
@@ -160,8 +160,8 @@ public final class PreviewTest extends PathBaseTest {
         assertNotNull(preview.getSize(file, stat, max, true));
         assertNotNull(preview.getThumbnail(file, stat, max, true));
         assertNotNull(preview.getBlurredThumbnail(file, stat, max, true));
-        assertNotNull(preview.getMediaType(file, stat, max, true));
-        assertNotNull(preview.getThumbnailFromDisk(file, stat, max, true));
+        assertNotNull(preview.getMediaType(file, stat, max));
+        assertNotNull(preview.getThumbnailFromDisk(file, stat, max));
         assertNull(preview.getNoPreviewReason(file, stat, max));
     }
 
@@ -169,7 +169,7 @@ public final class PreviewTest extends PathBaseTest {
         Preview.Callback callback = mock(Preview.Callback.class);
         Stat stat = file.stat(NOFOLLOW);
         Rect rect = Rect.of(10, 10);
-        assertNull(newPreview().get(file, stat, rect, callback));
+        assertNull(newPreview().get(file, stat, rect, callback, getContext()));
     }
 
 }

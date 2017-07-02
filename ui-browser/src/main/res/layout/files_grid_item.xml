@@ -28,7 +28,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:minHeight="32dp"
-            android:minWidth="32dp" />
+            android:minWidth="32dp"
+            android:contentDescription="@string/thumbnail" />
 
         <TextView
             android:id="@+id/title"
@@ -37,10 +38,8 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="@dimen/files_item_name_padding_top"
             android:gravity="center_horizontal"
-            android:paddingEnd="12dp"
             android:paddingLeft="12dp"
             android:paddingRight="12dp"
-            android:paddingStart="12dp"
             android:textColor="?android:attr/textColorPrimary"
             android:textSize="13sp" />
 
@@ -50,10 +49,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:gravity="center_horizontal"
-            android:paddingEnd="12dp"
             android:paddingLeft="12dp"
             android:paddingRight="12dp"
-            android:paddingStart="12dp"
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="12sp" />
 
@@ -63,10 +60,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:gravity="center_horizontal"
-            android:paddingEnd="12dp"
             android:paddingLeft="12dp"
             android:paddingRight="12dp"
-            android:paddingStart="12dp"
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="12sp" />
 

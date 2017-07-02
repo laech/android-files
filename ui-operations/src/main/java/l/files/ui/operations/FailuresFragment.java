@@ -37,7 +37,7 @@ public final class FailuresFragment extends ListFragment {
         adapter.notifyDataSetChanged();
     }
 
-    class Adapter extends ArrayAdapter<FailureMessage> {
+    private class Adapter extends ArrayAdapter<FailureMessage> {
 
         Adapter() {
             super(getActivity(), 0);
@@ -51,8 +51,10 @@ public final class FailuresFragment extends ListFragment {
             }
             TextView pathView = (TextView) convertView.findViewById(R.id.failure_path);
             TextView msgView = (TextView) convertView.findViewById(R.id.failure_message);
-            pathView.setText(getItem(position).path().toString());
-            msgView.setText(getItem(position).message());
+            FailureMessage item = getItem(position);
+            assert item != null;
+            pathView.setText(item.path().toString());
+            msgView.setText(item.message());
             return convertView;
         }
     }

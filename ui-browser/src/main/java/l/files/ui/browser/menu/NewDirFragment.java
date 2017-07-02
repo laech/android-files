@@ -9,6 +9,7 @@ import java.io.IOException;
 
 import javax.annotation.Nullable;
 
+import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.ui.browser.FileCreationFragment;
 import l.files.ui.browser.R;
@@ -61,7 +62,7 @@ public final class NewDirFragment extends FileCreationFragment {
         @Override
         protected Path doInBackground(Path... params) {
             Path base = params[0];
-            String baseName = base.name().toString();
+            Name baseName = base.name();
             Path parent = base.parent();
             assert parent != null;
             Path file = base;
@@ -84,7 +85,9 @@ public final class NewDirFragment extends FileCreationFragment {
             if (result == null) {
                 set("");
             } else {
-                set(result.name().toString());
+                Name name = result.name();
+                assert name != null;
+                set(name.toString());
             }
         }
 

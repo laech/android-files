@@ -27,7 +27,7 @@ public abstract class InfoBaseFragment
 
     public static final String FRAGMENT_TAG = "info-dialog";
 
-    static final Handler handler = new Handler();
+    private static final Handler handler = new Handler();
 
     static final String ARG_DIR = "dir";
     static final String ARG_CHILDREN = "children";
@@ -47,12 +47,12 @@ public abstract class InfoBaseFragment
     @Nullable
     private ProgressBar calculatingSize;
 
-    public Path getDirectory() {
+    Path getDirectory() {
         assert dir != null;
         return dir;
     }
 
-    public List<Name> getChildren() {
+    List<Name> getChildren() {
         assert children != null;
         return children;
     }
@@ -67,7 +67,7 @@ public abstract class InfoBaseFragment
         return sizeOnDisk;
     }
 
-    public ProgressBar getCalculatingSizeProgressBar() {
+    private ProgressBar getCalculatingSizeProgressBar() {
         assert calculatingSize != null;
         return calculatingSize;
     }
@@ -97,7 +97,7 @@ public abstract class InfoBaseFragment
             @Override
             public void run() {
                 CalculateSizeLoader loader = sizeLoader();
-                if (loader != null && !loader.finished()) {
+                if (loader != null && loader.isRunning()) {
                     getSizeView().setText(formatSizeCount(loader.currentSize(), loader.currentCount()));
                     getSizeOnDiskView().setText(formatSizeOnDisk(loader.currentSizeOnDisk()));
                     getCalculatingSizeProgressBar().setVisibility(VISIBLE);

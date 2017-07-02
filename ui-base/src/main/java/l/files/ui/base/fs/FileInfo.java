@@ -8,6 +8,7 @@ import java.text.Collator;
 import javax.annotation.Nullable;
 
 import l.files.base.Objects;
+import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.text.CollationKey;
@@ -69,7 +70,8 @@ public final class FileInfo implements Comparable<FileInfo> {
     }
 
     public String name() {
-        return selfPath().name().toString();
+        Name name = selfPath().name();
+        return name != null ? name.toString() : "";
     }
 
     public Path selfPath() {
@@ -87,7 +89,7 @@ public final class FileInfo implements Comparable<FileInfo> {
     }
 
     @Nullable
-    public Stat linkTargetStat() {
+    private Stat linkTargetStat() {
         return linkTargetStat;
     }
 
@@ -103,8 +105,7 @@ public final class FileInfo implements Comparable<FileInfo> {
 
     private CollationKey collationKey() {
         if (collationKey == null) {
-            collationKey = CollationKey.create(
-                    collator, selfPath().name().toString());
+            collationKey = CollationKey.create(collator, name());
         }
         return collationKey;
     }

@@ -16,6 +16,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -38,7 +39,7 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 public abstract class FileCreationFragment extends AppCompatDialogFragment
         implements OnClickListener {
 
-    public static final String ARG_PARENT_PATH = "parent";
+    protected static final String ARG_PARENT_PATH = "parent";
 
     private static final int LOADER_CHECKER =
             identityHashCode(FileCreationFragment.class);
@@ -85,8 +86,10 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
             restartChecker();
         }
 
-        getDialog().getWindow()
-                .setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+        Window window = getDialog().getWindow();
+        if (window != null) {
+            window.setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+        }
     }
 
     @Override
@@ -137,7 +140,7 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
         return getDialog().getButton(BUTTON_POSITIVE);
     }
 
-    class CheckerCallback implements LoaderCallbacks<Existence> {
+    private class CheckerCallback implements LoaderCallbacks<Existence> {
 
         @Override
         public Loader<Existence> onCreateLoader(int id, Bundle bundle) {
@@ -213,7 +216,7 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
         }
     }
 
-    class FileTextWatcher implements TextWatcher {
+    private class FileTextWatcher implements TextWatcher {
 
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {

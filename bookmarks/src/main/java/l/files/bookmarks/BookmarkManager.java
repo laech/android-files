@@ -6,12 +6,15 @@ import android.content.SharedPreferences;
 import java.util.Collection;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import l.files.fs.Path;
 
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 
 public abstract class BookmarkManager {
 
+    @Nullable
     private static BookmarkManager instance;
 
     public static BookmarkManager get(Context context) {

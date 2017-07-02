@@ -13,19 +13,13 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 
 public final class FileTextLayouts {
 
-    private static final FileTextLayouts instance = new FileTextLayouts();
-
-    public static FileTextLayouts get() {
-        return instance;
-    }
-
     private FileTextLayouts() {
     }
 
     @Nullable
     private static DateFormatter formatter;
 
-    private static DateFormatter createFormatter(final Context context) {
+    private static DateFormatter createFormatter(Context context) {
         return new DateFormatter(context.getApplicationContext());
     }
 
@@ -38,7 +32,7 @@ public final class FileTextLayouts {
         if (formatter == null) {
             formatter = createFormatter(context.getApplicationContext());
         }
-        String date = formatter.apply(stat);
+        String date = formatter.apply(stat, context);
         String size = formatShortFileSize(context, stat.size());
         boolean hasDate = stat.lastModifiedTime().to(MINUTES) > 0;
         boolean isFile = stat.isRegularFile();

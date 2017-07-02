@@ -16,7 +16,7 @@ final class FailureRecorder {
         this.failures = new ArrayList<>();
     }
 
-    public void onFailure(Path path, IOException failure)
+    void onFailure(Path path, IOException failure)
             throws FileException {
         if (failures.size() > limit) {
             throw new FileException(failures);

@@ -24,11 +24,8 @@ import static java.lang.System.currentTimeMillis;
 import static java.util.Calendar.DAY_OF_YEAR;
 import static java.util.Calendar.YEAR;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static l.files.base.Objects.requireNonNull;
 
 final class DateFormatter {
-
-    private final Context context;
 
     private final DateFormat dateFormat;
     private final DateFormat timeFormat;
@@ -50,13 +47,12 @@ final class DateFormatter {
     private final Looper mainLooper;
 
     DateFormatter(Context context) {
-        this.context = requireNonNull(context);
         this.dateFormat = getDateFormat(context);
         this.timeFormat = getTimeFormat(context);
         this.mainLooper = getMainLooper();
     }
 
-    String apply(Stat file) {
+    String apply(Stat file, Context context) {
 
         if (myLooper() != mainLooper) {
             throw new IllegalStateException("Can only be called on the UI thread.");

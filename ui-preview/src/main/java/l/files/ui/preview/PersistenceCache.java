@@ -64,7 +64,7 @@ abstract class PersistenceCache<V> extends MemCache<Path, V> {
     }
 
     @Override
-    Path getKey(Path path, Stat stat, Rect constraint) {
+    Path getKey(Path path, Rect constraint) {
         return path;
     }
 

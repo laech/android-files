@@ -2,7 +2,6 @@ package l.files.thumbnail;
 
 import android.content.Context;
 import android.media.MediaMetadataRetriever;
-import android.net.Uri;
 
 import l.files.fs.Path;
 import l.files.ui.base.graphics.Rect;

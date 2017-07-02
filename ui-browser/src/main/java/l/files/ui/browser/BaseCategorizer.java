@@ -27,11 +27,11 @@ abstract class BaseCategorizer implements Categorizer {
             FileInfo stat = items.get(i);
             int currentId = id(stat);
             if (i == 0) {
-                result.add(Header.of(label(stat, res, currentId)));
+                result.add(Header.of(label(res, currentId)));
                 previousId = currentId;
             } else if (currentId != previousId) {
                 result.addAll(items.subList(previousIdStartIndex, i));
-                result.add(Header.of(label(stat, res, currentId)));
+                result.add(Header.of(label(res, currentId)));
                 previousIdStartIndex = i;
                 previousId = currentId;
             }

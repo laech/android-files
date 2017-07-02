@@ -3,6 +3,7 @@ package l.files.ui.base.fs;
 import android.content.res.Resources;
 import android.os.Build;
 
+import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.ui.base.R;
 
@@ -17,7 +18,11 @@ public final class FileLabels {
     public static String get(Resources res, Path file) {
         if (DIR_HOME.equals(file)) return res.getString(R.string.home);
         if (DIR_ROOT.equals(file)) return Build.MODEL;
-        return file.name().toString();
+        Name name = file.toAbsolutePath().name();
+        if (name == null) {
+            return file.toString();
+        }
+        return name.toString();
     }
 
 }

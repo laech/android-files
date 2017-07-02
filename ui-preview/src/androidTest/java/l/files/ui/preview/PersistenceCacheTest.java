@@ -24,7 +24,7 @@ public abstract class PersistenceCacheTest<V, C extends PersistenceCache<V>>
         C c2 = newCache();
         c2.readIfNeeded();
         assertValueEquals(value, c2.get(file, stat, constraint, true));
-        c2.remove(file, stat, constraint);
+        c2.remove(file, constraint);
         c2.writeIfNeeded();
 
         C c3 = newCache();

@@ -125,7 +125,7 @@ public final class NotificationProvider implements TaskListener {
     }
 
     private Notification newIndeterminateNotification(Context context, Pending state) {
-        String title = getViewer(state).getContentTitle(context, state);
+        String title = getViewer(state).getContentTitlePending(context);
         return newIndeterminateNotification(context, state, title);
     }
 
@@ -140,12 +140,12 @@ public final class NotificationProvider implements TaskListener {
 
     private Notification newProgressNotification(Context context, Running state) {
         TaskStateViewer viewer = getViewer(state);
-        String title = viewer.getContentTitle(context, state);
+        String title = viewer.getContentTitleRunning(context, state);
         if (state.items().isDone() || state.bytes().isDone()) {
             return newIndeterminateNotification(context, state, title);
         }
         int progressMax = 10000;
-        int percentage = (int) (viewer.getProgress(context, state) * progressMax);
+        int percentage = (int) (viewer.getProgress(state) * progressMax);
         boolean indeterminate = percentage <= 0;
         return newProgressNotificationBuilder(context, state)
                 .setContentTitle(title)
@@ -199,7 +199,7 @@ public final class NotificationProvider implements TaskListener {
             messages.add(FailureMessage.create(
                     failure.path(), message(failure.cause())));
         }
-        String title = viewer.getContentTitle(context, state);
+        String title = viewer.getContentTitleFailed(context, state);
         return FailuresActivity.newIntent(context, title, messages);
     }
 }

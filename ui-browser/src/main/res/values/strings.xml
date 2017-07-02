@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="ad_app_id">ca-app-pub-3251738373408970~7732248243</string>
-    <string name="ad_unit_browser_express_id">ca-app-pub-3251738373408970/2349786248</string>
-    <string name="ad">AD</string>
-
     <string name="share">Share</string>
     <string name="refresh">Refresh</string>
     <string name="empty">Empty</string>
@@ -36,7 +32,6 @@
     <string name="__">——</string>
     <string name="x_dot_y">%1$s ・ %2$s</string>
 
-    <string name="link_icon">➥</string>
     <string name="link_x">➞ %1$s</string>
 
 </resources>

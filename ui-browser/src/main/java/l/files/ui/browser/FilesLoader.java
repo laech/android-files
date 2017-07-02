@@ -233,7 +233,9 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         root.list(new Path.Consumer() {
             @Override
             public boolean accept(Path child) {
-                checkedAdd(children, child.name());
+                Name name = child.name();
+                assert name != null;
+                checkedAdd(children, name);
                 return true;
             }
         });
@@ -257,7 +259,9 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         return new Path.Consumer() {
             @Override
             public boolean accept(Path child) {
-                checkedAdd(children, child.name());
+                Name name = child.name();
+                assert name != null;
+                checkedAdd(children, name);
                 return true;
             }
         };
@@ -342,7 +346,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
      * Adds the new status of the given path to the data map. Returns true if
      * the data map is changed.
      */
-    private boolean update(Name child, Event event) {
+    private boolean update(Name child, @Nullable Event event) {
         return update(root.concat(child.toPath()), event);
     }
 

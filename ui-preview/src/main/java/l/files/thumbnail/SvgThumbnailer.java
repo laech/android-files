@@ -8,7 +8,6 @@ import android.util.DisplayMetrics;
 import com.caverock.androidsvg.SVG;
 import com.caverock.androidsvg.SVGParseException;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 import javax.annotation.Nullable;
@@ -43,9 +42,7 @@ public final class SvgThumbnailer implements Thumbnailer<InputStream> {
     }
 
     @Nullable
-    private static SVG parseSvg(InputStream input)
-            throws IOException, SVGParseException {
-
+    private static SVG parseSvg(InputStream input) throws SVGParseException {
         SVG svg = SVG.getFromInputStream(input);
         if (svg == null ||
                 svg.getDocumentWidth() < 1 ||

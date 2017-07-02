@@ -5,11 +5,6 @@
     <dimen name="files_item_space_vertical">6dp</dimen>
     <dimen name="files_item_card_inner_space">0dp</dimen>
     <dimen name="files_item_card_inner_radius">2dp</dimen>
-    <dimen name="files_item_card_radius">3dp</dimen>
-    <dimen name="files_item_icon_text_size">32dp</dimen>
-    <dimen name="files_item_name_size">13sp</dimen>
     <dimen name="files_item_name_padding_top">10dp</dimen>
-    <dimen name="files_item_summary_size">12sp</dimen>
-    <dimen name="files_item_summary_padding_top">4dp</dimen>
     <dimen name="title_drop_down_vertical_offset">0dp</dimen>
 </resources>

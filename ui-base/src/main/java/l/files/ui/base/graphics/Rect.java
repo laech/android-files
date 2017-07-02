@@ -13,7 +13,7 @@ public final class Rect {
     private final int width;
     private final int height;
 
-    Rect(int width, int height) {
+    private Rect(int width, int height) {
         this.width = width;
         this.height = height;
     }

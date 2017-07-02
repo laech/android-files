@@ -204,7 +204,7 @@ public final class FilesFragment
 
         handler.postDelayed(checkProgress, 1000);
 
-        if (hasPermission(READ_EXTERNAL_STORAGE)) {
+        if (hasReadExternalStoragePermission()) {
             initLoad();
         } else {
             requestPermissions(
@@ -222,8 +222,8 @@ public final class FilesFragment
         Preferences.unregister(getActivity(), this);
     }
 
-    private boolean hasPermission(String permission) {
-        int state = checkSelfPermission(getActivity(), permission);
+    private boolean hasReadExternalStoragePermission() {
+        int state = checkSelfPermission(getActivity(), READ_EXTERNAL_STORAGE);
         return state == PERMISSION_GRANTED;
     }
 
@@ -292,9 +292,9 @@ public final class FilesFragment
         FragmentManager manager = activity.getSupportFragmentManager();
         setOptionsMenu(OptionsMenus.compose(
                 new RefreshMenu(autoRefreshDisable(), refresh()),
-                new BookmarkMenu(directory, activity),
-                new NewDirMenu(manager, directory),
-                new PasteMenu(activity, directory),
+                new BookmarkMenu(directory(), activity),
+                new NewDirMenu(manager, directory()),
+                new PasteMenu(activity, directory()),
                 new SortMenu(manager),
                 new ShowHiddenFilesMenu(activity)
         ));
@@ -304,7 +304,7 @@ public final class FilesFragment
         return new Runnable() {
             @Override
             public void run() {
-                if (hasPermission(READ_EXTERNAL_STORAGE)) {
+                if (hasReadExternalStoragePermission()) {
                     restartLoad();
                 } else {
                     requestPermissions(
