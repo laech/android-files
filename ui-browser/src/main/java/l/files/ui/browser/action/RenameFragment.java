@@ -77,6 +77,8 @@ public final class RenameFragment extends FileCreationFragment {
             return;
         }
 
+        // TODO check name does not contain invalid characters '/', '\u0000'
+
         super.restartChecker();
     }
 
