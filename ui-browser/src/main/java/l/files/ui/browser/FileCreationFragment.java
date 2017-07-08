@@ -121,6 +121,7 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
     }
 
     protected Path parent() {
+        // TODO use AbsolutePath
         Path path = getArguments().getParcelable(ARG_PARENT_PATH);
         assert path != null;
         return path;

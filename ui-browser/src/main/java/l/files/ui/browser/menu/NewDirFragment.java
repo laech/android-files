@@ -61,8 +61,9 @@ public final class NewDirFragment extends FileCreationFragment {
         @Nullable
         @Override
         protected Path doInBackground(Path... params) {
+            // TODO use AbsolutePath
             Path base = params[0];
-            Name baseName = base.name();
+            String baseName = base.getName().or(""); // TODO deal with ""
             Path parent = base.parent();
             assert parent != null;
             Path file = base;
@@ -85,9 +86,7 @@ public final class NewDirFragment extends FileCreationFragment {
             if (result == null) {
                 set("");
             } else {
-                Name name = result.name();
-                assert name != null;
-                set(name.toString());
+                set(result.getName().or("")); // TODO deal with ""
             }
         }
 

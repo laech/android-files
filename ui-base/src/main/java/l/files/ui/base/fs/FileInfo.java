@@ -70,8 +70,7 @@ public final class FileInfo implements Comparable<FileInfo> {
     }
 
     public String name() {
-        Name name = selfPath().name();
-        return name != null ? name.toString() : "";
+        return selfPath().getName().or("");
     }
 
     public Path selfPath() {

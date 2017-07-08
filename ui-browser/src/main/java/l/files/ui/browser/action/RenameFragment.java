@@ -41,6 +41,8 @@ public final class RenameFragment extends FileCreationFragment {
     @Nullable
     private AsyncTask<?, ?, ?> highlight;
 
+    // TODO use AbsolutePath
+
     @Nullable
     private Path path;
 
@@ -69,7 +71,7 @@ public final class RenameFragment extends FileCreationFragment {
     protected void restartChecker() {
 
         assert path != null;
-        String oldName = path.name().toString();
+        String oldName = path.getName().or("");
         String newName = getFilename();
         if (!oldName.equals(newName) &&
                 oldName.equalsIgnoreCase(newName)) {
@@ -120,11 +122,11 @@ public final class RenameFragment extends FileCreationFragment {
                 if (!getFilename().isEmpty()) {
                     return;
                 }
-                field.setText(path.name().toString());
+                field.setText(path.getName().or(""));
                 if (stat.isDirectory()) {
                     field.selectAll();
                 } else {
-                    field.setSelection(0, path.name().base().length());
+                    field.setSelection(0, path.getBaseName().or("").length());
                 }
             }
         }

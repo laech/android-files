@@ -14,7 +14,7 @@ import java.io.InputStream;
 
 import javax.annotation.Nullable;
 
-import l.files.fs.Name;
+import l.files.base.BiFunction;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 
@@ -107,15 +107,15 @@ final class Detector {
         }
     }
 
-    private static String detectFile(
-            MimeTypes types,
-            Path path) throws IOException {
+    private static String detectFile(MimeTypes types, Path path) throws IOException {
 
-        Metadata meta = new Metadata();
-        Name name = path.name();
-        if (name != null) {
-            meta.add(RESOURCE_NAME_KEY, name.toString());
-        }
+        Metadata meta = path.getName().fold(new Metadata(), new BiFunction<Metadata, String, Metadata>() {
+            @Override
+            public Metadata apply(Metadata meta, String name) {
+                meta.add(RESOURCE_NAME_KEY, name);
+                return meta;
+            }
+        });
         InputStream in = new BufferedInputStream(path.newInputStream());
         try {
             return types.detect(in, meta).getBaseType().toString();

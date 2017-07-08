@@ -14,6 +14,8 @@ import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 
 public abstract class BookmarkManager {
 
+    // TODO use AbsolutePath
+
     @Nullable
     private static BookmarkManager instance;
 

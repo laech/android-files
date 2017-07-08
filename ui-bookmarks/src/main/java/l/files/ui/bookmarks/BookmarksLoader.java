@@ -51,10 +51,7 @@ final class BookmarksLoader extends AsyncTaskLoader<List<Path>> {
     private List<Entry> collateBookmarks(Collator collator) {
         List<Entry> collation = new ArrayList<>();
         for (Path bookmark : manager.getBookmarks()) {
-            Name name = bookmark.name();
-            collation.add(new Entry(bookmark, name == null
-                    ? CollationKey.create(collator, "")
-                    : CollationKey.create(collator, name.toString())));
+            collation.add(new Entry(bookmark, CollationKey.create(collator, bookmark.getName().or(""))));
         }
         Collections.sort(collation, new Comparator<Entry>() {
             @Override

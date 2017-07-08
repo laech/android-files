@@ -15,7 +15,6 @@ import java.util.ArrayList;
 
 import javax.annotation.Nullable;
 
-import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.graphics.Rect;
@@ -109,12 +108,7 @@ public final class InfoFragment
 
         name = find(R.id.name, this);
         name.setMaxWidth(constraint.width());
-        Name fileName = file.name();
-        if (fileName != null) {
-            name.setText(fileName.toString());
-        } else {
-            name.setText(file.toString());
-        }
+        name.setText(String.valueOf(file.getName().orObject(file)));
 
         date = find(R.id.modified, this);
         if (stat != null) {

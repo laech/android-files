@@ -20,7 +20,7 @@ public final class InfoMultiFragment extends InfoBaseFragment {
 
         ArrayList<Name> names = new ArrayList<>(items.size());
         for (FileInfo item : items) {
-            names.add(item.selfPath().name());
+            names.add(item.selfPath().name()); // TODO handle null
         }
 
         Bundle bundle = new Bundle();
