@@ -25,6 +25,8 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 
 import l.files.base.Bytes;
+import l.files.base.Function;
+import l.files.base.Optional;
 import l.files.fs.event.BatchObserver;
 import l.files.fs.event.BatchObserverNotifier;
 import l.files.fs.event.Observation;
@@ -200,6 +202,42 @@ public abstract class Path implements Parcelable {
      */
     @Nullable // TODO old code expect not null
     public abstract Name name();
+
+    public Optional<String> getName() {
+        return Optional.ofNullable(name()).map(new Function<Name, String>() {
+            @Override
+            public String apply(Name name) {
+                return name.toString();
+            }
+        });
+    }
+
+    public Optional<String> getBaseName() {
+        return Optional.ofNullable(name()).map(new Function<Name, String>() {
+            @Override
+            public String apply(Name name) {
+                return name.base();
+            }
+        });
+    }
+
+    public Optional<String> getExtension() {
+        return Optional.ofNullable(name()).map(new Function<Name, String>() {
+            @Override
+            public String apply(Name name) {
+                return name.extension();
+            }
+        });
+    }
+
+    public Optional<String> getExtensionWithLeadingDot() {
+        return getExtension().map(new Function<String, String>() {
+            @Override
+            public String apply(String extension) {
+                return "." + extension;
+            }
+        });
+    }
 
     /**
      * Returns the parent file, if any. For example:
