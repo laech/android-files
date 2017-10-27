@@ -43,16 +43,10 @@ android {
         debug {
             applicationIdSuffix ".debug"
             signingConfig signingConfigs.debug
-            minifyEnabled true
-            shrinkResources true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
 
         release {
             signingConfig signingConfigs.release
-            minifyEnabled true
-            shrinkResources true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
 
     }
@@ -104,8 +98,5 @@ dependencies {
 
     compile project(':fs')
     compile project(':ui-browser')
-    compile 'com.google.firebase:firebase-core:10.2.6'
 
 }
-
-apply plugin: 'com.google.gms.google-services'

@@ -27,9 +27,6 @@ android {
 dependencies {
     compile project(':base')
 
-    // TODO this shouldn't be at the fs layer
-    compile 'com.google.firebase:firebase-crash:10.2.6'
-
     androidTestCompile project(':testing')
     androidTestCompile 'junit:junit:4.12'
     androidTestCompile 'com.android.support.test:runner:0.5'

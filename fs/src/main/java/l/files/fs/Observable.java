@@ -3,8 +3,6 @@ package l.files.fs;
 import android.os.Handler;
 import android.util.Log;
 
-import com.google.firebase.crash.FirebaseCrash;
-
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -528,8 +526,6 @@ final class Observable extends Native
 
             } else {
                 // FIXME
-                FirebaseCrash.log("Unknown event: " + eventNames(event) + " child == null: " + (child == null));
-                // Not logging the name of people's privacy files
             }
 
         } else {
