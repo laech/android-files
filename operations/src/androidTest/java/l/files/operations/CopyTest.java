@@ -3,6 +3,7 @@ package l.files.operations;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -18,6 +19,7 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public final class CopyTest extends PasteTest {
 
@@ -129,7 +131,11 @@ public final class CopyTest extends PasteTest {
         Path dstDir = dir1().concat("dst").createDirectory();
 
         copy(srcFile, dstDir);
-        assertTrue(dir1().concat("dst/empty").exists(NOFOLLOW));
+        Path expected = dstDir.concat("empty");
+        if (!expected.exists(NOFOLLOW)) {
+            List<Path> all = dstDir.list(new ArrayList<>());
+            fail("File " + expected + " doesn't exist, all files are: " + all);
+        }
     }
 
 

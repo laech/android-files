@@ -225,7 +225,8 @@ public abstract class Path implements Parcelable {
         return Optional.ofNullable(name()).map(new Function<Name, String>() {
             @Override
             public String apply(Name name) {
-                return name.extension();
+                String extension = name.extension();
+                return "".equals(extension) ? null : extension;
             }
         });
     }
