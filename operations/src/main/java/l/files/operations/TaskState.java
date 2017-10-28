@@ -48,7 +48,7 @@ public abstract class TaskState {
     /**
      * Returns true if the task is finished (success or failure).
      */
-    public boolean isFinished() {
+    boolean isFinished() {
         return this instanceof Success || this instanceof Failed;
     }
 

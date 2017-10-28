@@ -43,7 +43,7 @@ public final class Progress {
      * If total is less than processed, set total and processed to have the
      * value of processed.
      */
-    public static Progress normalize(long total, long processed) {
+    static Progress normalize(long total, long processed) {
         if (total < processed) {
             return create(processed, processed);
         } else {

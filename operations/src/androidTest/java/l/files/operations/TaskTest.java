@@ -7,7 +7,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -19,6 +18,7 @@ import l.files.operations.TaskState.Success;
 
 import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
 import static android.os.Looper.getMainLooper;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.operations.TaskKind.COPY;
@@ -36,35 +36,24 @@ public final class TaskTest {
 
     @Test
     public void notifiesOnCancelFromInterrupt() throws Exception {
-        TaskState state = last(capturedExecute(new Command() {
-            @Override
-            public void execute(Task task) throws InterruptedException {
-                throw new InterruptedException("Test");
-            }
+        TaskState state = last(capturedExecute(task -> {
+            throw new InterruptedException("Test");
         }));
         assertTrue(state.toString(), state instanceof Success);
     }
 
     @Test
     public void notifiesOnCancelFromCancellingTask() throws Exception {
-        List<TaskState> states = capturedExecute(new Command() {
-            @Override
-            public void execute(Task task) throws InterruptedException {
-                task.cancel(true);
-            }
-        });
+        List<TaskState> states = capturedExecute(task -> task.cancel(true));
         assertTrue(states.toString(), last(states) instanceof Success);
     }
 
     @Test
     public void notifiesOnFailure() throws Throwable {
-        TaskState state = last(capturedExecute(new Command() {
-            @Override
-            public void execute(Task task) throws FileException {
-                throw new FileException(singletonList(Failure.create(
-                        Path.of("a"), new IOException("Test")
-                )));
-            }
+        TaskState state = last(capturedExecute(task -> {
+            throw new FileException(singletonList(Failure.create(
+                    Path.of("a"), new IOException("Test")
+            )));
         }));
         assertTrue(state.toString(), state instanceof Failed);
     }
@@ -82,10 +71,7 @@ public final class TaskTest {
     }
 
     private List<TaskState> capturedExecute() throws InterruptedException {
-        return capturedExecute(new Command() {
-            @Override
-            public void execute(Task task) {
-            }
+        return capturedExecute(task -> {
         });
     }
 
@@ -109,7 +95,7 @@ public final class TaskTest {
         TestTask(Handler handler, Callback callback) {
             super(
                     TaskId.create(0, COPY),
-                    Target.from(Collections.<Path>emptyList(), mock(Path.class)),
+                    Target.from(emptyList(), mock(Path.class)),
                     Clock.system(),
                     callback,
                     handler

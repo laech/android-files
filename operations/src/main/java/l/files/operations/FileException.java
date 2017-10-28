@@ -26,7 +26,7 @@ final class FileException extends RuntimeException {
         }
     }
 
-    public static void throwIfNotEmpty(Collection<Failure> failures)
+    static void throwIfNotEmpty(Collection<Failure> failures)
             throws FileException {
         if (!failures.isEmpty()) {
             throw new FileException(failures);

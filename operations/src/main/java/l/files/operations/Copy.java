@@ -125,25 +125,21 @@ final class Copy extends Paste {
             return;
         }
 
-        InputStream source = sourcePath.newInputStream();
-        try {
+        try (InputStream source = sourcePath.newInputStream();
+             OutputStream sink = destinationPath.newOutputStream(false)) {
 
-            OutputStream sink = destinationPath.newOutputStream(false);
-            try {
-                // TODO perform sync to disk
-                byte[] buf = new byte[BUFFER_SIZE];
-                int n;
-                while ((n = source.read(buf)) > 0) {
 
-                    if (isInterrupted()) {
-                        throw new InterruptedIOException();
-                    }
+            // TODO perform sync to disk
+            byte[] buf = new byte[BUFFER_SIZE];
+            int n;
+            while ((n = source.read(buf)) > 0) {
 
-                    sink.write(buf, 0, n);
-                    copiedByteCount.addAndGet(n);
+                if (isInterrupted()) {
+                    throw new InterruptedIOException();
                 }
-            } finally {
-                sink.close();
+
+                sink.write(buf, 0, n);
+                copiedByteCount.addAndGet(n);
             }
             copiedItemCount.incrementAndGet();
 
@@ -163,8 +159,6 @@ final class Copy extends Paste {
                 throw e;
             }
 
-        } finally {
-            source.close();
         }
     }
 

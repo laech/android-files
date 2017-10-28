@@ -152,18 +152,15 @@ public final class OperationService extends Service {
                     .build());
         }
 
-        Task task = newTask(data, startId, handler, new Callback() {
-            @Override
-            public void onUpdate(TaskState state) {
-                if (state.isFinished()) {
-                    tasks.remove(state.task().id());
-                    if (tasks.isEmpty()) {
-                        stopSelf();
-                    }
+        Task task = newTask(data, startId, handler, state -> {
+            if (state.isFinished()) {
+                tasks.remove(state.task().id());
+                if (tasks.isEmpty()) {
+                    stopSelf();
                 }
-                if (listener != null) {
-                    listener.onUpdate(OperationService.this, state);
-                }
+            }
+            if (listener != null) {
+                listener.onUpdate(OperationService.this, state);
             }
         });
         tasks.put(startId, task.executeOnExecutor(executor));

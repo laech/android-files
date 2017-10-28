@@ -22,7 +22,7 @@ public final class Target {
         this.dstDir = requireNonNull(dstDir);
     }
 
-    public Collection<Path> srcFiles() {
+    Collection<Path> srcFiles() {
         return srcFiles;
     }
 

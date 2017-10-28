@@ -14,7 +14,7 @@ class Count extends AbstractOperation {
         super(sourcePaths);
     }
 
-    public int getCount() {
+    int getCount() {
         return count.get();
     }
 

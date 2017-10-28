@@ -172,7 +172,7 @@ public final class OperationServiceTest extends PathBaseTest {
             }
         }
 
-        public void await() throws InterruptedException {
+        void await() throws InterruptedException {
             assertTrue(latch.await(1, SECONDS));
         }
 

@@ -87,24 +87,21 @@ public abstract class PasteTest extends PathBaseTest {
         ));
         final Path dstDir = dir1().concat("b").createDirectory();
 
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                currentThread().interrupt();
-                try {
-                    create(sources, dstDir).execute();
-                    fail();
-                } catch (InterruptedException e) {
-                    // Pass
-                } catch (FileException e) {
-                    fail();
-                }
+        Thread thread = new Thread(() -> {
+            currentThread().interrupt();
+            try {
+                create(sources, dstDir).execute();
+                fail();
+            } catch (InterruptedException e) {
+                // Pass
+            } catch (FileException e) {
+                fail();
             }
         });
         thread.start();
         thread.join();
 
-        List<Path> actual = dstDir.list(new ArrayList<Path>());
+        List<Path> actual = dstDir.list(new ArrayList<>());
         assertTrue(actual.isEmpty());
     }
 
