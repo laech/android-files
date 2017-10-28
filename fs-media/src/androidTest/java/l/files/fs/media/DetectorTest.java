@@ -84,7 +84,7 @@ public final class DetectorTest extends PathBaseTest {
         }
     }
 
-    protected Path createDir(String name) throws IOException {
+    private Path createDir(String name) throws IOException {
         return dir1().concat(name).createDirectory();
     }
 

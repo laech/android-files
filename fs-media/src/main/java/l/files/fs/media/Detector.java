@@ -97,23 +97,17 @@ final class Detector {
          * and to avoid the unnecessary memory usage increase because of the caching
          * used for the jar content created by Android's Class.getResource*().
          */
-        InputStream in = context.getResources()
-                .openRawResource(R.raw.tika_mimetypes_1_10);
-        try {
+        try (InputStream in = context.getResources()
+                .openRawResource(R.raw.tika_mimetypes_1_10)) {
             return MimeTypesFactory.create(in);
-        } finally {
-            in.close();
         }
     }
 
     private static String detectFile(MimeTypes types, Path path) throws IOException {
         Metadata meta = new Metadata();
         meta.add(RESOURCE_NAME_KEY, path.toString());
-        InputStream in = new BufferedInputStream(path.newInputStream());
-        try {
+        try (InputStream in = new BufferedInputStream(path.newInputStream())) {
             return types.detect(in, meta).getBaseType().toString();
-        } finally {
-            in.close();
         }
     }
 
