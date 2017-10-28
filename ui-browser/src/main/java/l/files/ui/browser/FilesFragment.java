@@ -61,7 +61,6 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static java.util.Collections.emptyList;
 import static l.files.ui.base.fs.IOExceptions.message;
-import static l.files.ui.base.view.Views.find;
 import static l.files.ui.browser.FilesAdapter.VIEW_TYPE_FILE;
 import static l.files.ui.browser.FilesAdapter.VIEW_TYPE_HEADER;
 import static l.files.ui.browser.preference.Preferences.getShowHiddenFiles;
@@ -185,7 +184,7 @@ public final class FilesFragment
         watchLimit = getArguments().getInt(ARG_WATCH_LIMIT, -1);
 
         int spanCount = getResources().getInteger(R.integer.files_grid_columns);
-        recycler = find(android.R.id.list, this);
+        recycler = getView().findViewById(android.R.id.list);
         recycler.setHasFixedSize(true);
         recycler.setItemViewCacheSize(spanCount * 3);
         recycler.setLayoutManager(new StaggeredGridLayoutManager(spanCount, VERTICAL));

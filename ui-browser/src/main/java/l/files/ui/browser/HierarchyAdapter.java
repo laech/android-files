@@ -24,7 +24,6 @@ import static android.view.View.VISIBLE;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
 import static l.files.ui.base.fs.UserDirs.DIR_HOME;
-import static l.files.ui.base.view.Views.find;
 
 final class HierarchyAdapter extends BaseAdapter {
 
@@ -87,10 +86,10 @@ final class HierarchyAdapter extends BaseAdapter {
 
         Path path = getItem(position);
 
-        TextView title = find(R.id.title, view);
+        TextView title = view.findViewById(R.id.title);
         title.setText(FileLabels.get(parent.getResources(), path));
 
-        ImageView icon = find(R.id.icon, view);
+        ImageView icon = view.findViewById(R.id.icon);
         icon.setImageResource(FileIcons.getDirectory(path));
         icon.setColorFilter(WHITE, SRC_ATOP);
 
@@ -115,12 +114,12 @@ final class HierarchyAdapter extends BaseAdapter {
         Path path = getItem(position);
         view.setEnabled(enabled);
 
-        ImageView iconView = find(R.id.icon, view);
+        ImageView iconView = view.findViewById(R.id.icon);
         iconView.setImageResource(FileIcons.getDirectory(path));
         iconView.setEnabled(enabled);
         iconView.setAlpha(enabled ? 0.54f : 0.2f);
 
-        TextView titleView = find(R.id.title, view);
+        TextView titleView = view.findViewById(R.id.title);
         titleView.setText(String.valueOf(path.getName().orObject(path)));
         titleView.setEnabled(enabled);
 

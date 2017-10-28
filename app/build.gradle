@@ -96,7 +96,8 @@ android.applicationVariants.all { variant ->
 
 dependencies {
 
-    compile project(':fs')
-    compile project(':ui-browser')
+    implementation project(':fs')
+    implementation project(':ui-browser')
+    implementation project(':ui-preview')
 
 }

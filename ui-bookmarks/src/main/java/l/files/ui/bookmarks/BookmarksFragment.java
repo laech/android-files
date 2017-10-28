@@ -26,7 +26,6 @@ import l.files.ui.base.view.ClearSelectionOnDestroyActionMode;
 import l.files.ui.base.view.CountSelectedItemsAction;
 
 import static l.files.ui.base.fs.UserDirs.DIR_HOME;
-import static l.files.ui.base.view.Views.find;
 
 public final class BookmarksFragment
         extends SelectionModeFragment<Path, Path>
@@ -68,7 +67,7 @@ public final class BookmarksFragment
                 actionModeCallback(),
                 (OnOpenFileListener) getActivity());
 
-        recycler = find(R.id.bookmarks, this);
+        recycler = getView().findViewById(R.id.bookmarks);
         recycler.setLayoutManager(new LinearLayoutManager(getActivity()));
         recycler.setAdapter(adapter);
 

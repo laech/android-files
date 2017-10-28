@@ -23,9 +23,13 @@ android {
 }
 
 dependencies {
-    compile project(':bookmarks')
-    compile project(':ui-base')
+
+    implementation project(':bookmarks')
+    implementation project(':ui-base')
+    implementation "com.android.support:appcompat-v7:$supportLibVersion"
+    implementation "com.android.support:recyclerview-v7:$supportLibVersion"
 
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.mockito:mockito-android:2.11.0'
+
 }

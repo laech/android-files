@@ -26,8 +26,9 @@ android {
 
 dependencies {
 
-    compile project(':operations')
-    compile project(':ui-base')
+    implementation project(':operations')
+    implementation project(':ui-base')
+    implementation "com.android.support:appcompat-v7:$supportLibVersion"
 
     androidTestImplementation 'org.mockito:mockito-android:2.11.0'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'

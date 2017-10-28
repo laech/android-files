@@ -26,7 +26,6 @@ import static android.text.format.DateUtils.formatDateTime;
 import static android.view.View.GONE;
 import static java.util.Collections.singleton;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static l.files.ui.base.view.Views.find;
 
 public final class InfoFragment
         extends InfoBaseFragment
@@ -98,19 +97,19 @@ public final class InfoFragment
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        root = find(R.id.root, this);
-        image = find(R.id.image, this);
+        root = getView().findViewById(R.id.root);
+        image = getView().findViewById(R.id.image);
 
         Path file = getDirectory().concat(getChildren().get(0).toPath());
         Stat stat = getArguments().getParcelable(ARG_STAT);
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         constraint = Rect.of((int) (metrics.widthPixels * 0.75), metrics.heightPixels);
 
-        name = find(R.id.name, this);
+        name = getView().findViewById(R.id.name);
         name.setMaxWidth(constraint.width());
         name.setText(String.valueOf(file.getName().orObject(file)));
 
-        date = find(R.id.modified, this);
+        date = getView().findViewById(R.id.modified);
         if (stat != null) {
 
             initImage(file, stat);

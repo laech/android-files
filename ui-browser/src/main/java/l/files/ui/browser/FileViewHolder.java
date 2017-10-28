@@ -56,7 +56,6 @@ import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.ui.base.content.Contexts.isDebugBuild;
-import static l.files.ui.base.view.Views.find;
 import static l.files.ui.browser.FilesAdapter.calculateCardContentWidthPixels;
 
 public final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo>
@@ -95,12 +94,12 @@ public final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo
         this.recyclerView = requireNonNull(recyclerView, "recyclerView");
         this.decorator = Preview.get(itemView.getContext());
         this.listener = requireNonNull(listener, "listener");
-        this.blurView = find(R.id.blur, this);
-        this.cardView = find(R.id.card, this);
-        this.titleView = find(R.id.title, this);
-        this.linkView = find(R.id.link, this);
-        this.summaryView = find(R.id.summary, this);
-        this.imageView = find(R.id.image, this);
+        this.blurView = itemView.findViewById(R.id.blur);
+        this.cardView = itemView.findViewById(R.id.card);
+        this.titleView = itemView.findViewById(R.id.title);
+        this.linkView = itemView.findViewById(R.id.link);
+        this.summaryView = itemView.findViewById(R.id.summary);
+        this.imageView = itemView.findViewById(R.id.image);
         this.itemView.setOnClickListener(this);
         this.itemView.setOnLongClickListener(this);
 

@@ -46,7 +46,6 @@ import static android.widget.Toast.makeText;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.ui.base.fs.IOExceptions.message;
 import static l.files.ui.base.fs.UserDirs.DIR_HOME;
-import static l.files.ui.base.view.Views.find;
 
 public final class FilesActivity extends BaseActivity implements
         OnBackStackChangedListener,
@@ -84,15 +83,15 @@ public final class FilesActivity extends BaseActivity implements
         navigationIcon = new DrawerArrowDrawable(this);
         navigationIcon.setColor(WHITE);
 
-        toolbar = find(R.id.toolbar, this);
+        toolbar = findViewById(R.id.toolbar);
         toolbar.setNavigationIcon(navigationIcon);
 
         hierarchy = new HierarchyAdapter();
-        title = find(R.id.title, this);
+        title = findViewById(R.id.title);
         title.setAdapter(hierarchy);
         title.setOnItemSelectedListener(this);
 
-        drawer = find(R.id.drawer_layout, this);
+        drawer = findViewById(R.id.drawer_layout);
 
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();

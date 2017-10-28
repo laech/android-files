@@ -21,9 +21,10 @@ android {
 
 dependencies {
 
-    compile project(':base')
-    compile project(':fs')
-    compile project(':ui-base')
-    compile project(':ui-preview')
+    implementation project(':base')
+    implementation project(':fs')
+    implementation project(':ui-base')
+    implementation project(':ui-preview')
+    implementation "com.android.support:appcompat-v7:$supportLibVersion"
 
 }

@@ -22,7 +22,6 @@ import l.files.ui.base.widget.StableAdapter;
 
 import static java.util.Collections.emptyList;
 import static l.files.base.Objects.requireNonNull;
-import static l.files.ui.base.view.Views.find;
 
 final class BookmarksAdapter extends StableAdapter<Object, ViewHolder> {
 
@@ -77,7 +76,7 @@ final class BookmarksAdapter extends StableAdapter<Object, ViewHolder> {
 
         HeaderHolder(View itemView) {
             super(itemView);
-            this.headerView = find(R.id.header, itemView);
+            this.headerView = itemView.findViewById(R.id.header);
         }
 
         void bind(String header) {
@@ -92,8 +91,8 @@ final class BookmarksAdapter extends StableAdapter<Object, ViewHolder> {
 
         BookmarkHolder(View itemView) {
             super(itemView, selection, actionModeProvider, actionModeCallback);
-            this.titleView = find(R.id.title, itemView);
-            this.iconView = find(R.id.icon, itemView);
+            this.titleView = itemView.findViewById(R.id.title);
+            this.iconView = itemView.findViewById(R.id.icon);
         }
 
         @Override

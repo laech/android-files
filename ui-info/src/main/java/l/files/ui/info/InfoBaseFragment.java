@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatDialogFragment;
+import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -19,7 +20,6 @@ import l.files.ui.info.CalculateSizeLoader.Size;
 import static android.text.format.Formatter.formatFileSize;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
-import static l.files.ui.base.view.Views.find;
 
 public abstract class InfoBaseFragment
         extends AppCompatDialogFragment
@@ -82,9 +82,11 @@ public abstract class InfoBaseFragment
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        size = find(R.id.size, this);
-        sizeOnDisk = find(R.id.size_on_disk, this);
-        calculatingSize = find(R.id.calculate_size_progress_bar, this);
+        View root = getView();
+        assert root != null;
+        size = root.findViewById(R.id.size);
+        sizeOnDisk = root.findViewById(R.id.size_on_disk);
+        calculatingSize = root.findViewById(R.id.calculate_size_progress_bar);
 
         dir = getArguments().getParcelable(ARG_DIR);
         children = getArguments().getParcelableArrayList(ARG_CHILDREN);

@@ -46,7 +46,6 @@ import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.ui.base.view.Views.find;
 import static l.files.ui.browser.Instrumentations.await;
 import static l.files.ui.browser.Instrumentations.awaitOnMainThread;
 import static l.files.ui.browser.Instrumentations.clickItemOnMainThread;
@@ -342,7 +341,7 @@ final class UiFileActivity {
 
     UiFileActivity assertThumbnailShown(Path path, final boolean shown) {
         findItemOnMainThread(path, view -> {
-            ImageView imageView = find(R.id.image, view);
+            ImageView imageView = view.findViewById(R.id.image);
             Drawable drawable = imageView.getDrawable();
             assertEquals(shown, drawable instanceof BitmapDrawable
                     || drawable instanceof RoundedBitmapDrawable);
@@ -355,7 +354,7 @@ final class UiFileActivity {
             @Nullable final Path target) {
 
         findItemOnMainThread(link, view -> {
-            TextView linkView = find(R.id.link, view);
+            TextView linkView = view.findViewById(R.id.link);
             if (target != null) {
                 Resources res = view.getResources();
                 String expected = res.getString(R.string.link_x, target);
@@ -378,7 +377,7 @@ final class UiFileActivity {
             final Path path,
             final Consumer<String> assertion) {
         findItemOnMainThread(path, view -> {
-            TextView summaryView = find(R.id.summary, view);
+            TextView summaryView = view.findViewById(R.id.summary);
             assertion.accept(summaryView.getText().toString());
         });
         return this;
@@ -391,9 +390,9 @@ final class UiFileActivity {
 
     UiFileActivity assertDisabled(Path path) {
         findItemOnMainThread(path, view -> {
-            assertFalse(find(R.id.title, view).isEnabled());
-            assertFalse(find(R.id.summary, view).isEnabled());
-            assertFalse(find(R.id.link, view).isEnabled());
+            assertFalse(view.findViewById(R.id.title).isEnabled());
+            assertFalse(view.findViewById(R.id.summary).isEnabled());
+            assertFalse(view.findViewById(R.id.link).isEnabled());
         });
         return this;
     }

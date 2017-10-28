@@ -13,8 +13,6 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import static l.files.ui.base.view.Views.find;
-
 public final class FailuresActivity extends AppCompatActivity {
 
     private static final String EXTRA_FAILURES = "failures";
@@ -38,7 +36,7 @@ public final class FailuresActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.failures_activity);
-        setSupportActionBar(find(R.id.toolbar, this));
+        setSupportActionBar(findViewById(R.id.toolbar));
         ActionBar actionBar = getSupportActionBar();
         assert actionBar != null;
         actionBar.setDisplayHomeAsUpEnabled(true);

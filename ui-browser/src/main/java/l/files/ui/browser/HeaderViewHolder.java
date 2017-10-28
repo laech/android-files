@@ -6,8 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import static l.files.ui.base.view.Views.find;
-
 final class HeaderViewHolder extends RecyclerView.ViewHolder {
 
     static final int LAYOUT_ID = R.layout.files_grid_header;
@@ -16,7 +14,7 @@ final class HeaderViewHolder extends RecyclerView.ViewHolder {
 
     HeaderViewHolder(View itemView) {
         super(itemView);
-        title = find(android.R.id.title, this);
+        title = itemView.findViewById(android.R.id.title);
     }
 
     void bind(Header header) {
