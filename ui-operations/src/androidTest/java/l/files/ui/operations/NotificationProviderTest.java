@@ -11,7 +11,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import l.files.fs.Path;
@@ -25,6 +24,7 @@ import l.files.operations.Time;
 
 import static android.support.test.InstrumentationRegistry.getContext;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static l.files.operations.TaskKind.COPY;
 import static l.files.ui.operations.FailuresActivity.getFailures;
@@ -51,7 +51,7 @@ public final class NotificationProviderTest {
         provider = new NotificationProvider();
         base = TaskState.pending(
                 TaskId.create(1, COPY),
-                Target.from(Collections.<Path>emptyList(), mock(Path.class)),
+                Target.from(emptyList(), mock(Path.class)),
                 Time.create(0, 0)
         );
         manager = mock(NotificationManager.class);
@@ -115,7 +115,7 @@ public final class NotificationProviderTest {
 
         provider.onUpdate(context, base
                 .running(Time.create(1, 1))
-                .failed(Time.create(2, 2), Collections.<Failure>emptyList()));
+                .failed(Time.create(2, 2), emptyList()));
         verify(manager, timeout(1000)).cancel(base.task().id());
     }
 

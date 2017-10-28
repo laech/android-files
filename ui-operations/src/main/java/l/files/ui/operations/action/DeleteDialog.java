@@ -2,8 +2,6 @@ package l.files.ui.operations.action;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatDialogFragment;
@@ -53,13 +51,10 @@ public final class DeleteDialog extends AppCompatDialogFragment {
         return new AlertDialog.Builder(getActivity())
                 .setMessage(getConfirmMessage(paths.size()))
                 .setNegativeButton(android.R.string.cancel, null)
-                .setPositiveButton(R.string.delete, new OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        requestDelete(paths);
-                        assert mode != null;
-                        mode.finish();
-                    }
+                .setPositiveButton(R.string.delete, (dialog, which) -> {
+                    requestDelete(paths);
+                    assert mode != null;
+                    mode.finish();
                 })
                 .create();
     }

@@ -10,7 +10,7 @@ final class Styles {
 
     private static final int UNDEFINED = -1;
 
-    public static int getResourceId(final int attr, final Context context) {
+    static int getResourceId(final int attr, final Context context) {
         final TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
         final int id = ta.getResourceId(0, UNDEFINED);
         ta.recycle();

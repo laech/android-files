@@ -45,11 +45,11 @@ public final class NotificationProvider implements TaskListener {
     }
 
     @SuppressWarnings("unused")
-    public NotificationProvider() {
+    NotificationProvider() {
         this(Clock.system());
     }
 
-    NotificationProvider(Clock clock) {
+    private NotificationProvider(Clock clock) {
         this.viewers = buildViewers(clock);
     }
 
