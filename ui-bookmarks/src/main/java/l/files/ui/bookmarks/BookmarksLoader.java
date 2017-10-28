@@ -7,13 +7,11 @@ import android.support.v4.content.AsyncTaskLoader;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import javax.annotation.Nullable;
 
 import l.files.bookmarks.BookmarkManager;
-import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.ui.base.text.CollationKey;
 
@@ -53,17 +51,14 @@ final class BookmarksLoader extends AsyncTaskLoader<List<Path>> {
         for (Path bookmark : manager.getBookmarks()) {
             collation.add(new Entry(bookmark, CollationKey.create(collator, bookmark.getName().or(""))));
         }
-        Collections.sort(collation, new Comparator<Entry>() {
-            @Override
-            public int compare(Entry a, Entry b) {
-                if (a.bookmark.equals(home)) {
-                    return -1;
-                }
-                if (b.bookmark.equals(home)) {
-                    return 1;
-                }
-                return a.collationKey.compareTo(b.collationKey);
+        Collections.sort(collation, (a, b) -> {
+            if (a.bookmark.equals(home)) {
+                return -1;
             }
+            if (b.bookmark.equals(home)) {
+                return 1;
+            }
+            return a.collationKey.compareTo(b.collationKey);
         });
         return collation;
     }
