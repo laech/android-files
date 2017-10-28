@@ -709,7 +709,7 @@ public abstract class Path implements Parcelable {
      * @see #list(Consumer)
      */
     public <C extends Collection<? super Path>> C list(
-            final C collection
+            C collection
     ) throws IOException {
         list((Consumer) path -> {
             collection.add(path);

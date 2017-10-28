@@ -81,11 +81,11 @@ public abstract class PasteTest extends PathBaseTest {
 
     @Test
     public void doesNothingIfAlreadyCancelledOnExecution() throws Exception {
-        final Set<Path> sources = new HashSet<>(asList(
+        Set<Path> sources = new HashSet<>(asList(
                 Paths.createFiles(dir1().concat("a/1.txt")),
                 Paths.createFiles(dir1().concat("a/2.txt"))
         ));
-        final Path dstDir = dir1().concat("b").createDirectory();
+        Path dstDir = dir1().concat("b").createDirectory();
 
         Thread thread = new Thread(() -> {
             currentThread().interrupt();

@@ -113,7 +113,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
         screen().assertListMatchesFileSystem(dir());
     }
 
-    private void deleteFiles(final int n) throws IOException {
+    private void deleteFiles(int n) throws IOException {
         dir().list(new Consumer() {
 
             int count = 0;
@@ -152,7 +152,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
     private void updateAttributes() throws IOException {
 
-        final Random r = new Random();
+        Random r = new Random();
         dir().list((Consumer) child -> {
             child.setLastModifiedTime(NOFOLLOW, Instant.of(
                     r.nextInt((int) (currentTimeMillis() / 1000)),

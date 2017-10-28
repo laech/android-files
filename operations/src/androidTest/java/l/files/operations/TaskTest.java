@@ -79,7 +79,7 @@ public final class TaskTest {
         return states.get(states.size() - 1);
     }
 
-    private List<TaskState> capturedExecute(final Command command) throws InterruptedException {
+    private List<TaskState> capturedExecute(Command command) throws InterruptedException {
         Listener listener = new Listener();
         new TestTask(handler, listener) {
             @Override

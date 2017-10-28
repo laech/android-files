@@ -7,8 +7,8 @@ import android.graphics.drawable.ColorDrawable;
  */
 public final class SizedColorDrawable extends ColorDrawable {
 
-    private int width;
-    private int height;
+    private final int width;
+    private final int height;
 
     public SizedColorDrawable(int color, int width, int height) {
         super(color);

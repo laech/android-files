@@ -39,7 +39,7 @@ final class Copy extends Paste {
     }
 
     @Override
-    void paste(final Path sourcePath, final Path destinationPath)
+    void paste(Path sourcePath, Path destinationPath)
             throws IOException {
 
         sourcePath.traverse(NOFOLLOW, new OperationVisitor() {

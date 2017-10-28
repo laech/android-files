@@ -66,10 +66,10 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
     @Test
     public void notifies_children_change() throws Exception {
 
-        final Path b = dir1().concat("b").createDirectory();
-        final Path a = dir1().concat("a").createFile();
-        final Path c = dir1().concat("c").createDirectory();
-        final Path d = dir1().concat("d");
+        Path b = dir1().concat("b").createDirectory();
+        Path a = dir1().concat("a").createFile();
+        Path c = dir1().concat("c").createDirectory();
+        Path d = dir1().concat("d");
 
         dir1().concat("e").createFile();
         dir1().concat("f").createDirectory();
@@ -109,7 +109,7 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
     @Test
     public void notifies_latest_event() throws Exception {
 
-        final Path file = dir1().concat("file").createFile();
+        Path file = dir1().concat("file").createFile();
         try (Observation ignored = dir1().observe(
                 NOFOLLOW,
                 observer,
@@ -139,7 +139,7 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
     @Test
     public void notifies_self_and_children_change() throws Exception {
 
-        final Path child = dir1().concat("a").createFile();
+        Path child = dir1().concat("a").createFile();
         try (Observation ignored = dir1().observe(
                 NOFOLLOW,
                 observer,

@@ -83,14 +83,14 @@ public final class NewDirTest extends BaseFilesActivityTest {
         });
     }
 
-    private void checkNameField(final Consumer<EditText> assertion)
+    private void checkNameField(Consumer<EditText> assertion)
             throws Throwable {
 
-        final UiNewDir dialog = screen().newFolder();
+        UiNewDir dialog = screen().newFolder();
         runTestOnUiThread(() -> assertion.accept(dialog.editText()));
     }
 
-    private String string(final int id) {
+    private String string(int id) {
         return getActivity().getString(id);
     }
 

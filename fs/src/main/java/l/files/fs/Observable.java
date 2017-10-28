@@ -474,7 +474,7 @@ final class Observable extends Native
         }
     }
 
-    private static void throwOnMainThread(final Throwable e) {
+    private static void throwOnMainThread(Throwable e) {
         handler.post(() -> {
             if (e instanceof RuntimeException) {
                 throw (RuntimeException) e;

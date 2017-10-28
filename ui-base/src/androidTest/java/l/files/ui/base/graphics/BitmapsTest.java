@@ -45,7 +45,7 @@ public final class BitmapsTest {
     private void testDecodeScaledDownBitmap(Bitmap src, Rect max, Bitmap expected)
             throws Exception {
 
-        final File file = createTempFile("BitmapsTest", null);
+        File file = createTempFile("BitmapsTest", null);
         try {
             write(src, file);
             ScaledBitmap result = decodeScaledDownBitmap(() -> new FileInputStream(file), max);
@@ -102,10 +102,10 @@ public final class BitmapsTest {
 
     @Test
     public void decodeBounds() throws Exception {
-        final int width = 10;
-        final int height = 11;
-        final byte[] bytes = generateBitmapByteArray(width, height);
-        final Rect bounds = Bitmaps.decodeBounds(() -> new ByteArrayInputStream(bytes));
+        int width = 10;
+        int height = 11;
+        byte[] bytes = generateBitmapByteArray(width, height);
+        Rect bounds = Bitmaps.decodeBounds(() -> new ByteArrayInputStream(bytes));
         assertNotNull(bounds);
         assertEquals(width, bounds.width());
         assertEquals(height, bounds.height());

@@ -54,12 +54,12 @@ import static l.files.ui.browser.Instrumentations.longClickItemOnMainThread;
 final class UiFileActivity {
 
     private final Instrumentation instrument;
-    private Provider<FilesActivity> activity;
+    private final Provider<FilesActivity> activity;
 
     UiFileActivity(
-            final Instrumentation instrumentation,
-            final Provider<FilesActivity> provider) {
-
+            Instrumentation instrumentation,
+            Provider<FilesActivity> provider
+    ) {
         requireNonNull(instrumentation);
         requireNonNull(provider);
 
@@ -135,7 +135,7 @@ final class UiFileActivity {
         return new UiSort(this);
     }
 
-    UiFileActivity selectFromNavigationMode(final Path dir) {
+    UiFileActivity selectFromNavigationMode(Path dir) {
         awaitOnMainThread(instrument, () -> {
             int position = activity().hierarchy().indexOf(dir);
             activity().title().setSelection(position);
@@ -165,7 +165,7 @@ final class UiFileActivity {
         return new UiBookmarksFragment(this);
     }
 
-    UiFileActivity assertDrawerIsOpened(final boolean opened) {
+    UiFileActivity assertDrawerIsOpened(boolean opened) {
         awaitOnMainThread(instrument, () -> assertEquals(opened, activity().drawerLayout().isDrawerOpen(START)));
         return this;
     }
@@ -200,15 +200,14 @@ final class UiFileActivity {
         return this;
     }
 
-    UiFileActivity assertCanPaste(final boolean can) {
+    UiFileActivity assertCanPaste(boolean can) {
         return findOptionMenuItem(android.R.id.paste, input -> {
             String msg = "Paste menu enabled to be " + can;
             assertEquals(msg, can, input.isEnabled());
         });
     }
 
-    private UiFileActivity findOptionMenuItem(
-            final int id, final Consumer<MenuItem> consumer) {
+    private UiFileActivity findOptionMenuItem(int id, Consumer<MenuItem> consumer) {
 
         awaitOnMainThread(instrument, () -> {
             Toolbar toolbar = activity().toolbar();
@@ -222,12 +221,12 @@ final class UiFileActivity {
         return this;
     }
 
-    private UiFileActivity clickOptionMenuItem(final int id) {
+    private UiFileActivity clickOptionMenuItem(int id) {
         awaitOnMainThread(instrument, (Runnable) () -> activity().toolbar().getMenu().performIdentifierAction(id, 0));
         return this;
     }
 
-    UiFileActivity assertCurrentDirectory(final Path expected) {
+    UiFileActivity assertCurrentDirectory(Path expected) {
         awaitOnMainThread(instrument, () -> {
             FilesFragment fragment = activity().fragment();
             assertNotNull(fragment);
@@ -237,14 +236,12 @@ final class UiFileActivity {
         return this;
     }
 
-    UiFileActivity assertListViewContains(
-            final Path item,
-            final boolean contains) {
+    UiFileActivity assertListViewContains(Path item, boolean contains) {
         awaitOnMainThread(instrument, () -> assertEquals(contains, resources().contains(item)));
         return this;
     }
 
-    UiFileActivity assertActionBarTitle(final String title) {
+    UiFileActivity assertActionBarTitle(String title) {
         awaitOnMainThread(instrument, () -> assertEquals(title, label((Path) activity().title().getSelectedItem())));
         return this;
     }
@@ -253,7 +250,7 @@ final class UiFileActivity {
         return FileLabels.get(activity().getResources(), file);
     }
 
-    UiFileActivity assertActionBarUpIndicatorIsVisible(final boolean visible) {
+    UiFileActivity assertActionBarUpIndicatorIsVisible(boolean visible) {
         awaitOnMainThread(instrument, () -> assertEquals(visible ? 1F : 0F, activity().navigationIcon().getProgress()));
         return this;
     }
@@ -278,7 +275,7 @@ final class UiFileActivity {
         return clickOptionMenuItem(id);
     }
 
-    void selectActionModeAction(final int id) {
+    void selectActionModeAction(int id) {
         awaitOnMainThread(instrument, () -> {
             ActionMode mode = activity().currentActionMode();
             assertNotNull(mode);
@@ -305,8 +302,7 @@ final class UiFileActivity {
     /**
      * Asserts whether the given item is currently checked.
      */
-    UiFileActivity assertChecked(
-            Path file, final boolean checked) {
+    UiFileActivity assertChecked(Path file, boolean checked) {
         findItemOnMainThread(file, view -> assertEquals(checked, view.isActivated()));
         return this;
     }
@@ -314,12 +310,12 @@ final class UiFileActivity {
     /**
      * Asserts whether the activity.get() currently in an action mode.
      */
-    UiFileActivity assertActionModePresent(final boolean present) {
+    UiFileActivity assertActionModePresent(boolean present) {
         awaitOnMainThread(instrument, () -> assertEquals(present, activity().currentActionMode() != null));
         return this;
     }
 
-    UiFileActivity assertActionModeTitle(final Object title) {
+    UiFileActivity assertActionModeTitle(Object title) {
         awaitOnMainThread(instrument, () -> {
             ActionMode mode = activity().currentActionMode();
             assertNotNull(mode);
@@ -328,18 +324,18 @@ final class UiFileActivity {
         return this;
     }
 
-    UiFileActivity assertBookmarkMenuChecked(final boolean checked) {
+    UiFileActivity assertBookmarkMenuChecked(boolean checked) {
         return findOptionMenuItem(R.id.bookmark, item -> assertEquals(checked, item.isChecked()));
     }
 
-    UiFileActivity assertRefreshMenuVisible(final boolean visible) {
+    UiFileActivity assertRefreshMenuVisible(boolean visible) {
         return findOptionMenuItem(R.id.refresh, input -> {
             String msg = "Refresh menu visible to be " + visible;
             assertEquals(msg, visible, input.isVisible());
         });
     }
 
-    UiFileActivity assertThumbnailShown(Path path, final boolean shown) {
+    UiFileActivity assertThumbnailShown(Path path, boolean shown) {
         findItemOnMainThread(path, view -> {
             ImageView imageView = view.findViewById(R.id.image);
             Drawable drawable = imageView.getDrawable();
@@ -349,9 +345,7 @@ final class UiFileActivity {
         return this;
     }
 
-    UiFileActivity assertLinkPathDisplayed(
-            Path link,
-            @Nullable final Path target) {
+    UiFileActivity assertLinkPathDisplayed(Path link, @Nullable Path target) {
 
         findItemOnMainThread(link, view -> {
             TextView linkView = view.findViewById(R.id.link);
@@ -369,13 +363,14 @@ final class UiFileActivity {
         return this;
     }
 
-    UiFileActivity assertSummary(Path path, final CharSequence expected) {
+    UiFileActivity assertSummary(Path path, CharSequence expected) {
         return assertSummary(path, summary -> assertEquals(expected, summary));
     }
 
     UiFileActivity assertSummary(
-            final Path path,
-            final Consumer<String> assertion) {
+            Path path,
+            Consumer<String> assertion
+    ) {
         findItemOnMainThread(path, view -> {
             TextView summaryView = view.findViewById(R.id.summary);
             assertion.accept(summaryView.getText().toString());
@@ -397,7 +392,7 @@ final class UiFileActivity {
         return this;
     }
 
-    UiFileActivity assertNavigationModeHierarchy(final Path dir) {
+    UiFileActivity assertNavigationModeHierarchy(Path dir) {
         awaitOnMainThread(instrument, () -> {
             List<Path> actual = activity().hierarchy();
             List<Path> expected = new ArrayList<>(dir.hierarchy());
@@ -414,15 +409,15 @@ final class UiFileActivity {
     }
 
     UiFileActivity assertListMatchesFileSystem(
-            final Path dir,
-            final int timeout,
-            final TimeUnit timeoutUnit)
-            throws IOException {
+            Path dir,
+            int timeout,
+            TimeUnit timeoutUnit
+    ) throws IOException {
 
         await((Callable<Void>) () -> {
 
 
-            final SimpleArrayMap<Path, Stat> filesInView = filesInView();
+            SimpleArrayMap<Path, Stat> filesInView = filesInView();
 
             dir.list((Path.Consumer) child -> {
                 Stat oldStat = filesInView.remove(child);
@@ -481,7 +476,7 @@ final class UiFileActivity {
         return files;
     }
 
-    UiFileActivity assertAllItemsDisplayedInOrder(final Path... expected) {
+    UiFileActivity assertAllItemsDisplayedInOrder(Path... expected) {
         awaitOnMainThread(instrument, () -> {
             List<FileInfo> items = fileItems();
             List<Path> actual = new ArrayList<>(items.size());

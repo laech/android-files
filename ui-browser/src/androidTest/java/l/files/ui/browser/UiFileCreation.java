@@ -37,7 +37,7 @@ abstract class UiFileCreation<T extends UiFileCreation> {
         return (T) this;
     }
 
-    T setFilename(final CharSequence name) {
+    T setFilename(CharSequence name) {
         awaitOnMainThread(context.instrumentation(), () -> editText().setText(name));
         return self();
     }
@@ -54,12 +54,12 @@ abstract class UiFileCreation<T extends UiFileCreation> {
         return context;
     }
 
-    UiFileActivity okExpectingFailure(final String message) {
+    UiFileActivity okExpectingFailure(String message) {
         @SuppressWarnings("unchecked")
-        final Consumer<String>[] original = new Consumer[1];
+        Consumer<String>[] original = new Consumer[1];
 
-        final List<String> messages = new CopyOnWriteArrayList<>();
-        final Consumer<String> consumer = input -> {
+        List<String> messages = new CopyOnWriteArrayList<>();
+        Consumer<String> consumer = input -> {
             original[0].accept(input);
             messages.add(input);
         };
@@ -76,7 +76,7 @@ abstract class UiFileCreation<T extends UiFileCreation> {
         return context;
     }
 
-    T assertOkButtonEnabled(final boolean enabled) {
+    T assertOkButtonEnabled(boolean enabled) {
         awaitOnMainThread(context.instrumentation(), () -> {
             FileCreationFragment fragment = fragment();
             assertNotNull(fragment);
@@ -87,7 +87,7 @@ abstract class UiFileCreation<T extends UiFileCreation> {
         return self();
     }
 
-    T assertHasError(final int resId, final Object... args) {
+    T assertHasError(int resId, Object... args) {
         awaitOnMainThread(context.instrumentation(), () -> assertEquals(
                 context.activity().getString(resId, args),
                 error()));
@@ -99,7 +99,7 @@ abstract class UiFileCreation<T extends UiFileCreation> {
         return self();
     }
 
-    T assertError(final CharSequence error) {
+    T assertError(CharSequence error) {
         awaitOnMainThread(context.instrumentation(), () -> assertEquals(error, error()));
         return self();
     }
@@ -129,7 +129,7 @@ abstract class UiFileCreation<T extends UiFileCreation> {
         return fragment;
     }
 
-    T assertFilename(final CharSequence name) {
+    T assertFilename(CharSequence name) {
         awaitOnMainThread(context.instrumentation(), () -> assertEquals(name.toString(), filename()));
         return self();
     }
@@ -138,7 +138,7 @@ abstract class UiFileCreation<T extends UiFileCreation> {
         return editText().getText().toString();
     }
 
-    T assertSelection(final String selection) {
+    T assertSelection(String selection) {
         awaitOnMainThread(context.instrumentation(), () -> assertEquals(selection, selection()));
         return self();
     }

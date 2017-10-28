@@ -50,9 +50,7 @@ final class UiBookmarksFragment {
         return this;
     }
 
-    UiBookmarksFragment assertBookmarked(
-            final Path bookmark,
-            final boolean bookmarked) {
+    UiBookmarksFragment assertBookmarked(Path bookmark, boolean bookmarked) {
         awaitOnMainThread(context.instrumentation(), () ->
                 assertEquals(bookmarked, fragment().bookmarks().contains(bookmark)));
         return this;
@@ -68,8 +66,7 @@ final class UiBookmarksFragment {
         return this;
     }
 
-    UiBookmarksFragment assertChecked(
-            Path bookmark, final boolean checked) {
+    UiBookmarksFragment assertChecked(Path bookmark, boolean checked) {
         findItemOnMainThread(
                 context.instrumentation(),
                 this::recycler,

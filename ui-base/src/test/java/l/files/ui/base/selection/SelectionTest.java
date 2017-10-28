@@ -55,7 +55,7 @@ public final class SelectionTest {
 
     @Test
     public void can_add_selection_while_being_notified() throws Exception {
-        final boolean[] called = {false};
+        boolean[] called = {false};
         Callback callback1 = new Callback() {
             @Override
             public void onSelectionChanged() {

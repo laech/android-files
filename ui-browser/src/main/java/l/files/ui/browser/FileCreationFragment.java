@@ -67,13 +67,13 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
         super.onStart();
 
         if (layout == null) {
-            layout = (TextInputLayout) getDialog().findViewById(R.id.text_layout);
+            layout = getDialog().findViewById(R.id.text_layout);
             assert layout != null;
             layout.setHint(getString(getTitleResourceId()));
         }
 
         if (editText == null) {
-            editText = (EditText) getDialog().findViewById(R.id.file_name);
+            editText = getDialog().findViewById(R.id.file_name);
             assert editText != null;
             editText.setFilters(new InputFilter[]{new LengthFilter(255)});
             editText.addTextChangedListener(new FileTextWatcher());
@@ -152,7 +152,7 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
         }
 
         private Loader<Existence> newChecker() {
-            final Path file = parent().concat(getFilename());
+            Path file = parent().concat(getFilename());
             return new AsyncTaskLoader<Existence>(getActivity()) {
 
                 boolean started;

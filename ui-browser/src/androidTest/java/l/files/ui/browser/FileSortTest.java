@@ -43,8 +43,8 @@ abstract class FileSortTest {
     private List<FileInfo> mapData(Locale locale, Path... files)
             throws IOException {
 
-        final Collator collator = Collator.getInstance(locale);
-        final List<FileInfo> expected = new ArrayList<>(files.length);
+        Collator collator = Collator.getInstance(locale);
+        List<FileInfo> expected = new ArrayList<>(files.length);
         for (Path file : files) {
             Stat stat;
             try {

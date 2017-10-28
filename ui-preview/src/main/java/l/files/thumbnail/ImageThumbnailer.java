@@ -16,7 +16,7 @@ public final class ImageThumbnailer implements Thumbnailer<Path> {
     }
 
     @Override
-    public ScaledBitmap create(final Path path, Rect max, Context context) throws Exception {
+    public ScaledBitmap create(Path path, Rect max, Context context) throws Exception {
         return decodeScaledDownBitmap(path::newInputStream, max);
     }
 

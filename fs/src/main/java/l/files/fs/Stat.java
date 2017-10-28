@@ -103,7 +103,7 @@ public class Stat extends Native implements Parcelable {
                     return lstat(path.toByteArray());
                 }
 
-            } catch (final ErrnoException e) {
+            } catch (ErrnoException e) {
                 if (e.errno != EAGAIN) {
                     throw e.toIOException(path);
                 }

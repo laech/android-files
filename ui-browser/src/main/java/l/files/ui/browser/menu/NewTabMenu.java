@@ -23,13 +23,13 @@ public final class NewTabMenu extends OptionsMenuAction {
 
     private final Context context;
 
-    public NewTabMenu(final Context context) {
+    public NewTabMenu(Context context) {
         super(R.id.new_tab);
         this.context = requireNonNull(context, "context");
     }
 
     @Override
-    public void onCreateOptionsMenu(final Menu menu) {
+    public void onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         if (SDK_INT >= LOLLIPOP) {
             menu.add(NONE, id(), NONE, R.string.new_tab)
@@ -39,8 +39,8 @@ public final class NewTabMenu extends OptionsMenuAction {
 
     @Override
     @TargetApi(LOLLIPOP)
-    protected void onItemSelected(final MenuItem item) {
-        final int flags
+    protected void onItemSelected(MenuItem item) {
+        int flags
                 = Intent.FLAG_ACTIVITY_NEW_DOCUMENT
                 | Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 

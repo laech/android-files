@@ -18,23 +18,23 @@ final class UiInfo {
         this.context = requireNonNull(context);
     }
 
-    UiInfo assertName(final String value) throws IOException {
+    UiInfo assertName(String value) throws IOException {
         awaitOnMainThread(context.instrumentation(), () -> assertEquals(value, getName()));
         return this;
     }
 
-    UiInfo assertDate(final String value) throws IOException {
+    UiInfo assertDate(String value) throws IOException {
         awaitOnMainThread(context.instrumentation(), () -> assertEquals(value, getDate()));
         return this;
     }
 
-    UiInfo assertSize(final String value) throws IOException {
+    UiInfo assertSize(String value) throws IOException {
         awaitOnMainThread(context.instrumentation(), () -> assertEquals(value, getSize()));
         return this;
     }
 
 
-    UiInfo assertSizeOnDisk(final String value) throws IOException {
+    UiInfo assertSizeOnDisk(String value) throws IOException {
         awaitOnMainThread(context.instrumentation(), () -> assertEquals(value, getSizeOnDisk()));
         return this;
     }

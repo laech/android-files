@@ -41,8 +41,8 @@ public final class Paths {
     }
 
     public static void listDirectories(
-            final Path path,
-            final Consumer consumer
+            Path path,
+            Consumer consumer
     ) throws IOException {
 
         path.list((Consumer) entry -> !entry.stat(NOFOLLOW).isDirectory() ||
@@ -50,8 +50,8 @@ public final class Paths {
     }
 
     public static <C extends Collection<? super Path>> C listDirectories(
-            final Path path,
-            final C collection
+            Path path,
+            C collection
     ) throws IOException {
 
         listDirectories(path, (Consumer) entry -> {

@@ -37,8 +37,8 @@ final class Instrumentations {
         @Override
         @SuppressWarnings("unchecked")
         public final T call() throws Exception {
-            final Object[] result = {null};
-            final Throwable[] error = {null};
+            Object[] result = {null};
+            Throwable[] error = {null};
             Runnable code = () -> {
                 try {
                     result[0] = delegate.call();
@@ -80,7 +80,7 @@ final class Instrumentations {
         return await(new InstrumentCallable<>(in, callable), 1, MINUTES);
     }
 
-    static void awaitOnMainThread(Instrumentation in, final Runnable runnable) {
+    static void awaitOnMainThread(Instrumentation in, Runnable runnable) {
         awaitOnMainThread(in, () -> {
             runnable.run();
             return true;
@@ -110,14 +110,13 @@ final class Instrumentations {
             throw new AssertionError("Timed out.");
         }
 
-        AssertionError e = new AssertionError(error.getMessage());
-        e.initCause(error);
+        AssertionError e = new AssertionError(error.getMessage(), error);
         throw e;
     }
 
     private static void scrollToTop(
-            final Instrumentation in,
-            final Provider<RecyclerView> recycler) {
+            Instrumentation in,
+            Provider<RecyclerView> recycler) {
 
         awaitOnMainThread(in, () -> {
             if (getStableAdapter(recycler).getItemCount() > 0) {
@@ -151,10 +150,10 @@ final class Instrumentations {
     }
 
     static void findItemOnMainThread(
-            final Instrumentation in,
-            final Provider<RecyclerView> recycler,
-            final Object itemId,
-            final Consumer<View> consumer) {
+            Instrumentation in,
+            Provider<RecyclerView> recycler,
+            Object itemId,
+            Consumer<View> consumer) {
         scrollToTop(in, recycler);
         awaitOnMainThread(in, () -> find(recycler, itemId, consumer));
     }

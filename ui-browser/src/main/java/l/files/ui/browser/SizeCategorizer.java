@@ -59,7 +59,7 @@ final class SizeCategorizer extends BaseCategorizer {
         final long minSize;
         final int label;
 
-        Group(final long minSize, final int label) {
+        Group(long minSize, int label) {
             this.minSize = minSize;
             this.label = label;
         }

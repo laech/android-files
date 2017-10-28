@@ -204,8 +204,8 @@ public final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo
             task = null;
         }
 
-        final Path file = previewPath();
-        final Stat stat = previewStat();
+        Path file = previewPath();
+        Stat stat = previewStat();
         assert constraint != null;
         if (stat == null || !decorator.isPreviewable(file, stat, constraint)) {
             backgroundBlurClear();
@@ -341,7 +341,7 @@ public final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo
     }
 
     @Override
-    public void onPreviewAvailable(Path path, Stat stat, final Bitmap bm) {
+    public void onPreviewAvailable(Path path, Stat stat, Bitmap bm) {
         runWhenUiIsIdle(path, canUpdate, () -> {
             int position = getAdapterPosition();
             if (position != NO_POSITION) {
@@ -352,17 +352,18 @@ public final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo
 
     @Override
     public void onBlurredThumbnailAvailable(
-            final Path path,
-            final Stat stat,
-            final Bitmap thumbnail) {
+            Path path,
+            Stat stat,
+            Bitmap thumbnail
+    ) {
         runWhenUiIsIdle(path, canUpdate, () -> backgroundBlurFadeIn(thumbnail));
     }
 
     private void runWhenUiIsIdle(
-            final Path previewPath,
-            final Provider<Boolean> canUpdate,
-            final Runnable update) {
-
+            Path previewPath,
+            Provider<Boolean> canUpdate,
+            Runnable update
+    ) {
         new Runnable() {
             @Override
             public void run() {

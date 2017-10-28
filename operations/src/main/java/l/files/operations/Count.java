@@ -19,7 +19,7 @@ class Count extends AbstractOperation {
     }
 
     @Override
-    void process(final Path path) throws InterruptedException {
+    void process(Path path) throws InterruptedException {
         traverse(path, new OperationVisitor() {
 
             @Override

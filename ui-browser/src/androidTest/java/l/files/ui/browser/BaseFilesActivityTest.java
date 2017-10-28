@@ -207,7 +207,7 @@ public class BaseFilesActivityTest {
 
             src.rename(dst);
             List<Path> actual = dir.list(new ArrayList<Path>());
-            List<Path> expected = Collections.<Path>singletonList(dst);
+            List<Path> expected = Collections.singletonList(dst);
             assertEquals(1, actual.size());
             if (!expected.equals(actual)) {
                 throw new CannotRenameFileToDifferentCasing(

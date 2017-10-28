@@ -86,8 +86,8 @@ public final class ObservableDownloadTest extends PathBaseTest {
     }
 
     private void awaitSuccessfulDownload(
-            final long id,
-            final Path dst
+            long id,
+            Path dst
     ) throws Exception {
 
         Tests.timeout(60, SECONDS,
@@ -95,8 +95,8 @@ public final class ObservableDownloadTest extends PathBaseTest {
     }
 
     private void assertSuccessfulDownload(
-            final long id,
-            final Path dst
+            long id,
+            Path dst
     ) throws IOException {
 
         Query query = new Query().setFilterById(id);

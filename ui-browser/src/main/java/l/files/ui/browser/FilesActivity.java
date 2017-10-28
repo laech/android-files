@@ -241,7 +241,7 @@ public final class FilesActivity extends BaseActivity implements
     }
 
     @Override
-    public void onOpen(final Path file, @Nullable final Stat stat) {
+    public void onOpen(Path file, @Nullable Stat stat) {
         ActionMode mode = currentActionMode();
         if (mode != null) {
             mode.finish();
@@ -254,7 +254,7 @@ public final class FilesActivity extends BaseActivity implements
         show(file, stat);
     }
 
-    private void show(final Path path, @Nullable final Stat stat) {
+    private void show(Path path, @Nullable Stat stat) {
         if (stat != null && !stat.isSymbolicLink()) {
             doShow(path, stat);
             return;

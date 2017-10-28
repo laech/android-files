@@ -68,7 +68,7 @@ abstract class Task extends AsyncTask<Void, TaskState, Void> {
                 state = ((Running) state).failed(clock.read(), ((FileException) e).failures());
 
             } else {
-                state = ((Running) state).failed(clock.read(), Collections.<Failure>emptyList());
+                state = ((Running) state).failed(clock.read(), Collections.emptyList());
 
                 if (e instanceof Error) {
                     throw (Error) e;

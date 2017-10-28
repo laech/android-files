@@ -21,7 +21,7 @@ public abstract class StableAdapter<T, VH extends ViewHolder> extends Adapter<VH
     }
 
     @SuppressWarnings("unchecked")
-    public void setItems(final List<? extends T> items) {
+    public void setItems(List<? extends T> items) {
         this.items = (List<T>) requireNonNull(items);
         notifyDataSetChanged();
     }
@@ -31,8 +31,8 @@ public abstract class StableAdapter<T, VH extends ViewHolder> extends Adapter<VH
     }
 
     @Override
-    public long getItemId(final int position) {
-        final Object object = getItemIdObject(position);
+    public long getItemId(int position) {
+        Object object = getItemIdObject(position);
         Long id = ids.get(object);
         if (id == null) {
             id = ids.size() + 1L;
@@ -50,9 +50,9 @@ public abstract class StableAdapter<T, VH extends ViewHolder> extends Adapter<VH
         return getItemCount() == 0;
     }
 
-    protected T getItem(final int position) {
+    protected T getItem(int position) {
         return items.get(position);
     }
 
-    public abstract Object getItemIdObject(final int position);
+    public abstract Object getItemIdObject(int position);
 }

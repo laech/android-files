@@ -17,7 +17,7 @@ public final class Toaster implements Consumer<String> {
     }
 
     @Override
-    public void accept(final String message) {
+    public void accept(String message) {
         makeText(context, message, LENGTH_SHORT).show();
     }
 }

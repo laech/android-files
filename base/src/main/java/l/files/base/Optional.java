@@ -57,7 +57,7 @@ public abstract class Optional<A> implements Foldable<A> {
         }
     }
 
-    private static Optional<?> NOTHING = new Optional<Object>() {
+    private static final Optional<?> NOTHING = new Optional<Object>() {
 
         @Override
         public <B> Optional<B> map(Function<? super Object, ? extends B> f) {

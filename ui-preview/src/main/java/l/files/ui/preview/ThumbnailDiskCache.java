@@ -129,7 +129,7 @@ final class ThumbnailDiskCache extends Cache<ScaledBitmap> {
 
     Path cacheFile(Path path, Stat stat, Rect constraint, boolean matchTime) throws IOException {
         if (!matchTime) {
-            final Path[] result = {null};
+            Path[] result = {null};
             cacheDir(path, constraint).list((Path.Consumer) path1 -> {
                 result[0] = path1;
                 return false;

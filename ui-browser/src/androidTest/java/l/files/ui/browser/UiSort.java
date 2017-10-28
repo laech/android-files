@@ -20,7 +20,7 @@ final class UiSort {
         this.context = context;
     }
 
-    UiFileActivity by(final FileSort sort) {
+    UiFileActivity by(FileSort sort) {
         awaitOnMainThread(context.instrumentation(), () -> {
             ListView list = listView();
             for (int i = 0; i < list.getChildCount(); i++) {

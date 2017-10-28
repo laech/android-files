@@ -24,10 +24,10 @@ public final class FileOperationTest extends BaseFilesActivityTest {
     @Test
     public void delete() throws Exception {
 
-        final Path file = dir().concat("file").createFile();
-        final Path link = dir().concat("link").createSymbolicLink(file);
-        final Path dir1 = dir().concat("dir1").createDirectory();
-        final Path dir2 = dir().concat("dir2").createDirectory();
+        Path file = dir().concat("file").createFile();
+        Path link = dir().concat("link").createSymbolicLink(file);
+        Path dir1 = dir().concat("dir1").createDirectory();
+        Path dir2 = dir().concat("dir2").createDirectory();
         dir2.concat("a").createFile();
 
         screen()
@@ -50,8 +50,8 @@ public final class FileOperationTest extends BaseFilesActivityTest {
     @Test
     public void cut_files() throws Exception {
 
-        final Path file = dir().concat("a").createFile();
-        final Path dir = dir().concat("dir").createDirectory();
+        Path file = dir().concat("a").createFile();
+        Path dir = dir().concat("dir").createDirectory();
 
         screen()
                 .longClick(file)

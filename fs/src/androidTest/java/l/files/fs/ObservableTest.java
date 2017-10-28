@@ -747,7 +747,7 @@ public final class ObservableTest extends PathBaseTest {
         return WatchEvent.create(kind, file);
     }
 
-    private static Action compose(final Action... callables) throws Exception {
+    private static Action compose(Action... callables) throws Exception {
         return () -> {
             for (Action callable : callables) {
                 callable.call();
@@ -809,15 +809,15 @@ public final class ObservableTest extends PathBaseTest {
         }
 
         private static void verifyTracker(
-                final Recorder observer,
-                final Tracker tracker,
-                final Path file,
-                final LinkOption option
+                Recorder observer,
+                Tracker tracker,
+                Path file,
+                LinkOption option
         ) throws IOException {
 
-            final ArgumentCaptor<Integer> fd = ArgumentCaptor.forClass(Integer.class);
-            final ArgumentCaptor<Integer> wd = ArgumentCaptor.forClass(Integer.class);
-            final InOrder order = inOrder(tracker);
+            ArgumentCaptor<Integer> fd = ArgumentCaptor.forClass(Integer.class);
+            ArgumentCaptor<Integer> wd = ArgumentCaptor.forClass(Integer.class);
+            InOrder order = inOrder(tracker);
             order.verify(tracker).onInit(fd.capture());
             order.verify(tracker).onWatchAdded(
                     eq(fd.getValue()),
@@ -1101,7 +1101,7 @@ public final class ObservableTest extends PathBaseTest {
     }
 
     private static Tracker registerMockTracker() {
-        final Tracker tracker = mock(Tracker.class);
+        Tracker tracker = mock(Tracker.class);
         try {
             doAnswer(invocation -> {
                 InotifyTracker.get().unregisterTracker(tracker);
@@ -1211,7 +1211,7 @@ public final class ObservableTest extends PathBaseTest {
             return add(src -> Paths.removePermissions(src, Permission.read()));
         }
 
-        PreActions createFile(final String name) {
+        PreActions createFile(String name) {
             return add(src -> src.concat(name).createFile());
         }
 
@@ -1233,11 +1233,11 @@ public final class ObservableTest extends PathBaseTest {
             return this;
         }
 
-        PostActions awaitCreateFileInParent(final String name) {
+        PostActions awaitCreateFileInParent(String name) {
             return add((dst, observer) -> observer.awaitCreateFile(dst.parent().concat(name)));
         }
 
-        PostActions awaitDelete(final String name) {
+        PostActions awaitDelete(String name) {
             return add((dst, observer) -> observer.awaitModifyByDelete(dst, name));
         }
 
@@ -1245,11 +1245,11 @@ public final class ObservableTest extends PathBaseTest {
             return add((dst, observer) -> observer.awaitModifyBySetPermissions(dst, Permission.none()));
         }
 
-        PostActions awaitCreateDir(final String name) {
+        PostActions awaitCreateDir(String name) {
             return add((dst, observer) -> observer.awaitModifyByCreateDir(dst, name));
         }
 
-        PostActions awaitMoveIn(final Path src) {
+        PostActions awaitMoveIn(Path src) {
             return add((dst, observer) -> observer.awaitMove(src, dst.concat(src.name().toPath())));
         }
 

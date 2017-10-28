@@ -91,9 +91,9 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     };
 
     private void updateAll(
-            final Map<Name, Event> changedChildren,
-            final boolean forceReload) {
-
+            Map<Name, Event> changedChildren,
+            boolean forceReload
+    ) {
         executor.execute(() -> {
             setThreadPriority(THREAD_PRIORITY_BACKGROUND);
 
@@ -103,7 +103,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
             }
 
             if (changed || forceReload) {
-                final Result result = buildResult();
+                Result result = buildResult();
                 handler.post(() -> deliverResult(result));
             }
         });
@@ -221,7 +221,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     }
 
     private List<Name> visit() throws IOException {
-        final List<Name> children = new ArrayList<>();
+        List<Name> children = new ArrayList<>();
         root.list((Path.Consumer) child -> {
             Name name = child.name();
             assert name != null;
@@ -244,7 +244,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         children.add(child);
     }
 
-    private Path.Consumer collectInto(final List<Name> children) {
+    private Path.Consumer collectInto(List<Name> children) {
         return child -> {
             Name name = child.name();
             assert name != null;

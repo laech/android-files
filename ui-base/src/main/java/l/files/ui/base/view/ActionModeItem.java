@@ -7,7 +7,7 @@ public abstract class ActionModeItem extends ActionModeAdapter {
 
     private final int id;
 
-    public ActionModeItem(final int id) {
+    public ActionModeItem(int id) {
         this.id = id;
     }
 

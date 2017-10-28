@@ -41,7 +41,7 @@ abstract class AbstractOperation implements FileOperation {
         return currentThread().isInterrupted();
     }
 
-    final void record(Path path, final IOException exception) {
+    final void record(Path path, IOException exception) {
         recorder.onFailure(path, exception);
     }
 

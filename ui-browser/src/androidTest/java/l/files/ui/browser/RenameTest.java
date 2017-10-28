@@ -64,8 +64,8 @@ public class RenameTest extends BaseFilesActivityTest {
 
     @Test
     public void renames_file_to_specified_name() throws Throwable {
-        final Path from = dir().concat("a").createFile();
-        final Path to = dir().concat("abc");
+        Path from = dir().concat("a").createFile();
+        Path to = dir().concat("abc");
 
         rename(from).setFilename(to.name().toString()).ok();
 

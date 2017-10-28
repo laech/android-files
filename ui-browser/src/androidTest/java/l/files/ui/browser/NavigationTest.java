@@ -181,7 +181,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
         long size = file.stat(NOFOLLOW).size();
         Context c = getActivity();
-        final String expected = formatShortFileSize(c, size);
+        String expected = formatShortFileSize(c, size);
 
         screen().assertSummary(file, summary ->
                 assertTrue(summary.contains(expected)));
@@ -370,7 +370,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
             throws IOException {
         file.setLastModifiedTime(NOFOLLOW, EPOCH);
 
-        final CharSequence[] chars = {null};
+        CharSequence[] chars = {null};
         screen().assertSummary(file, summary ->
                 chars[0] = summary);
 
@@ -385,7 +385,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
         file.setLastModifiedTime(NOFOLLOW, Instant.of(100000, 1));
 
-        final CharSequence[] date = {null};
+        CharSequence[] date = {null};
         screen().assertSummary(file, summary ->
                 date[0] = summary);
 
