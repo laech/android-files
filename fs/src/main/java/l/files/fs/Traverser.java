@@ -95,7 +95,7 @@ final class Traverser {
             return;
         }
 
-        List<Path> children = parent.path.list(new ArrayList<Path>());
+        List<Path> children = parent.path.list(new ArrayList<>());
         if (childrenComparator != null) {
             Collections.sort(children, childrenComparator);
         }

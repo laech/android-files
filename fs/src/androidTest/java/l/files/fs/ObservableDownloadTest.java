@@ -10,9 +10,7 @@ import android.support.test.InstrumentationRegistry;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.concurrent.Callable;
 
-import l.files.testing.Executable;
 import l.files.testing.Tests;
 import l.files.testing.fs.PathBaseTest;
 import l.files.testing.fs.Paths;
@@ -68,26 +66,12 @@ public final class ObservableDownloadTest extends PathBaseTest {
         Path downloadFile = downloadDir.concat(
                 "test_notifies_files_downloaded_by_download_manager-" +
                         currentTimeMillis());
-        try {
-            ObservableTest.Recorder observer = ObservableTest.Recorder.observe(downloadDir);
-            try {
-                observer.await(CREATE, downloadFile, newDownload(downloadFile));
-            } finally {
-                observer.close();
-            }
+        try (ObservableTest.Recorder observer = ObservableTest.Recorder.observe(downloadDir)) {
+            observer.await(CREATE, downloadFile,
+                    () -> download(downloadFile));
         } finally {
             Paths.deleteIfExists(downloadFile);
         }
-    }
-
-    private Callable<Void> newDownload(final Path dst) {
-        return new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
-                download(dst);
-                return null;
-            }
-        };
     }
 
     private void download(Path saveTo) throws Exception {
@@ -106,12 +90,8 @@ public final class ObservableDownloadTest extends PathBaseTest {
             final Path dst
     ) throws Exception {
 
-        Tests.timeout(60, SECONDS, new Executable() {
-            @Override
-            public void execute() throws Exception {
-                assertSuccessfulDownload(id, dst);
-            }
-        });
+        Tests.timeout(60, SECONDS,
+                () -> assertSuccessfulDownload(id, dst));
     }
 
     private void assertSuccessfulDownload(
@@ -120,16 +100,13 @@ public final class ObservableDownloadTest extends PathBaseTest {
     ) throws IOException {
 
         Query query = new Query().setFilterById(id);
-        Cursor cursor = downloadManager().query(query);
-        try {
+        try (Cursor cursor = downloadManager().query(query)) {
             assertTrue(cursor.moveToFirst());
             assertEquals(
                     cursor.getString(cursor.getColumnIndex(COLUMN_REASON)),
                     STATUS_SUCCESSFUL,
                     cursor.getInt(cursor.getColumnIndex(COLUMN_STATUS))
             );
-        } finally {
-            cursor.close();
         }
         assertTrue(dst.exists(NOFOLLOW));
     }

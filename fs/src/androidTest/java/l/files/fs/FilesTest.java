@@ -11,7 +11,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -120,7 +119,7 @@ public final class FilesTest extends PathBaseTest {
 
         Path link = dir1().concat("link").createSymbolicLink(dir);
         List<Path> expected = singletonList(link.concat("b"));
-        List<Path> actual = sortByName(Paths.listDirectories(link, new ArrayList<Path>()));
+        List<Path> actual = sortByName(Paths.listDirectories(link, new ArrayList<>()));
         assertEquals(expected, actual);
     }
 
@@ -130,7 +129,7 @@ public final class FilesTest extends PathBaseTest {
         dir1().concat("b").createDirectory();
         dir1().concat("c").createFile();
         List<?> expected = singletonList(dir1().concat("b"));
-        List<?> actual = sortByName(Paths.listDirectories(dir1(), new ArrayList<Path>()));
+        List<?> actual = sortByName(Paths.listDirectories(dir1(), new ArrayList<>()));
         assertEquals(expected, actual);
     }
 
@@ -150,22 +149,14 @@ public final class FilesTest extends PathBaseTest {
 
     @Test
     public void output_append_false() throws Exception {
-        test_output("a", "b", "b", new OutputProvider() {
-            @Override
-            public OutputStream open(Path file) throws IOException {
-                return file.newOutputStream(false);
-            }
-        });
+        test_output("a", "b", "b",
+                file -> file.newOutputStream(false));
     }
 
     @Test
     public void output_append_true() throws Exception {
-        test_output("a", "b", "ab", new OutputProvider() {
-            @Override
-            public OutputStream open(Path file) throws IOException {
-                return file.newOutputStream(true);
-            }
-        });
+        test_output("a", "b", "ab",
+                file -> file.newOutputStream(true));
     }
 
     private void test_output(
@@ -176,11 +167,8 @@ public final class FilesTest extends PathBaseTest {
 
         Path file = dir1().concat("file").createFile();
         Paths.appendUtf8(file, initial);
-        OutputStream out = provider.open(file);
-        try {
+        try (OutputStream out = provider.open(file)) {
             out.write(write.getBytes(UTF_8));
-        } finally {
-            out.close();
         }
         assertEquals(result, Paths.readAllUtf8(file));
     }
@@ -221,8 +209,7 @@ public final class FilesTest extends PathBaseTest {
     @Test
     public void input_cannotUseAfterClose() throws Exception {
         Path file = dir1().concat("a").createFile();
-        InputStream in = file.newInputStream();
-        try {
+        try (InputStream in = file.newInputStream()) {
             FileDescriptor fd = ((FileInputStream) in).getFD();
 
             //noinspection ResultOfMethodCallIgnored
@@ -235,8 +222,6 @@ public final class FilesTest extends PathBaseTest {
             } catch (IOException e) {
                 // Pass
             }
-        } finally {
-            in.close();
         }
     }
 
@@ -487,11 +472,10 @@ public final class FilesTest extends PathBaseTest {
     }
 
     private List<Path> sortByName(List<Path> files) throws IOException {
-        Collections.sort(files, new Comparator<Path>() {
-            @Override
-            public int compare(Path a, Path b) {
-                return a.name().toString().compareTo(b.name().toString());
-            }
+        Collections.sort(files, (a, b) -> {
+            String aName = a.name().toString();
+            String bName = b.name().toString();
+            return aName.compareTo(bName);
         });
         return files;
     }

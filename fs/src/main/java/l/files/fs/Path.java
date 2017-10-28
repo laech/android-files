@@ -204,40 +204,22 @@ public abstract class Path implements Parcelable {
     public abstract Name name();
 
     public Optional<String> getName() {
-        return Optional.ofNullable(name()).map(new Function<Name, String>() {
-            @Override
-            public String apply(Name name) {
-                return name.toString();
-            }
-        });
+        return Optional.ofNullable(name()).map(name -> name.toString());
     }
 
     public Optional<String> getBaseName() {
-        return Optional.ofNullable(name()).map(new Function<Name, String>() {
-            @Override
-            public String apply(Name name) {
-                return name.base();
-            }
-        });
+        return Optional.ofNullable(name()).map(name -> name.base());
     }
 
     public Optional<String> getExtension() {
-        return Optional.ofNullable(name()).map(new Function<Name, String>() {
-            @Override
-            public String apply(Name name) {
-                String extension = name.extension();
-                return "".equals(extension) ? null : extension;
-            }
+        return Optional.ofNullable(name()).map(name -> {
+            String extension = name.extension();
+            return "".equals(extension) ? null : extension;
         });
     }
 
     public Optional<String> getExtensionWithLeadingDot() {
-        return getExtension().map(new Function<String, String>() {
-            @Override
-            public String apply(String extension) {
-                return "." + extension;
-            }
-        });
+        return getExtension().map(extension -> "." + extension);
     }
 
     /**
@@ -729,12 +711,9 @@ public abstract class Path implements Parcelable {
     public <C extends Collection<? super Path>> C list(
             final C collection
     ) throws IOException {
-        list(new Path.Consumer() {
-            @Override
-            public boolean accept(Path path) throws IOException {
-                collection.add(path);
-                return true;
-            }
+        list((Consumer) path -> {
+            collection.add(path);
+            return true;
         });
         return collection;
     }

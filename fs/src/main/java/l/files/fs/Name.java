@@ -10,7 +10,7 @@ import l.files.base.Bytes;
 
 import static java.util.Collections.singletonList;
 
-public class Name implements Parcelable {
+public class Name implements Parcelable, Comparable<Name> {
 
     /*
      * Binary representation of file name, normally it's whatever
@@ -185,4 +185,9 @@ public class Name implements Parcelable {
             return new Name[size];
         }
     };
+
+    @Override
+    public int compareTo(Name o) {
+        return toString().compareTo(o.toString());
+    }
 }

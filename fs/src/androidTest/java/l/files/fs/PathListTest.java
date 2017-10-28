@@ -5,7 +5,6 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import l.files.fs.exception.AccessDenied;
@@ -34,7 +33,7 @@ public final class PathListTest extends PathBaseTest {
                 c.rebase(dir, link)
         );
 
-        List<Path> actual = sortByName(link.list(new ArrayList<Path>()));
+        List<Path> actual = sortByName(link.list(new ArrayList<>()));
         assertEquals(expected, actual);
     }
 
@@ -43,17 +42,12 @@ public final class PathListTest extends PathBaseTest {
         Path a = dir1().concat("a").createFile();
         Path b = dir1().concat("b").createDirectory();
         List<Path> expected = asList(a, b);
-        List<Path> actual = sortByName(dir1().list(new ArrayList<Path>()));
+        List<Path> actual = sortByName(dir1().list(new ArrayList<>()));
         assertEquals(expected, actual);
     }
 
     private List<Path> sortByName(List<Path> paths) throws IOException {
-        Collections.sort(paths, new Comparator<Path>() {
-            @Override
-            public int compare(Path a, Path b) {
-                return a.name().toString().compareTo(b.name().toString());
-            }
-        });
+        Collections.sort(paths, (a, b) -> a.name().compareTo(b.name()));
         return paths;
     }
 
@@ -99,7 +93,7 @@ public final class PathListTest extends PathBaseTest {
     ) throws IOException {
 
         try {
-            path.list(new ArrayList<Path>());
+            path.list(new ArrayList<>());
             fail("Expected: " + expected.getName());
         } catch (IOException e) {
             if (!expected.isInstance(e)) {

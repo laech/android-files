@@ -1,7 +1,5 @@
 package l.files.fs;
 
-import android.util.Log;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;

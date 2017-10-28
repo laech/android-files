@@ -83,16 +83,13 @@ public final class FcntlTest {
 
     private static String readAllUtf8(File file) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        FileInputStream in = new FileInputStream(file);
-        try {
+        try (FileInputStream in = new FileInputStream(file)) {
             byte[] buffer = new byte[1024];
             int count;
             while ((count = in.read(buffer)) != -1) {
                 out.write(buffer, 0, count);
             }
             return out.toString("UTF-8");
-        } finally {
-            in.close();
         }
     }
 

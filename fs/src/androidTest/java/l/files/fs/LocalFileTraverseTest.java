@@ -23,12 +23,8 @@ import static l.files.fs.TraversalCallback.Result.TERMINATE;
 
 public final class LocalFileTraverseTest extends PathBaseTest {
 
-    private static final Comparator<Path> SORT_BY_NAME = new Comparator<Path>() {
-        @Override
-        public int compare(Path a, Path b) {
-            return a.name().toString().compareTo(b.name().toString());
-        }
-    };
+    private static final Comparator<Path> SORT_BY_NAME =
+            (a, b) -> a.name().compareTo(b.name());
 
     @Test
     public void traverse_noFollowLink() throws Exception {

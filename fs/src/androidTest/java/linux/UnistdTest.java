@@ -147,18 +147,12 @@ public final class UnistdTest {
         File link = new File(file.getParent(), file.getName() + "-link");
         Unistd.symlink(file.getPath().getBytes(), link.getPath().getBytes());
 
-        OutputStream out = new FileOutputStream(file);
-        try {
+        try (OutputStream out = new FileOutputStream(file)) {
             out.write("hello".getBytes());
-        } finally {
-            out.close();
         }
 
-        InputStream in = new FileInputStream(link);
-        try {
+        try (InputStream in = new FileInputStream(link)) {
             assertEquals("hello", readAllUtf8(in));
-        } finally {
-            in.close();
         }
     }
 

@@ -1,12 +1,10 @@
 package l.files.fs.event;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -18,18 +16,15 @@ import l.files.fs.Path;
 import l.files.fs.Path.Consumer;
 
 import static java.lang.System.nanoTime;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.unmodifiableMap;
 import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 import static l.files.base.Throwables.addSuppressed;
 
 public final class BatchObserverNotifier implements Observer, Observation, Runnable {
 
     private static final ScheduledExecutorService service =
-            newSingleThreadScheduledExecutor(new ThreadFactory() {
-                @Override
-                public Thread newThread(Runnable r) {
-                    return new Thread(r, "BatchObserverNotifier");
-                }
-            });
+            newSingleThreadScheduledExecutor(r -> new Thread(r, "BatchObserverNotifier"));
 
     private boolean selfChanged;
     private final Map<Name, Event> childrenChanged;
@@ -148,8 +143,8 @@ public final class BatchObserverNotifier implements Observer, Observation, Runna
 
             snapshotSelfChanged = selfChanged;
             snapshotChildrenChanged = childrenChanged.isEmpty()
-                    ? Collections.<Name, Event>emptyMap()
-                    : Collections.unmodifiableMap(new HashMap<>(childrenChanged));
+                    ? emptyMap()
+                    : unmodifiableMap(new HashMap<>(childrenChanged));
 
             selfChanged = false;
             childrenChanged.clear();
