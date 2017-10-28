@@ -26,6 +26,6 @@ dependencies {
     compile 'org.apache.tika:tika-core:1.10'
 
     androidTestImplementation project(':testing-fs')
-    androidTestImplementation 'com.android.support.test:runner:0.5'
+    androidTestImplementation 'com.android.support.test:runner:1.0.1'
 
 }
