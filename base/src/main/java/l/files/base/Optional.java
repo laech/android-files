@@ -25,7 +25,7 @@ public abstract class Optional<A> implements Foldable<A> {
     }
 
     public static <T> Optional<T> ofNullable(@Nullable T value) {
-        return value == null ? Optional.<T>empty() : of(value);
+        return value == null ? Optional.empty() : of(value);
     }
 
     private static final class Just<T> extends Optional<T> {
