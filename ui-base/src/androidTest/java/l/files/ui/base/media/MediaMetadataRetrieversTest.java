@@ -27,38 +27,32 @@ public final class MediaMetadataRetrieversTest {
     @Test
     public void getFrameAtAnyTimeThumbnail() throws Exception {
         String name = "MediaMetadataRetrieversTest.mp4";
-        testGetThumbnail(name, new Consumer<MediaMetadataRetriever>() {
-            @Override
-            public void accept(MediaMetadataRetriever retriever) {
-                Rect max = Rect.of(72, 1000);
-                ScaledBitmap result = MediaMetadataRetrievers
-                        .getFrameAtAnyTimeThumbnail(retriever, max);
-                assertNotNull(result);
-                assertFalse(result.bitmap().isRecycled());
-                assertEquals(Rect.of(720, 1280), result.originalSize());
-                assertEquals(Rect.of(72, 128), Rect.of(result.bitmap()));
-            }
+        testGetThumbnail(name, retriever -> {
+            Rect max = Rect.of(72, 1000);
+            ScaledBitmap result = MediaMetadataRetrievers
+                    .getFrameAtAnyTimeThumbnail(retriever, max);
+            assertNotNull(result);
+            assertFalse(result.bitmap().isRecycled());
+            assertEquals(Rect.of(720, 1280), result.originalSize());
+            assertEquals(Rect.of(72, 128), Rect.of(result.bitmap()));
         });
     }
 
     @Test
     public void getEmbeddedThumbnail() throws Exception {
         String name = "MediaMetadataRetrieversTest.m4a";
-        testGetThumbnail(name, new Consumer<MediaMetadataRetriever>() {
-            @Override
-            public void accept(MediaMetadataRetriever retriever) {
-                Rect max = Rect.of(10, 1000);
-                ScaledBitmap result;
-                try {
-                    result = MediaMetadataRetrievers
-                            .getEmbeddedThumbnail(retriever, max);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-                assertNotNull(result);
-                assertFalse(result.bitmap().isRecycled());
-                assertEquals(max.width(), result.bitmap().getWidth());
+        testGetThumbnail(name, retriever -> {
+            Rect max = Rect.of(10, 1000);
+            ScaledBitmap result;
+            try {
+                result = MediaMetadataRetrievers
+                        .getEmbeddedThumbnail(retriever, max);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
+            assertNotNull(result);
+            assertFalse(result.bitmap().isRecycled());
+            assertEquals(max.width(), result.bitmap().getWidth());
         });
     }
 
@@ -85,11 +79,8 @@ public final class MediaMetadataRetrieversTest {
         File file = createTempFile("MediaMetadataRetrieversTest", null);
         try {
             Path path = Path.of(file);
-            InputStream in = getContext().getAssets().open(name);
-            try {
+            try (InputStream in = getContext().getAssets().open(name)) {
                 Paths.copy(in, path);
-            } finally {
-                in.close();
             }
             return path;
         } catch (Throwable e) {

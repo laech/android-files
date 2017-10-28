@@ -11,9 +11,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.concurrent.Callable;
 
 import static android.graphics.Bitmap.CompressFormat.JPEG;
 import static android.graphics.Bitmap.CompressFormat.PNG;
@@ -50,12 +48,7 @@ public final class BitmapsTest {
         final File file = createTempFile("BitmapsTest", null);
         try {
             write(src, file);
-            ScaledBitmap result = decodeScaledDownBitmap(new Callable<InputStream>() {
-                @Override
-                public InputStream call() throws IOException {
-                    return new FileInputStream(file);
-                }
-            }, max);
+            ScaledBitmap result = decodeScaledDownBitmap(() -> new FileInputStream(file), max);
 
             assertNotNull(result);
             assertTrue(result.bitmap().sameAs(expected));
@@ -67,11 +60,8 @@ public final class BitmapsTest {
     }
 
     private static void write(Bitmap src, File file) throws IOException {
-        OutputStream out = new FileOutputStream(file);
-        try {
+        try (OutputStream out = new FileOutputStream(file)) {
             src.compress(PNG, 100, out);
-        } finally {
-            out.close();
         }
     }
 
@@ -115,12 +105,7 @@ public final class BitmapsTest {
         final int width = 10;
         final int height = 11;
         final byte[] bytes = generateBitmapByteArray(width, height);
-        final Rect bounds = Bitmaps.decodeBounds(new Callable<InputStream>() {
-            @Override
-            public InputStream call() {
-                return new ByteArrayInputStream(bytes);
-            }
-        });
+        final Rect bounds = Bitmaps.decodeBounds(() -> new ByteArrayInputStream(bytes));
         assertNotNull(bounds);
         assertEquals(width, bounds.width());
         assertEquals(height, bounds.height());

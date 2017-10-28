@@ -4,8 +4,6 @@ import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.concurrent.Callable;
 
 import javax.annotation.Nullable;
 
@@ -40,7 +38,7 @@ public final class MediaMetadataRetrievers {
      * scaled to fit within {@code max} maintaining original aspect ratio.
      */
     @Nullable
-    public static ScaledBitmap getFrameAtAnyTimeThumbnail(
+    static ScaledBitmap getFrameAtAnyTimeThumbnail(
             MediaMetadataRetriever retriever,
             Rect max) {
 
@@ -61,7 +59,7 @@ public final class MediaMetadataRetrievers {
      * scaled to fit within {@code max} maintaining original aspect ratio.
      */
     @Nullable
-    public static ScaledBitmap getEmbeddedThumbnail(
+    static ScaledBitmap getEmbeddedThumbnail(
             MediaMetadataRetriever retriever,
             Rect max) throws Exception {
 
@@ -69,15 +67,7 @@ public final class MediaMetadataRetrievers {
         if (data == null) {
             return null;
         }
-        return decodeScaledDownBitmap(newStreamProvider(data), max);
+        return decodeScaledDownBitmap(() -> new ByteArrayInputStream(data), max);
     }
 
-    private static Callable<InputStream> newStreamProvider(final byte[] data) {
-        return new Callable<InputStream>() {
-            @Override
-            public InputStream call() throws Exception {
-                return new ByteArrayInputStream(data);
-            }
-        };
-    }
 }

@@ -7,7 +7,7 @@ public final class CompositeMenu implements OptionsMenu {
 
     private final OptionsMenu[] actions;
 
-    public CompositeMenu(final OptionsMenu... actions) {
+    CompositeMenu(final OptionsMenu... actions) {
         this.actions = actions;
     }
 

@@ -26,43 +26,34 @@ public final class PackagesTest {
 
     @Test
     public void getApkIconDrawable() throws Exception {
-        testGetApkIcon(new Consumer<File>() {
-            @Override
-            public void accept(File file) {
-                String path = file.getPath();
-                assertNotNull(Packages.getApkIconDrawable(path, getPackageManager()));
-            }
+        testGetApkIcon(file -> {
+            String path = file.getPath();
+            assertNotNull(Packages.getApkIconDrawable(path, getPackageManager()));
         });
     }
 
     @Test
     public void getApkIconBitmap_no_scale_needed() throws Exception {
-        testGetApkIcon(new Consumer<File>() {
-            @Override
-            public void accept(File file) {
-                String path = file.getPath();
-                Rect max = Rect.of(Integer.MAX_VALUE, Integer.MAX_VALUE);
-                assertNotNull(getApkIconBitmap(path, max, getPackageManager()));
-            }
+        testGetApkIcon(file -> {
+            String path = file.getPath();
+            Rect max = Rect.of(Integer.MAX_VALUE, Integer.MAX_VALUE);
+            assertNotNull(getApkIconBitmap(path, max, getPackageManager()));
         });
     }
 
     @Test
     public void getApkIconBitmap_scale_to_fit() throws Exception {
-        testGetApkIcon(new Consumer<File>() {
-            @Override
-            public void accept(File file) {
-                String path = file.getPath();
-                Rect max = Rect.of(1, 1);
-                ScaledBitmap result = getApkIconBitmap(path, max, getPackageManager());
-                assertNotNull(result);
-                assertNotEqual(max, result);
-                assertEquals(max, Rect.of(result.bitmap()));
-            }
+        testGetApkIcon(file -> {
+            String path = file.getPath();
+            Rect max = Rect.of(1, 1);
+            ScaledBitmap result = getApkIconBitmap(path, max, getPackageManager());
+            assertNotNull(result);
+            assertNotEqual(max, result);
+            assertEquals(max, Rect.of(result.bitmap()));
         });
     }
 
-    public void testGetApkIcon(Consumer<File> test) throws IOException {
+    private void testGetApkIcon(Consumer<File> test) throws IOException {
         File file = createTempFile("PackagesTest", null);
         try {
             copyApkFile(file);
@@ -77,20 +68,13 @@ public final class PackagesTest {
     }
 
     private void copyApkFile(File dst) throws IOException {
-        InputStream in = openTestApk();
-        try {
-            OutputStream out = new FileOutputStream(dst);
-            try {
-                byte[] buffer = new byte[1024];
-                int count;
-                while ((count = in.read(buffer)) != -1) {
-                    out.write(buffer, 0, count);
-                }
-            } finally {
-                out.close();
+        try (InputStream in = openTestApk();
+             OutputStream out = new FileOutputStream(dst)) {
+            byte[] buffer = new byte[1024];
+            int count;
+            while ((count = in.read(buffer)) != -1) {
+                out.write(buffer, 0, count);
             }
-        } finally {
-            in.close();
         }
     }
 

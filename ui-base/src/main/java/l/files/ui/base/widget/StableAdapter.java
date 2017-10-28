@@ -16,7 +16,7 @@ public abstract class StableAdapter<T, VH extends ViewHolder> extends Adapter<VH
 
     private List<T> items = emptyList();
 
-    public StableAdapter() {
+    protected StableAdapter() {
         setHasStableIds(true);
     }
 
@@ -50,7 +50,7 @@ public abstract class StableAdapter<T, VH extends ViewHolder> extends Adapter<VH
         return getItemCount() == 0;
     }
 
-    public T getItem(final int position) {
+    protected T getItem(final int position) {
         return items.get(position);
     }
 

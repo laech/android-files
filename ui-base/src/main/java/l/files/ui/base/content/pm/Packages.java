@@ -18,7 +18,7 @@ public final class Packages {
     }
 
     @Nullable
-    public static Drawable getApkIconDrawable(String path, PackageManager pm) {
+    static Drawable getApkIconDrawable(String path, PackageManager pm) {
         PackageInfo info = pm.getPackageArchiveInfo(path, 0);
         if (info == null) {
             return null;

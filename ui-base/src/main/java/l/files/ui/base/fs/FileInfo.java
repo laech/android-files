@@ -8,7 +8,6 @@ import java.text.Collator;
 import javax.annotation.Nullable;
 
 import l.files.base.Objects;
-import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.text.CollationKey;

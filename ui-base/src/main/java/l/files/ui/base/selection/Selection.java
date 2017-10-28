@@ -44,7 +44,7 @@ public final class Selection<K, V> implements Iterable<K> {
         return selection.isEmpty();
     }
 
-    public boolean contains(K item) {
+    boolean contains(K item) {
         return selection.containsKey(item);
     }
 
@@ -89,7 +89,7 @@ public final class Selection<K, V> implements Iterable<K> {
         }
     }
 
-    public void toggle(K item, V data) {
+    void toggle(K item, V data) {
         if (selection.containsKey(item)) {
             selection.remove(item);
         } else {
