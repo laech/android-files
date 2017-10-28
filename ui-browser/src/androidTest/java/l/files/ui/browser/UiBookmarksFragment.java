@@ -1,10 +1,7 @@
 package l.files.ui.browser;
 
 import android.support.v7.widget.RecyclerView;
-import android.view.View;
 
-import l.files.base.Consumer;
-import l.files.base.Provider;
 import l.files.fs.Path;
 import l.files.ui.bookmarks.BookmarksFragment;
 
@@ -29,7 +26,7 @@ final class UiBookmarksFragment {
     }
 
     UiBookmarksFragment longClick(Path bookmark) {
-        longClickItemOnMainThread(context.instrumentation(), recycler(), bookmark);
+        longClickItemOnMainThread(context.instrumentation(), this::recycler, bookmark);
         return this;
     }
 
@@ -42,7 +39,7 @@ final class UiBookmarksFragment {
 
     UiBookmarksFragment click(Path bookmark) {
         assertDrawerIsOpened(true);
-        clickItemOnMainThread(context.instrumentation(), recycler(), bookmark);
+        clickItemOnMainThread(context.instrumentation(), this::recycler, bookmark);
         return this;
     }
 
@@ -56,12 +53,8 @@ final class UiBookmarksFragment {
     UiBookmarksFragment assertBookmarked(
             final Path bookmark,
             final boolean bookmarked) {
-        awaitOnMainThread(context.instrumentation(), new Runnable() {
-            @Override
-            public void run() {
-                assertEquals(bookmarked, fragment().bookmarks().contains(bookmark));
-            }
-        });
+        awaitOnMainThread(context.instrumentation(), () ->
+                assertEquals(bookmarked, fragment().bookmarks().contains(bookmark)));
         return this;
     }
 
@@ -79,26 +72,16 @@ final class UiBookmarksFragment {
             Path bookmark, final boolean checked) {
         findItemOnMainThread(
                 context.instrumentation(),
-                recycler(),
+                this::recycler,
                 bookmark,
-                new Consumer<View>() {
-                    @Override
-                    public void accept(View view) {
-                        assertEquals(checked, view.isActivated());
-                    }
-                });
+                view -> assertEquals(checked, view.isActivated()));
         return this;
     }
 
-    private Provider<RecyclerView> recycler() {
-        return new Provider<RecyclerView>() {
-            @Override
-            public RecyclerView get() {
-                BookmarksFragment fragment = fragment();
-                assertNotNull(fragment);
-                return fragment.recycler;
-            }
-        };
+    private RecyclerView recycler() {
+        BookmarksFragment fragment = fragment();
+        assertNotNull(fragment);
+        return fragment.recycler;
     }
 
     UiBookmarksFragment assertDrawerIsOpened(boolean opened) {

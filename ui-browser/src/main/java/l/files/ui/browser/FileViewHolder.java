@@ -228,12 +228,8 @@ public final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo
             return createdRoundedThumbnail(thumbnail);
         }
 
-        runWhenUiIsIdle(file, canInterruptScrollState, new Runnable() {
-            @Override
-            public void run() {
-                task = decorator.get(file, stat, constraint, FileViewHolder.this, context());
-            }
-        });
+        runWhenUiIsIdle(file, canInterruptScrollState, () ->
+                task = decorator.get(file, stat, constraint, FileViewHolder.this, context()));
 
         Rect size = decorator.getSize(file, stat, constraint, false);
         if (size != null) {
@@ -347,13 +343,10 @@ public final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo
 
     @Override
     public void onPreviewAvailable(Path path, Stat stat, final Bitmap bm) {
-        runWhenUiIsIdle(path, canUpdate, new Runnable() {
-            @Override
-            public void run() {
-                int position = getAdapterPosition();
-                if (position != NO_POSITION) {
-                    recyclerView.getAdapter().notifyItemChanged(position, bm);
-                }
+        runWhenUiIsIdle(path, canUpdate, () -> {
+            int position = getAdapterPosition();
+            if (position != NO_POSITION) {
+                recyclerView.getAdapter().notifyItemChanged(position, bm);
             }
         });
     }
@@ -363,12 +356,7 @@ public final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo
             final Path path,
             final Stat stat,
             final Bitmap thumbnail) {
-        runWhenUiIsIdle(path, canUpdate, new Runnable() {
-            @Override
-            public void run() {
-                backgroundBlurFadeIn(thumbnail);
-            }
-        });
+        runWhenUiIsIdle(path, canUpdate, () -> backgroundBlurFadeIn(thumbnail));
     }
 
     private void runWhenUiIsIdle(

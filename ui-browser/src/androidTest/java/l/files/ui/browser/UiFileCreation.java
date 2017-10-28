@@ -38,26 +38,18 @@ abstract class UiFileCreation<T extends UiFileCreation> {
     }
 
     T setFilename(final CharSequence name) {
-        awaitOnMainThread(context.instrumentation(), new Runnable() {
-            @Override
-            public void run() {
-                editText().setText(name);
-            }
-        });
+        awaitOnMainThread(context.instrumentation(), () -> editText().setText(name));
         return self();
     }
 
     UiFileActivity ok() {
-        awaitOnMainThread(context.instrumentation(), new Runnable() {
-            @Override
-            public void run() {
-                AlertDialog dialog = dialog();
-                Button button = dialog.getButton(BUTTON_POSITIVE);
-                assertTrue(dialog.isShowing());
-                assertTrue(button.isEnabled());
-                assertTrue(button.isClickable());
-                assertTrue(button.performClick());
-            }
+        awaitOnMainThread(context.instrumentation(), () -> {
+            AlertDialog dialog = dialog();
+            Button button = dialog.getButton(BUTTON_POSITIVE);
+            assertTrue(dialog.isShowing());
+            assertTrue(button.isEnabled());
+            assertTrue(button.isClickable());
+            assertTrue(button.performClick());
         });
         return context;
     }
@@ -67,77 +59,48 @@ abstract class UiFileCreation<T extends UiFileCreation> {
         final Consumer<String>[] original = new Consumer[1];
 
         final List<String> messages = new CopyOnWriteArrayList<>();
-        final Consumer<String> consumer = new Consumer<String>() {
-            @Override
-            public void accept(String input) {
-                original[0].accept(input);
-                messages.add(input);
-            }
+        final Consumer<String> consumer = input -> {
+            original[0].accept(input);
+            messages.add(input);
         };
 
-        awaitOnMainThread(context.instrumentation(), new Runnable() {
-            @Override
-            public void run() {
-                original[0] = fragment().toaster;
-                fragment().toaster = consumer;
-            }
+        awaitOnMainThread(context.instrumentation(), () -> {
+            original[0] = fragment().toaster;
+            fragment().toaster = consumer;
         });
 
         ok();
 
-        awaitOnMainThread(context.instrumentation(), new Runnable() {
-            @Override
-            public void run() {
-                assertEquals(singletonList(message), messages);
-            }
-        });
+        awaitOnMainThread(context.instrumentation(), () -> assertEquals(singletonList(message), messages));
 
         return context;
     }
 
     T assertOkButtonEnabled(final boolean enabled) {
-        awaitOnMainThread(context.instrumentation(), new Runnable() {
-            @Override
-            public void run() {
-                FileCreationFragment fragment = fragment();
-                assertNotNull(fragment);
-                assertEquals(
-                        enabled,
-                        dialog().getButton(BUTTON_POSITIVE).isEnabled());
-            }
+        awaitOnMainThread(context.instrumentation(), () -> {
+            FileCreationFragment fragment = fragment();
+            assertNotNull(fragment);
+            assertEquals(
+                    enabled,
+                    dialog().getButton(BUTTON_POSITIVE).isEnabled());
         });
         return self();
     }
 
     T assertHasError(final int resId, final Object... args) {
-        awaitOnMainThread(context.instrumentation(), new Runnable() {
-            @Override
-            public void run() {
-                assertEquals(
-                        context.activity().getString(resId, args),
-                        error());
-            }
-        });
+        awaitOnMainThread(context.instrumentation(), () -> assertEquals(
+                context.activity().getString(resId, args),
+                error()));
         return self();
     }
 
     T assertHasNoError() {
-        awaitOnMainThread(context.instrumentation(), new Runnable() {
-            @Override
-            public void run() {
-                assertNull(error());
-            }
-        });
+        awaitOnMainThread(context.instrumentation(), () -> assertNull(error()));
         return self();
     }
 
     T assertError(final CharSequence error) {
-        awaitOnMainThread(context.instrumentation(), new Runnable() {
-            @Override
-            public void run() {
-                assertEquals(error, error());
-            }
-        });
+        awaitOnMainThread(context.instrumentation(), () -> assertEquals(error, error()));
         return self();
     }
 
@@ -167,13 +130,7 @@ abstract class UiFileCreation<T extends UiFileCreation> {
     }
 
     T assertFilename(final CharSequence name) {
-        awaitOnMainThread(context.instrumentation(), new Runnable() {
-            @Override
-            public void run() {
-                assertEquals(name.toString(), filename());
-            }
-
-        });
+        awaitOnMainThread(context.instrumentation(), () -> assertEquals(name.toString(), filename()));
         return self();
     }
 
@@ -182,12 +139,7 @@ abstract class UiFileCreation<T extends UiFileCreation> {
     }
 
     T assertSelection(final String selection) {
-        awaitOnMainThread(context.instrumentation(), new Runnable() {
-            @Override
-            public void run() {
-                assertEquals(selection, selection());
-            }
-        });
+        awaitOnMainThread(context.instrumentation(), () -> assertEquals(selection, selection()));
         return self();
     }
 

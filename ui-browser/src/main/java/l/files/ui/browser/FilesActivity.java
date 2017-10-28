@@ -123,12 +123,7 @@ public final class FilesActivity extends BaseActivity implements
                     .commit();
         }
 
-        new Handler().post(new Runnable() {
-            @Override
-            public void run() {
-                updateToolBar();
-            }
-        });
+        new Handler().post(() -> updateToolBar());
     }
 
     @Override

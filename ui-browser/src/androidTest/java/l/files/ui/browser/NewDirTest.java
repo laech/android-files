@@ -72,22 +72,14 @@ public final class NewDirTest extends BaseFilesActivityTest {
 
     @Test
     public void name_field_is_limited_to_one_line() throws Throwable {
-        checkNameField(new Consumer<EditText>() {
-            @Override
-            public void accept(final EditText input) {
-                assertEquals(1, input.getMaxLines());
-            }
-        });
+        checkNameField(input -> assertEquals(1, input.getMaxLines()));
     }
 
     @Test
     public void name_field_has_all_text_selected() throws Throwable {
-        checkNameField(new Consumer<EditText>() {
-            @Override
-            public void accept(final EditText input) {
-                assertEquals(0, input.getSelectionStart());
-                assertEquals(input.getText().length(), input.getSelectionEnd());
-            }
+        checkNameField(input -> {
+            assertEquals(0, input.getSelectionStart());
+            assertEquals(input.getText().length(), input.getSelectionEnd());
         });
     }
 
@@ -95,12 +87,7 @@ public final class NewDirTest extends BaseFilesActivityTest {
             throws Throwable {
 
         final UiNewDir dialog = screen().newFolder();
-        runTestOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                assertion.accept(dialog.editText());
-            }
-        });
+        runTestOnUiThread(() -> assertion.accept(dialog.editText()));
     }
 
     private String string(final int id) {

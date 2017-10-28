@@ -20,12 +20,8 @@ final class UiDelete {
     }
 
     UiFileActivity ok() {
-        awaitOnMainThread(context.instrumentation(), new Runnable() {
-            @Override
-            public void run() {
-                assertTrue(dialog().getButton(BUTTON_POSITIVE).performClick());
-            }
-        });
+        awaitOnMainThread(context.instrumentation(), () ->
+                assertTrue(dialog().getButton(BUTTON_POSITIVE).performClick()));
         return context;
     }
 

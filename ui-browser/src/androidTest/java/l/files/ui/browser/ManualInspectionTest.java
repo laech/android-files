@@ -14,11 +14,11 @@ import l.files.testing.fs.Paths;
 import static android.os.Environment.getExternalStorageDirectory;
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
 import static android.test.MoreAsserts.assertNotEqual;
-import static l.files.base.io.Charsets.UTF_8;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.asList;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static l.files.base.io.Charsets.UTF_8;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
@@ -62,11 +62,8 @@ public final class ManualInspectionTest {
                 continue;
             }
 
-            InputStream in = getInstrumentation().getContext().getAssets().open(res);
-            try {
+            try (InputStream in = getInstrumentation().getContext().getAssets().open(res)) {
                 Paths.copy(in, file);
-            } finally {
-                in.close();
             }
         }
 

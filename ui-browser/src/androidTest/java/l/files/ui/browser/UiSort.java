@@ -21,19 +21,16 @@ final class UiSort {
     }
 
     UiFileActivity by(final FileSort sort) {
-        awaitOnMainThread(context.instrumentation(), new Runnable() {
-            @Override
-            public void run() {
-                ListView list = listView();
-                for (int i = 0; i < list.getChildCount(); i++) {
-                    FileSort that = (FileSort) list.getItemAtPosition(i);
-                    if (that == sort) {
-                        list.performItemClick(list.getChildAt(i), i, i);
-                        return;
-                    }
+        awaitOnMainThread(context.instrumentation(), () -> {
+            ListView list = listView();
+            for (int i = 0; i < list.getChildCount(); i++) {
+                FileSort that = (FileSort) list.getItemAtPosition(i);
+                if (that == sort) {
+                    list.performItemClick(list.getChildAt(i), i, i);
+                    return;
                 }
-                fail();
             }
+            fail();
         });
         return context;
     }

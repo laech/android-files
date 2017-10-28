@@ -268,8 +268,8 @@ public final class FilesFragment
         if (progressBar == null) {
             View view = getView();
             assert view != null;
-            ViewStub stub = (ViewStub) view.findViewById(R.id.progress_stub);
-            progressBar = (ProgressBar) stub.inflate().findViewById(android.R.id.progress);
+            ViewStub stub = view.findViewById(R.id.progress_stub);
+            progressBar = stub.inflate().findViewById(android.R.id.progress);
         }
         return progressBar;
     }
@@ -281,8 +281,8 @@ public final class FilesFragment
         if (emptyView == null) {
             View view = getView();
             assert view != null;
-            ViewStub stub = (ViewStub) view.findViewById(R.id.empty_stub);
-            emptyView = (TextView) stub.inflate().findViewById(android.R.id.empty);
+            ViewStub stub = view.findViewById(R.id.empty_stub);
+            emptyView = stub.inflate().findViewById(android.R.id.empty);
         }
         return emptyView;
     }
@@ -291,7 +291,7 @@ public final class FilesFragment
         FilesActivity activity = (FilesActivity) getActivity();
         FragmentManager manager = activity.getSupportFragmentManager();
         setOptionsMenu(OptionsMenus.compose(
-                new RefreshMenu(autoRefreshDisable(), refresh()),
+                new RefreshMenu(autoRefreshDisable(), this::refresh),
                 new BookmarkMenu(directory(), activity),
                 new NewDirMenu(manager, directory()),
                 new PasteMenu(activity, directory()),
@@ -300,31 +300,21 @@ public final class FilesFragment
         ));
     }
 
-    private Runnable refresh() {
-        return new Runnable() {
-            @Override
-            public void run() {
-                if (hasReadExternalStoragePermission()) {
-                    restartLoad();
-                } else {
-                    requestPermissions(
-                            PERM_EXTERNAL_STORAGE,
-                            PERM_REQ_EXTERNAL_STORAGE_REFRESH
-                    );
-                }
-            }
-        };
+    private void refresh() {
+        if (hasReadExternalStoragePermission()) {
+            restartLoad();
+        } else {
+            requestPermissions(
+                    PERM_EXTERNAL_STORAGE,
+                    PERM_REQ_EXTERNAL_STORAGE_REFRESH
+            );
+        }
     }
 
     private boolean refreshEnabled;
 
     private Provider<Boolean> autoRefreshDisable() {
-        return new Provider<Boolean>() {
-            @Override
-            public Boolean get() {
-                return refreshEnabled;
-            }
-        };
+        return () -> refreshEnabled;
     }
 
     @Override

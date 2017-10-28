@@ -10,52 +10,32 @@ import static junit.framework.Assert.assertNotNull;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.ui.browser.Instrumentations.awaitOnMainThread;
 
-public final class UiInfo {
+final class UiInfo {
 
     private final UiFileActivity context;
 
-    public UiInfo(UiFileActivity context) {
+    UiInfo(UiFileActivity context) {
         this.context = requireNonNull(context);
     }
 
-    public UiInfo assertName(final String value) throws IOException {
-        awaitOnMainThread(context.instrumentation(), new Runnable() {
-            @Override
-            public void run() {
-                assertEquals(value, getName());
-            }
-        });
+    UiInfo assertName(final String value) throws IOException {
+        awaitOnMainThread(context.instrumentation(), () -> assertEquals(value, getName()));
         return this;
     }
 
-    public UiInfo assertDate(final String value) throws IOException {
-        awaitOnMainThread(context.instrumentation(), new Runnable() {
-            @Override
-            public void run() {
-                assertEquals(value, getDate());
-            }
-        });
+    UiInfo assertDate(final String value) throws IOException {
+        awaitOnMainThread(context.instrumentation(), () -> assertEquals(value, getDate()));
         return this;
     }
 
-    public UiInfo assertSize(final String value) throws IOException {
-        awaitOnMainThread(context.instrumentation(), new Runnable() {
-            @Override
-            public void run() {
-                assertEquals(value, getSize());
-            }
-        });
+    UiInfo assertSize(final String value) throws IOException {
+        awaitOnMainThread(context.instrumentation(), () -> assertEquals(value, getSize()));
         return this;
     }
 
 
-    public UiInfo assertSizeOnDisk(final String value) throws IOException {
-        awaitOnMainThread(context.instrumentation(), new Runnable() {
-            @Override
-            public void run() {
-                assertEquals(value, getSizeOnDisk());
-            }
-        });
+    UiInfo assertSizeOnDisk(final String value) throws IOException {
+        awaitOnMainThread(context.instrumentation(), () -> assertEquals(value, getSizeOnDisk()));
         return this;
     }
 

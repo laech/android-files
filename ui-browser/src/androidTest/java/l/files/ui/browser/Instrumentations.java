@@ -18,7 +18,6 @@ import static android.os.SystemClock.sleep;
 import static android.support.v7.widget.RecyclerView.NO_POSITION;
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.MINUTES;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -40,14 +39,11 @@ final class Instrumentations {
         public final T call() throws Exception {
             final Object[] result = {null};
             final Throwable[] error = {null};
-            Runnable code = new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        result[0] = delegate.call();
-                    } catch (Exception | AssertionError e) {
-                        error[0] = e;
-                    }
+            Runnable code = () -> {
+                try {
+                    result[0] = delegate.call();
+                } catch (Exception | AssertionError e) {
+                    error[0] = e;
                 }
             };
 
@@ -85,12 +81,9 @@ final class Instrumentations {
     }
 
     static void awaitOnMainThread(Instrumentation in, final Runnable runnable) {
-        awaitOnMainThread(in, new Callable<Boolean>() {
-            @Override
-            public Boolean call() {
-                runnable.run();
-                return true;
-            }
+        awaitOnMainThread(in, () -> {
+            runnable.run();
+            return true;
         });
     }
 
@@ -122,16 +115,13 @@ final class Instrumentations {
         throw e;
     }
 
-    static void scrollToTop(
+    private static void scrollToTop(
             final Instrumentation in,
             final Provider<RecyclerView> recycler) {
 
-        awaitOnMainThread(in, new Runnable() {
-            @Override
-            public void run() {
-                if (getStableAdapter(recycler).getItemCount() > 0) {
-                    recycler.get().scrollToPosition(0);
-                }
+        awaitOnMainThread(in, () -> {
+            if (getStableAdapter(recycler).getItemCount() > 0) {
+                recycler.get().scrollToPosition(0);
             }
         });
     }
@@ -146,24 +136,17 @@ final class Instrumentations {
             Instrumentation in,
             Provider<RecyclerView> recycler,
             Object itemId) {
-        findItemOnMainThread(in, recycler, itemId, new Consumer<View>() {
-            @Override
-            public void accept(View input) {
-                assertTrue(input.performClick());
-            }
-        });
+        findItemOnMainThread(in, recycler, itemId, input ->
+                assertTrue(input.performClick()));
     }
 
     static void longClickItemOnMainThread(
             Instrumentation in,
             Provider<RecyclerView> recycler,
             Object itemId) {
-        findItemOnMainThread(in, recycler, itemId, new Consumer<View>() {
-            @Override
-            public void accept(View input) {
-                assertTrue(input.isEnabled());
-                assertTrue(input.performLongClick());
-            }
+        findItemOnMainThread(in, recycler, itemId, input -> {
+            assertTrue(input.isEnabled());
+            assertTrue(input.performLongClick());
         });
     }
 
@@ -173,12 +156,7 @@ final class Instrumentations {
             final Object itemId,
             final Consumer<View> consumer) {
         scrollToTop(in, recycler);
-        awaitOnMainThread(in, new Runnable() {
-            @Override
-            public void run() {
-                find(recycler, itemId, consumer);
-            }
-        });
+        awaitOnMainThread(in, () -> find(recycler, itemId, consumer));
     }
 
     private static void find(

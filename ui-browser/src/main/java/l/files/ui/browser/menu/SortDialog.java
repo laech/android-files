@@ -15,8 +15,8 @@ import android.widget.ListView;
 import javax.annotation.Nullable;
 
 import l.files.ui.browser.FileSort;
-import l.files.ui.browser.preference.Preferences;
 import l.files.ui.browser.R;
+import l.files.ui.browser.preference.Preferences;
 
 import static l.files.ui.browser.preference.Preferences.getSort;
 
@@ -53,7 +53,7 @@ public final class SortDialog
         public View getView(int position, @Nullable View convertView, ViewGroup parent) {
             View view = super.getView(position, convertView, parent);
             FileSort item = getItem(position);
-            CheckedTextView check = (CheckedTextView) view.findViewById(R.id.title);
+            CheckedTextView check = view.findViewById(R.id.title);
             assert item != null;
             check.setText(item.getLabel(view.getResources()));
             check.setChecked(item.equals(getSort(parent.getContext())));

@@ -12,18 +12,14 @@ import l.files.fs.Stat;
 import l.files.ui.base.fs.FileInfo;
 
 import static java.lang.System.currentTimeMillis;
+import static java.util.Collections.unmodifiableList;
 
 public enum FileSort {
 
     NAME(R.string.name) {
         @Override
         Comparator<FileInfo> comparator() {
-            return new Comparator<FileInfo>() {
-                @Override
-                public int compare(FileInfo a, FileInfo b) {
-                    return a.compareTo(b);
-                }
-            };
+            return FileInfo::compareTo;
         }
 
         @Override
@@ -34,7 +30,7 @@ public enum FileSort {
         @Override
         List<Object> sort(List<FileInfo> items, Resources res) {
             Collections.sort(items);
-            return Collections.<Object>unmodifiableList(items);
+            return unmodifiableList(items);
         }
     },
 

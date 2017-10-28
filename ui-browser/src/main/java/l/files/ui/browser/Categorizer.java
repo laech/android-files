@@ -2,10 +2,11 @@ package l.files.ui.browser;
 
 import android.content.res.Resources;
 
-import java.util.Collections;
 import java.util.List;
 
 import l.files.ui.base.fs.FileInfo;
+
+import static java.util.Collections.unmodifiableList;
 
 /**
  * Provides category information for items in cursors.
@@ -27,7 +28,7 @@ interface Categorizer {
 
         @Override
         public List<Object> categorize(Resources res, List<FileInfo> items) {
-            return Collections.<Object>unmodifiableList(items);
+            return unmodifiableList(items);
         }
     };
 

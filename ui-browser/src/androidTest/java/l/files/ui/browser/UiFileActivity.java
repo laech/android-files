@@ -137,12 +137,9 @@ final class UiFileActivity {
     }
 
     UiFileActivity selectFromNavigationMode(final Path dir) {
-        awaitOnMainThread(instrument, new Runnable() {
-            @Override
-            public void run() {
-                int position = activity().hierarchy().indexOf(dir);
-                activity().title().setSelection(position);
-            }
+        awaitOnMainThread(instrument, () -> {
+            int position = activity().hierarchy().indexOf(dir);
+            activity().title().setSelection(position);
         });
         return this;
     }
@@ -164,23 +161,13 @@ final class UiFileActivity {
     }
 
     UiBookmarksFragment openBookmarksDrawer() {
-        awaitOnMainThread(instrument, new Runnable() {
-            @Override
-            public void run() {
-                activity().drawerLayout().openDrawer(START);
-            }
-        });
+        awaitOnMainThread(instrument, () -> activity().drawerLayout().openDrawer(START));
         assertDrawerIsOpened(true);
         return new UiBookmarksFragment(this);
     }
 
     UiFileActivity assertDrawerIsOpened(final boolean opened) {
-        awaitOnMainThread(instrument, new Runnable() {
-            @Override
-            public void run() {
-                assertEquals(opened, activity().drawerLayout().isDrawerOpen(START));
-            }
-        });
+        awaitOnMainThread(instrument, () -> assertEquals(opened, activity().drawerLayout().isDrawerOpen(START)));
         return this;
     }
 
@@ -192,34 +179,21 @@ final class UiFileActivity {
     }
 
     UiFileActivity longPressBack() {
-        awaitOnMainThread(instrument, new Runnable() {
-            @Override
-            public void run() {
-                assertTrue(activity().onKeyLongPress(KEYCODE_BACK, null));
-            }
-        });
+        awaitOnMainThread(instrument, () -> assertTrue(activity().onKeyLongPress(KEYCODE_BACK, null)));
         return this;
     }
 
     UiFileActivity pressActionBarUpIndicator() {
         waitForUpIndicatorToAppear();
-        awaitOnMainThread(instrument, new Runnable() {
-            @Override
-            public void run() {
-                MenuItem item = new TestMenuItem(android.R.id.home);
-                assertTrue(activity().onOptionsItemSelected(item));
-            }
+        awaitOnMainThread(instrument, () -> {
+            MenuItem item = new TestMenuItem(android.R.id.home);
+            assertTrue(activity().onOptionsItemSelected(item));
         });
         return this;
     }
 
     private void waitForUpIndicatorToAppear() {
-        awaitOnMainThread(instrument, new Runnable() {
-            @Override
-            public void run() {
-                assertEquals(1F, activity().navigationIcon().getProgress());
-            }
-        });
+        awaitOnMainThread(instrument, () -> assertEquals(1F, activity().navigationIcon().getProgress()));
     }
 
     UiFileActivity assertCanRename(boolean can) {
@@ -228,52 +202,38 @@ final class UiFileActivity {
     }
 
     UiFileActivity assertCanPaste(final boolean can) {
-        return findOptionMenuItem(android.R.id.paste, new Consumer<MenuItem>() {
-            @Override
-            public void accept(MenuItem input) {
-                String msg = "Paste menu enabled to be " + can;
-                assertEquals(msg, can, input.isEnabled());
-            }
+        return findOptionMenuItem(android.R.id.paste, input -> {
+            String msg = "Paste menu enabled to be " + can;
+            assertEquals(msg, can, input.isEnabled());
         });
     }
 
     private UiFileActivity findOptionMenuItem(
             final int id, final Consumer<MenuItem> consumer) {
 
-        awaitOnMainThread(instrument, new Runnable() {
-            @Override
-            public void run() {
-                Toolbar toolbar = activity().toolbar();
-                toolbar.hideOverflowMenu();
-                toolbar.showOverflowMenu();
-                MenuItem item = toolbar.getMenu().findItem(id);
-                assertNotNull(item);
-                consumer.accept(item);
-                toolbar.hideOverflowMenu();
-            }
+        awaitOnMainThread(instrument, () -> {
+            Toolbar toolbar = activity().toolbar();
+            toolbar.hideOverflowMenu();
+            toolbar.showOverflowMenu();
+            MenuItem item = toolbar.getMenu().findItem(id);
+            assertNotNull(item);
+            consumer.accept(item);
+            toolbar.hideOverflowMenu();
         });
         return this;
     }
 
     private UiFileActivity clickOptionMenuItem(final int id) {
-        awaitOnMainThread(instrument, new Runnable() {
-            @Override
-            public void run() {
-                activity().toolbar().getMenu().performIdentifierAction(id, 0);
-            }
-        });
+        awaitOnMainThread(instrument, (Runnable) () -> activity().toolbar().getMenu().performIdentifierAction(id, 0));
         return this;
     }
 
     UiFileActivity assertCurrentDirectory(final Path expected) {
-        awaitOnMainThread(instrument, new Runnable() {
-            @Override
-            public void run() {
-                FilesFragment fragment = activity().fragment();
-                assertNotNull(fragment);
-                Path actual = fragment.directory();
-                assertEquals(expected, actual);
-            }
+        awaitOnMainThread(instrument, () -> {
+            FilesFragment fragment = activity().fragment();
+            assertNotNull(fragment);
+            Path actual = fragment.directory();
+            assertEquals(expected, actual);
         });
         return this;
     }
@@ -281,22 +241,12 @@ final class UiFileActivity {
     UiFileActivity assertListViewContains(
             final Path item,
             final boolean contains) {
-        awaitOnMainThread(instrument, new Runnable() {
-            @Override
-            public void run() {
-                assertEquals(contains, resources().contains(item));
-            }
-        });
+        awaitOnMainThread(instrument, () -> assertEquals(contains, resources().contains(item)));
         return this;
     }
 
     UiFileActivity assertActionBarTitle(final String title) {
-        awaitOnMainThread(instrument, new Runnable() {
-            @Override
-            public void run() {
-                assertEquals(title, label((Path) activity().title().getSelectedItem()));
-            }
-        });
+        awaitOnMainThread(instrument, () -> assertEquals(title, label((Path) activity().title().getSelectedItem())));
         return this;
     }
 
@@ -305,12 +255,7 @@ final class UiFileActivity {
     }
 
     UiFileActivity assertActionBarUpIndicatorIsVisible(final boolean visible) {
-        awaitOnMainThread(instrument, new Runnable() {
-            @Override
-            public void run() {
-                assertEquals(visible ? 1F : 0F, activity().navigationIcon().getProgress());
-            }
-        });
+        awaitOnMainThread(instrument, () -> assertEquals(visible ? 1F : 0F, activity().navigationIcon().getProgress()));
         return this;
     }
 
@@ -322,19 +267,7 @@ final class UiFileActivity {
     }
 
     private Provider<RecyclerView> recycler() {
-        return new Provider<RecyclerView>() {
-            @Override
-            public RecyclerView get() {
-
-                return awaitOnMainThread(instrument, new Callable<RecyclerView>() {
-                    @Override
-                    public RecyclerView call() throws Exception {
-                        return fragment().recycler;
-                    }
-                });
-
-            }
-        };
+        return () -> awaitOnMainThread(instrument, () -> fragment().recycler);
     }
 
     private MenuItem renameMenu() {
@@ -342,37 +275,24 @@ final class UiFileActivity {
     }
 
     private UiFileActivity selectMenuAction(int id) {
-        findOptionMenuItem(id, new Consumer<MenuItem>() {
-            @Override
-            public void accept(MenuItem item) {
-                assertTrue(item.isEnabled());
-            }
-        });
+        findOptionMenuItem(id, item -> assertTrue(item.isEnabled()));
         return clickOptionMenuItem(id);
     }
 
     void selectActionModeAction(final int id) {
-        awaitOnMainThread(instrument, new Runnable() {
-            @Override
-            public void run() {
-                ActionMode mode = activity().currentActionMode();
-                assertNotNull(mode);
-                MenuItem item = mode.getMenu().findItem(id);
-                //noinspection ConstantConditions
-                assertTrue(activity()
-                        .currentActionModeCallback()
-                        .onActionItemClicked(mode, item));
-            }
+        awaitOnMainThread(instrument, () -> {
+            ActionMode mode = activity().currentActionMode();
+            assertNotNull(mode);
+            MenuItem item = mode.getMenu().findItem(id);
+            //noinspection ConstantConditions
+            assertTrue(activity()
+                    .currentActionModeCallback()
+                    .onActionItemClicked(mode, item));
         });
     }
 
     void waitForActionModeToFinish() {
-        awaitOnMainThread(instrument, new Runnable() {
-            @Override
-            public void run() {
-                assertNull(activity().currentActionMode());
-            }
-        });
+        awaitOnMainThread(instrument, () -> assertNull(activity().currentActionMode()));
     }
 
     /**
@@ -388,12 +308,7 @@ final class UiFileActivity {
      */
     UiFileActivity assertChecked(
             Path file, final boolean checked) {
-        findItemOnMainThread(file, new Consumer<View>() {
-            @Override
-            public void accept(View view) {
-                assertEquals(checked, view.isActivated());
-            }
-        });
+        findItemOnMainThread(file, view -> assertEquals(checked, view.isActivated()));
         return this;
     }
 
@@ -401,55 +316,36 @@ final class UiFileActivity {
      * Asserts whether the activity.get() currently in an action mode.
      */
     UiFileActivity assertActionModePresent(final boolean present) {
-        awaitOnMainThread(instrument, new Runnable() {
-            @Override
-            public void run() {
-                assertEquals(present, activity().currentActionMode() != null);
-            }
-        });
+        awaitOnMainThread(instrument, () -> assertEquals(present, activity().currentActionMode() != null));
         return this;
     }
 
     UiFileActivity assertActionModeTitle(final Object title) {
-        awaitOnMainThread(instrument, new Runnable() {
-            @Override
-            public void run() {
-                ActionMode mode = activity().currentActionMode();
-                assertNotNull(mode);
-                assertEquals(title.toString(), mode.getTitle().toString());
-            }
+        awaitOnMainThread(instrument, () -> {
+            ActionMode mode = activity().currentActionMode();
+            assertNotNull(mode);
+            assertEquals(title.toString(), mode.getTitle().toString());
         });
         return this;
     }
 
     UiFileActivity assertBookmarkMenuChecked(final boolean checked) {
-        return findOptionMenuItem(R.id.bookmark, new Consumer<MenuItem>() {
-            @Override
-            public void accept(MenuItem item) {
-                assertEquals(checked, item.isChecked());
-            }
-        });
+        return findOptionMenuItem(R.id.bookmark, item -> assertEquals(checked, item.isChecked()));
     }
 
     UiFileActivity assertRefreshMenuVisible(final boolean visible) {
-        return findOptionMenuItem(R.id.refresh, new Consumer<MenuItem>() {
-            @Override
-            public void accept(MenuItem input) {
-                String msg = "Refresh menu visible to be " + visible;
-                assertEquals(msg, visible, input.isVisible());
-            }
+        return findOptionMenuItem(R.id.refresh, input -> {
+            String msg = "Refresh menu visible to be " + visible;
+            assertEquals(msg, visible, input.isVisible());
         });
     }
 
     UiFileActivity assertThumbnailShown(Path path, final boolean shown) {
-        findItemOnMainThread(path, new Consumer<View>() {
-            @Override
-            public void accept(View view) {
-                ImageView imageView = find(R.id.image, view);
-                Drawable drawable = imageView.getDrawable();
-                assertEquals(shown, drawable instanceof BitmapDrawable
-                        || drawable instanceof RoundedBitmapDrawable);
-            }
+        findItemOnMainThread(path, view -> {
+            ImageView imageView = find(R.id.image, view);
+            Drawable drawable = imageView.getDrawable();
+            assertEquals(shown, drawable instanceof BitmapDrawable
+                    || drawable instanceof RoundedBitmapDrawable);
         });
         return this;
     }
@@ -458,19 +354,16 @@ final class UiFileActivity {
             Path link,
             @Nullable final Path target) {
 
-        findItemOnMainThread(link, new Consumer<View>() {
-            @Override
-            public void accept(View view) {
-                TextView linkView = find(R.id.link, view);
-                if (target != null) {
-                    Resources res = view.getResources();
-                    String expected = res.getString(R.string.link_x, target);
-                    CharSequence actual = linkView.getText().toString();
-                    assertEquals(expected, actual);
-                    assertEquals(VISIBLE, linkView.getVisibility());
-                } else {
-                    assertEquals(GONE, linkView.getVisibility());
-                }
+        findItemOnMainThread(link, view -> {
+            TextView linkView = find(R.id.link, view);
+            if (target != null) {
+                Resources res = view.getResources();
+                String expected = res.getString(R.string.link_x, target);
+                CharSequence actual = linkView.getText().toString();
+                assertEquals(expected, actual);
+                assertEquals(VISIBLE, linkView.getVisibility());
+            } else {
+                assertEquals(GONE, linkView.getVisibility());
             }
         });
 
@@ -478,59 +371,40 @@ final class UiFileActivity {
     }
 
     UiFileActivity assertSummary(Path path, final CharSequence expected) {
-        return assertSummary(path, new Consumer<String>() {
-            @Override
-            public void accept(String summary) {
-                assertEquals(expected, summary);
-            }
-        });
+        return assertSummary(path, summary -> assertEquals(expected, summary));
     }
 
     UiFileActivity assertSummary(
             final Path path,
             final Consumer<String> assertion) {
-        findItemOnMainThread(path, new Consumer<View>() {
-            @Override
-            public void accept(View view) {
-                TextView summaryView = find(R.id.summary, view);
-                assertion.accept(summaryView.getText().toString());
-            }
+        findItemOnMainThread(path, view -> {
+            TextView summaryView = find(R.id.summary, view);
+            assertion.accept(summaryView.getText().toString());
         });
         return this;
     }
 
     UiFileActivity assertBookmarksSidebarIsClosed() {
-        awaitOnMainThread(instrument, new Runnable() {
-            @Override
-            public void run() {
-                assertEquals(false, activity().drawerLayout().isDrawerOpen(START));
-            }
-        });
+        awaitOnMainThread(instrument, () -> assertEquals(false, activity().drawerLayout().isDrawerOpen(START)));
         return this;
     }
 
     UiFileActivity assertDisabled(Path path) {
-        findItemOnMainThread(path, new Consumer<View>() {
-            @Override
-            public void accept(View view) {
-                assertFalse(find(R.id.title, view).isEnabled());
-                assertFalse(find(R.id.summary, view).isEnabled());
-                assertFalse(find(R.id.link, view).isEnabled());
-            }
+        findItemOnMainThread(path, view -> {
+            assertFalse(find(R.id.title, view).isEnabled());
+            assertFalse(find(R.id.summary, view).isEnabled());
+            assertFalse(find(R.id.link, view).isEnabled());
         });
         return this;
     }
 
     UiFileActivity assertNavigationModeHierarchy(final Path dir) {
-        awaitOnMainThread(instrument, new Runnable() {
-            @Override
-            public void run() {
-                List<Path> actual = activity().hierarchy();
-                List<Path> expected = new ArrayList<>(dir.hierarchy());
-                Collections.reverse(expected);
-                assertEquals(expected, actual);
-                assertEquals(dir, activity().title().getSelectedItem());
-            }
+        awaitOnMainThread(instrument, () -> {
+            List<Path> actual = activity().hierarchy();
+            List<Path> expected = new ArrayList<>(dir.hierarchy());
+            Collections.reverse(expected);
+            assertEquals(expected, actual);
+            assertEquals(dir, activity().title().getSelectedItem());
         });
         return this;
     }
@@ -546,40 +420,33 @@ final class UiFileActivity {
             final TimeUnit timeoutUnit)
             throws IOException {
 
-        await(new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
+        await((Callable<Void>) () -> {
 
 
-                final SimpleArrayMap<Path, Stat> filesInView = filesInView();
+            final SimpleArrayMap<Path, Stat> filesInView = filesInView();
 
-                dir.list(new Path.Consumer() {
-                    @Override
-                    public boolean accept(Path child) throws IOException {
-                        Stat oldStat = filesInView.remove(child);
-                        if (oldStat == null) {
-                            fail("Path in file system but not in view: " + child);
-                        }
-
-                        Stat newStat = child.stat(NOFOLLOW);
-                        if (!newStat.equals(oldStat)) {
-                            fail("Path details differ for : " + child
-                                    + "\nnew: " + newStat
-                                    + "\nold: " + oldStat);
-                        }
-                        return true;
-                    }
-                });
-
-                if (!filesInView.isEmpty()) {
-                    fail("Path in view but not on file system: "
-                            + filesInView.keyAt(0) + "="
-                            + filesInView.valueAt(0));
+            dir.list((Path.Consumer) child -> {
+                Stat oldStat = filesInView.remove(child);
+                if (oldStat == null) {
+                    fail("Path in file system but not in view: " + child);
                 }
 
-                return null;
+                Stat newStat = child.stat(NOFOLLOW);
+                if (!newStat.equals(oldStat)) {
+                    fail("Path details differ for : " + child
+                            + "\nnew: " + newStat
+                            + "\nold: " + oldStat);
+                }
+                return true;
+            });
 
+            if (!filesInView.isEmpty()) {
+                fail("Path in view but not on file system: "
+                        + filesInView.keyAt(0) + "="
+                        + filesInView.valueAt(0));
             }
+
+            return null;
 
         }, timeout, timeoutUnit);
 
@@ -616,20 +483,17 @@ final class UiFileActivity {
     }
 
     UiFileActivity assertAllItemsDisplayedInOrder(final Path... expected) {
-        awaitOnMainThread(instrument, new Runnable() {
-            @Override
-            public void run() {
-                List<FileInfo> items = fileItems();
-                List<Path> actual = new ArrayList<>(items.size());
-                for (FileInfo item : items) {
-                    actual.add(item.selfPath());
-                }
+        awaitOnMainThread(instrument, () -> {
+            List<FileInfo> items = fileItems();
+            List<Path> actual = new ArrayList<>(items.size());
+            for (FileInfo item : items) {
+                actual.add(item.selfPath());
+            }
 
-                if (!asList(expected).equals(actual)) {
-                    throw new AssertionError("" +
-                            "\nexpected in order:\n" + TextUtils.join("\n", expected) +
-                            "\nbus was:\n" + TextUtils.join("\n", actual));
-                }
+            if (!asList(expected).equals(actual)) {
+                throw new AssertionError("" +
+                        "\nexpected in order:\n" + TextUtils.join("\n", expected) +
+                        "\nbus was:\n" + TextUtils.join("\n", actual));
             }
         });
         return this;

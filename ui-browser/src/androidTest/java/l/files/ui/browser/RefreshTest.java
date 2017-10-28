@@ -49,16 +49,13 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
     private void testRefreshInManualMode(Path dir) throws IOException {
 
-        Paths.listDirectories(dir, new Consumer() {
-            @Override
-            public boolean accept(Path childDir) throws IOException {
-                // Inotify don't notify child directory last modified time,
-                // unless we explicitly monitor the child dir, but we aren't
-                // doing that because we ran out of watches, so this is a
-                // good operation for testing the manual refresh
-                childDir.concat("x").createFile();
-                return false;
-            }
+        Paths.listDirectories(dir, (Consumer) childDir -> {
+            // Inotify don't notify child directory last modified time,
+            // unless we explicitly monitor the child dir, but we aren't
+            // doing that because we ran out of watches, so this is a
+            // good operation for testing the manual refresh
+            childDir.concat("x").createFile();
+            return false;
         });
 
         boolean updated = false;
@@ -81,12 +78,9 @@ public final class RefreshTest extends BaseFilesActivityTest {
                 .createFile()
                 .rename(dir.concat("after-move-" + nanoTime()));
 
-        dir.list(new Consumer() {
-            @Override
-            public boolean accept(Path file) throws IOException {
-                Paths.deleteRecursive(file);
-                return false;
-            }
+        dir.list((Consumer) file -> {
+            Paths.deleteRecursive(file);
+            return false;
         });
 
         screen().assertListMatchesFileSystem(dir);
@@ -99,19 +93,16 @@ public final class RefreshTest extends BaseFilesActivityTest {
             dir().concat(String.valueOf(i)).createDirectory();
         }
 
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                long start = currentTimeMillis();
-                while (currentTimeMillis() - start < 5000) {
-                    try {
+        Thread thread = new Thread(() -> {
+            long start = currentTimeMillis();
+            while (currentTimeMillis() - start < 5000) {
+                try {
 
-                        deleteFiles(2);
-                        randomFile(dir()).createDirectory();
-                        randomFile(dir()).createFile();
+                    deleteFiles(2);
+                    randomFile(dir()).createDirectory();
+                    randomFile(dir()).createFile();
 
-                    } catch (IOException ignore) {
-                    }
+                } catch (IOException ignore) {
                 }
             }
         });
@@ -162,14 +153,11 @@ public final class RefreshTest extends BaseFilesActivityTest {
     private void updateAttributes() throws IOException {
 
         final Random r = new Random();
-        dir().list(new Consumer() {
-            @Override
-            public boolean accept(Path child) throws IOException {
-                child.setLastModifiedTime(NOFOLLOW, Instant.of(
-                        r.nextInt((int) (currentTimeMillis() / 1000)),
-                        r.nextInt(999999)));
-                return true;
-            }
+        dir().list((Consumer) child -> {
+            child.setLastModifiedTime(NOFOLLOW, Instant.of(
+                    r.nextInt((int) (currentTimeMillis() / 1000)),
+                    r.nextInt(999999)));
+            return true;
         });
     }
 

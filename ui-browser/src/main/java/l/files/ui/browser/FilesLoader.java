@@ -12,7 +12,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -35,6 +34,7 @@ import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.setThreadPriority;
 import static java.lang.Thread.currentThread;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.unmodifiableList;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -94,25 +94,17 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
             final Map<Name, Event> changedChildren,
             final boolean forceReload) {
 
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                setThreadPriority(THREAD_PRIORITY_BACKGROUND);
+        executor.execute(() -> {
+            setThreadPriority(THREAD_PRIORITY_BACKGROUND);
 
-                boolean changed = false;
-                for (Entry<Name, Event> entry : changedChildren.entrySet()) {
-                    changed |= update(entry.getKey(), entry.getValue());
-                }
+            boolean changed = false;
+            for (Entry<Name, Event> entry : changedChildren.entrySet()) {
+                changed |= update(entry.getKey(), entry.getValue());
+            }
 
-                if (changed || forceReload) {
-                    final Result result = buildResult();
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            deliverResult(result);
-                        }
-                    });
-                }
+            if (changed || forceReload) {
+                final Result result = buildResult();
+                handler.post(() -> deliverResult(result));
             }
         });
     }
@@ -146,12 +138,12 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     void setSort(FileSort sort) {
         this.sort = requireNonNull(sort, "sort");
-        updateAll(Collections.<Name, Event>emptyMap(), true);
+        updateAll(emptyMap(), true);
     }
 
     void setShowHidden(boolean showHidden) {
         this.showHidden = showHidden;
-        updateAll(Collections.<Name, Event>emptyMap(), true);
+        updateAll(emptyMap(), true);
     }
 
     @Override
@@ -230,14 +222,11 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     private List<Name> visit() throws IOException {
         final List<Name> children = new ArrayList<>();
-        root.list(new Path.Consumer() {
-            @Override
-            public boolean accept(Path child) {
-                Name name = child.name();
-                assert name != null;
-                checkedAdd(children, name);
-                return true;
-            }
+        root.list((Path.Consumer) child -> {
+            Name name = child.name();
+            assert name != null;
+            checkedAdd(children, name);
+            return true;
         });
         return children;
     }
@@ -256,14 +245,11 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     }
 
     private Path.Consumer collectInto(final List<Name> children) {
-        return new Path.Consumer() {
-            @Override
-            public boolean accept(Path child) {
-                Name name = child.name();
-                assert name != null;
-                checkedAdd(children, name);
-                return true;
-            }
+        return child -> {
+            Name name = child.name();
+            assert name != null;
+            checkedAdd(children, name);
+            return true;
         };
     }
 

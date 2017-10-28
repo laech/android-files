@@ -35,7 +35,7 @@ final class DateCategorizer extends BaseCategorizer {
     private final long startSecondOf30Days;
     private final long startSecondOfThisYear;
 
-    public DateCategorizer(long now) {
+    DateCategorizer(long now) {
         timestamp.setTimeInMillis(now);
         timestamp.set(HOUR_OF_DAY, 0);
         timestamp.set(MINUTE, 0);
