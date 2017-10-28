@@ -25,11 +25,8 @@ public final class PathStreamThumbnailer implements Thumbnailer<Path> {
 
     @Override
     public ScaledBitmap create(Path path, Rect max, Context context) throws Exception {
-        InputStream in = path.newInputStream();
-        try {
+        try (InputStream in = path.newInputStream()) {
             return thumbnailer.create(in, max, context);
-        } finally {
-            in.close();
         }
     }
 }

@@ -190,8 +190,7 @@ abstract class PersistenceCache<V> extends MemCache<Path, V> {
         parent.createDirectories();
 
         Path tmp = parent.concat(file.name() + "-" + nanoTime());
-        DataOutputStream out = newBufferedDataOutputStream(tmp);
-        try {
+        try (DataOutputStream out = newBufferedDataOutputStream(tmp)) {
 
             out.writeInt(SUPERCLASS_VERSION);
             out.writeInt(subclassVersion);
@@ -214,8 +213,6 @@ abstract class PersistenceCache<V> extends MemCache<Path, V> {
                 addSuppressed(e, sup);
             }
             throw e;
-        } finally {
-            out.close();
         }
 
         tmp.rename(file);

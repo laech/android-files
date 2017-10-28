@@ -2,10 +2,6 @@ package l.files.thumbnail;
 
 import android.content.Context;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.concurrent.Callable;
-
 import l.files.fs.Path;
 import l.files.ui.base.graphics.Rect;
 import l.files.ui.base.graphics.ScaledBitmap;
@@ -21,12 +17,7 @@ public final class ImageThumbnailer implements Thumbnailer<Path> {
 
     @Override
     public ScaledBitmap create(final Path path, Rect max, Context context) throws Exception {
-        return decodeScaledDownBitmap(new Callable<InputStream>() {
-            @Override
-            public InputStream call() throws IOException {
-                return path.newInputStream();
-            }
-        }, max);
+        return decodeScaledDownBitmap(path::newInputStream, max);
     }
 
 }

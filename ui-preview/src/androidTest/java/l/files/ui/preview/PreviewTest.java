@@ -90,11 +90,8 @@ public final class PreviewTest extends PathBaseTest {
 
     private void testPreviewSuccessForTestFile(String testFile, String dstFileName) throws Throwable {
         Path file = dir1().concat(dstFileName);
-        InputStream in = getContext().getAssets().open(testFile);
-        try {
+        try (InputStream in = getContext().getAssets().open(testFile)) {
             Paths.copy(in, file);
-        } finally {
-            in.close();
         }
         testPreviewSuccess(file);
         testPreviewSuccess(file);

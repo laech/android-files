@@ -40,11 +40,8 @@ public final class PdfThumbnailerTest {
         File file = createTempFile("PdfThumbnailerTest", null);
         try {
             Path path = Path.of(file);
-            InputStream in = openTestPdf();
-            try {
+            try (InputStream in = openTestPdf()) {
                 Paths.copy(in, path);
-            } finally {
-                in.close();
             }
             return path;
         } catch (Throwable e) {

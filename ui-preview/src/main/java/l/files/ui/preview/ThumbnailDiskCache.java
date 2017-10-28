@@ -130,12 +130,9 @@ final class ThumbnailDiskCache extends Cache<ScaledBitmap> {
     Path cacheFile(Path path, Stat stat, Rect constraint, boolean matchTime) throws IOException {
         if (!matchTime) {
             final Path[] result = {null};
-            cacheDir(path, constraint).list(new Path.Consumer() {
-                @Override
-                public boolean accept(Path path) {
-                    result[0] = path;
-                    return false;
-                }
+            cacheDir(path, constraint).list((Path.Consumer) path1 -> {
+                result[0] = path1;
+                return false;
             });
             return result[0];
         }
@@ -215,8 +212,7 @@ final class ThumbnailDiskCache extends Cache<ScaledBitmap> {
         parent.createDirectories();
 
         Path tmp = parent.concat(cache.name() + "-" + nanoTime());
-        DataOutputStream out = newBufferedDataOutputStream(tmp);
-        try {
+        try (DataOutputStream out = newBufferedDataOutputStream(tmp)) {
 
             out.writeByte(VERSION);
             out.writeInt(thumbnail.originalSize().width());
@@ -230,8 +226,6 @@ final class ThumbnailDiskCache extends Cache<ScaledBitmap> {
                 addSuppressed(e, sup);
             }
             throw e;
-        } finally {
-            out.close();
         }
 
         tmp.rename(cache);
