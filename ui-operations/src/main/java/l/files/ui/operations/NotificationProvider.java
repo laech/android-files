@@ -44,8 +44,8 @@ public final class NotificationProvider implements TaskListener {
                 .getSystemService(NOTIFICATION_SERVICE);
     }
 
-    @SuppressWarnings("unused")
-    NotificationProvider() {
+    @SuppressWarnings({"unused", "WeakerAccess"}) // Called by reflection
+    public NotificationProvider() {
         this(Clock.system());
     }
 
