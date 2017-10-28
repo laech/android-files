@@ -37,12 +37,7 @@ public final class Paths {
             Observer observer
     ) throws IOException, InterruptedException {
 
-        return path.observe(option, observer, new Consumer() {
-            @Override
-            public boolean accept(Path entry) throws IOException {
-                return true;
-            }
-        }, null, -1);
+        return path.observe(option, observer, entry -> true, null, -1);
     }
 
     public static void listDirectories(
@@ -50,13 +45,8 @@ public final class Paths {
             final Consumer consumer
     ) throws IOException {
 
-        path.list(new Consumer() {
-            @Override
-            public boolean accept(Path entry) throws IOException {
-                return !entry.stat(NOFOLLOW).isDirectory() ||
-                        consumer.accept(entry);
-            }
-        });
+        path.list((Consumer) entry -> !entry.stat(NOFOLLOW).isDirectory() ||
+                consumer.accept(entry));
     }
 
     public static <C extends Collection<? super Path>> C listDirectories(
@@ -64,12 +54,9 @@ public final class Paths {
             final C collection
     ) throws IOException {
 
-        listDirectories(path, new Consumer() {
-            @Override
-            public boolean accept(Path entry) throws IOException {
-                collection.add(entry);
-                return true;
-            }
+        listDirectories(path, (Consumer) entry -> {
+            collection.add(entry);
+            return true;
         });
         return collection;
     }
@@ -123,14 +110,11 @@ public final class Paths {
 
     public static String readAllUtf8(Path path) throws IOException {
         StringBuilder builder = new StringBuilder();
-        Reader reader = newReader(path, UTF_8);
-        try {
+        try (Reader reader = newReader(path, UTF_8)) {
             char[] buffer = new char[8192];
             for (int i; (i = reader.read(buffer)) != -1; ) {
                 builder.append(buffer, 0, i);
             }
-        } finally {
-            reader.close();
         }
         return builder.toString();
     }
@@ -143,21 +127,15 @@ public final class Paths {
     public static void write(Path path, CharSequence content, Charset charset)
             throws IOException {
 
-        Writer writer = newWriter(path, charset, false);
-        try {
+        try (Writer writer = newWriter(path, charset, false)) {
             writer.write(content.toString());
-        } finally {
-            writer.close();
         }
     }
 
     public static void appendUtf8(Path path, CharSequence content)
             throws IOException {
-        Writer writer = newWriter(path, UTF_8, true);
-        try {
+        try (Writer writer = newWriter(path, UTF_8, true)) {
             writer.write(content.toString());
-        } finally {
-            writer.close();
         }
     }
 
@@ -199,14 +177,11 @@ public final class Paths {
 
     public static void copy(InputStream in, Path to)
             throws IOException {
-        OutputStream out = to.newOutputStream(false);
-        try {
+        try (OutputStream out = to.newOutputStream(false)) {
             byte[] buffer = new byte[8192];
             for (int i; (i = in.read(buffer)) != -1; ) {
                 out.write(buffer, 0, i);
             }
-        } finally {
-            out.close();
         }
     }
 
