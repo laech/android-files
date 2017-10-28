@@ -38,14 +38,11 @@ public final class FileOperationTest extends BaseFilesActivityTest {
                 .delete()
                 .ok();
 
-        timeout(5, SECONDS, new Executable() {
-            @Override
-            public void execute() throws Exception {
-                assertFalse(file.exists(NOFOLLOW));
-                assertFalse(link.exists(NOFOLLOW));
-                assertFalse(dir1.exists(NOFOLLOW));
-                assertFalse(dir2.exists(NOFOLLOW));
-            }
+        timeout(5, SECONDS, () -> {
+            assertFalse(file.exists(NOFOLLOW));
+            assertFalse(link.exists(NOFOLLOW));
+            assertFalse(dir1.exists(NOFOLLOW));
+            assertFalse(dir2.exists(NOFOLLOW));
         });
 
     }
@@ -62,12 +59,9 @@ public final class FileOperationTest extends BaseFilesActivityTest {
                 .click(dir)
                 .paste();
 
-        timeout(5, SECONDS, new Executable() {
-            @Override
-            public void execute() throws Exception {
-                assertFalse(file.exists(NOFOLLOW));
-                assertTrue(dir.concat(file.name()).exists(NOFOLLOW));
-            }
+        timeout(5, SECONDS, () -> {
+            assertFalse(file.exists(NOFOLLOW));
+            assertTrue(dir.concat(file.name()).exists(NOFOLLOW));
         });
 
     }
