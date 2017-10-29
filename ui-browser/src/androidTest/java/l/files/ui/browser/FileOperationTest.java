@@ -14,7 +14,7 @@ import static java.lang.System.currentTimeMillis;
 import static java.lang.Thread.sleep;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.ui.browser.Tests.timeout;
+import static l.files.testing.Tests.timeout;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
