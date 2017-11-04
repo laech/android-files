@@ -26,5 +26,6 @@ dependencies {
     implementation project(':ui-base')
     implementation project(':ui-preview')
     implementation "com.android.support:appcompat-v7:$supportLibVersion"
+    implementation 'com.google.code.findbugs:jsr305:3.0.1'
 
 }

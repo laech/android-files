@@ -20,11 +20,14 @@ android {
 
 dependencies {
 
+    implementation project(':base')
+    implementation project(':fs')
     implementation project(':fs-media')
 
     implementation "com.android.support:recyclerview-v7:$supportLibVersion"
     implementation "com.android.support:support-fragment:$supportLibVersion"
     implementation "com.android.support:appcompat-v7:$supportLibVersion"
+    implementation 'com.google.code.findbugs:jsr305:3.0.1'
 
     androidTestImplementation project(':testing-fs')
     androidTestImplementation 'com.android.support.test:runner:1.0.1'

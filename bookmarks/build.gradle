@@ -20,7 +20,9 @@ android {
 
 dependencies {
 
-    compile project(':fs')
+    implementation project(':base')
+    implementation project(':fs')
+    implementation 'com.google.code.findbugs:jsr305:3.0.1'
 
     androidTestImplementation project(':testing-fs')
 

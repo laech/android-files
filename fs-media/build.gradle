@@ -22,8 +22,10 @@ android {
 
 dependencies {
 
-    compile project(':fs')
-    compile 'org.apache.tika:tika-core:1.10'
+    implementation project(':base')
+    implementation project(':fs')
+    implementation 'org.apache.tika:tika-core:1.10'
+    implementation 'com.google.code.findbugs:jsr305:3.0.1'
 
     androidTestImplementation project(':testing-fs')
     androidTestImplementation 'com.android.support.test:runner:1.0.1'

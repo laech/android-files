@@ -20,17 +20,16 @@ android {
 
 dependencies {
 
-    compile project(':fs')
+    implementation project(':base')
+    implementation project(':fs')
+    implementation 'com.google.code.findbugs:jsr305:3.0.1'
 
     androidTestImplementation project(':testing-fs')
 
-    androidTestImplementation 'org.mockito:mockito-core:1.10.19'
-    androidTestImplementation 'com.crittercism.dexmaker:dexmaker:1.4'
-    androidTestImplementation 'com.crittercism.dexmaker:dexmaker-dx:1.4'
-    androidTestImplementation 'com.crittercism.dexmaker:dexmaker-mockito:1.4'
-    androidTestImplementation 'com.android.support.test:runner:0.5'
+    androidTestImplementation 'org.mockito:mockito-android:2.11.0'
+    androidTestImplementation 'com.android.support.test:runner:1.0.1'
 
     testImplementation 'junit:junit:4.12'
-    testImplementation 'org.mockito:mockito-core:1.10.19'
+    testImplementation 'org.mockito:mockito-core:2.11.0'
 
 }

@@ -18,7 +18,9 @@ android {
 }
 
 dependencies {
-    compile project(':fs')
-    compile project(':testing')
-    compile 'junit:junit:4.12'
+    implementation project(':base')
+    implementation project(':fs')
+    implementation project(':testing')
+    implementation 'junit:junit:4.12'
+    implementation 'com.google.code.findbugs:jsr305:3.0.1'
 }

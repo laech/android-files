@@ -26,12 +26,14 @@ android {
 
 dependencies {
 
+    implementation project(':base')
     implementation project(':fs')
     implementation project(':fs-media')
     implementation project(':ui-base')
     implementation project(':ui-preview-pdf')
     implementation 'com.caverock:androidsvg:1.2.1'
     implementation "com.android.support:support-compat:$supportLibVersion"
+    implementation 'com.google.code.findbugs:jsr305:3.0.1'
 
     androidTestImplementation project(':testing-fs')
 

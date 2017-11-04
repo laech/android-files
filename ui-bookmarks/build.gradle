@@ -24,10 +24,13 @@ android {
 
 dependencies {
 
+    implementation project(':base')
     implementation project(':bookmarks')
     implementation project(':ui-base')
+    implementation project(':fs')
     implementation "com.android.support:appcompat-v7:$supportLibVersion"
     implementation "com.android.support:recyclerview-v7:$supportLibVersion"
+    implementation 'com.google.code.findbugs:jsr305:3.0.1'
 
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.mockito:mockito-android:2.11.0'
