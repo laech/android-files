@@ -40,19 +40,19 @@ final class UiInfo {
     }
 
     private String getName() {
-        return ((InfoFragment) fragment()).getNameView().getText().toString();
+        return ((InfoFragment) fragment()).getDisplayedName().toString();
     }
 
     private String getDate() {
-        return ((InfoFragment) fragment()).getDateView().getText().toString();
+        return ((InfoFragment) fragment()).getDisplayedLastModifiedTime().toString();
     }
 
     private String getSize() {
-        return fragment().getSizeView().getText().toString();
+        return fragment().getDisplayedSize().toString();
     }
 
     private String getSizeOnDisk() {
-        return fragment().getSizeOnDiskView().getText().toString();
+        return fragment().getDisplayedSizeOnDisk().toString();
     }
 
     private InfoBaseFragment fragment() {

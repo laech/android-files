@@ -1,13 +1,11 @@
 package l.files.ui.info;
 
 import android.content.Context;
+import android.support.annotation.Nullable;
 import android.support.v4.content.AsyncTaskLoader;
-import android.util.Log;
 
 import java.io.IOException;
 import java.util.Collection;
-
-import android.support.annotation.Nullable;
 
 import l.files.fs.Name;
 import l.files.fs.Path;
@@ -30,15 +28,16 @@ final class CalculateSizeLoader
     @Nullable
     private volatile Size result;
 
-    private final Path dir;
+    private final Path parentDirectory;
     private final Collection<Name> children;
 
     CalculateSizeLoader(
             Context context,
-            Path dir,
-            Collection<Name> children) {
+            Path parentDirectory,
+            Collection<Name> children
+    ) {
         super(context);
-        this.dir = requireNonNull(dir);
+        this.parentDirectory = requireNonNull(parentDirectory);
         this.children = requireNonNull(children);
     }
 
@@ -59,12 +58,11 @@ final class CalculateSizeLoader
         currentSizeOnDisk = 0;
 
         for (Name child : children) {
-            Path path = dir.concat(child.toPath());
+            Path path = parentDirectory.concat(child);
             try {
                 path.traverse(NOFOLLOW, this);
             } catch (IOException e) {
-                Log.w(getClass().getSimpleName(),
-                        "Failed to traverse " + path, e);
+                // TODO report to UI
             }
         }
 
@@ -74,9 +72,15 @@ final class CalculateSizeLoader
             currentSizeOnDisk = 0;
         }
 
-        Size size = Size.of(currentCount, currentSize, currentSizeOnDisk);
-        result = size;
-        return size;
+        return (result = progress());
+    }
+
+    Size progress() {
+        return new Size(
+                currentCount,
+                currentSize,
+                currentSizeOnDisk
+        );
     }
 
     @Override
@@ -101,20 +105,7 @@ final class CalculateSizeLoader
 
     @Override
     public void onException(Path path, IOException e) throws IOException {
-        Log.w(getClass().getSimpleName(),
-                "Failed to visit " + path, e);
-    }
-
-    int currentCount() {
-        return currentCount;
-    }
-
-    long currentSize() {
-        return currentSize;
-    }
-
-    long currentSizeOnDisk() {
-        return currentSizeOnDisk;
+        // TODO report to UI
     }
 
     boolean isRunning() {
@@ -122,31 +113,14 @@ final class CalculateSizeLoader
     }
 
     static final class Size {
-
-        private final int count;
-        private final long size;
-        private final long sizeOnDisk;
+        final int count;
+        final long size;
+        final long sizeOnDisk;
 
         Size(int count, long size, long sizeOnDisk) {
             this.count = count;
             this.size = size;
             this.sizeOnDisk = sizeOnDisk;
-        }
-
-        int count() {
-            return count;
-        }
-
-        long size() {
-            return size;
-        }
-
-        long sizeOnDisk() {
-            return sizeOnDisk;
-        }
-
-        static Size of(int count, long size, long sizeOnDisk) {
-            return new Size(count, size, sizeOnDisk);
         }
     }
 }

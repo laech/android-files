@@ -1,49 +1,50 @@
 package l.files.ui.info;
 
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 import java.util.ArrayList;
 import java.util.Collection;
-
-import android.support.annotation.Nullable;
 
 import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.ui.base.fs.FileInfo;
 
+import static l.files.base.Objects.requireNonNull;
+
 public final class InfoMultiFragment extends InfoBaseFragment {
 
-    public static InfoMultiFragment create(Path dir, Collection<FileInfo> items) {
+    public static InfoMultiFragment create(
+            Path parentDirectory,
+            Collection<FileInfo> children
+    ) {
+        requireNonNull(parentDirectory);
+        requireNonNull(children);
+        return newFragment(newArgs(parentDirectory, children));
+    }
 
+    private static Bundle newArgs(
+            Path parentDirectory,
+            Collection<FileInfo> items
+    ) {
         ArrayList<Name> names = new ArrayList<>(items.size());
         for (FileInfo item : items) {
             names.add(item.selfPath().name()); // TODO handle null
         }
-
         Bundle bundle = new Bundle();
-        bundle.putParcelable(ARG_DIR, dir);
+        bundle.putParcelable(ARG_PARENT_DIRECTORY, parentDirectory);
         bundle.putParcelableArrayList(ARG_CHILDREN, names);
+        return bundle;
+    }
 
+    private static InfoMultiFragment newFragment(Bundle bundle) {
         InfoMultiFragment fragment = new InfoMultiFragment();
         fragment.setArguments(bundle);
         return fragment;
     }
 
     @Override
-    public View onCreateView(
-            LayoutInflater inflater,
-            @Nullable ViewGroup container,
-            @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.info_multi_fragment, container, false);
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        initLoader();
+    int layoutResourceId() {
+        return R.layout.info_multi_fragment;
     }
 
 }
