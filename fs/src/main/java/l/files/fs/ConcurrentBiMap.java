@@ -4,7 +4,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import javax.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import static java.util.Collections.unmodifiableSet;
 

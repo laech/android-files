@@ -33,7 +33,7 @@ dependencies {
     implementation project(':ui-preview-pdf')
     implementation 'com.caverock:androidsvg:1.2.1'
     implementation "com.android.support:support-compat:$supportLibVersion"
-    implementation 'com.google.code.findbugs:jsr305:3.0.1'
+    implementation "com.android.support:support-annotations:$supportLibVersion"
 
     androidTestImplementation project(':testing-fs')
 

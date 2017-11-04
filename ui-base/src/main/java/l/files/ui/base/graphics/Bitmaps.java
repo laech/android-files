@@ -6,7 +6,7 @@ import android.graphics.BitmapFactory.Options;
 import java.io.InputStream;
 import java.util.concurrent.Callable;
 
-import javax.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import static android.graphics.Bitmap.createScaledBitmap;
 import static android.graphics.BitmapFactory.decodeStream;

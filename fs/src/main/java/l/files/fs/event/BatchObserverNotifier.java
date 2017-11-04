@@ -8,7 +8,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import l.files.fs.LinkOption;
 import l.files.fs.Name;

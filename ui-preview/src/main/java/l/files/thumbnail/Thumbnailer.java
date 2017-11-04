@@ -2,7 +2,7 @@ package l.files.thumbnail;
 
 import android.content.Context;
 
-import javax.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import l.files.fs.Path;
 import l.files.ui.base.graphics.Rect;

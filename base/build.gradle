@@ -1,9 +1,24 @@
-apply plugin: 'java'
+apply plugin: 'com.android.library'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+android {
+    compileSdkVersion project.compileSdkVersion
+    buildToolsVersion project.buildToolsVersion
+
+    defaultConfig {
+        minSdkVersion project.minSdkVersion
+        targetSdkVersion project.targetSdkVersion
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
 
 dependencies {
-    implementation 'com.google.code.findbugs:jsr305:3.0.1'
+    implementation "com.android.support:support-annotations:$supportLibVersion"
     testImplementation 'junit:junit:4.12'
 }

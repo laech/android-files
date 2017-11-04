@@ -4,7 +4,7 @@ import android.content.Context;
 import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
 
-import javax.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import l.files.ui.browser.R;
 

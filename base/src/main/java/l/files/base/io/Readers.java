@@ -9,7 +9,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.MalformedInputException;
 
-import javax.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import static java.lang.Math.min;
 import static java.nio.charset.CodingErrorAction.REPORT;

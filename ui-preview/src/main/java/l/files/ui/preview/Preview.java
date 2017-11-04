@@ -6,7 +6,7 @@ import android.graphics.Bitmap;
 import java.io.IOException;
 import java.util.concurrent.Future;
 
-import javax.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import l.files.fs.Path;
 import l.files.fs.Stat;

@@ -2,7 +2,7 @@ package l.files.ui.browser.text;
 
 import android.content.Context;
 
-import javax.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import l.files.fs.Stat;
 import l.files.ui.base.fs.FileInfo;
