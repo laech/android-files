@@ -12,8 +12,7 @@ buildscript {
     }
 
     ext.minSdkVersion = 16
-    // TODO Cannot target API 24 yet, need to handle FileUriExposedException when clicking on a file
-    ext.targetSdkVersion = 23
+    ext.targetSdkVersion = 26
     ext.compileSdkVersion = 26
     ext.buildToolsVersion = '27.0.0'
     ext.supportLibVersion = '27.0.0'
