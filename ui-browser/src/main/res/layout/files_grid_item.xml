@@ -11,7 +11,6 @@
     android:layout_marginStart="@dimen/files_item_space_horizontal"
     android:layout_marginTop="@dimen/files_item_space_vertical"
     android:foreground="?attr/selectableItemBackground"
-    app:cardElevation="1dp"
     app:cardPreventCornerOverlap="false"
     app:cardUseCompatPadding="true">
 
