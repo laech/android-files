@@ -2,12 +2,10 @@ package l.files.ui.preview;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.support.annotation.Nullable;
 
 import java.io.IOException;
 import java.util.concurrent.Future;
-
-import android.os.AsyncTask;
-import android.support.annotation.Nullable;
 
 import l.files.fs.Path;
 import l.files.fs.Stat;
@@ -156,7 +154,7 @@ public final class Preview {
     }
 
     @Nullable
-    public AsyncTask<?, ?, ?> get(
+    public Decode get(
             Path path,
             Stat stat,
             Rect constraint,

@@ -1,7 +1,5 @@
 package l.files.ui.preview;
 
-import android.graphics.Bitmap;
-
 import org.junit.Test;
 
 import java.io.IOException;
@@ -145,12 +143,12 @@ public final class PreviewTest extends PathBaseTest {
         verify(callback, timeout(millis)).onPreviewAvailable(
                 eq(file),
                 eq(stat),
-                notNull(Bitmap.class));
+                notNull());
 
         verify(callback, timeout(millis)).onBlurredThumbnailAvailable(
                 eq(file),
                 eq(stat),
-                notNull(Bitmap.class));
+                notNull());
 
         task.awaitAll(1, MINUTES);
 
