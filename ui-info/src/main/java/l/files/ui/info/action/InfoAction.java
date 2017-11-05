@@ -23,16 +23,17 @@ public final class InfoAction extends ActionModeItem implements Selection.Callba
 
     private final Selection<?, FileInfo> selection;
     private final FragmentManager manager;
-    private final Path dir;
+    private final Path parentDirectory;
 
     public InfoAction(
             Selection<?, FileInfo> selection,
             FragmentManager manager,
-            Path dir) {
+            Path parentDirectory
+    ) {
         super(R.id.info);
         this.selection = requireNonNull(selection);
         this.manager = requireNonNull(manager);
-        this.dir = requireNonNull(dir);
+        this.parentDirectory = requireNonNull(parentDirectory);
     }
 
     @Override
@@ -53,13 +54,23 @@ public final class InfoAction extends ActionModeItem implements Selection.Callba
     protected void onItemSelected(ActionMode mode, MenuItem item) {
         Collection<FileInfo> values = selection.values();
         if (values.size() == 1) {
-            FileInfo file = values.iterator().next();
-            Stat stat = file.selfStat();
-            InfoFragment.create(file.selfPath(), stat).show(manager, FRAGMENT_TAG);
+            showSingleFileInfo(values);
         } else {
-            InfoMultiFragment.create(dir, values).show(manager, FRAGMENT_TAG);
+            showMultiFileInfo(values);
         }
         mode.finish();
+    }
+
+    private void showMultiFileInfo(Collection<FileInfo> values) {
+        InfoMultiFragment.create(parentDirectory, values)
+                .show(manager, FRAGMENT_TAG);
+    }
+
+    private void showSingleFileInfo(Collection<FileInfo> values) {
+        FileInfo file = values.iterator().next();
+        Stat stat = file.selfStat();
+        InfoFragment.create(file.selfPath(), stat)
+                .show(manager, FRAGMENT_TAG);
     }
 
     @Override
