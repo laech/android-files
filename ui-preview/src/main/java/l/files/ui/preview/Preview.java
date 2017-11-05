@@ -167,8 +167,8 @@ public final class Preview {
             return null;
         }
 
-        return new Decode(path, stat, constraint, callback, this, context)
-                .executeOnPreferredExecutor();
+        return new Decode(path, stat, constraint, callback, this)
+                .executeOnPreferredExecutor(context);
     }
 
     public void clearThumbnailCache() {

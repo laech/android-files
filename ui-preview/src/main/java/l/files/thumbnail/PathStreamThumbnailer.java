@@ -10,11 +10,11 @@ import l.files.ui.base.graphics.ScaledBitmap;
 
 import static l.files.base.Objects.requireNonNull;
 
-public final class PathStreamThumbnailer implements Thumbnailer<Path> {
+final class PathStreamThumbnailer implements Thumbnailer<Path> {
 
     private final Thumbnailer<InputStream> thumbnailer;
 
-    public PathStreamThumbnailer(Thumbnailer<InputStream> thumbnailer) {
+    PathStreamThumbnailer(Thumbnailer<InputStream> thumbnailer) {
         this.thumbnailer = requireNonNull(thumbnailer);
     }
 
@@ -24,7 +24,8 @@ public final class PathStreamThumbnailer implements Thumbnailer<Path> {
     }
 
     @Override
-    public ScaledBitmap create(Path path, Rect max, Context context) throws Exception {
+    public ScaledBitmap create(Path path, Rect max, Context context)
+            throws Exception {
         try (InputStream in = path.newInputStream()) {
             return thumbnailer.create(in, max, context);
         }

@@ -3,6 +3,7 @@ package l.files.thumbnail;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
 
 import com.caverock.androidsvg.SVG;
@@ -10,17 +11,14 @@ import com.caverock.androidsvg.SVGParseException;
 
 import java.io.InputStream;
 
-import android.support.annotation.Nullable;
-
 import l.files.fs.Path;
 import l.files.ui.base.graphics.Rect;
 import l.files.ui.base.graphics.ScaledBitmap;
 
 import static android.graphics.Bitmap.Config.ARGB_8888;
-import static android.graphics.Bitmap.createBitmap;
 import static android.graphics.Color.WHITE;
 
-public final class SvgThumbnailer implements Thumbnailer<InputStream> {
+final class SvgThumbnailer implements Thumbnailer<InputStream> {
 
     @Override
     public boolean accepts(Path path, String mediaType) {
@@ -28,17 +26,18 @@ public final class SvgThumbnailer implements Thumbnailer<InputStream> {
     }
 
     @Override
-    public ScaledBitmap create(InputStream input, Rect max, Context context) throws Exception {
+    public ScaledBitmap create(InputStream input, Rect max, Context context)
+            throws Exception {
         SVG svg = parseSvg(input);
         if (svg == null) {
             return null;
         }
         Rect originalSize = getSize(svg);
         Rect scaledSize = originalSize.scaleDown(max);
-        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-        Bitmap bitmap = renderSvg(svg, scaledSize, metrics);
-        return new ScaledBitmap(bitmap, originalSize);
-
+        return new ScaledBitmap(
+                render(svg, scaledSize, context),
+                originalSize
+        );
     }
 
     @Nullable
@@ -55,19 +54,32 @@ public final class SvgThumbnailer implements Thumbnailer<InputStream> {
     private static Rect getSize(SVG svg) {
         return Rect.of(
                 (int) svg.getDocumentWidth(),
-                (int) svg.getDocumentHeight());
+                (int) svg.getDocumentHeight()
+        );
     }
 
-    private static Bitmap renderSvg(SVG svg, Rect size, DisplayMetrics metrics) {
+    private static Bitmap render(SVG svg, Rect size, Context context) {
         svg.setDocumentWidth(size.width());
         svg.setDocumentHeight(size.height());
+        Bitmap bitmap = createBitmap(size, context);
+        return render(svg, bitmap);
+    }
 
-        Bitmap bitmap = createBitmap(size.width(), size.height(), ARGB_8888);
+    private static Bitmap render(SVG source, Bitmap destination) {
+        Canvas canvas = new Canvas(destination);
+        source.renderToCanvas(canvas);
+        return destination;
+    }
+
+    private static Bitmap createBitmap(Rect size, Context context) {
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        Bitmap bitmap = Bitmap.createBitmap(
+                size.width(),
+                size.height(),
+                ARGB_8888
+        );
         bitmap.setDensity(metrics.densityDpi);
         bitmap.eraseColor(WHITE);
-
-        Canvas canvas = new Canvas(bitmap);
-        svg.renderToCanvas(canvas);
         return bitmap;
     }
 }

@@ -16,7 +16,7 @@ import static android.graphics.Color.WHITE;
 import static android.util.TypedValue.COMPLEX_UNIT_PT;
 import static android.util.TypedValue.applyDimension;
 
-public final class PdfThumbnailer implements Thumbnailer<Path> {
+final class PdfThumbnailer implements Thumbnailer<Path> {
 
     /**
      * The PDF lib is not thread safe, need a global lock.
@@ -29,7 +29,8 @@ public final class PdfThumbnailer implements Thumbnailer<Path> {
     }
 
     @Override
-    public ScaledBitmap create(Path path, Rect max, Context context) throws IOException {
+    public ScaledBitmap create(Path path, Rect max, Context context)
+            throws IOException {
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         byte[] pathByteArray = path.toByteArray();
         synchronized (lock) {
@@ -55,16 +56,21 @@ public final class PdfThumbnailer implements Thumbnailer<Path> {
         }
     }
 
-    private static Rect getSize(long page, DisplayMetrics metrics) throws IOException {
+    private static Rect getSize(long page, DisplayMetrics metrics)
+            throws IOException {
         double pageWidthInPoints = Pdf.getPageWidthInPoints(page);
         double pageHeightInPoints = Pdf.getPageHeightInPoints(page);
         return Rect.of(
                 pointToPixel((float) pageWidthInPoints, metrics),
-                pointToPixel((float) pageHeightInPoints, metrics));
+                pointToPixel((float) pageHeightInPoints, metrics)
+        );
     }
 
     private static Bitmap renderPage(
-            long page, Rect size, DisplayMetrics metrics) throws IOException {
+            long page,
+            Rect size,
+            DisplayMetrics metrics
+    ) throws IOException {
 
         Bitmap bitmap = createBitmap(size.width(), size.height(), ARGB_8888);
         bitmap.setDensity(metrics.densityDpi);

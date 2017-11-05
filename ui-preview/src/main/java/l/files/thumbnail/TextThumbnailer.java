@@ -29,7 +29,7 @@ import static android.view.View.MeasureSpec.makeMeasureSpec;
 import static l.files.base.io.Charsets.UTF_8;
 import static java.lang.Math.min;
 
-public final class TextThumbnailer implements Thumbnailer<InputStream> {
+final class TextThumbnailer implements Thumbnailer<InputStream> {
 
     private static final int PREVIEW_LIMIT = 256;
     private static final int TEXT_COLOR = parseColor("#616161");
@@ -40,7 +40,8 @@ public final class TextThumbnailer implements Thumbnailer<InputStream> {
     }
 
     @Override
-    public ScaledBitmap create(InputStream input, Rect max, Context context) throws IOException {
+    public ScaledBitmap create(InputStream input, Rect max, Context context)
+            throws IOException {
         // TODO support more charsets
         String text = Readers.readString(input, PREVIEW_LIMIT, UTF_8);
         if (text == null) {
