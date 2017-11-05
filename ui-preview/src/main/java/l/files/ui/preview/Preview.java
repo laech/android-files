@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import java.io.IOException;
 import java.util.concurrent.Future;
 
+import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 
 import l.files.fs.Path;
@@ -155,7 +156,7 @@ public final class Preview {
     }
 
     @Nullable
-    public Decode get(
+    public AsyncTask<?, ?, ?> get(
             Path path,
             Stat stat,
             Rect constraint,

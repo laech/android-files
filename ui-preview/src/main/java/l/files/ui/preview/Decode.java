@@ -28,7 +28,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.ui.base.content.Contexts.isDebugBuild;
 
-public final class Decode extends AsyncTask<Context, Object, Object> {
+final class Decode extends AsyncTask<Context, Object, Object> {
 
     private static final BlockingQueue<Runnable> queue =
             new LinkedBlockingQueue<>();
@@ -68,8 +68,9 @@ public final class Decode extends AsyncTask<Context, Object, Object> {
         this.preview = requireNonNull(preview);
     }
 
-    public void cancelAll() {
-        cancel(true);
+    @Override
+    protected void onCancelled() {
+        super.onCancelled();
         Future<?> saveThumbnailToDiskTask = this.saveThumbnailToDiskTask;
         if (saveThumbnailToDiskTask != null) {
             saveThumbnailToDiskTask.cancel(true);

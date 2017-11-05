@@ -4,6 +4,8 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
+import android.support.annotation.Nullable;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
@@ -20,8 +22,6 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import android.support.annotation.Nullable;
-
 import l.files.base.Provider;
 import l.files.fs.Path;
 import l.files.fs.Stat;
@@ -36,7 +36,6 @@ import l.files.ui.base.view.ActionModeProvider;
 import l.files.ui.browser.text.FileTextLayouts;
 import l.files.ui.browser.widget.ActivatedCardView;
 import l.files.ui.browser.widget.ActivatedCardView.ActivatedListener;
-import l.files.ui.preview.Decode;
 import l.files.ui.preview.Preview;
 import l.files.ui.preview.SizedColorDrawable;
 
@@ -78,7 +77,7 @@ public final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo
     private Rect constraint;
 
     @Nullable
-    private Decode task;
+    private AsyncTask<?, ?, ?> task;
 
     FileViewHolder(
             View itemView,
@@ -200,7 +199,7 @@ public final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo
     private Drawable retrieveThumbnail() {
 
         if (task != null) {
-            task.cancelAll();
+            task.cancel(true);
             task = null;
         }
 
@@ -399,7 +398,7 @@ public final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo
     @Override
     public void onDestroy() {
         if (task != null) {
-            task.cancelAll();
+            task.cancel(true);
             task = null;
         }
     }
