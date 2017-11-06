@@ -4,18 +4,18 @@ import android.support.annotation.Nullable;
 
 import java.io.IOException;
 
-import l.files.ui.base.graphics.Rect;
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.ui.base.graphics.Rect;
 
-abstract class Cache<V> {
+interface Cache<V> {
 
     @Nullable
-    abstract V get(Path path, Stat stat, Rect constraint, boolean matchTime)
+    V get(Path path, Stat stat, Rect constraint, boolean matchTime)
             throws IOException;
 
     @Nullable
-    abstract Snapshot<V> put(Path path, Stat stat, Rect constraint, V value)
+    Snapshot<V> put(Path path, Stat stat, Rect constraint, V value)
             throws IOException;
 
 }

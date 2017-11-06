@@ -8,14 +8,14 @@ import l.files.ui.base.graphics.Rect;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
-abstract class MemCache<K, V> extends Cache<V> {
+abstract class MemCache<K, V> implements Cache<V> {
 
     private long lastModifiedTime(Stat stat) {
         return stat.lastModifiedTime().to(MILLISECONDS);
     }
 
     @Override
-    V get(Path path, Stat stat, Rect constraint, boolean matchTime) {
+    public V get(Path path, Stat stat, Rect constraint, boolean matchTime) {
         K key = getKey(path, constraint);
         Snapshot<V> value = delegate().get(key);
         if (value == null) {
@@ -30,7 +30,7 @@ abstract class MemCache<K, V> extends Cache<V> {
     abstract K getKey(Path path, Rect constraint);
 
     @Override
-    Snapshot<V> put(Path path, Stat stat, Rect constraint, V value) {
+    public Snapshot<V> put(Path path, Stat stat, Rect constraint, V value) {
         return delegate().put(
                 getKey(path, constraint),
                 Snapshot.of(value, lastModifiedTime(stat)));

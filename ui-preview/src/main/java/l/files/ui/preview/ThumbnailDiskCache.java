@@ -1,6 +1,7 @@
 package l.files.ui.preview;
 
 import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.io.BufferedInputStream;
@@ -38,7 +39,7 @@ import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.TraversalCallback.Result.CONTINUE;
 
-final class ThumbnailDiskCache extends Cache<ScaledBitmap> {
+final class ThumbnailDiskCache implements Cache<ScaledBitmap> {
 
     private static final ExecutorService executor =
             newFixedThreadPool(2, new ThreadFactory() {
@@ -47,7 +48,7 @@ final class ThumbnailDiskCache extends Cache<ScaledBitmap> {
                         new AtomicInteger(1);
 
                 @Override
-                public Thread newThread(Runnable r) {
+                public Thread newThread(@NonNull Runnable r) {
                     String prefix = "ThumbnailDiskCache #";
                     int num = count.getAndIncrement();
                     return new Thread(r, prefix + num);
@@ -198,7 +199,7 @@ final class ThumbnailDiskCache extends Cache<ScaledBitmap> {
     }
 
     @Override
-    Snapshot<ScaledBitmap> put(
+    public Snapshot<ScaledBitmap> put(
             Path path,
             Stat stat,
             Rect constraint,
