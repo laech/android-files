@@ -221,9 +221,9 @@ public final class FileViewHolder
 
         Bitmap thumbnail = getCachedThumbnail(path, stat);
         if (thumbnail != null) {
-            if (blurred == null) {
+            // if (blurred == null) {
                 // TODO
-            }
+            //}
             return createRoundedBitmapDrawable(thumbnail);
         }
 
@@ -250,6 +250,7 @@ public final class FileViewHolder
     private Drawable newIcon() {
         int resId = item().iconDrawableResourceId();
         Drawable icon = getDrawable(context(), resId);
+        assert icon != null;
         Drawable wrapped = DrawableCompat.wrap(icon).mutate();
         setTintList(wrapped, titleView.getTextColors());
         setIconAlpha(wrapped);
