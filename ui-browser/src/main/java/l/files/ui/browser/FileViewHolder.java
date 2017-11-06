@@ -2,8 +2,11 @@ package l.files.ui.browser;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -57,27 +60,27 @@ import static l.files.base.Objects.requireNonNull;
 import static l.files.ui.base.content.Contexts.isDebugBuild;
 import static l.files.ui.browser.FilesAdapter.calculateCardContentWidthPixels;
 
-public final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo>
+public final class FileViewHolder
+        extends SelectionModeViewHolder<Path, FileInfo>
         implements Preview.Callback, LifeCycleListener, ActivatedListener {
 
     static final int LAYOUT_ID = R.layout.files_grid_item;
 
-    private final Preview decorator;
+    private final Preview preview;
     private final OnOpenFileListener listener;
 
-    private final ImageView imageView;
+    private final ImageView thumbnailView;
     private final TextView titleView;
     private final TextView linkView;
     private final TextView summaryView;
-    private final View blurView;
+    private final View backgroundView;
     private final CardView cardView;
     private final RecyclerView recyclerView;
 
-    @Nullable
     private Rect constraint;
 
     @Nullable
-    private AsyncTask<?, ?, ?> task;
+    private AsyncTask<?, ?, ?> decodeThumbnailTask;
 
     FileViewHolder(
             View itemView,
@@ -86,19 +89,20 @@ public final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo
             Selection<Path, FileInfo> selection,
             ActionModeProvider actionModeProvider,
             ActionMode.Callback actionModeCallback,
-            OnOpenFileListener listener) {
+            OnOpenFileListener listener
+    ) {
 
         super(itemView, selection, actionModeProvider, actionModeCallback);
 
         this.recyclerView = requireNonNull(recyclerView, "recyclerView");
-        this.decorator = Preview.get(itemView.getContext());
+        this.preview = Preview.get(itemView.getContext());
         this.listener = requireNonNull(listener, "listener");
-        this.blurView = itemView.findViewById(R.id.blur);
+        this.backgroundView = itemView.findViewById(R.id.blur);
         this.cardView = itemView.findViewById(R.id.card);
         this.titleView = itemView.findViewById(R.id.title);
         this.linkView = itemView.findViewById(R.id.link);
         this.summaryView = itemView.findViewById(R.id.summary);
-        this.imageView = itemView.findViewById(R.id.image);
+        this.thumbnailView = itemView.findViewById(R.id.image);
         this.itemView.setOnClickListener(this);
         this.itemView.setOnLongClickListener(this);
 
@@ -133,20 +137,22 @@ public final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo
     }
 
     private void bindFull(FileInfo file) {
-        assert constraint != null;
         cardView.setCardBackgroundColor(WHITE);
         bindTitle(file);
         bindSummary(file);
         bindLink(file);
-        bindImage(file, retrieveThumbnail());
+        bindThumbnail(file, retrieveThumbnail());
     }
 
     private void bindPartial(List<Object> payloads) {
         for (Object payload : payloads) {
             if (payload instanceof Bitmap) {
-                bindImage(item(), createdRoundedThumbnail((Bitmap) payload));
-                imageView.setAlpha(0f);
-                imageView.animate().alpha(1f);
+                bindThumbnail(item(), createRoundedBitmapDrawable((Bitmap) payload));
+                thumbnailView.setAlpha(0f);
+                thumbnailView
+                        .animate()
+                        .setDuration(animateDuration())
+                        .alpha(1f);
             }
         }
     }
@@ -158,26 +164,20 @@ public final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo
 
     private void bindSummary(FileInfo file) {
         String summary = FileTextLayouts.getSummary(context(), file);
-        if (summary != null) {
-            summaryView.setText(summary);
-            summaryView.setVisibility(VISIBLE);
-        } else {
-            summaryView.setText("");
-            summaryView.setVisibility(GONE);
-        }
+        summaryView.setText(summary);
+        summaryView.setVisibility(summary != null ? VISIBLE : GONE);
         summaryView.setEnabled(file.isReadable());
     }
 
     private void bindLink(FileInfo file) {
         Path target = file.linkTargetPath();
-        if (target != null) {
-            linkView.setText(context().getString(R.string.link_x, target.toString()));
-            linkView.setVisibility(VISIBLE);
-        } else {
-            linkView.setText("");
-            linkView.setVisibility(GONE);
-        }
+        linkView.setText(target != null ? getLinkLabel(target) : null);
+        linkView.setVisibility(target != null ? VISIBLE : GONE);
         linkView.setEnabled(file.isReadable());
+    }
+
+    private String getLinkLabel(Path linkTarget) {
+        return context().getString(R.string.link_x, linkTarget.toString());
     }
 
     private Rect calculateThumbnailConstraint(CardView card) {
@@ -189,82 +189,84 @@ public final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo
         return Rect.of(maxThumbnailWidth, maxThumbnailHeight);
     }
 
-    private void bindImage(FileInfo file, Drawable preview) {
-        assert constraint != null;
-        setMarginTop(imageView, (constraint.width() - preview.getIntrinsicWidth()) / 2);
-        imageView.setImageDrawable(preview);
-        imageView.setEnabled(file.isReadable());
+    private void bindThumbnail(FileInfo file, Drawable thumbnail) {
+        int margin = (constraint.width() - thumbnail.getIntrinsicWidth()) / 2;
+        setMarginTop(thumbnailView, margin);
+        thumbnailView.setImageDrawable(thumbnail);
+        thumbnailView.setEnabled(file.isReadable());
     }
 
     private Drawable retrieveThumbnail() {
 
-        if (task != null) {
-            task.cancel(true);
-            task = null;
+        if (decodeThumbnailTask != null) {
+            decodeThumbnailTask.cancel(true);
+            decodeThumbnailTask = null;
         }
 
-        Path file = previewPath();
+        Path path = previewPath();
         Stat stat = previewStat();
-        assert constraint != null;
-        if (stat == null || !decorator.isPreviewable(file, stat, constraint)) {
-            backgroundBlurClear();
+        if (stat == null || !preview.isPreviewable(path, stat, constraint)) {
+            clearBackground();
             return newIcon();
         }
 
-        Bitmap blurred = decorator.getBlurredThumbnail(file, stat, constraint, false);
+        Bitmap blurred = preview.getBlurredThumbnail(
+                path, stat, constraint, false
+        );
         if (blurred != null) {
-            backgroundBlurSet(blurred);
+            setBackground(blurred, false);
         } else {
-            backgroundBlurClear();
+            clearBackground();
         }
 
-        Bitmap thumbnail = getCachedThumbnail(file, stat);
+        Bitmap thumbnail = getCachedThumbnail(path, stat);
         if (thumbnail != null) {
             if (blurred == null) {
                 // TODO
             }
-            return createdRoundedThumbnail(thumbnail);
+            return createRoundedBitmapDrawable(thumbnail);
         }
 
-        runWhenUiIsIdle(file, canInterruptScrollState, () ->
-                task = decorator.get(file, stat, constraint, FileViewHolder.this, context()));
+        runWhenUiIsIdle(path, this::canInterruptScrollState, () ->
+                decodeThumbnailTask = preview.get(
+                        path, stat, constraint, this, context()));
 
-        Rect size = decorator.getSize(file, stat, constraint, false);
+        return getOrNewIcon(path, stat);
+    }
+
+    private Drawable getOrNewIcon(Path path, Stat stat) {
+        Rect size = preview.getSize(path, stat, constraint, false);
         if (size != null) {
             Rect scaledSize = scaleSize(size);
             return new SizedColorDrawable(
                     TRANSPARENT,
                     scaledSize.width(),
-                    scaledSize.height());
+                    scaledSize.height()
+            );
         }
-
         return newIcon();
     }
 
     private Drawable newIcon() {
         int resId = item().iconDrawableResourceId();
-        Drawable drawable = DrawableCompat.wrap(getDrawable(context(), resId)).mutate();
-        setTintList(drawable, titleView.getTextColors());
-        setIconAlpha(drawable);
-        return drawable;
+        Drawable icon = getDrawable(context(), resId);
+        Drawable wrapped = DrawableCompat.wrap(icon).mutate();
+        setTintList(wrapped, titleView.getTextColors());
+        setIconAlpha(wrapped);
+        return wrapped;
     }
 
     private void setIconAlpha(Drawable drawable) {
         drawable.setAlpha(125);
     }
 
-    private final Provider<Boolean> canUpdate = new Provider<Boolean>() {
-        @Override
-        public Boolean get() {
-            ItemAnimator animator = recyclerView.getItemAnimator();
-            return (animator == null || !animator.isRunning()) &&
-                    canInterruptScrollState.get();
-        }
-    };
+    private boolean canUpdateUi() {
+        ItemAnimator animator = recyclerView.getItemAnimator();
+        return (animator == null || !animator.isRunning()) &&
+                canInterruptScrollState();
+    }
 
-    private final Provider<Boolean> canInterruptScrollState = new Provider<Boolean>() {
-        @Override
-        public Boolean get() {
+    private boolean canInterruptScrollState() {
         /*
          * SCROLL_STATE_IDLE: view not being scrolled
          * SCROLL_STATE_DRAGGING: finger touching screen, dragging
@@ -281,11 +283,10 @@ public final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo
          * is actually wanted otherwise user will have to lift finger to see
          * things updated which is annoying.
          */
-            int scrollState = recyclerView.getScrollState();
-            return scrollState == SCROLL_STATE_IDLE ||
-                    scrollState == SCROLL_STATE_DRAGGING;
-        }
-    };
+        int scrollState = recyclerView.getScrollState();
+        return scrollState == SCROLL_STATE_IDLE ||
+                scrollState == SCROLL_STATE_DRAGGING;
+    }
 
     private Path previewPath() {
         return item().linkTargetOrSelfPath();
@@ -300,31 +301,40 @@ public final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo
     private Bitmap getCachedThumbnail(Path path, Stat stat) {
         long now = currentTimeMillis();
         long then = stat.lastModifiedTime().to(MILLISECONDS);
+        // TODO this will cause thumbnail not to be the latest correct one
         boolean changedMoreThan5SecondsAgo = now - then > 5000;
-        assert constraint != null;
         if (changedMoreThan5SecondsAgo) {
-            return decorator.getThumbnail(path, stat, constraint, true);
+            return preview.getThumbnail(path, stat, constraint, true);
         } else {
-            return decorator.getThumbnail(path, stat, constraint, false);
+            return preview.getThumbnail(path, stat, constraint, false);
         }
     }
 
     private Rect scaleSize(Rect size) {
-        assert constraint != null;
         return size.scaleDown(constraint);
     }
 
-    private void backgroundBlurClear() {
-        blurView.setBackground(null);
+    private void clearBackground() {
+        backgroundView.setBackground(null);
     }
 
-    private void backgroundBlurSet(Bitmap bitmap) {
-        RoundedBitmapDrawable drawable = createdRoundedThumbnail(bitmap);
-        drawable.setAlpha((int) (0.5f * 255));
-        blurView.setBackground(drawable);
+    private static final int BG_FILTER = Color.parseColor("#AAFFFFFF");
+
+    private void setBackground(Bitmap bitmap, boolean fade) {
+        Drawable drawable = createRoundedBitmapDrawable(bitmap);
+        drawable.setColorFilter(BG_FILTER, PorterDuff.Mode.LIGHTEN);
+        if (fade) {
+            TransitionDrawable background = new TransitionDrawable(
+                    new Drawable[]{new ColorDrawable(TRANSPARENT), drawable}
+            );
+            backgroundView.setBackground(background);
+            background.startTransition(animateDuration());
+        } else {
+            backgroundView.setBackground(drawable);
+        }
     }
 
-    private RoundedBitmapDrawable createdRoundedThumbnail(Bitmap bitmap) {
+    private RoundedBitmapDrawable createRoundedBitmapDrawable(Bitmap bitmap) {
         Resources res = resources();
         RoundedBitmapDrawable drawable =
                 RoundedBitmapDrawableFactory.create(res, bitmap);
@@ -333,15 +343,14 @@ public final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo
         return drawable;
     }
 
-    private void backgroundBlurFadeIn(Bitmap thumbnail) {
-        backgroundBlurSet(thumbnail);
-        blurView.setAlpha(0f);
-        blurView.animate().alpha(1);
+    private int animateDuration() {
+        return resources().getInteger(
+                android.R.integer.config_shortAnimTime);
     }
 
     @Override
     public void onPreviewAvailable(Path path, Stat stat, Bitmap bm) {
-        runWhenUiIsIdle(path, canUpdate, () -> {
+        runWhenUiIsIdle(path, this::canUpdateUi, () -> {
             int position = getAdapterPosition();
             if (position != NO_POSITION) {
                 recyclerView.getAdapter().notifyItemChanged(position, bm);
@@ -355,30 +364,27 @@ public final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo
             Stat stat,
             Bitmap thumbnail
     ) {
-        runWhenUiIsIdle(path, canUpdate, () -> backgroundBlurFadeIn(thumbnail));
+        runWhenUiIsIdle(path, this::canUpdateUi,
+                () -> setBackground(thumbnail, true));
     }
 
     private void runWhenUiIsIdle(
             Path previewPath,
-            Provider<Boolean> canUpdate,
+            Provider<Boolean> canUpdateUi,
             Runnable update
     ) {
-        new Runnable() {
-            @Override
-            public void run() {
-                if (!previewPath.equals(previewPath())) {
-                    return;
-                }
-                if (!canUpdate.get()) {
-                    itemView.postDelayed(this, 50);
-                    return;
-                }
-                int position = getAdapterPosition();
-                if (position != NO_POSITION) {
-                    update.run();
-                }
-            }
-        }.run();
+        if (!previewPath.equals(previewPath())) {
+            return;
+        }
+        if (!canUpdateUi.get()) {
+            itemView.postDelayed(() ->
+                    runWhenUiIsIdle(previewPath, canUpdateUi, update), 50);
+            return;
+        }
+        int position = getAdapterPosition();
+        if (position != NO_POSITION) {
+            update.run();
+        }
     }
 
     @Override
@@ -397,9 +403,9 @@ public final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo
 
     @Override
     public void onDestroy() {
-        if (task != null) {
-            task.cancel(true);
-            task = null;
+        if (decodeThumbnailTask != null) {
+            decodeThumbnailTask.cancel(true);
+            decodeThumbnailTask = null;
         }
     }
 
@@ -415,10 +421,10 @@ public final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo
     public void onActivated(boolean activated) {
         if (activated) {
             int color = getColor(context(), R.color.activated_highlight);
-            imageView.setColorFilter(color, PorterDuff.Mode.MULTIPLY);
+            thumbnailView.setColorFilter(color, PorterDuff.Mode.MULTIPLY);
         } else {
-            imageView.setColorFilter(null);
-            Drawable drawable = imageView.getDrawable();
+            thumbnailView.setColorFilter(null);
+            Drawable drawable = thumbnailView.getDrawable();
             if (!(drawable instanceof RoundedBitmapDrawable)) {
                 setIconAlpha(drawable);
             }
