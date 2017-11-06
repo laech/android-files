@@ -4,33 +4,25 @@ import static l.files.base.Objects.requireNonNull;
 
 public final class Header {
 
-    private final String header;
+    final String value;
 
-    private Header(String header) {
-        this.header = requireNonNull(header);
-    }
-
-    String header() {
-        return header;
-    }
-
-    static Header of(String header) {
-        return new Header(header);
+    Header(String value) {
+        this.value = requireNonNull(value);
     }
 
     @Override
     public String toString() {
-        return header();
+        return value;
     }
 
     @Override
     public boolean equals(Object o) {
         return o instanceof Header &&
-                header.equals(((Header) o).header);
+                value.equals(((Header) o).value);
     }
 
     @Override
     public int hashCode() {
-        return header.hashCode();
+        return value.hashCode();
     }
 }

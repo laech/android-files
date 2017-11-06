@@ -132,7 +132,7 @@ public final class DateCategorizerTest {
         List<String> names = new ArrayList<>(items.size());
         for (Object item : items) {
             names.add(item instanceof Header
-                    ? ((Header) item).header()
+                    ? ((Header) item).value
                     : ((FileInfo) item).selfPath().name().toString());
         }
         return unmodifiableList(names);
@@ -150,7 +150,7 @@ public final class DateCategorizerTest {
     }
 
     private Header header(String string) {
-        return Header.of(string);
+        return new Header(string);
     }
 
     private long millis(Calendar calendar) {
