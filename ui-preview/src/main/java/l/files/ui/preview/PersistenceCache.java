@@ -69,7 +69,7 @@ abstract class PersistenceCache<V> extends MemCache<Path, V> {
     }
 
     @Override
-    Snapshot<V> put(Path path, Stat stat, Rect constraint, V value) {
+    public Snapshot<V> put(Path path, Stat stat, Rect constraint, V value) {
         Snapshot<V> old = super.put(path, stat, constraint, value);
         if (old == null
                 || !old.get().equals(value)
