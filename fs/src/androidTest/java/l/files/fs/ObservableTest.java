@@ -44,12 +44,11 @@ import static l.files.fs.Permission.OWNER_WRITE;
 import static l.files.fs.event.Event.CREATE;
 import static l.files.fs.event.Event.DELETE;
 import static l.files.fs.event.Event.MODIFY;
-import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeThat;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.AdditionalMatchers.aryEq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
@@ -326,7 +325,7 @@ public final class ObservableTest extends PathBaseTest {
     }
 
     private int maxUserInstances() throws IOException {
-        assumeThat(Build.VERSION.SDK_INT, not(Build.VERSION_CODES.O));
+        assumeTrue(Build.VERSION.SDK_INT < Build.VERSION_CODES.O);
         Path limitFile = Path.of("/proc/sys/fs/inotify/max_user_instances");
         return parseInt(Paths.readAllUtf8(limitFile).trim());
     }
