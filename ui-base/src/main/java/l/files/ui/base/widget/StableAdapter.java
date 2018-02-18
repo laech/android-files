@@ -1,29 +1,39 @@
 package l.files.ui.base.widget;
 
+import android.support.annotation.CallSuper;
 import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
-import static l.files.base.Objects.requireNonNull;
 
 public abstract class StableAdapter<T, VH extends ViewHolder> extends Adapter<VH> {
     private final Map<Object, Long> ids = new HashMap<>();
 
-    private List<T> items = emptyList();
+    private final List<T> items = new ArrayList<>();
 
     protected StableAdapter() {
         setHasStableIds(true);
     }
 
     @SuppressWarnings("unchecked")
-    public void setItems(List<? extends T> items) {
-        this.items = (List<T>) requireNonNull(items);
+    public final void setItems(List<? extends T> items) {
+        this.items.clear();
+        this.items.addAll(items);
+        cleanIds();
         notifyDataSetChanged();
+    }
+
+    private void cleanIds() {
+        List<Object> ids = new ArrayList<>(items.size());
+        for (T item : items) {
+            ids.add(getItemIdObject(item));
+        }
+        this.ids.keySet().retainAll(ids);
     }
 
     public List<T> items() {
@@ -32,7 +42,7 @@ public abstract class StableAdapter<T, VH extends ViewHolder> extends Adapter<VH
 
     @Override
     public long getItemId(int position) {
-        Object object = getItemIdObject(position);
+        Object object = getItemIdObject(getItem(position));
         Long id = ids.get(object);
         if (id == null) {
             id = ids.size() + 1L;
@@ -54,5 +64,5 @@ public abstract class StableAdapter<T, VH extends ViewHolder> extends Adapter<VH
         return items.get(position);
     }
 
-    public abstract Object getItemIdObject(int position);
+    public abstract Object getItemIdObject(T item);
 }

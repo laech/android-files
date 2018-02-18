@@ -26,8 +26,7 @@ import l.files.ui.browser.action.Selectable;
 import static java.util.Collections.emptyList;
 import static l.files.base.Objects.requireNonNull;
 
-final class FilesAdapter extends StableAdapter<Object, ViewHolder>
-        implements Selectable {
+final class FilesAdapter extends StableAdapter<Object, ViewHolder> implements Selectable {
 
     static final int VIEW_TYPE_FILE = 0;
     static final int VIEW_TYPE_HEADER = 1;
@@ -112,8 +111,7 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
     }
 
     @Override
-    public Object getItemIdObject(int position) {
-        Object item = getItem(position);
+    public Object getItemIdObject(Object item) {
         if (item instanceof FileInfo) {
             return ((FileInfo) item).selfPath();
         }

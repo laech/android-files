@@ -63,8 +63,8 @@ final class BookmarksAdapter extends StableAdapter<Object, ItemViewHolder<Object
     }
 
     @Override
-    public Object getItemIdObject(int position) {
-        return getItem(position);
+    public Object getItemIdObject(Object item) {
+        return item;
     }
 
     private static class HeaderHolder extends ItemViewHolder<String> {
