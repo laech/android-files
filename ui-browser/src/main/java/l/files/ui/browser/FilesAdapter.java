@@ -46,8 +46,8 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder> implements Se
             Selection<Path, FileInfo> selection,
             ActionModeProvider actionModeProvider,
             ActionMode.Callback actionModeCallback,
-            OnOpenFileListener listener) {
-
+            OnOpenFileListener listener
+    ) {
         this.recyclerView = requireNonNull(recyclerView);
         this.listenable = requireNonNull(listenable);
         this.actionModeProvider = requireNonNull(actionModeProvider);
@@ -59,38 +59,34 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder> implements Se
     @Override
     public int getItemViewType(int position) {
         Object item = getItem(position);
-        if (item instanceof FileInfo) {
-            return VIEW_TYPE_FILE;
-        } else if (item instanceof Header) {
-            return VIEW_TYPE_HEADER;
-        } else {
-            throw new IllegalArgumentException(String.valueOf(item));
-        }
+        if (item instanceof FileInfo) return VIEW_TYPE_FILE;
+        if (item instanceof Header) return VIEW_TYPE_HEADER;
+        throw new IllegalArgumentException(String.valueOf(item));
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         Context context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
-        switch (viewType) {
+        if (viewType == VIEW_TYPE_FILE) return newFileViewHolder(inflater, parent);
+        if (viewType == VIEW_TYPE_HEADER) return newHeaderViewHolder(inflater, parent);
+        throw new IllegalArgumentException(String.valueOf(viewType));
+    }
 
-            case VIEW_TYPE_FILE:
-                return new FileViewHolder(
-                        inflater.inflate(FileViewHolder.LAYOUT_ID, parent, false),
-                        recyclerView,
-                        listenable,
-                        selection,
-                        actionModeProvider,
-                        actionModeCallback,
-                        listener);
+    private FileViewHolder newFileViewHolder(LayoutInflater inflater, ViewGroup parent) {
+        return new FileViewHolder(
+                inflater.inflate(FileViewHolder.LAYOUT_ID, parent, false),
+                recyclerView,
+                listenable,
+                selection,
+                actionModeProvider,
+                actionModeCallback,
+                listener
+        );
+    }
 
-            case VIEW_TYPE_HEADER:
-                return new HeaderViewHolder(
-                        inflater.inflate(HeaderViewHolder.LAYOUT_ID, parent, false));
-
-            default:
-                throw new IllegalArgumentException(String.valueOf(viewType));
-        }
+    private ViewHolder newHeaderViewHolder(LayoutInflater inflater, ViewGroup parent) {
+        return new HeaderViewHolder(inflater.inflate(HeaderViewHolder.LAYOUT_ID, parent, false));
     }
 
     @Override
