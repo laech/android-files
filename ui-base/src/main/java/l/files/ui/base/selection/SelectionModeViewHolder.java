@@ -1,37 +1,30 @@
 package l.files.ui.base.selection;
 
-import android.content.Context;
-import android.content.res.Resources;
 import android.support.v7.view.ActionMode;
-import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 
 import java.util.List;
 
-import android.support.annotation.Nullable;
-
 import l.files.ui.base.view.ActionModeProvider;
+import l.files.ui.base.widget.ItemViewHolder;
 
 import static l.files.base.Objects.requireNonNull;
 
-public abstract class SelectionModeViewHolder<K, V> extends ViewHolder
+public abstract class SelectionModeViewHolder<K, V> extends ItemViewHolder<V>
         implements OnClickListener, OnLongClickListener, Selection.Callback {
 
     private final Selection<K, V> selection;
     private final ActionModeProvider actionModeProvider;
     private final ActionMode.Callback actionModeCallback;
 
-    @Nullable
-    private V item;
-
     public SelectionModeViewHolder(
             View itemView,
             Selection<K, V> selection,
             ActionModeProvider actionModeProvider,
-            ActionMode.Callback actionModeCallback) {
-
+            ActionMode.Callback actionModeCallback
+    ) {
         super(itemView);
 
         this.actionModeProvider = requireNonNull(actionModeProvider);
@@ -44,26 +37,15 @@ public abstract class SelectionModeViewHolder<K, V> extends ViewHolder
 
     protected abstract K itemId(V item);
 
-    protected final V item() {
-        assert item != null;
-        return item;
-    }
-
+    @Override
     public void bind(V item, List<Object> payloads) {
-        this.item = item;
+        super.bind(item, payloads);
         setActivated(item);
-    }
-
-    protected final Context context() {
-        return itemView.getContext();
-    }
-
-    protected final Resources resources() {
-        return itemView.getResources();
     }
 
     @Override
     public void onSelectionChanged() {
+        V item = item();
         if (item == null) {
             return;
         }
@@ -87,6 +69,7 @@ public abstract class SelectionModeViewHolder<K, V> extends ViewHolder
 
     @Override
     public void onClick(View v) {
+        V item = item();
         if (item == null) {
             return;
         }
@@ -102,7 +85,7 @@ public abstract class SelectionModeViewHolder<K, V> extends ViewHolder
 
     @Override
     public boolean onLongClick(View v) {
-        assert item != null;
+        V item = item();
         selection.toggle(itemId(item), item);
         return true;
     }

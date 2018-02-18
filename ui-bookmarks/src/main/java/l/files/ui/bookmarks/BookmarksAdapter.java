@@ -1,8 +1,6 @@
 package l.files.ui.bookmarks;
 
 import android.support.v7.view.ActionMode;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,12 +16,13 @@ import l.files.ui.base.fs.OnOpenFileListener;
 import l.files.ui.base.selection.Selection;
 import l.files.ui.base.selection.SelectionModeViewHolder;
 import l.files.ui.base.view.ActionModeProvider;
+import l.files.ui.base.widget.ItemViewHolder;
 import l.files.ui.base.widget.StableAdapter;
 
 import static java.util.Collections.emptyList;
 import static l.files.base.Objects.requireNonNull;
 
-final class BookmarksAdapter extends StableAdapter<Object, ViewHolder> {
+final class BookmarksAdapter extends StableAdapter<Object, ItemViewHolder<Object>> {
 
     private final ActionModeProvider actionModeProvider;
     private final ActionMode.Callback actionModeCallback;
@@ -34,8 +33,8 @@ final class BookmarksAdapter extends StableAdapter<Object, ViewHolder> {
             Selection<Path, Path> selection,
             ActionModeProvider actionModeProvider,
             ActionMode.Callback actionModeCallback,
-            OnOpenFileListener listener) {
-
+            OnOpenFileListener listener
+    ) {
         this.listener = requireNonNull(listener);
         this.selection = requireNonNull(selection);
         this.actionModeProvider = requireNonNull(actionModeProvider);
@@ -48,21 +47,19 @@ final class BookmarksAdapter extends StableAdapter<Object, ViewHolder> {
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ItemViewHolder<Object> onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        return viewType == 0
+        @SuppressWarnings("unchecked")
+        ItemViewHolder<Object> holder = (ItemViewHolder<Object>) (viewType == 0
                 ? new BookmarkHolder(inflater.inflate(R.layout.bookmark_item, parent, false))
-                : new HeaderHolder(inflater.inflate(R.layout.bookmark_header, parent, false));
+                : new HeaderHolder(inflater.inflate(R.layout.bookmark_header, parent, false)));
+        return holder;
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        Object item = getItem(position);
-        if (holder instanceof BookmarkHolder) {
-            ((BookmarkHolder) holder).bind((Path) item, emptyList());
-        } else {
-            ((HeaderHolder) holder).bind((String) item);
-        }
+    @SuppressWarnings("unchecked")
+    public void onBindViewHolder(ItemViewHolder<Object> holder, int position) {
+        holder.bind(getItem(position), emptyList());
     }
 
     @Override
@@ -70,7 +67,7 @@ final class BookmarksAdapter extends StableAdapter<Object, ViewHolder> {
         return getItem(position);
     }
 
-    private static class HeaderHolder extends RecyclerView.ViewHolder {
+    private static class HeaderHolder extends ItemViewHolder<String> {
 
         private final TextView headerView;
 
@@ -79,12 +76,14 @@ final class BookmarksAdapter extends StableAdapter<Object, ViewHolder> {
             this.headerView = itemView.findViewById(R.id.header);
         }
 
-        void bind(String header) {
+        @Override
+        public void bind(String header, List<Object> payloads) {
+            super.bind(header, payloads);
             headerView.setText(header);
         }
     }
 
-    class BookmarkHolder extends SelectionModeViewHolder<Path, Path> {
+    private final class BookmarkHolder extends SelectionModeViewHolder<Path, Path> {
 
         private final TextView titleView;
         private final ImageView iconView;
