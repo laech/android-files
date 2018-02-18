@@ -24,6 +24,9 @@ import static l.files.base.Objects.requireNonNull;
 
 final class BookmarksAdapter extends StableAdapter<Object, ItemViewHolder<Object>> {
 
+    private static final int VIEW_TYPE_HEADER = 0;
+    private static final int VIEW_TYPE_BOOKMARK = 1;
+
     private final ActionModeProvider actionModeProvider;
     private final ActionMode.Callback actionModeCallback;
     private final Selection<Path, Path> selection;
@@ -43,17 +46,26 @@ final class BookmarksAdapter extends StableAdapter<Object, ItemViewHolder<Object
 
     @Override
     public int getItemViewType(int position) {
-        return getItem(position) instanceof Path ? 0 : 1;
+        return getItem(position) instanceof Path ? VIEW_TYPE_BOOKMARK : VIEW_TYPE_HEADER;
     }
 
     @Override
     public ItemViewHolder<Object> onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         @SuppressWarnings("unchecked")
-        ItemViewHolder<Object> holder = (ItemViewHolder<Object>) (viewType == 0
-                ? new BookmarkHolder(inflater.inflate(R.layout.bookmark_item, parent, false))
-                : new HeaderHolder(inflater.inflate(R.layout.bookmark_header, parent, false)));
+        ItemViewHolder<Object> holder = (ItemViewHolder<Object>)
+                (viewType == VIEW_TYPE_BOOKMARK
+                        ? newBookmarkHolder(parent, inflater)
+                        : newHeaderHolder(parent, inflater));
         return holder;
+    }
+
+    private HeaderHolder newHeaderHolder(ViewGroup parent, LayoutInflater inflater) {
+        return new HeaderHolder(inflater.inflate(R.layout.bookmark_header, parent, false));
+    }
+
+    private BookmarkHolder newBookmarkHolder(ViewGroup parent, LayoutInflater inflater) {
+        return new BookmarkHolder(inflater.inflate(R.layout.bookmark_item, parent, false));
     }
 
     @Override
