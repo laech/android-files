@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
@@ -23,12 +24,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.support.annotation.Nullable;
-
-import l.files.base.Provider;
 import l.files.fs.Path;
 import l.files.ui.base.app.OptionsMenus;
 import l.files.ui.base.fs.FileInfo;
+import l.files.ui.base.fs.OpenFileEvent;
 import l.files.ui.base.selection.SelectionModeFragment;
 import l.files.ui.base.view.ActionModeProvider;
 import l.files.ui.base.view.ActionModes;
@@ -103,10 +102,8 @@ public final class FilesFragment
     private Path directory;
     private int watchLimit;
 
-    @Nullable
     private FilesAdapter adapter;
 
-    @Nullable
     public RecyclerView recycler;
 
     private final Handler handler = new Handler();
@@ -169,7 +166,7 @@ public final class FilesFragment
 
     @Override
     public View onCreateView(
-            LayoutInflater inflater,
+            @NonNull LayoutInflater inflater,
             @Nullable ViewGroup container,
             @Nullable Bundle state
     ) {
@@ -180,11 +177,15 @@ public final class FilesFragment
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        directory = getArguments().getParcelable(ARG_DIRECTORY);
-        watchLimit = getArguments().getInt(ARG_WATCH_LIMIT, -1);
+        Bundle args = getArguments();
+        assert args != null;
+        directory = args.getParcelable(ARG_DIRECTORY);
+        watchLimit = args.getInt(ARG_WATCH_LIMIT, -1);
 
+        View view = getView();
+        assert view != null;
         int spanCount = getResources().getInteger(R.integer.files_grid_columns);
-        recycler = getView().findViewById(android.R.id.list);
+        recycler = view.findViewById(android.R.id.list);
         recycler.setHasFixedSize(true);
         recycler.setItemViewCacheSize(spanCount * 3);
         recycler.setLayoutManager(new StaggeredGridLayoutManager(spanCount, VERTICAL));
@@ -196,7 +197,8 @@ public final class FilesFragment
                 selection(),
                 actionModeProvider(),
                 actionModeCallback(),
-                (FilesActivity) getActivity()));
+                OpenFileEvent.topic
+        ));
 
         setupOptionsMenu();
         setHasOptionsMenu(true);
@@ -222,7 +224,9 @@ public final class FilesFragment
     }
 
     private boolean hasReadExternalStoragePermission() {
-        int state = checkSelfPermission(getActivity(), READ_EXTERNAL_STORAGE);
+        Activity activity = getActivity();
+        assert activity != null;
+        int state = checkSelfPermission(activity, READ_EXTERNAL_STORAGE);
         return state == PERMISSION_GRANTED;
     }
 
@@ -288,9 +292,10 @@ public final class FilesFragment
 
     private void setupOptionsMenu() {
         FilesActivity activity = (FilesActivity) getActivity();
+        assert activity != null;
         FragmentManager manager = activity.getSupportFragmentManager();
         setOptionsMenu(OptionsMenus.compose(
-                new RefreshMenu(autoRefreshDisable(), this::refresh),
+                new RefreshMenu(() -> refreshEnabled, this::refresh),
                 new BookmarkMenu(directory(), activity),
                 new NewDirMenu(manager, directory()),
                 new PasteMenu(activity, directory()),
@@ -312,10 +317,6 @@ public final class FilesFragment
 
     private boolean refreshEnabled;
 
-    private Provider<Boolean> autoRefreshDisable() {
-        return () -> refreshEnabled;
-    }
-
     @Override
     public void selectAll() {
         assert adapter != null;
@@ -325,6 +326,7 @@ public final class FilesFragment
     @Override
     protected ActionMode.Callback actionModeCallback() {
         FilesActivity activity = (FilesActivity) getActivity();
+        assert activity != null;
         FragmentManager manager = activity.getSupportFragmentManager();
         return ActionModes.compose(
                 new CountSelectedItemsAction(selection()),
@@ -370,7 +372,6 @@ public final class FilesFragment
 
             updateSelection(data);
 
-            assert adapter != null;
             adapter.setItems(data.items());
 
             IOException e = data.exception();
@@ -405,7 +406,6 @@ public final class FilesFragment
 
     @Override
     public void onLoaderReset(Loader<Result> loader) {
-        assert adapter != null;
         adapter.setItems(emptyList());
     }
 

@@ -18,6 +18,7 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Spinner;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 import l.files.base.Consumer;
@@ -44,6 +45,7 @@ import static android.view.KeyEvent.KEYCODE_BACK;
 import static android.view.View.VISIBLE;
 import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
+import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.ui.base.fs.IOExceptions.message;
 import static l.files.ui.base.fs.UserDirs.DIR_HOME;
@@ -257,32 +259,42 @@ public final class FilesActivity extends BaseActivity implements
             doShow(path, stat);
             return;
         }
+        new ShowTask(path, this).execute();
+    }
 
-        new AsyncTask<Void, Void, Object>() {
+    private static final class ShowTask extends AsyncTask<Void, Void, Object> {
 
-            @Override
-            protected Object doInBackground(Void... params) {
-                try {
-                    return path.stat(FOLLOW);
-                } catch (IOException e) {
-                    return e;
+        private final Path path;
+        private final WeakReference<FilesActivity> activityRef;
+
+        private ShowTask(Path path, FilesActivity activity) {
+            this.path = requireNonNull(path);
+            this.activityRef = new WeakReference<>(activity);
+        }
+
+        @Override
+        protected Object doInBackground(Void... params) {
+            try {
+                return path.stat(FOLLOW);
+            } catch (IOException e) {
+                return e;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Object result) {
+            super.onPostExecute(result);
+            FilesActivity activity = activityRef.get();
+            if (activity != null && !activity.isFinishing()) {
+                if (result instanceof Stat) {
+                    activity.doShow(path, (Stat) result);
+                } else {
+                    String msg = message((IOException) result);
+                    makeText(activity, msg, LENGTH_SHORT).show();
                 }
             }
+        }
 
-            @Override
-            protected void onPostExecute(Object result) {
-                super.onPostExecute(result);
-                if (!isFinishing()) {
-                    if (result instanceof Stat) {
-                        doShow(path, (Stat) result);
-                    } else {
-                        String msg = message((IOException) result);
-                        makeText(FilesActivity.this, msg, LENGTH_SHORT).show();
-                    }
-                }
-            }
-
-        }.execute();
     }
 
     private void doShow(Path path, Stat stat) {

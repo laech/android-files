@@ -2,7 +2,6 @@ package l.files.ui.browser;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.support.v4.util.ArrayMap;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -12,8 +11,8 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import java.util.List;
-import java.util.Map;
 
+import kotlin.sequences.Sequence;
 import l.files.fs.Path;
 import l.files.ui.base.app.LifeCycleListenable;
 import l.files.ui.base.fs.FileInfo;
@@ -25,6 +24,9 @@ import l.files.ui.base.widget.StableAdapter;
 import l.files.ui.browser.action.Selectable;
 
 import static java.util.Collections.emptyList;
+import static kotlin.collections.CollectionsKt.asSequence;
+import static kotlin.sequences.SequencesKt.associateBy;
+import static kotlin.sequences.SequencesKt.filterIsInstance;
 import static l.files.base.Objects.requireNonNull;
 
 final class FilesAdapter extends StableAdapter<Object, ViewHolder> implements Selectable {
@@ -117,15 +119,8 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder> implements Se
 
     @Override
     public void selectAll() {
-        List<Object> items = items();
-        Map<Path, FileInfo> files = new ArrayMap<>(items.size());
-        for (Object item : items) {
-            if (item instanceof FileInfo) {
-                FileInfo file = (FileInfo) item;
-                files.put(file.selfPath(), file);
-            }
-        }
-        selection.addAll(files);
+        Sequence<FileInfo> files = filterIsInstance(asSequence(items()), FileInfo.class);
+        selection.addAll(associateBy(files, FileInfo::selfPath));
     }
 
     static int calculateCardContentWidthPixels(CardView card, int columns) {

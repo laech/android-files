@@ -4,11 +4,13 @@ import android.content.res.Resources;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import l.files.ui.base.fs.FileInfo;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.unmodifiableList;
+import static kotlin.collections.CollectionsKt.fold;
+import static kotlin.collections.CollectionsKt.groupBy;
 
 abstract class BaseCategorizer implements Categorizer {
 
@@ -19,25 +21,12 @@ abstract class BaseCategorizer implements Categorizer {
             return emptyList();
         }
 
-        List<Object> result = new ArrayList<>(items.size() + 10);
-
-        int previousId = 0;
-        int previousIdStartIndex = 0;
-        for (int i = 0; i < items.size(); i++) {
-            FileInfo stat = items.get(i);
-            int currentId = id(stat);
-            if (i == 0) {
-                result.add(new Header(label(res, currentId)));
-                previousId = currentId;
-            } else if (currentId != previousId) {
-                result.addAll(items.subList(previousIdStartIndex, i));
-                result.add(new Header(label(res, currentId)));
-                previousIdStartIndex = i;
-                previousId = currentId;
-            }
-        }
-        result.addAll(items.subList(previousIdStartIndex, items.size()));
-        return unmodifiableList(result);
+        Map<Integer, List<FileInfo>> groups = groupBy(items, this::id);
+        return fold(groups.entrySet(), new ArrayList<>(), (result, entry) -> {
+            result.add(new Header(label(res, entry.getKey())));
+            result.addAll(entry.getValue());
+            return result;
+        });
     }
 
 }

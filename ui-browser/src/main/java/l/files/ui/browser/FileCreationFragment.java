@@ -1,8 +1,12 @@
 package l.files.ui.browser;
 
+import android.content.Context;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
@@ -24,8 +28,6 @@ import android.widget.TextView.OnEditorActionListener;
 
 import java.io.IOException;
 
-import android.support.annotation.Nullable;
-
 import l.files.base.Consumer;
 import l.files.fs.Path;
 import l.files.ui.browser.widget.Toaster;
@@ -34,6 +36,7 @@ import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE;
 import static android.view.inputmethod.EditorInfo.IME_ACTION_DONE;
 import static java.lang.System.identityHashCode;
+import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
 public abstract class FileCreationFragment extends AppCompatDialogFragment
@@ -47,13 +50,8 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
     private final LoaderCallbacks<Existence> checkerCallback =
             new CheckerCallback();
 
-    @Nullable
     private TextInputLayout layout;
-
-    @Nullable
     private EditText editText;
-
-    @Nullable
     public Consumer<String> toaster;
 
     @Override
@@ -68,13 +66,11 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
 
         if (layout == null) {
             layout = getDialog().findViewById(R.id.text_layout);
-            assert layout != null;
             layout.setHint(getString(getTitleResourceId()));
         }
 
         if (editText == null) {
             editText = getDialog().findViewById(R.id.file_name);
-            assert editText != null;
             editText.setFilters(new InputFilter[]{new LengthFilter(255)});
             editText.addTextChangedListener(new FileTextWatcher());
             editText.setOnEditorActionListener(new OkActionListener());
@@ -92,12 +88,16 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
         }
     }
 
+    @NonNull
     @Override
     public AlertDialog onCreateDialog(Bundle savedInstanceState) {
-        View view = LayoutInflater.from(getActivity())
+        FragmentActivity activity = getActivity();
+        assert activity != null;
+
+        View view = LayoutInflater.from(activity)
                 .inflate(R.layout.file_name, (ViewGroup) getView(), false);
 
-        return new AlertDialog.Builder(getActivity())
+        return new AlertDialog.Builder(activity)
                 .setView(view)
                 .setPositiveButton(android.R.string.ok, this)
                 .setNegativeButton(android.R.string.cancel, null)
@@ -122,18 +122,16 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
 
     protected Path parent() {
         // TODO use AbsolutePath
-        Path path = getArguments().getParcelable(ARG_PARENT_PATH);
-        assert path != null;
-        return path;
+        Bundle args = getArguments();
+        assert args != null;
+        return args.getParcelable(ARG_PARENT_PATH);
     }
 
     protected String getFilename() {
-        assert editText != null;
         return editText.getText().toString();
     }
 
     protected EditText getFilenameField() {
-        assert editText != null;
         return editText;
     }
 
@@ -153,30 +151,7 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
 
         private Loader<Existence> newChecker() {
             Path file = parent().concat(getFilename());
-            return new AsyncTaskLoader<Existence>(getActivity()) {
-
-                boolean started;
-
-                @Nullable
-                @Override
-                public Existence loadInBackground() {
-                    try {
-                        boolean exists = file.exists(NOFOLLOW);
-                        return new Existence(file, exists);
-                    } catch (IOException e) {
-                        return null;
-                    }
-                }
-
-                @Override
-                protected void onStartLoading() {
-                    super.onStartLoading();
-                    if (!started) {
-                        started = true;
-                        forceLoad();
-                    }
-                }
-            };
+            return new CheckTask(getActivity(), file);
         }
 
         @Override
@@ -196,13 +171,42 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
             }
             Button ok = getOkButton();
             if (existence.exists) {
-                assert layout != null;
                 layout.setError(getError(existence.file));
                 ok.setEnabled(false);
             } else {
-                assert layout != null;
                 layout.setError(null);
                 ok.setEnabled(true);
+            }
+        }
+    }
+
+    private static final class CheckTask extends AsyncTaskLoader<Existence> {
+
+        final Path path;
+        boolean started;
+
+        CheckTask(Context context, Path path) {
+            super(context);
+            this.path = requireNonNull(path);
+        }
+
+        @Nullable
+        @Override
+        public Existence loadInBackground() {
+            try {
+                boolean exists = path.exists(NOFOLLOW);
+                return new Existence(path, exists);
+            } catch (IOException e) {
+                return null;
+            }
+        }
+
+        @Override
+        protected void onStartLoading() {
+            super.onStartLoading();
+            if (!started) {
+                started = true;
+                forceLoad();
             }
         }
     }
