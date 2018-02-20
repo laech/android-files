@@ -1,6 +1,7 @@
 package l.files.ui.bookmarks;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
@@ -12,7 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import l.files.bookmarks.BookmarkManager;
@@ -24,33 +24,24 @@ import l.files.ui.base.view.ActionModes;
 import l.files.ui.base.view.ClearSelectionOnDestroyActionMode;
 import l.files.ui.base.view.CountSelectedItemsAction;
 
+import static java.util.Collections.emptyList;
+import static kotlin.collections.CollectionsKt.filterIsInstance;
 import static l.files.ui.base.fs.UserDirs.DIR_HOME;
 
 public final class BookmarksFragment
         extends SelectionModeFragment<Path, Path>
         implements LoaderCallbacks<List<Path>> {
 
-    @Nullable
     public RecyclerView recycler;
-
-    @Nullable
     private BookmarksAdapter adapter;
 
     public List<Path> bookmarks() {
-        assert adapter != null;
-        List<Object> items = adapter.items();
-        List<Path> bookmarks = new ArrayList<>(items.size());
-        for (Object item : items) {
-            if (item instanceof Path) {
-                bookmarks.add((Path) item);
-            }
-        }
-        return bookmarks;
+        return filterIsInstance(adapter.items(), Path.class);
     }
 
     @Override
     public View onCreateView(
-            LayoutInflater inflater,
+            @NonNull LayoutInflater inflater,
             @Nullable ViewGroup container,
             @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.bookmarks_fragment, container, false);
@@ -67,7 +58,10 @@ public final class BookmarksFragment
                 OpenFileEvent.topic
         );
 
-        recycler = getView().findViewById(R.id.bookmarks);
+        View view = getView();
+        assert view != null;
+
+        recycler = view.findViewById(R.id.bookmarks);
         recycler.setLayoutManager(new LinearLayoutManager(getActivity()));
         recycler.setAdapter(adapter);
 
@@ -101,13 +95,11 @@ public final class BookmarksFragment
         List<Object> items = new ArrayList<>(bookmarks.size() + 1);
         items.add(getString(R.string.bookmarks));
         items.addAll(bookmarks);
-        assert adapter != null;
         adapter.setItems(items);
     }
 
     @Override
     public void onLoaderReset(Loader<List<Path>> loader) {
-        assert adapter != null;
-        adapter.setItems(Collections.<Path>emptyList());
+        adapter.setItems(emptyList());
     }
 }

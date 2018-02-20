@@ -12,7 +12,7 @@ import l.files.fs.Path;
 import l.files.ui.base.text.CollationKey;
 
 import static java.util.Collections.sort;
-import static l.files.base.Lists.map;
+import static kotlin.collections.CollectionsKt.map;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.bookmarks.BookmarkManager.BookmarkChangedListener;
 
