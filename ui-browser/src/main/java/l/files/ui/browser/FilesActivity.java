@@ -20,11 +20,12 @@ import android.widget.Spinner;
 import java.io.IOException;
 import java.util.List;
 
+import l.files.base.Consumer;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.app.BaseActivity;
 import l.files.ui.base.app.OptionsMenus;
-import l.files.ui.base.fs.OnOpenFileListener;
+import l.files.ui.base.fs.OpenFileEvent;
 import l.files.ui.browser.menu.ActionBarDrawerToggleMenu;
 import l.files.ui.browser.menu.GoBackOnHomePressedMenu;
 import l.files.ui.browser.menu.NewTabMenu;
@@ -49,8 +50,7 @@ import static l.files.ui.base.fs.UserDirs.DIR_HOME;
 
 public final class FilesActivity extends BaseActivity implements
         OnBackStackChangedListener,
-        OnItemSelectedListener,
-        OnOpenFileListener {
+        OnItemSelectedListener {
 
     public static final String EXTRA_DIRECTORY = "directory";
     public static final String EXTRA_WATCH_LIMIT = "watch_limit";
@@ -61,6 +61,8 @@ public final class FilesActivity extends BaseActivity implements
     private Toolbar toolbar;
     private Spinner title;
     private DrawerArrowDrawable navigationIcon;
+
+    private final Consumer<OpenFileEvent> openFileListener = this::onOpen;
 
     public List<Path> hierarchy() {
         return hierarchy.get();
@@ -122,21 +124,23 @@ public final class FilesActivity extends BaseActivity implements
                     .commit();
         }
 
-        new Handler().post(() -> updateToolBar());
+        new Handler().post(this::updateToolBar);
+
+        OpenFileEvent.topic.weakSubscribeOnMainThread(openFileListener);
     }
 
     @Override
     protected void onDestroy() {
+        OpenFileEvent.topic.unsubscribeOnMainThread(openFileListener);
         getSupportFragmentManager().removeOnBackStackChangedListener(this);
         super.onDestroy();
     }
 
     @Override
-    public void onItemSelected(
-            AdapterView<?> parent, View view, int position, long id) {
-        Path item = (Path) parent.getAdapter().getItem(position);
-        if (!item.equals(fragment().directory())) {
-            onOpen(item);
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        Path path = (Path) parent.getAdapter().getItem(position);
+        if (!path.equals(fragment().directory())) {
+            onOpen(new OpenFileEvent(path, null));
         }
     }
 
@@ -235,13 +239,7 @@ public final class FilesActivity extends BaseActivity implements
         return navigationIcon;
     }
 
-    @Override
-    public void onOpen(Path file) {
-        onOpen(file, null);
-    }
-
-    @Override
-    public void onOpen(Path file, @Nullable Stat stat) {
+    private void onOpen(OpenFileEvent event) {
         ActionMode mode = currentActionMode();
         if (mode != null) {
             mode.finish();
@@ -251,7 +249,7 @@ public final class FilesActivity extends BaseActivity implements
             drawer.closeDrawers();
         }
 
-        show(file, stat);
+        show(event.path, event.stat);
     }
 
     private void show(Path path, @Nullable Stat stat) {

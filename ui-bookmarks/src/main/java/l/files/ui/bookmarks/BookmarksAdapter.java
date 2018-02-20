@@ -12,7 +12,8 @@ import java.util.List;
 import l.files.fs.Path;
 import l.files.ui.base.fs.FileIcons;
 import l.files.ui.base.fs.FileLabels;
-import l.files.ui.base.fs.OnOpenFileListener;
+import l.files.ui.base.fs.OpenFileEvent;
+import l.files.ui.base.messaging.MainThreadTopic;
 import l.files.ui.base.selection.Selection;
 import l.files.ui.base.selection.SelectionModeViewHolder;
 import l.files.ui.base.view.ActionModeProvider;
@@ -30,15 +31,15 @@ final class BookmarksAdapter extends StableAdapter<Object, ItemViewHolder<Object
     private final ActionModeProvider actionModeProvider;
     private final ActionMode.Callback actionModeCallback;
     private final Selection<Path, Path> selection;
-    private final OnOpenFileListener listener;
+    private final MainThreadTopic<OpenFileEvent> topic;
 
     BookmarksAdapter(
             Selection<Path, Path> selection,
             ActionModeProvider actionModeProvider,
             ActionMode.Callback actionModeCallback,
-            OnOpenFileListener listener
+            MainThreadTopic<OpenFileEvent> topic
     ) {
-        this.listener = requireNonNull(listener);
+        this.topic = requireNonNull(topic);
         this.selection = requireNonNull(selection);
         this.actionModeProvider = requireNonNull(actionModeProvider);
         this.actionModeCallback = requireNonNull(actionModeCallback);
@@ -119,8 +120,8 @@ final class BookmarksAdapter extends StableAdapter<Object, ItemViewHolder<Object
         }
 
         @Override
-        protected void onClick(View v, Path item) {
-            listener.onOpen(item);
+        protected void onClick(View v, Path path) {
+            topic.postOnMainThread(new OpenFileEvent(path, null));
         }
     }
 }

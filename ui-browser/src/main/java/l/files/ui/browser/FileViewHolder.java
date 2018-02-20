@@ -31,8 +31,9 @@ import l.files.fs.Stat;
 import l.files.ui.base.app.LifeCycleListenable;
 import l.files.ui.base.app.LifeCycleListener;
 import l.files.ui.base.fs.FileInfo;
-import l.files.ui.base.fs.OnOpenFileListener;
+import l.files.ui.base.fs.OpenFileEvent;
 import l.files.ui.base.graphics.Rect;
+import l.files.ui.base.messaging.MainThreadTopic;
 import l.files.ui.base.selection.Selection;
 import l.files.ui.base.selection.SelectionModeViewHolder;
 import l.files.ui.base.view.ActionModeProvider;
@@ -67,7 +68,7 @@ public final class FileViewHolder
     static final int LAYOUT_ID = R.layout.files_grid_item;
 
     private final Preview preview;
-    private final OnOpenFileListener listener;
+    private final MainThreadTopic<OpenFileEvent> topic;
 
     private final ImageView thumbnailView;
     private final TextView titleView;
@@ -89,14 +90,14 @@ public final class FileViewHolder
             Selection<Path, FileInfo> selection,
             ActionModeProvider actionModeProvider,
             ActionMode.Callback actionModeCallback,
-            OnOpenFileListener listener
+            MainThreadTopic<OpenFileEvent> topic
     ) {
 
         super(itemView, selection, actionModeProvider, actionModeCallback);
 
         this.recyclerView = requireNonNull(recyclerView, "recyclerView");
         this.preview = Preview.get(itemView.getContext());
-        this.listener = requireNonNull(listener, "listener");
+        this.topic = requireNonNull(topic, "topic");
         this.backgroundView = itemView.findViewById(R.id.blur);
         this.cardView = itemView.findViewById(R.id.card);
         this.titleView = itemView.findViewById(R.id.title);
@@ -118,7 +119,7 @@ public final class FileViewHolder
 
     @Override
     protected void onClick(View v, FileInfo file) {
-        listener.onOpen(file.selfPath(), file.linkTargetOrSelfStat());
+        topic.postOnMainThread(new OpenFileEvent(file.selfPath(), file.linkTargetOrSelfStat()));
     }
 
     @Override

@@ -1,6 +1,7 @@
 package l.files.ui.bookmarks;
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
 import android.support.v7.view.ActionMode;
@@ -14,11 +15,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import android.support.annotation.Nullable;
-
 import l.files.bookmarks.BookmarkManager;
 import l.files.fs.Path;
-import l.files.ui.base.fs.OnOpenFileListener;
+import l.files.ui.base.fs.OpenFileEvent;
 import l.files.ui.base.selection.SelectionModeFragment;
 import l.files.ui.base.view.ActionModeProvider;
 import l.files.ui.base.view.ActionModes;
@@ -65,7 +64,8 @@ public final class BookmarksFragment
                 selection(),
                 actionModeProvider(),
                 actionModeCallback(),
-                (OnOpenFileListener) getActivity());
+                OpenFileEvent.topic
+        );
 
         recycler = getView().findViewById(R.id.bookmarks);
         recycler.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -79,8 +79,7 @@ public final class BookmarksFragment
         return ActionModes.compose(
                 new CountSelectedItemsAction(selection()),
                 new ClearSelectionOnDestroyActionMode(selection()),
-                new RemoveBookmark(selection(),  BookmarkManager.get(
-                        getActivity()))
+                new RemoveBookmark(selection(), BookmarkManager.get(getActivity()))
         );
     }
 

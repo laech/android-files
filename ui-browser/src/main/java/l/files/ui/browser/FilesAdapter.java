@@ -17,7 +17,8 @@ import java.util.Map;
 import l.files.fs.Path;
 import l.files.ui.base.app.LifeCycleListenable;
 import l.files.ui.base.fs.FileInfo;
-import l.files.ui.base.fs.OnOpenFileListener;
+import l.files.ui.base.fs.OpenFileEvent;
+import l.files.ui.base.messaging.MainThreadTopic;
 import l.files.ui.base.selection.Selection;
 import l.files.ui.base.view.ActionModeProvider;
 import l.files.ui.base.widget.StableAdapter;
@@ -35,7 +36,7 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder> implements Se
     private final ActionMode.Callback actionModeCallback;
     private final Selection<Path, FileInfo> selection;
 
-    private final OnOpenFileListener listener;
+    private final MainThreadTopic<OpenFileEvent> topic;
 
     private final LifeCycleListenable listenable;
     private final RecyclerView recyclerView;
@@ -46,13 +47,13 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder> implements Se
             Selection<Path, FileInfo> selection,
             ActionModeProvider actionModeProvider,
             ActionMode.Callback actionModeCallback,
-            OnOpenFileListener listener
+            MainThreadTopic<OpenFileEvent> topic
     ) {
         this.recyclerView = requireNonNull(recyclerView);
         this.listenable = requireNonNull(listenable);
         this.actionModeProvider = requireNonNull(actionModeProvider);
         this.actionModeCallback = requireNonNull(actionModeCallback);
-        this.listener = requireNonNull(listener);
+        this.topic = requireNonNull(topic);
         this.selection = requireNonNull(selection);
     }
 
@@ -81,7 +82,7 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder> implements Se
                 selection,
                 actionModeProvider,
                 actionModeCallback,
-                listener
+                topic
         );
     }
 
