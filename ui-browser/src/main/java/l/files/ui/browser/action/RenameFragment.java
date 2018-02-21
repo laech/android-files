@@ -3,14 +3,15 @@ package l.files.ui.browser.action;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.view.ActionMode;
 import android.util.Pair;
 import android.widget.EditText;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 
-import android.support.annotation.Nullable;
-
+import l.files.base.Consumer;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.app.BaseActivity;
@@ -43,13 +44,14 @@ public final class RenameFragment extends FileCreationFragment {
 
     // TODO use AbsolutePath
 
-    @Nullable
     private Path path;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        path = getArguments().getParcelable(ARG_PATH);
+        Bundle args = getArguments();
+        assert args != null;
+        path = args.getParcelable(ARG_PATH);
     }
 
     @Override
@@ -91,12 +93,18 @@ public final class RenameFragment extends FileCreationFragment {
 
     private void highlight() {
         if (getFilename().isEmpty()) {
-            highlight = new Highlight()
+            highlight = new Highlight(this)
                     .executeOnExecutor(THREAD_POOL_EXECUTOR, path());
         }
     }
 
-    private class Highlight extends AsyncTask<Path, Void, Pair<Path, Stat>> {
+    private static final class Highlight extends AsyncTask<Path, Void, Pair<Path, Stat>> {
+
+        private final WeakReference<RenameFragment> fragmentRef;
+
+        Highlight(RenameFragment fragment) {
+            this.fragmentRef = new WeakReference<>(fragment);
+        }
 
         @Nullable
         @Override
@@ -115,11 +123,15 @@ public final class RenameFragment extends FileCreationFragment {
             if (isCancelled()) {
                 return;
             }
+            RenameFragment fragment = fragmentRef.get();
+            if (fragment == null) {
+                return;
+            }
             if (pair != null) {
                 Path path = pair.first;
                 Stat stat = pair.second;
-                EditText field = getFilenameField();
-                if (!getFilename().isEmpty()) {
+                EditText field = fragment.getFilenameField();
+                if (!fragment.getFilename().isEmpty()) {
                     return;
                 }
                 field.setText(path.getName().or(""));
@@ -152,20 +164,24 @@ public final class RenameFragment extends FileCreationFragment {
 
     private void rename() {
         Path dst = parent().concat(getFilename());
-        new Rename(path(), dst).executeOnExecutor(THREAD_POOL_EXECUTOR);
+        new Rename(toaster, path(), dst).executeOnExecutor(THREAD_POOL_EXECUTOR);
 
-        ActionMode mode = ((BaseActivity) getActivity()).currentActionMode();
+        BaseActivity activity = (BaseActivity) getActivity();
+        assert activity != null;
+        ActionMode mode = activity.currentActionMode();
         if (mode != null) {
             mode.finish();
         }
     }
 
-    private class Rename extends AsyncTask<Path, Void, IOException> {
+    private static final class Rename extends AsyncTask<Path, Void, IOException> {
 
+        private final Consumer<String> toaster;
         private final Path src;
         private final Path dst;
 
-        private Rename(Path src, Path dst) {
+        private Rename(Consumer<String> toaster, Path src, Path dst) {
+            this.toaster = requireNonNull(toaster);
             this.src = requireNonNull(src);
             this.dst = requireNonNull(dst);
         }
@@ -185,7 +201,6 @@ public final class RenameFragment extends FileCreationFragment {
         protected void onPostExecute(@Nullable IOException e) {
             super.onPostExecute(e);
             if (e != null) {
-                assert toaster != null;
                 toaster.accept(message(e));
             }
         }
