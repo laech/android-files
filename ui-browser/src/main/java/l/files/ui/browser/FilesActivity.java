@@ -215,7 +215,7 @@ public final class FilesActivity extends BaseActivity implements
     }
 
     @Override
-    public void onSupportActionModeStarted(ActionMode mode) {
+    public void onSupportActionModeStarted(@NonNull ActionMode mode) {
         super.onSupportActionModeStarted(mode);
 
         if (isSidebarOpen()) {

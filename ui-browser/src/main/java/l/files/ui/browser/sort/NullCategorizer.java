@@ -26,4 +26,4 @@ enum NullCategorizer implements Categorizer {
     public List<Object> categorize(Resources res, List<FileInfo> items) {
         return unmodifiableList(items);
     }
-};
+}
