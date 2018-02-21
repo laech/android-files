@@ -28,6 +28,7 @@ import l.files.fs.event.BatchObserver;
 import l.files.fs.event.Event;
 import l.files.fs.event.Observation;
 import l.files.ui.base.fs.FileInfo;
+import l.files.ui.browser.sort.FileSort;
 
 import static android.os.Looper.getMainLooper;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;

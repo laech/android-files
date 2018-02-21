@@ -1,4 +1,4 @@
-package l.files.ui.browser;
+package l.files.ui.browser.sort;
 
 import java.io.IOException;
 import java.text.Collator;

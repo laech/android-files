@@ -12,9 +12,9 @@ import l.files.fs.Path;
 import l.files.testing.fs.Paths;
 
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.ui.browser.FileSort.MODIFIED;
-import static l.files.ui.browser.FileSort.NAME;
-import static l.files.ui.browser.FileSort.SIZE;
+import static l.files.ui.browser.sort.FileSort.MODIFIED;
+import static l.files.ui.browser.sort.FileSort.NAME;
+import static l.files.ui.browser.sort.FileSort.SIZE;
 
 @RunWith(AndroidJUnit4.class)
 public final class SortTest extends BaseFilesActivityTest {

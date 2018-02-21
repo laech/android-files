@@ -1,4 +1,4 @@
-package l.files.ui.browser;
+package l.files.ui.browser.sort;
 
 import android.content.res.Resources;
 
@@ -8,6 +8,7 @@ import java.util.GregorianCalendar;
 
 import l.files.fs.Stat;
 import l.files.ui.base.fs.FileInfo;
+import l.files.ui.browser.R;
 
 import static java.util.Calendar.DAY_OF_MONTH;
 import static java.util.Calendar.HOUR_OF_DAY;

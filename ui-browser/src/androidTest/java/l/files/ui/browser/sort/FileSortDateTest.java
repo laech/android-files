@@ -1,4 +1,4 @@
-package l.files.ui.browser;
+package l.files.ui.browser.sort;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -11,7 +11,7 @@ import l.files.fs.Instant;
 import l.files.fs.Path;
 
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.ui.browser.FileSort.MODIFIED;
+import static l.files.ui.browser.sort.FileSort.MODIFIED;
 
 public final class FileSortDateTest extends FileSortTest {
 

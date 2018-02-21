@@ -1,4 +1,4 @@
-package l.files.ui.browser;
+package l.files.ui.browser.sort;
 
 import org.junit.Test;
 
@@ -7,7 +7,7 @@ import java.util.Locale;
 import l.files.fs.Path;
 
 import static java.util.Locale.SIMPLIFIED_CHINESE;
-import static l.files.ui.browser.FileSort.NAME;
+import static l.files.ui.browser.sort.FileSort.NAME;
 
 public final class FileSortNameTest extends FileSortTest {
 

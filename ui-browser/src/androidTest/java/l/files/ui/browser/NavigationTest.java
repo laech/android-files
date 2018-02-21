@@ -35,7 +35,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.base.io.Charsets.UTF_8;
 import static l.files.fs.Instant.EPOCH;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.ui.browser.FileSort.NAME;
+import static l.files.ui.browser.sort.FileSort.NAME;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

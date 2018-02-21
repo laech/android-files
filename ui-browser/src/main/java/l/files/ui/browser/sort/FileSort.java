@@ -1,4 +1,4 @@
-package l.files.ui.browser;
+package l.files.ui.browser.sort;
 
 import android.content.res.Resources;
 
@@ -10,6 +10,7 @@ import l.files.base.Integers;
 import l.files.base.Longs;
 import l.files.fs.Stat;
 import l.files.ui.base.fs.FileInfo;
+import l.files.ui.browser.R;
 
 import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.unmodifiableList;
@@ -24,11 +25,11 @@ public enum FileSort {
 
         @Override
         Categorizer categorizer() {
-            return Categorizer.NULL;
+            return NullCategorizer.INSTANCE;
         }
 
         @Override
-        List<Object> sort(List<FileInfo> items, Resources res) {
+        public List<Object> sort(List<FileInfo> items, Resources res) {
             Collections.sort(items);
             return unmodifiableList(items);
         }
@@ -99,7 +100,7 @@ public enum FileSort {
 
         @Override
         Categorizer categorizer() {
-            return new SizeCategorizer();
+            return SizeCategorizer.INSTANCE;
         }
     };
 
@@ -117,7 +118,7 @@ public enum FileSort {
 
     abstract Categorizer categorizer();
 
-    List<Object> sort(List<FileInfo> items, Resources res) {
+    public List<Object> sort(List<FileInfo> items, Resources res) {
         Collections.sort(items, comparator());
         return categorizer().categorize(res, items);
     }

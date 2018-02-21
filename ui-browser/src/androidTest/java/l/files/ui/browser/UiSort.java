@@ -5,6 +5,7 @@ import android.support.v7.app.AlertDialog;
 import android.widget.ListView;
 
 import l.files.ui.browser.menu.SortDialog;
+import l.files.ui.browser.sort.FileSort;
 
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.fail;

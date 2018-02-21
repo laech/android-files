@@ -14,7 +14,7 @@ import android.widget.ListView;
 
 import android.support.annotation.Nullable;
 
-import l.files.ui.browser.FileSort;
+import l.files.ui.browser.sort.FileSort;
 import l.files.ui.browser.R;
 import l.files.ui.browser.preference.Preferences;
 

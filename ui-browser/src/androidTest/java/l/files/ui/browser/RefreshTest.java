@@ -19,7 +19,7 @@ import static java.lang.System.nanoTime;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.ui.browser.FileSort.MODIFIED;
+import static l.files.ui.browser.sort.FileSort.MODIFIED;
 import static l.files.ui.browser.FilesLoader.BATCH_UPDATE_MILLIS;
 import static org.junit.Assert.assertFalse;
 

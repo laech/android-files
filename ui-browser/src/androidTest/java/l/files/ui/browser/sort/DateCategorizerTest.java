@@ -1,4 +1,4 @@
-package l.files.ui.browser;
+package l.files.ui.browser.sort;
 
 import android.annotation.SuppressLint;
 import android.content.res.Resources;
@@ -20,6 +20,8 @@ import java.util.List;
 import l.files.fs.Instant;
 import l.files.fs.Path;
 import l.files.ui.base.fs.FileInfo;
+import l.files.ui.browser.Header;
+import l.files.ui.browser.R;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
 import static java.util.Arrays.asList;
@@ -132,7 +134,7 @@ public final class DateCategorizerTest {
         List<String> names = new ArrayList<>(items.size());
         for (Object item : items) {
             names.add(item instanceof Header
-                    ? ((Header) item).value
+                    ? item.toString()
                     : ((FileInfo) item).selfPath().name().toString());
         }
         return unmodifiableList(names);

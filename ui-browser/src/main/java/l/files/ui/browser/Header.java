@@ -4,9 +4,9 @@ import static l.files.base.Objects.requireNonNull;
 
 public final class Header {
 
-    final String value;
+    private final String value;
 
-    Header(String value) {
+    public Header(String value) {
         this.value = requireNonNull(value);
     }
 

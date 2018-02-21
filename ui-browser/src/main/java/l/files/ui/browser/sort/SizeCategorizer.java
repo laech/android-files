@@ -1,14 +1,17 @@
-package l.files.ui.browser;
+package l.files.ui.browser.sort;
 
 import android.content.res.Resources;
 
 import l.files.fs.Stat;
 import l.files.ui.base.fs.FileInfo;
+import l.files.ui.browser.R;
 
 /**
  * Categorizes by file size (descending order).
  */
 final class SizeCategorizer extends BaseCategorizer {
+
+    static final SizeCategorizer INSTANCE = new SizeCategorizer();
 
     private static final long ZERO = 0;
     private static final long KB_1 = 1024;
@@ -25,6 +28,9 @@ final class SizeCategorizer extends BaseCategorizer {
             new Group(KB_1, R.string._1kb_to_1mb),
             new Group(ZERO, R.string.less_than_1kb),
     };
+
+    private SizeCategorizer() {
+    }
 
     @Override
     public int id(FileInfo file) {

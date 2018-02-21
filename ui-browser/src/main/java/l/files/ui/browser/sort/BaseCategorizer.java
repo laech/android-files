@@ -1,4 +1,4 @@
-package l.files.ui.browser;
+package l.files.ui.browser.sort;
 
 import android.content.res.Resources;
 
@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import l.files.ui.base.fs.FileInfo;
+import l.files.ui.browser.Header;
 
 import static kotlin.collections.CollectionsKt.fold;
 import static kotlin.collections.CollectionsKt.groupBy;

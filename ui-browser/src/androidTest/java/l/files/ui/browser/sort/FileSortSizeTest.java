@@ -1,4 +1,4 @@
-package l.files.ui.browser;
+package l.files.ui.browser.sort;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -10,7 +10,7 @@ import java.util.Locale;
 import l.files.fs.Path;
 import l.files.testing.fs.Paths;
 
-import static l.files.ui.browser.FileSort.SIZE;
+import static l.files.ui.browser.sort.FileSort.SIZE;
 
 public final class FileSortSizeTest extends FileSortTest {
 
