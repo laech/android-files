@@ -8,9 +8,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import java.util.ArrayList;
-import java.util.Collection;
 
-import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.fs.FileInfo;
 import l.files.ui.base.selection.Selection;
@@ -20,6 +18,8 @@ import l.files.ui.browser.R;
 import static android.content.Intent.ACTION_SEND_MULTIPLE;
 import static android.content.Intent.EXTRA_STREAM;
 import static android.content.Intent.createChooser;
+import static kotlin.collections.CollectionsKt.arrayListOf;
+import static kotlin.collections.CollectionsKt.mapTo;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.media.MediaTypes.MEDIA_TYPE_OCTET_STREAM;
 
@@ -31,7 +31,8 @@ public final class ShareAction extends ActionModeItem
 
     public ShareAction(
             Selection<?, FileInfo> selection,
-            Context context) {
+            Context context
+    ) {
         super(R.id.share);
         this.selection = requireNonNull(selection);
         this.context = requireNonNull(context);
@@ -91,7 +92,8 @@ public final class ShareAction extends ActionModeItem
     protected void onItemSelected(ActionMode mode, MenuItem item) {
         context.startActivity(createChooser(
                 createShareIntent(),
-                context.getText(R.string.share)));
+                context.getText(R.string.share)
+        ));
         mode.finish();
     }
 
@@ -102,13 +104,7 @@ public final class ShareAction extends ActionModeItem
     }
 
     private ArrayList<Uri> selectionUris() {
-        Collection<FileInfo> files = selection.values();
-        ArrayList<Uri> uris = new ArrayList<>(files.size());
-        for (FileInfo item : files) {
-            Path path = item.linkTargetOrSelfPath();
-            uris.add(path.toUri());
-        }
-        return uris;
+        return mapTo(selection.values(), arrayListOf(), f -> f.linkTargetOrSelfPath().toUri());
     }
 
 }
