@@ -3,12 +3,13 @@ package l.files.ui.browser.menu;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.widget.EditText;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 
-import android.support.annotation.Nullable;
-
+import l.files.base.Consumer;
 import l.files.fs.Path;
 import l.files.ui.browser.FileCreationFragment;
 import l.files.ui.browser.R;
@@ -52,12 +53,18 @@ public final class NewDirFragment extends FileCreationFragment {
     private void suggestName() {
         String name = getString(R.string.untitled_dir);
         Path base = parent().concat(name);
-        suggestion = new SuggestName().executeOnExecutor(THREAD_POOL_EXECUTOR, base);
+        suggestion = new SuggestName(this).executeOnExecutor(THREAD_POOL_EXECUTOR, base);
     }
 
-    private class SuggestName extends AsyncTask<Path, Void, Path> {
+    private static final class SuggestName extends AsyncTask<Path, Void, Path> {
 
-        @Nullable
+        private final WeakReference<NewDirFragment> fragmentRef;
+
+        SuggestName(NewDirFragment fragment) {
+            this.fragmentRef = new WeakReference<>(fragment);
+        }
+
+
         @Override
         protected Path doInBackground(Path... params) {
             // TODO use AbsolutePath
@@ -90,7 +97,11 @@ public final class NewDirFragment extends FileCreationFragment {
         }
 
         private void set(String name) {
-            EditText field = getFilenameField();
+            NewDirFragment fragment = fragmentRef.get();
+            if (fragment == null) {
+                return;
+            }
+            EditText field = fragment.getFilenameField();
             boolean notChanged = field.getText().length() == 0;
             if (notChanged) {
                 field.setText(name);
@@ -106,14 +117,16 @@ public final class NewDirFragment extends FileCreationFragment {
 
     private void createDir(Path dir) {
         // Don't cancel this onDestroy for directory to be created
-        new CreateDir(dir).executeOnExecutor(THREAD_POOL_EXECUTOR);
+        new CreateDir(toaster, dir).executeOnExecutor(THREAD_POOL_EXECUTOR);
     }
 
-    private class CreateDir extends AsyncTask<Path, Void, IOException> {
+    private static final class CreateDir extends AsyncTask<Path, Void, IOException> {
 
+        private final Consumer<String> toaster;
         private final Path dir;
 
-        private CreateDir(Path dir) {
+        CreateDir(Consumer<String> toaster, Path dir) {
+            this.toaster = requireNonNull(toaster);
             this.dir = requireNonNull(dir);
         }
 
@@ -132,7 +145,6 @@ public final class NewDirFragment extends FileCreationFragment {
         protected void onPostExecute(@Nullable IOException e) {
             super.onPostExecute(e);
             if (e != null) {
-                assert toaster != null;
                 toaster.accept(message(e));
             }
         }

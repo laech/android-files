@@ -4,6 +4,8 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.view.View;
@@ -12,11 +14,9 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckedTextView;
 import android.widget.ListView;
 
-import android.support.annotation.Nullable;
-
-import l.files.ui.browser.sort.FileSort;
 import l.files.ui.browser.R;
 import l.files.ui.browser.preference.Preferences;
+import l.files.ui.browser.sort.FileSort;
 
 import static l.files.ui.browser.preference.Preferences.getSort;
 
@@ -26,12 +26,14 @@ public final class SortDialog
 
     public static final String FRAGMENT_TAG = "sort-dialog";
 
+    @NonNull
     @Override
-    @SuppressWarnings("NullableProblems")
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        return new AlertDialog.Builder(getContext())
+        Context context = getContext();
+        assert context != null;
+        return new AlertDialog.Builder(context)
                 .setTitle(R.string.sort_by)
-                .setAdapter(new SorterAdapter(getContext()), this)
+                .setAdapter(new SorterAdapter(context), this)
                 .create();
     }
 
@@ -43,14 +45,15 @@ public final class SortDialog
         dialog.dismiss();
     }
 
-    private static class SorterAdapter extends ArrayAdapter<FileSort> {
+    private static final class SorterAdapter extends ArrayAdapter<FileSort> {
 
         SorterAdapter(Context context) {
             super(context, R.layout.sort_by_item, FileSort.values());
         }
 
+        @NonNull
         @Override
-        public View getView(int position, @Nullable View convertView, ViewGroup parent) {
+        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
             View view = super.getView(position, convertView, parent);
             FileSort item = getItem(position);
             CheckedTextView check = view.findViewById(R.id.title);
