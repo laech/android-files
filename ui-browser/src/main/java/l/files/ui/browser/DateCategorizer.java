@@ -56,9 +56,7 @@ final class DateCategorizer extends BaseCategorizer {
     @Override
     public int id(FileInfo file) {
         Stat stat = file.selfStat();
-        if (stat == null) {
-            return R.string.__;
-        }
+        if (stat == null) return R.string.__;
 
         long seconds = stat.lastModifiedEpochSecond();
         if (seconds >= startSecondOfTomorrow) return R.string.future;
@@ -68,25 +66,13 @@ final class DateCategorizer extends BaseCategorizer {
         if (seconds >= startSecondOf30Days) return R.string.previous_30_days;
 
         timestamp.setTimeInMillis(seconds * 1000);
-        if (seconds >= startSecondOfThisYear) {
-            return -timestamp.get(MONTH);
-        } else {
-            return -timestamp.get(YEAR);
-        }
+        return -timestamp.get(seconds >= startSecondOfThisYear ? MONTH : YEAR);
     }
 
     @Override
     public String label(Resources res, int id) {
-        if (id > 0) {
-            try {
-                return res.getString(id);
-            } catch (Resources.NotFoundException e) {
-                throw new AssertionError(e);
-            }
-        }
-        if (id >= -12) {
-            return monthLabels[-id];
-        }
+        if (id > 0) return res.getString(id);
+        if (id >= -12) return monthLabels[-id];
         return String.valueOf(-id);
     }
 
