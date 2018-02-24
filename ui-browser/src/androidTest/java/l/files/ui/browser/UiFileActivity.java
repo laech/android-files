@@ -4,6 +4,7 @@ import android.app.Instrumentation;
 import android.content.res.Resources;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.util.SimpleArrayMap;
@@ -22,8 +23,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-
-import android.support.annotation.Nullable;
 
 import l.files.base.Consumer;
 import l.files.base.Provider;
@@ -44,6 +43,7 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
+import static kotlin.collections.CollectionsKt.filterIsInstance;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.ui.browser.Instrumentations.await;
@@ -457,14 +457,7 @@ final class UiFileActivity {
     }
 
     private List<FileInfo> fileItems() {
-        List<Object> items = fragment().items();
-        List<FileInfo> files = new ArrayList<>(items.size());
-        for (Object item : items) {
-            if (item instanceof FileInfo) {
-                files.add(((FileInfo) item));
-            }
-        }
-        return files;
+        return filterIsInstance(fragment().items(), FileInfo.class);
     }
 
     private List<Path> resources() {

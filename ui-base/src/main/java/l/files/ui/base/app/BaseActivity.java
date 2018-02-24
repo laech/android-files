@@ -1,6 +1,7 @@
 package l.files.ui.base.app;
 
 import android.annotation.SuppressLint;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.view.Menu;
@@ -48,14 +49,14 @@ public class BaseActivity extends AppCompatActivity
     }
 
     @Override
-    public void onSupportActionModeFinished(ActionMode mode) {
+    public void onSupportActionModeFinished(@NonNull ActionMode mode) {
         super.onSupportActionModeFinished(mode);
         currentActionMode = null;
         currentActionModeCallback = null;
     }
 
     @Override
-    public ActionMode startSupportActionMode(ActionMode.Callback callback) {
+    public ActionMode startSupportActionMode(@NonNull ActionMode.Callback callback) {
         currentActionModeCallback = callback;
         currentActionMode = super.startSupportActionMode(callback);
         return currentActionMode;

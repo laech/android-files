@@ -1,5 +1,7 @@
 package l.files.ui.base.text;
 
+import android.support.annotation.NonNull;
+
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.List;
@@ -75,7 +77,7 @@ public final class CollationKey implements Comparable<CollationKey> {
     }
 
     @Override
-    public int compareTo(CollationKey that) {
+    public int compareTo(@NonNull CollationKey that) {
         int i;
         int len = min(this.segments.length, that.segments.length);
         for (i = 0; i < len; i++) {

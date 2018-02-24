@@ -5,6 +5,7 @@ import android.support.annotation.DrawableRes;
 import java.io.IOException;
 import java.text.Collator;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import l.files.base.Objects;
@@ -109,7 +110,7 @@ public final class FileInfo implements Comparable<FileInfo> {
     }
 
     @Override
-    public int compareTo(FileInfo that) {
+    public int compareTo(@NonNull FileInfo that) {
         return collationKey().compareTo(that.collationKey());
     }
 

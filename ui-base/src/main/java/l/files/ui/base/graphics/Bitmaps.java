@@ -2,11 +2,10 @@ package l.files.ui.base.graphics;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
+import android.support.annotation.Nullable;
 
 import java.io.InputStream;
 import java.util.concurrent.Callable;
-
-import android.support.annotation.Nullable;
 
 import static android.graphics.Bitmap.createScaledBitmap;
 import static android.graphics.BitmapFactory.decodeStream;
@@ -31,11 +30,8 @@ public final class Bitmaps {
     static Rect decodeBounds(Callable<InputStream> provider)
             throws Exception {
 
-        InputStream in = provider.call();
-        try {
+        try (InputStream in = provider.call()) {
             return decodeBounds(in);
-        } finally {
-            in.close();
         }
     }
 
@@ -57,11 +53,8 @@ public final class Bitmaps {
 
         Options opts = scaleDownOptions(originalSize, max);
         Bitmap bitmap;
-        InputStream in = provider.call();
-        try {
+        try (InputStream in = provider.call()) {
             bitmap = decodeStream(in, null, opts);
-        } finally {
-            in.close();
         }
         if (bitmap == null) {
             return null;
