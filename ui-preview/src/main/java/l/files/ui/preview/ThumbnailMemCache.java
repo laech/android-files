@@ -3,7 +3,7 @@ package l.files.ui.preview;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.support.v4.util.LruCache;
+import androidx.collection.LruCache;
 
 import java.util.AbstractMap.SimpleImmutableEntry;
 

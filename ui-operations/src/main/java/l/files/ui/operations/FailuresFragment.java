@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import static android.graphics.Color.TRANSPARENT;
 

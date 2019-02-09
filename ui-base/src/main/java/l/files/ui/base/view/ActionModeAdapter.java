@@ -1,11 +1,11 @@
 package l.files.ui.base.view;
 
-import android.support.annotation.CallSuper;
-import android.support.v7.view.ActionMode;
+import androidx.annotation.CallSuper;
+import androidx.appcompat.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 public class ActionModeAdapter implements ActionMode.Callback {
 

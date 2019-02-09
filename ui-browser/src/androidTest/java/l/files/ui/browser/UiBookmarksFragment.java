@@ -1,6 +1,6 @@
 package l.files.ui.browser;
 
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 
 import l.files.fs.Path;
 import l.files.ui.bookmarks.BookmarksFragment;

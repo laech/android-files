@@ -10,7 +10,7 @@ android {
         targetSdkVersion project.targetSdkVersion
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     compileOptions {
@@ -25,9 +25,9 @@ dependencies {
     implementation project(':base')
     implementation project(':fs')
     implementation 'org.apache.tika:tika-core:1.10'
-    implementation "com.android.support:support-annotations:$supportLibVersion"
+    implementation "androidx.annotation:annotation:$supportLibVersion"
 
     androidTestImplementation project(':testing-fs')
-    androidTestImplementation 'com.android.support.test:runner:1.0.1'
+    androidTestImplementation 'androidx.test:runner:1.1.0-alpha4'
 
 }

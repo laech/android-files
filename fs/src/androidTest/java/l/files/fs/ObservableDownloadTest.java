@@ -5,7 +5,7 @@ import android.app.DownloadManager.Query;
 import android.app.DownloadManager.Request;
 import android.database.Cursor;
 import android.net.Uri;
-import android.support.test.InstrumentationRegistry;
+import androidx.test.InstrumentationRegistry;
 
 import org.junit.Test;
 

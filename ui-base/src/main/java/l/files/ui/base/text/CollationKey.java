@@ -1,6 +1,6 @@
 package l.files.ui.base.text;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import java.text.Collator;
 import java.util.ArrayList;

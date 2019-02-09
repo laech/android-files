@@ -1,12 +1,12 @@
 package l.files.ui.browser.menu;
 
-import android.support.v4.app.FragmentManager;
-import android.support.v4.widget.DrawerLayout;
+import androidx.fragment.app.FragmentManager;
+import androidx.drawerlayout.widget.DrawerLayout;
 import android.view.MenuItem;
 
 import l.files.ui.base.app.OptionsMenuAdapter;
 
-import static android.support.v4.view.GravityCompat.START;
+import static androidx.core.view.GravityCompat.START;
 import static l.files.base.Objects.requireNonNull;
 
 public final class ActionBarDrawerToggleMenu extends OptionsMenuAdapter {

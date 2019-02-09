@@ -3,13 +3,13 @@ package l.files.ui.operations.action;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatDialogFragment;
-import android.support.v7.view.ActionMode;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatDialogFragment;
+import androidx.appcompat.view.ActionMode;
 
 import java.util.Collection;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import l.files.fs.Path;
 import l.files.ui.operations.R;

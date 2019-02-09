@@ -10,7 +10,7 @@ import l.files.fs.Path;
 import l.files.testing.fs.PathBaseTest;
 
 import static android.content.Context.MODE_PRIVATE;
-import static android.support.test.InstrumentationRegistry.getContext;
+import static androidx.test.InstrumentationRegistry.getContext;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static l.files.bookmarks.BookmarkManager.BookmarkChangedListener;

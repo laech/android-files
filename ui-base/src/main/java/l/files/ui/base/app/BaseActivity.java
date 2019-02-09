@@ -1,13 +1,13 @@
 package l.files.ui.base.app;
 
 import android.annotation.SuppressLint;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.view.ActionMode;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import l.files.ui.base.view.ActionModeProvider;
 

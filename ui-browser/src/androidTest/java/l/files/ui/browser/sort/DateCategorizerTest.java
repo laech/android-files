@@ -23,7 +23,7 @@ import l.files.ui.base.fs.FileInfo;
 import l.files.ui.browser.Header;
 import l.files.ui.browser.R;
 
-import static android.support.test.InstrumentationRegistry.getInstrumentation;
+import static androidx.test.InstrumentationRegistry.getInstrumentation;
 import static java.util.Arrays.asList;
 import static java.util.Calendar.JUNE;
 import static java.util.Calendar.YEAR;

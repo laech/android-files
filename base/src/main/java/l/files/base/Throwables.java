@@ -4,7 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.logging.Logger;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import static java.util.logging.Level.WARNING;
 

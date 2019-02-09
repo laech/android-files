@@ -1,6 +1,6 @@
 package l.files.ui.base.messaging;
 
-import android.support.annotation.MainThread;
+import androidx.annotation.MainThread;
 
 import java.util.Set;
 import java.util.WeakHashMap;

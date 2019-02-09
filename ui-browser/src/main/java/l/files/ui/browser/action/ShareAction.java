@@ -3,7 +3,7 @@ package l.files.ui.browser.action;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.support.v7.view.ActionMode;
+import androidx.appcompat.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 

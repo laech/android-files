@@ -1,8 +1,8 @@
 package l.files.ui.browser;
 
 import android.app.Instrumentation;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.ViewHolder;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 import android.view.View;
 
 import java.util.concurrent.Callable;
@@ -15,7 +15,7 @@ import l.files.ui.base.widget.StableAdapter;
 import static android.os.Looper.getMainLooper;
 import static android.os.Looper.myLooper;
 import static android.os.SystemClock.sleep;
-import static android.support.v7.widget.RecyclerView.NO_POSITION;
+import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.junit.Assert.assertTrue;

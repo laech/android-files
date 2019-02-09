@@ -7,7 +7,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import java.util.Collection;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;

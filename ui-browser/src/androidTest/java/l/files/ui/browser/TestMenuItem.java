@@ -2,9 +2,9 @@ package l.files.ui.browser;
 
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.LayoutRes;
-import android.support.annotation.StringRes;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.LayoutRes;
+import androidx.annotation.StringRes;
 import android.view.ActionProvider;
 import android.view.ContextMenu;
 import android.view.MenuItem;

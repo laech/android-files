@@ -1,7 +1,7 @@
 package l.files.ui.operations;
 
 import android.content.Context;
-import android.support.annotation.PluralsRes;
+import androidx.annotation.PluralsRes;
 
 import l.files.operations.Clock;
 import l.files.operations.Progress;

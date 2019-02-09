@@ -11,7 +11,7 @@ import l.files.testing.fs.PathBaseTest;
 import l.files.testing.fs.Paths;
 import l.files.ui.base.graphics.Rect;
 
-import static android.support.test.InstrumentationRegistry.getContext;
+import static androidx.test.InstrumentationRegistry.getContext;
 import static java.lang.System.nanoTime;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static l.files.fs.LinkOption.FOLLOW;

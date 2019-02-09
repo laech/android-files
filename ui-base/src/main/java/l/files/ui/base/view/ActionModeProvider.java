@@ -1,7 +1,7 @@
 package l.files.ui.base.view;
 
-import android.support.annotation.Nullable;
-import android.support.v7.view.ActionMode;
+import androidx.annotation.Nullable;
+import androidx.appcompat.view.ActionMode;
 
 public interface ActionModeProvider {
 

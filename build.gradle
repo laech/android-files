@@ -15,7 +15,7 @@ buildscript {
     ext.targetSdkVersion = 28
     ext.compileSdkVersion = 28
     ext.buildToolsVersion = '28.0.3'
-    ext.supportLibVersion = '27.0.2'
+    ext.supportLibVersion = '1.0.0-beta01'
 
 }
 

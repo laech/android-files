@@ -5,7 +5,7 @@ import android.media.MediaMetadataRetriever;
 
 import java.io.ByteArrayInputStream;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import l.files.ui.base.graphics.Rect;
 import l.files.ui.base.graphics.ScaledBitmap;

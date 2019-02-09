@@ -1,6 +1,6 @@
 package l.files.ui.browser;
 
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.runner.AndroidJUnit4;
 import android.util.Log;
 
 import org.junit.Test;

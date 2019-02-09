@@ -2,7 +2,7 @@ package l.files.ui.base.graphics;
 
 import android.graphics.Bitmap;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;

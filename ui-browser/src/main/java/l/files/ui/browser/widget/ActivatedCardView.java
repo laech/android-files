@@ -1,14 +1,14 @@
 package l.files.ui.browser.widget;
 
 import android.content.Context;
-import android.support.v7.widget.CardView;
+import androidx.cardview.widget.CardView;
 import android.util.AttributeSet;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import l.files.ui.browser.R;
 
-import static android.support.v4.content.ContextCompat.getColor;
+import static androidx.core.content.ContextCompat.getColor;
 
 public final class ActivatedCardView extends CardView {
 

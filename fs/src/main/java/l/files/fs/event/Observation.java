@@ -2,7 +2,7 @@ package l.files.fs.event;
 
 import java.io.Closeable;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 public interface Observation extends Closeable {
 

@@ -14,7 +14,7 @@ import l.files.base.Consumer;
 import l.files.ui.base.graphics.Rect;
 import l.files.ui.base.graphics.ScaledBitmap;
 
-import static android.support.test.InstrumentationRegistry.getContext;
+import static androidx.test.InstrumentationRegistry.getContext;
 import static android.test.MoreAsserts.assertNotEqual;
 import static java.io.File.createTempFile;
 import static l.files.ui.base.content.pm.Packages.getApkIconBitmap;

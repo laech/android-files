@@ -1,14 +1,14 @@
 package l.files.ui.base.selection;
 
 import android.os.Bundle;
-import android.support.v7.view.ActionMode;
+import androidx.appcompat.view.ActionMode;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import l.files.ui.base.app.BaseFragment;
 import l.files.ui.base.view.ActionModeProvider;

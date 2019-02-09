@@ -12,7 +12,7 @@ import l.files.fs.Path;
 import l.files.testing.fs.Paths;
 
 import static android.os.Environment.getExternalStorageDirectory;
-import static android.support.test.InstrumentationRegistry.getInstrumentation;
+import static androidx.test.InstrumentationRegistry.getInstrumentation;
 import static android.test.MoreAsserts.assertNotEqual;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.asList;

@@ -2,7 +2,7 @@ package l.files.ui.base.graphics;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import java.io.InputStream;
 import java.util.concurrent.Callable;

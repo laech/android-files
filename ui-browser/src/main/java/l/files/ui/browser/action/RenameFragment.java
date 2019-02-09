@@ -3,8 +3,8 @@ package l.files.ui.browser.action;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v7.view.ActionMode;
+import androidx.annotation.Nullable;
+import androidx.appcompat.view.ActionMode;
 import android.util.Pair;
 import android.widget.EditText;
 

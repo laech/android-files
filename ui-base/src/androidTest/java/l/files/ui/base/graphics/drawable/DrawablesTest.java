@@ -12,7 +12,7 @@ import l.files.ui.base.graphics.ScaledBitmap;
 
 import static android.graphics.Bitmap.Config.ARGB_8888;
 import static android.graphics.Color.BLUE;
-import static android.support.test.InstrumentationRegistry.getContext;
+import static androidx.test.InstrumentationRegistry.getContext;
 import static l.files.ui.base.graphics.drawable.Drawables.toBitmap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

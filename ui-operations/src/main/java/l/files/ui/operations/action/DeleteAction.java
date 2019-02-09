@@ -1,7 +1,7 @@
 package l.files.ui.operations.action;
 
-import android.support.v4.app.FragmentManager;
-import android.support.v7.view.ActionMode;
+import androidx.fragment.app.FragmentManager;
+import androidx.appcompat.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 

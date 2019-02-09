@@ -1,7 +1,7 @@
 package l.files.ui.preview;
 
 import android.os.AsyncTask;
-import android.support.v4.util.LruCache;
+import androidx.collection.LruCache;
 import android.util.Log;
 
 import java.io.BufferedInputStream;
@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import l.files.fs.Path;
 import l.files.fs.Stat;

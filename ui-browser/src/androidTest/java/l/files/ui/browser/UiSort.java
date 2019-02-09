@@ -1,7 +1,7 @@
 package l.files.ui.browser;
 
 import android.app.Dialog;
-import android.support.v7.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.widget.ListView;
 
 import l.files.ui.browser.menu.SortDialog;

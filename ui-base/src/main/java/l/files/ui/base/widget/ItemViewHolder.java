@@ -2,8 +2,8 @@ package l.files.ui.base.widget;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.support.annotation.CallSuper;
-import android.support.v7.widget.RecyclerView.ViewHolder;
+import androidx.annotation.CallSuper;
+import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 import android.view.View;
 
 import java.util.List;
