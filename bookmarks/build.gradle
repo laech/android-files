@@ -26,7 +26,7 @@ dependencies {
 
     androidTestImplementation project(':testing-fs')
 
-    androidTestImplementation 'org.mockito:mockito-android:2.24.0'
-    androidTestImplementation 'androidx.test:runner:1.1.0-alpha4'
+    androidTestImplementation "org.mockito:mockito-android:$mockitoVersion"
+    androidTestImplementation "androidx.test:runner:$androidTestRunnerVersion"
 
 }

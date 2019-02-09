@@ -28,6 +28,6 @@ dependencies {
     implementation "androidx.annotation:annotation:$supportLibVersion"
 
     androidTestImplementation project(':testing-fs')
-    androidTestImplementation 'androidx.test:runner:1.1.0-alpha4'
+    androidTestImplementation "androidx.test:runner:$androidTestRunnerVersion"
 
 }

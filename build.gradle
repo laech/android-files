@@ -16,6 +16,8 @@ buildscript {
     ext.compileSdkVersion = 28
     ext.buildToolsVersion = '28.0.3'
     ext.supportLibVersion = '1.0.0-beta01'
+    ext.mockitoVersion = '2.24.0'
+    ext.androidTestRunnerVersion = '1.1.1'
 
 }
 

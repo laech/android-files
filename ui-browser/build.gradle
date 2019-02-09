@@ -44,11 +44,11 @@ dependencies {
     androidTestImplementation project(':testing')
     androidTestImplementation project(':testing-fs')
 
-    androidTestImplementation 'androidx.test:runner:1.1.0-alpha4'
+    androidTestImplementation "androidx.test:runner:$androidTestRunnerVersion"
     androidTestImplementation 'androidx.test:rules:1.1.0-alpha4'
     androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0-alpha4'
 
     testImplementation 'junit:junit:4.12'
-    testImplementation 'org.mockito:mockito-core:2.24.0'
+    testImplementation "org.mockito:mockito-core:$mockitoVersion"
 
 }
