@@ -25,7 +25,7 @@ dependencies {
     implementation project(':fs')
     implementation project(':ui-base')
     implementation project(':ui-preview')
-    implementation "androidx.appcompat:appcompat:$supportLibVersion"
-    implementation "androidx.annotation:annotation:$supportLibVersion"
+    implementation "androidx.appcompat:appcompat:$androidAppCompatVersion"
+    implementation "androidx.annotation:annotation:$androidAnnotationVersion"
 
 }

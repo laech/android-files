@@ -5,7 +5,7 @@ import org.junit.Test;
 import l.files.fs.Path;
 import l.files.ui.base.graphics.Rect;
 
-import static android.test.MoreAsserts.assertNotEqual;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 
 public abstract class PersistenceCacheTest<V, C extends PersistenceCache<V>>
@@ -56,7 +56,7 @@ public abstract class PersistenceCacheTest<V, C extends PersistenceCache<V>>
         assertValueEquals(value, cache.get(file, stat, newConstraint(), true));
         assertValueEquals(value, cache.get(file, stat, newConstraint(), true));
         assertValueEquals(value, cache.get(file, stat, newConstraint(), true));
-        assertNotEqual(newConstraint(), newConstraint());
+        assertNotEquals(newConstraint(), newConstraint());
     }
 
 }

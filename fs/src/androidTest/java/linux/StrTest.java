@@ -4,11 +4,10 @@ import org.junit.Test;
 
 import java.lang.reflect.Field;
 
-import static android.test.MoreAsserts.assertMatchesRegex;
-import static android.test.MoreAsserts.assertNotEqual;
 import static linux.Errno.*;
 import static linux.Str.strerror;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 
 public final class StrTest {
@@ -23,7 +22,6 @@ public final class StrTest {
         assertEquals("ENXIO", "No such device or address", strerror(ENXIO));
         assertEquals("E2BIG", "Argument list too long", strerror(E2BIG));
         assertEquals("ENOEXEC", "Exec format error", strerror(ENOEXEC));
-        assertMatchesRegex("EBADF", "Bad file number|Bad file descriptor", strerror(EBADF));
         assertEquals("ECHILD", "No child processes", strerror(ECHILD));
         assertEquals("EAGAIN", "Try again", strerror(EAGAIN));
         assertEquals("EWOULDBLOCK", "Try again", strerror(EWOULDBLOCK));
@@ -151,7 +149,7 @@ public final class StrTest {
     @Test
     public void strerror_can_handle_all_errno() throws Exception {
         Field[] fields = Errno.class.getFields();
-        assertNotEqual(0, fields.length);
+        assertNotEquals(0, fields.length);
         for (Field field : fields) {
             assertNotNull(strerror(field.getInt(null)));
         }

@@ -32,8 +32,8 @@ dependencies {
     implementation project(':ui-base')
     implementation project(':ui-preview-pdf')
     implementation 'com.caverock:androidsvg:1.2.1'
-    implementation "androidx.core:core:$supportLibVersion"
-    implementation "androidx.annotation:annotation:$supportLibVersion"
+    implementation "androidx.core:core:$androidCoreVersion"
+    implementation "androidx.annotation:annotation:$androidAnnotationVersion"
 
     androidTestImplementation project(':testing-fs')
 

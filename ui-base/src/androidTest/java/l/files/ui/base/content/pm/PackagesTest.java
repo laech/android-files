@@ -15,10 +15,10 @@ import l.files.ui.base.graphics.Rect;
 import l.files.ui.base.graphics.ScaledBitmap;
 
 import static androidx.test.InstrumentationRegistry.getContext;
-import static android.test.MoreAsserts.assertNotEqual;
 import static java.io.File.createTempFile;
 import static l.files.ui.base.content.pm.Packages.getApkIconBitmap;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -48,7 +48,7 @@ public final class PackagesTest {
             Rect max = Rect.of(1, 1);
             ScaledBitmap result = getApkIconBitmap(path, max, getPackageManager());
             assertNotNull(result);
-            assertNotEqual(max, result);
+            assertNotEquals(max, result);
             assertEquals(max, Rect.of(result.bitmap()));
         });
     }

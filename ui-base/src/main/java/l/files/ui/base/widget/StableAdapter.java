@@ -42,7 +42,7 @@ public abstract class StableAdapter<T, VH extends ViewHolder> extends Adapter<VH
 
     @Override
     public long getItemId(int position) {
-        Object object = getItemIdObject(getItem(position));
+        Object object = getItemIdObjectAt(position);
         Long id = ids.get(object);
         if (id == null) {
             id = ids.size() + 1L;
@@ -64,5 +64,9 @@ public abstract class StableAdapter<T, VH extends ViewHolder> extends Adapter<VH
         return items.get(position);
     }
 
-    public abstract Object getItemIdObject(T item);
+    public Object getItemIdObjectAt(int position) {
+        return getItemIdObject(getItem(position));
+    }
+
+    protected abstract Object getItemIdObject(T item);
 }

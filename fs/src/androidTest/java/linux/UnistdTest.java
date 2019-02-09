@@ -11,7 +11,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 
-import static android.test.MoreAsserts.assertNotEqual;
 import static java.io.File.createTempFile;
 import static linux.Errno.EACCES;
 import static linux.Errno.ENOENT;
@@ -21,6 +20,7 @@ import static linux.Unistd.R_OK;
 import static linux.Unistd.W_OK;
 import static linux.Unistd.X_OK;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -29,14 +29,14 @@ public final class UnistdTest {
     @Test
     public void constants_are_initialized() throws Exception {
         Field[] fields = Unistd.class.getFields();
-        assertNotEqual(0, fields.length);
+        assertNotEquals(0, fields.length);
         for (Field field : fields) {
-            assertNotEqual(field.getName(), Unistd.placeholder(), field.getByte(null));
+            assertNotEquals(field.getName(), Unistd.placeholder(), field.getByte(null));
         }
     }
 
     @Test
-    public void access_throws_NullPointerException_on_null_path() throws Exception {
+    public void access_throws_NullPointerException_on_null_path() {
         try {
             Unistd.access(null, F_OK);
             fail();

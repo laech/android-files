@@ -21,7 +21,6 @@ import java.util.Set;
 import l.files.testing.fs.PathBaseTest;
 import linux.ErrnoException;
 
-import static android.test.MoreAsserts.assertNotEqual;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Stat.chmod;
 import static l.files.fs.Stat.fstat;
@@ -34,6 +33,7 @@ import static linux.Unistd.close;
 import static linux.Unistd.symlink;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -60,19 +60,19 @@ public final class StatTest extends PathBaseTest {
     public void constants_are_initialized() throws Exception {
         Field[] fields = Stat.class.getDeclaredFields();
         Set<Integer> values = new HashSet<>();
-        assertNotEqual(0, fields.length);
+        assertNotEquals(0, fields.length);
         for (Field field : fields) {
             if (Modifier.isStatic(field.getModifiers()) &&
                     field.getType() == int.class) {
                 field.setAccessible(true);
                 int value = field.getInt(null);
-                assertNotEqual(field.getName(), Stat.placeholder(), value);
+                assertNotEquals(field.getName(), Stat.placeholder(), value);
                 if (!values.add(value)) {
                     fail("Failed to add " + field.getName() + "=" + value);
                 }
             }
         }
-        assertNotEqual(0, values.size());
+        assertNotEquals(0, values.size());
     }
 
     private File createNonEmptyFile() throws IOException {
@@ -189,8 +189,8 @@ public final class StatTest extends PathBaseTest {
         File link = new File(file.getParent(), file.getName() + "-link");
         symlink(file.getPath().getBytes(), link.getPath().getBytes());
         Stat stat = lstat(link.getPath().getBytes());
-        assertEquals(true, stat.isSymbolicLink());
-        assertNotEqual(file.length(), stat.size());
+        assertTrue(stat.isSymbolicLink());
+        assertNotEquals(file.length(), stat.size());
     }
 
     @Test
@@ -204,7 +204,7 @@ public final class StatTest extends PathBaseTest {
     }
 
     @Test
-    public void chmod_throws_ErrnoException_if_path_does_not_exist() throws Exception {
+    public void chmod_throws_ErrnoException_if_path_does_not_exist() {
         try {
             chmod("/abc".getBytes(), 0);
             fail();
@@ -245,7 +245,7 @@ public final class StatTest extends PathBaseTest {
     }
 
     @Test
-    public void mkdir_throws_ErrnoException_if_parent_does_not_exist() throws Exception {
+    public void mkdir_throws_ErrnoException_if_parent_does_not_exist() {
         File dir = new File("/abc/def");
         try {
             mkdir(dir.getPath().getBytes(), 0);

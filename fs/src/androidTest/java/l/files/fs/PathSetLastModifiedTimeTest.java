@@ -15,12 +15,12 @@ import l.files.testing.fs.Paths;
 
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
-import static android.test.MoreAsserts.assertNotEqual;
 import static l.files.fs.Instant.EPOCH;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static linux.Limits.NAME_MAX;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.fail;
 
 public final class PathSetLastModifiedTimeTest extends PathBaseTest {
@@ -44,7 +44,7 @@ public final class PathSetLastModifiedTimeTest extends PathBaseTest {
 
         assertEquals(fileTime, file.stat(NOFOLLOW).lastModifiedTime());
         assertEquals(linkTime, link.stat(NOFOLLOW).lastModifiedTime());
-        assertNotEqual(fileTime, linkTime);
+        assertNotEquals(fileTime, linkTime);
     }
 
     @Test
@@ -59,7 +59,7 @@ public final class PathSetLastModifiedTimeTest extends PathBaseTest {
 
         assertEquals(fileTime, file.stat(NOFOLLOW).lastModifiedTime());
         assertEquals(linkTime, link.stat(NOFOLLOW).lastModifiedTime());
-        assertNotEqual(fileTime, linkTime);
+        assertNotEquals(fileTime, linkTime);
     }
 
     private Instant newInstant() {

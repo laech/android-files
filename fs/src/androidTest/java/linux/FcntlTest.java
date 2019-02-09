@@ -15,11 +15,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import static android.test.MoreAsserts.assertNotEqual;
 import static linux.Errno.ENOENT;
 import static linux.Fcntl.O_WRONLY;
 import static linux.Fcntl.placeholder;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -31,9 +31,9 @@ public final class FcntlTest {
     @Test
     public void constants_are_initialized() throws Exception {
         Field[] fields = Fcntl.class.getFields();
-        assertNotEqual(0, fields.length);
+        assertNotEquals(0, fields.length);
         for (Field field : fields) {
-            assertNotEqual(placeholder(), field.getInt(null));
+            assertNotEquals(placeholder(), field.getInt(null));
         }
     }
 

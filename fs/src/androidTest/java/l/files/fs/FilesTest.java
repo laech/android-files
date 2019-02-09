@@ -19,17 +19,17 @@ import l.files.fs.exception.DirectoryNotEmpty;
 import l.files.testing.fs.PathBaseTest;
 import l.files.testing.fs.Paths;
 
-import static android.test.MoreAsserts.assertNotEqual;
-import static l.files.base.io.Charsets.UTF_8;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
+import static l.files.base.io.Charsets.UTF_8;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Permission.OWNER_READ;
 import static l.files.fs.Stat.stat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -268,7 +268,7 @@ public final class FilesTest extends PathBaseTest {
         Stat actual = child.stat(NOFOLLOW);
         assertTrue(actual.isSymbolicLink());
         assertFalse(actual.isDirectory());
-        assertNotEqual(dir1().stat(NOFOLLOW), actual);
+        assertNotEquals(dir1().stat(NOFOLLOW), actual);
     }
 
     @Test
@@ -471,7 +471,7 @@ public final class FilesTest extends PathBaseTest {
         assertTrue(link.stat(NOFOLLOW).permissions().contains(perm));
     }
 
-    private List<Path> sortByName(List<Path> files) throws IOException {
+    private List<Path> sortByName(List<Path> files) {
         Collections.sort(files, (a, b) -> {
             String aName = a.name().toString();
             String bName = b.name().toString();

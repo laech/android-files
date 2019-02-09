@@ -1,7 +1,5 @@
 package l.files.fs;
 
-import android.test.MoreAsserts;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -13,12 +11,14 @@ import java.util.HashSet;
 import l.files.testing.fs.PathBaseTest;
 import l.files.testing.fs.Paths;
 
-import static l.files.base.io.Charsets.UTF_8;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
+import static l.files.base.io.Charsets.UTF_8;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(Parameterized.class)
@@ -79,7 +79,8 @@ public final class PathInvalidUtf8Test extends PathBaseTest {
         assertEquals(singleton(file), dir.list(new HashSet<>()));
 
         Name name = dir.name();
-        MoreAsserts.assertEquals(invalidUtf8.clone(), name.toByteArray());
+        assertNotNull(name);
+        assertArrayEquals(invalidUtf8.clone(), name.toByteArray());
         assertEquals(new String(invalidUtf8.clone(), UTF_8), name.toString());
         assertFalse(Arrays.equals(invalidUtf8.clone(), name.toString().getBytes(UTF_8)));
     }

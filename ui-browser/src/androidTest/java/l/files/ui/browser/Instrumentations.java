@@ -1,13 +1,13 @@
 package l.files.ui.browser;
 
 import android.app.Instrumentation;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 import android.view.View;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 import l.files.base.Consumer;
 import l.files.base.Provider;
 import l.files.ui.base.widget.StableAdapter;
@@ -17,7 +17,7 @@ import static android.os.Looper.myLooper;
 import static android.os.SystemClock.sleep;
 import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 import static java.lang.System.currentTimeMillis;
-import static java.util.concurrent.TimeUnit.MINUTES;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -72,12 +72,12 @@ final class Instrumentations {
     }
 
     static <T> T await(Callable<T> callable) {
-        return await(callable, 1, MINUTES);
+        return await(callable, 10, SECONDS);
     }
 
     static <T> T awaitOnMainThread(
             Instrumentation in, Callable<T> callable) {
-        return await(new InstrumentCallable<>(in, callable), 1, MINUTES);
+        return await(new InstrumentCallable<>(in, callable), 10, SECONDS);
     }
 
     static void awaitOnMainThread(Instrumentation in, Runnable runnable) {
@@ -144,7 +144,6 @@ final class Instrumentations {
             Provider<RecyclerView> recycler,
             Object itemId) {
         findItemOnMainThread(in, recycler, itemId, input -> {
-            assertTrue(input.isEnabled());
             assertTrue(input.performLongClick());
         });
     }
@@ -176,7 +175,7 @@ final class Instrumentations {
                     fail();
                 }
                 if (position == i) {
-                    Object thatId = adapter.getItemIdObject(position);
+                    Object thatId = adapter.getItemIdObjectAt(position);
                     if (itemId.equals(thatId)) {
                         consumer.accept(child);
                         return;

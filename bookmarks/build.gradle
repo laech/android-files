@@ -22,7 +22,7 @@ dependencies {
 
     implementation project(':base')
     implementation project(':fs')
-    implementation "androidx.annotation:annotation:$supportLibVersion"
+    implementation "androidx.annotation:annotation:$androidAnnotationVersion"
 
     androidTestImplementation project(':testing-fs')
 

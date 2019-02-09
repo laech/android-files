@@ -13,7 +13,6 @@ import java.util.Set;
 
 import linux.Dirent.DIR;
 
-import static android.test.MoreAsserts.assertNotEqual;
 import static junit.framework.Assert.assertTrue;
 import static linux.Dirent.DT_DIR;
 import static linux.Dirent.DT_REG;
@@ -23,6 +22,8 @@ import static linux.Dirent.placeholder;
 import static linux.Dirent.readdir;
 import static linux.Errno.ENOENT;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 public final class DirentTest {
@@ -49,11 +50,11 @@ public final class DirentTest {
         for (Field field : fields) {
             if (Modifier.isStatic(field.getModifiers())) {
                 byte value = field.getByte(null);
-                assertNotEqual(placeholder(), value);
+                assertNotEquals(placeholder(), value);
                 assertTrue(values.add(value));
             }
         }
-        assertNotEqual(0, values.size());
+        assertNotEquals(0, values.size());
     }
 
 
@@ -72,20 +73,20 @@ public final class DirentTest {
             try {
 
                 Dirent self = readdir(dir, new Dirent());
-                assertNotEqual(0, self.d_ino);
+                assertNotEquals(0, self.d_ino);
                 assertEquals(DT_DIR, self.d_type);
                 assertEquals(1, self.d_name_len);
                 assertEquals('.', self.d_name[0]);
 
                 Dirent parent = readdir(dir, new Dirent());
-                assertNotEqual(0, parent.d_ino);
+                assertNotEquals(0, parent.d_ino);
                 assertEquals(DT_DIR, parent.d_type);
                 assertEquals(2, parent.d_name_len);
                 assertEquals('.', parent.d_name[0]);
                 assertEquals('.', parent.d_name[1]);
 
                 Dirent child = readdir(dir, new Dirent());
-                assertNotEqual(0, child.d_ino);
+                assertNotEquals(0, child.d_ino);
                 assertEquals(DT_REG, child.d_type);
                 assertEquals(5, child.d_name_len);
                 assertEquals('c', child.d_name[0]);
@@ -94,7 +95,7 @@ public final class DirentTest {
                 assertEquals('l', child.d_name[3]);
                 assertEquals('d', child.d_name[4]);
 
-                assertEquals(null, readdir(dir, new Dirent()));
+                assertNull(readdir(dir, new Dirent()));
 
             } finally {
                 closedir(dir);

@@ -13,7 +13,6 @@ import l.files.testing.fs.Paths;
 
 import static android.os.Environment.getExternalStorageDirectory;
 import static androidx.test.InstrumentationRegistry.getInstrumentation;
-import static android.test.MoreAsserts.assertNotEqual;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.asList;
 import static java.util.concurrent.TimeUnit.DAYS;
@@ -21,6 +20,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.base.io.Charsets.UTF_8;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static org.junit.Assert.assertNotEquals;
 
 public final class ManualInspectionTest {
 
@@ -72,7 +72,7 @@ public final class ManualInspectionTest {
     private void createNonUtf8Dir() throws IOException {
 
         byte[] nonUtf8 = {-19, -96, -67, -19, -80, -117};
-        assertNotEqual(nonUtf8.clone(), new String(nonUtf8.clone(), UTF_8).getBytes(UTF_8));
+        assertNotEquals(nonUtf8.clone(), new String(nonUtf8.clone(), UTF_8).getBytes(UTF_8));
 
         Path dir = Path.of(getExternalStorageDirectory()).concat(nonUtf8);
         Path child = dir.concat("good we can see this dir");

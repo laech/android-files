@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 
-import static android.test.MoreAsserts.assertNotEqual;
 import static java.io.File.createTempFile;
 import static linux.Errno.EBADF;
 import static linux.Inotify.IN_ALL_EVENTS;
@@ -15,6 +14,7 @@ import static linux.Inotify.inotify_init;
 import static linux.Inotify.inotify_rm_watch;
 import static linux.Unistd.close;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -23,9 +23,9 @@ public final class InotifyTest {
     @Test
     public void constants_are_initialized() throws Exception {
         Field[] fields = Inotify.class.getFields();
-        assertNotEqual(0, fields.length);
+        assertNotEquals(0, fields.length);
         for (Field field : fields) {
-            assertNotEqual(Inotify.placeholder(), field.getInt(null));
+            assertNotEquals(Inotify.placeholder(), field.getInt(null));
         }
     }
 

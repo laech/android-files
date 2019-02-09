@@ -26,7 +26,7 @@ android {
 
 dependencies {
     implementation project(':base')
-    implementation "androidx.annotation:annotation:$supportLibVersion"
+    implementation "androidx.annotation:annotation:$androidAnnotationVersion"
 
     androidTestImplementation project(':testing')
     androidTestImplementation 'junit:junit:4.12'

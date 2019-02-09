@@ -2,7 +2,6 @@ package l.files.ui.browser;
 
 import android.content.Context;
 import android.content.Intent;
-import androidx.test.runner.AndroidJUnit4;
 import android.util.Log;
 
 import org.junit.Test;
@@ -13,6 +12,7 @@ import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.Date;
 
+import androidx.test.runner.AndroidJUnit4;
 import l.files.fs.Instant;
 import l.files.fs.Path;
 import l.files.fs.Permission;
@@ -20,7 +20,6 @@ import l.files.fs.Stat;
 import l.files.testing.fs.Paths;
 
 import static android.os.Build.VERSION.SDK_INT;
-import static android.test.MoreAsserts.assertNotEqual;
 import static android.text.format.DateFormat.getDateFormat;
 import static android.text.format.DateFormat.getTimeFormat;
 import static android.text.format.DateUtils.FORMAT_ABBREV_MONTH;
@@ -38,6 +37,7 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.ui.browser.sort.FileSort.NAME;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
@@ -102,7 +102,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
     public void can_navigate_into_non_utf8_named_dir() throws Exception {
 
         byte[] nonUtf8Name = {-19, -96, -67, -19, -80, -117};
-        assertNotEqual(
+        assertNotEquals(
                 nonUtf8Name.clone(),
                 new String(nonUtf8Name.clone(), UTF_8).getBytes(UTF_8)
         );
@@ -377,7 +377,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
         modify(file);
 
         screen().assertSummary(file, summary ->
-                assertNotEqual(chars[0], summary));
+                assertNotEquals(chars[0], summary));
     }
 
     private void testUpdatesDateViewOnChildModified(Path file)
@@ -392,7 +392,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
         modify(file);
 
         screen().assertSummary(file, summary ->
-                assertNotEqual(date[0], summary));
+                assertNotEquals(date[0], summary));
     }
 
     private void modify(Path file) throws IOException {
@@ -404,7 +404,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
             Paths.appendUtf8(file, "test");
         }
         Instant lastModifiedAfter = file.stat(NOFOLLOW).lastModifiedTime();
-        assertNotEqual(lastModifiedBefore, lastModifiedAfter);
+        assertNotEquals(lastModifiedBefore, lastModifiedAfter);
     }
 
 }

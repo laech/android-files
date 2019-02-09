@@ -7,9 +7,9 @@ import java.lang.reflect.Field;
 
 import linux.Vfs.Statfs;
 
-import static android.test.MoreAsserts.assertNotEqual;
 import static linux.Vfs.statfs;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.fail;
 
 public final class VfsTest {
@@ -17,9 +17,9 @@ public final class VfsTest {
     @Test
     public void constants_are_initialized() throws Exception {
         Field[] fields = Vfs.class.getFields();
-        assertNotEqual(0, fields.length);
+        assertNotEquals(0, fields.length);
         for (Field field : fields) {
-            assertNotEqual(field.getName(), Vfs.placeholder(), field.getLong(null));
+            assertNotEquals(field.getName(), Vfs.placeholder(), field.getLong(null));
         }
     }
 
@@ -48,14 +48,14 @@ public final class VfsTest {
 
         Statfs statfs = new Statfs();
         Field[] fields = Statfs.class.getFields();
-        assertNotEqual(0, fields.length);
+        assertNotEquals(0, fields.length);
         for (Field field : fields) {
             assertEquals(Vfs.placeholder(), field.getLong(statfs));
         }
 
         statfs("/".getBytes(), statfs);
         for (Field field : fields) {
-            assertNotEqual(Vfs.placeholder(), field.getLong(statfs));
+            assertNotEquals(Vfs.placeholder(), field.getLong(statfs));
         }
     }
 

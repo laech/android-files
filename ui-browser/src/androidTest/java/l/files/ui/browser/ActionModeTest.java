@@ -1,9 +1,6 @@
 package l.files.ui.browser;
 
-import androidx.test.runner.AndroidJUnit4;
-
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import l.files.fs.Path;
 import l.files.fs.Permission;
@@ -11,7 +8,6 @@ import l.files.testing.fs.Paths;
 
 import static l.files.ui.browser.sort.FileSort.NAME;
 
-@RunWith(AndroidJUnit4.class)
 public final class ActionModeTest extends BaseFilesActivityTest {
 
     @Test

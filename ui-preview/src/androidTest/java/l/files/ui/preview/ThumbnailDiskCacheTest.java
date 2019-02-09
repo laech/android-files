@@ -13,12 +13,12 @@ import l.files.ui.base.graphics.ScaledBitmap;
 import static android.graphics.Bitmap.Config.ARGB_8888;
 import static android.graphics.Bitmap.createBitmap;
 import static android.graphics.Color.BLUE;
-import static android.test.MoreAsserts.assertNotEqual;
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -75,7 +75,7 @@ public final class ThumbnailDiskCacheTest
 
         cache.get(file, stat, constraint, true);
         Instant newTime = cacheFile.stat(NOFOLLOW).lastModifiedTime();
-        assertNotEqual(oldTime, newTime);
+        assertNotEquals(oldTime, newTime);
         assertTrue(oldTime.to(DAYS) < newTime.to(DAYS));
     }
 
