@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:layout_gravity="center_horizontal"
     android:columnCount="2"
-    android:padding="16dp"
+    android:padding="24dp"
     android:rowCount="2"
     android:useDefaultMargins="true">
 

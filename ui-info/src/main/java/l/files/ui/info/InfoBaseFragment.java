@@ -1,12 +1,14 @@
 package l.files.ui.info;
 
 import android.os.Bundle;
+
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.loader.app.LoaderManager.LoaderCallbacks;
 import androidx.loader.content.Loader;
 import androidx.appcompat.app.AppCompatDialogFragment;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,12 +55,6 @@ public abstract class InfoBaseFragment
 
     public CharSequence getDisplayedSizeOnDisk() {
         return sizeOnDiskView.getText();
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setStyle(STYLE_NO_FRAME, R.style.Theme_Dialog_NoTitle);
     }
 
     @Override
