@@ -15,7 +15,6 @@ buildscript {
     ext.targetSdkVersion = 28
     ext.compileSdkVersion = 28
     ext.buildToolsVersion = '28.0.3'
-    ext.supportLibVersion = '1.0.0-beta01'
     ext.mockitoVersion = '2.24.0'
     ext.androidTestRunnerVersion = '1.1.1'
     ext.androidTestRulesVersion = '1.1.1'
@@ -25,6 +24,8 @@ buildscript {
     ext.androidRecyclerViewVersion = '1.0.0'
     ext.androidFragmentVersion = '1.0.0'
     ext.androidAppCompatVersion = '1.0.2'
+    ext.androidCardViewVersion = '1.0.0'
+    ext.androidMaterialVersion = '1.0.0'
 
 }
 
