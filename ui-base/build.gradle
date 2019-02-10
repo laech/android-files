@@ -29,6 +29,7 @@ dependencies {
     implementation "androidx.appcompat:appcompat:$androidAppCompatVersion"
     implementation "androidx.annotation:annotation:$androidAnnotationVersion"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "com.google.android.material:material:$androidMaterialVersion"
 
     androidTestImplementation project(':testing-fs')
     androidTestImplementation "androidx.test:runner:$androidTestRunnerVersion"

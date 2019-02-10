@@ -3,15 +3,19 @@ package l.files.ui.browser;
 import android.content.Context;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import com.google.android.material.textfield.TextInputLayout;
+
 import androidx.fragment.app.FragmentActivity;
 import androidx.loader.app.LoaderManager.LoaderCallbacks;
 import androidx.loader.content.AsyncTaskLoader;
 import androidx.loader.content.Loader;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDialogFragment;
+
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputFilter.LengthFilter;
@@ -64,13 +68,14 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
     public void onStart() {
         super.onStart();
 
+        AlertDialog dialog = getDialog();
+
         if (layout == null) {
-            layout = getDialog().findViewById(R.id.text_layout);
-            layout.setHint(getString(getTitleResourceId()));
+            layout = dialog.findViewById(R.id.text_layout);
         }
 
         if (editText == null) {
-            editText = getDialog().findViewById(R.id.file_name);
+            editText = dialog.findViewById(R.id.file_name);
             editText.setFilters(new InputFilter[]{new LengthFilter(255)});
             editText.addTextChangedListener(new FileTextWatcher());
             editText.setOnEditorActionListener(new OkActionListener());
@@ -82,7 +87,7 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
             restartChecker();
         }
 
-        Window window = getDialog().getWindow();
+        Window window = dialog.getWindow();
         if (window != null) {
             window.setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_VISIBLE);
         }
@@ -99,6 +104,7 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
 
         return new AlertDialog.Builder(activity)
                 .setView(view)
+                .setTitle(getTitleResourceId())
                 .setPositiveButton(android.R.string.ok, this)
                 .setNegativeButton(android.R.string.cancel, null)
                 .create();

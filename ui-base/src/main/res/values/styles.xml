@@ -1,24 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="Theme" parent="Theme.MaterialComponents.Light.DarkActionBar">
         <item name="android:windowBackground">@drawable/window_background</item>
         <item name="colorPrimaryDark">@color/color_primary_dark</item>
         <item name="colorPrimary">@color/color_primary</item>
-        <item name="actionBarTheme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
+        <item name="actionBarTheme">@style/ThemeOverlay.MaterialComponents.Dark.ActionBar</item>
+        <item name="alertDialogTheme">@style/Theme.MaterialComponents.Light.Dialog.Alert</item>
     </style>
 
-    <style name="Theme.Dialog" parent="Theme.AppCompat.Light.Dialog" />
+    <style name="Theme.Dialog" parent="Theme.MaterialComponents.Light.Dialog" />
 
     <style name="Theme.Dialog.NoTitle">
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="Toolbar" parent="Theme.AppCompat">
+    <style name="Toolbar" parent="Theme.MaterialComponents">
         <item name="android:textColorSecondary">?android:attr/textColorPrimary</item>
     </style>
 
-    <style name="ToolbarPopup" parent="Theme.AppCompat.Light" />
+    <style name="ToolbarPopup" parent="Theme.MaterialComponents.Light" />
 
     <style name="ToolbarTitle" parent="TextAppearance.AppCompat.Widget.ActionBar.Title" />
 
