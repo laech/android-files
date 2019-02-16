@@ -103,11 +103,6 @@ public final class FilesActivity extends BaseActivity implements
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setDisplayShowTitleEnabled(false);
 
-        if (SDK_INT <= LOLLIPOP) {
-            findViewById(R.id.toolbar_shadow).setVisibility(VISIBLE);
-            drawer.setDrawerShadow(R.drawable.drawer_shadow, START);
-        }
-
         setOptionsMenu(OptionsMenus.compose(
                 new ActionBarDrawerToggleMenu(drawer, getSupportFragmentManager()),
                 new GoBackOnHomePressedMenu(this),
