@@ -1,21 +1,20 @@
 package l.files.fs;
 
+import linux.ErrnoException;
+import linux.Unistd;
+
 import java.lang.ref.WeakReference;
 import java.util.HashSet;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import linux.ErrnoException;
-import linux.Unistd;
-
 import static l.files.base.Throwables.addSuppressed;
 import static linux.Errno.EAGAIN;
 import static linux.Errno.ENOSPC;
-import static linux.Inotify.inotify_add_watch;
-import static linux.Inotify.inotify_init;
-import static linux.Inotify.inotify_rm_watch;
+import static linux.Inotify.*;
 
 final class InotifyTracker {
 
@@ -34,9 +33,8 @@ final class InotifyTracker {
     private InotifyTracker() {
     }
 
-    Tracker registerTracker(Tracker tracker) {
+    void registerTracker(Tracker tracker) {
         trackers.add(new WeakReference<>(tracker));
-        return tracker;
     }
 
     void unregisterTracker(Tracker tracker) {
@@ -59,7 +57,7 @@ final class InotifyTracker {
 
         } catch (Throwable e) {
             try {
-                close(fd);
+                close(OptionalInt.of(fd), e);
             } catch (Throwable sup) {
                 addSuppressed(e, sup);
             }
@@ -182,20 +180,19 @@ final class InotifyTracker {
         }
     }
 
-    void close(int fd) throws ErrnoException {
-        Unistd.close(fd);
-        entries.remove(fd);
-        notifyClose(fd);
+    void close(OptionalInt fd, Throwable cause) throws ErrnoException {
+        if (fd.isPresent()) {
+            Unistd.close(fd.getAsInt());
+            entries.remove(fd.getAsInt());
+        }
+        notifyClose(fd, cause);
     }
 
-    private void notifyClose(int fd) {
-        if (trackers.isEmpty()) {
-            return;
-        }
+    private void notifyClose(OptionalInt fd, Throwable cause) {
         for (WeakReference<Tracker> ref : trackers) {
             Tracker tracker = ref.get();
             if (tracker != null) {
-                tracker.onClose(fd);
+                tracker.onClose(fd, cause);
             } else {
                 // CopyOnWriteArrayList okay to remove while iterating
                 trackers.remove(ref);
@@ -203,7 +200,7 @@ final class InotifyTracker {
         }
     }
 
-    private final class Entry {
+    private static final class Entry {
 
         private final Set<Integer> wds = new HashSet<>();
         private final int watchLimit;
@@ -212,7 +209,7 @@ final class InotifyTracker {
             this.watchLimit = watchLimit;
         }
 
-        void add(int wd) throws ErrnoException {
+        void add(int wd) {
             synchronized (this) {
                 wds.add(wd);
             }
@@ -240,7 +237,7 @@ final class InotifyTracker {
 
         void onWatchRemoved(int fd, int wd);
 
-        void onClose(int fd);
+        void onClose(OptionalInt fd, Throwable cause);
 
     }
 

@@ -1,25 +1,6 @@
 package l.files.fs;
 
 import android.os.Build;
-
-import org.junit.Test;
-import org.mockito.AdditionalMatchers;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InOrder;
-
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.CountDownLatch;
-
 import l.files.fs.Path.Consumer;
 import l.files.fs.event.Event;
 import l.files.fs.event.Observation;
@@ -27,6 +8,18 @@ import l.files.fs.event.Observer;
 import l.files.fs.exception.AlreadyExist;
 import l.files.testing.fs.PathBaseTest;
 import l.files.testing.fs.Paths;
+import org.junit.Test;
+import org.mockito.AdditionalMatchers;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.CountDownLatch;
 
 import static java.lang.Integer.parseInt;
 import static java.lang.Math.random;
@@ -41,30 +34,13 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.ObservableTest.Recorder.observe;
 import static l.files.fs.Permission.OWNER_EXECUTE;
 import static l.files.fs.Permission.OWNER_WRITE;
-import static l.files.fs.event.Event.CREATE;
-import static l.files.fs.event.Event.DELETE;
-import static l.files.fs.event.Event.MODIFY;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static l.files.fs.event.Event.*;
+import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.AdditionalMatchers.aryEq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.notNull;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.*;
 
 public final class ObservableTest extends PathBaseTest {
 
@@ -113,6 +89,9 @@ public final class ObservableTest extends PathBaseTest {
         try (Tracker tracker = registerMockTracker();
              Recorder observer = observe(Path.of("/proc/self"), FOLLOW, false)) {
             assertTrue(observer.isClosed());
+            assertNotNull(observer.closeReason);
+            assertEquals("procfs not supported", observer.closeReason.getMessage());
+            verify(tracker).onClose(any(), any());
             verifyZeroInteractions(tracker);
         }
     }
@@ -309,7 +288,7 @@ public final class ObservableTest extends PathBaseTest {
             );
             verify(tracker).onWatchRemoved(fd.getValue(), wd.getAllValues().get(0));
             verify(tracker).onWatchRemoved(fd.getValue(), wd.getAllValues().get(1));
-            verify(tracker).onClose(fd.getValue());
+            verify(tracker).onClose(eq(OptionalInt.of(fd.getValue())), any());
 
         }
     }
@@ -320,7 +299,7 @@ public final class ObservableTest extends PathBaseTest {
         try (Tracker tracker = registerMockTracker()) {
             Paths.observe(dir1(), NOFOLLOW, mock(Observer.class)).close();
             verify(tracker).onInit(fd.capture());
-            verify(tracker).onClose(fd.getValue());
+            verify(tracker).onClose(eq(OptionalInt.of(fd.getValue())), any());
         }
     }
 
@@ -794,6 +773,7 @@ public final class ObservableTest extends PathBaseTest {
 
             try (Tracker tracker = registerMockTracker()) {
                 Recorder observer = new Recorder(file);
+                InotifyTracker.get().registerTracker(observer);
                 observer.observation = Paths.observe(file, option, observer);
                 if (verifyTracker) {
                     if (observer.observation.isClosed()) {
@@ -801,8 +781,6 @@ public final class ObservableTest extends PathBaseTest {
                     }
                     verifyTracker(observer, tracker, file, option);
                 }
-
-                InotifyTracker.get().registerTracker(observer);
                 return observer;
             }
         }
@@ -1063,7 +1041,7 @@ public final class ObservableTest extends PathBaseTest {
                 verify(tracker).onWatchRemoved(fd, wd);
             }
             verify(tracker).onWatchRemoved(fd, wd);
-            verify(tracker).onClose(fd);
+            verify(tracker).onClose(eq(OptionalInt.of(fd)), any());
             verifyNoMoreInteractions(tracker);
         }
 
@@ -1115,12 +1093,15 @@ public final class ObservableTest extends PathBaseTest {
 
     public static abstract class Tracker implements InotifyTracker.Tracker, Closeable {
 
+        volatile Throwable closeReason;
+
         @Override
         public void close() throws IOException {
         }
 
         @Override
-        public void onClose(int fd) {
+        public void onClose(OptionalInt fd, Throwable cause) {
+            this.closeReason = cause;
         }
 
         @Override

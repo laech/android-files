@@ -2,17 +2,7 @@ package l.files.fs;
 
 import android.os.Handler;
 import android.util.Log;
-
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-
 import androidx.annotation.Nullable;
-
 import l.files.fs.Path.Consumer;
 import l.files.fs.event.Event;
 import l.files.fs.event.Observation;
@@ -22,6 +12,15 @@ import linux.Dirent.DIR;
 import linux.ErrnoException;
 import linux.Vfs.Statfs;
 
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.OptionalInt;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
 import static android.os.Looper.getMainLooper;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.setThreadPriority;
@@ -29,32 +28,9 @@ import static java.lang.Thread.currentThread;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.base.Throwables.addSuppressed;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.fs.event.Event.CREATE;
-import static l.files.fs.event.Event.DELETE;
-import static l.files.fs.event.Event.MODIFY;
-import static linux.Errno.EACCES;
-import static linux.Errno.EINVAL;
-import static linux.Errno.ENOENT;
-import static linux.Errno.ENOMEM;
-import static linux.Errno.ENOSPC;
-import static linux.Inotify.IN_ACCESS;
-import static linux.Inotify.IN_ATTRIB;
-import static linux.Inotify.IN_CLOSE_NOWRITE;
-import static linux.Inotify.IN_CLOSE_WRITE;
-import static linux.Inotify.IN_CREATE;
-import static linux.Inotify.IN_DELETE;
-import static linux.Inotify.IN_DELETE_SELF;
-import static linux.Inotify.IN_DONT_FOLLOW;
-import static linux.Inotify.IN_IGNORED;
-import static linux.Inotify.IN_ISDIR;
-import static linux.Inotify.IN_MODIFY;
-import static linux.Inotify.IN_MOVED_FROM;
-import static linux.Inotify.IN_MOVED_TO;
-import static linux.Inotify.IN_MOVE_SELF;
-import static linux.Inotify.IN_ONLYDIR;
-import static linux.Inotify.IN_OPEN;
-import static linux.Inotify.IN_Q_OVERFLOW;
-import static linux.Inotify.IN_UNMOUNT;
+import static l.files.fs.event.Event.*;
+import static linux.Errno.*;
+import static linux.Inotify.*;
 import static linux.Vfs.PROC_SUPER_MAGIC;
 import static linux.Vfs.statfs;
 
@@ -162,8 +138,8 @@ final class Observable extends Native
 
     private final InotifyTracker inotify = InotifyTracker.get();
 
-    private volatile int fd = -1;
-    private volatile int wd = -1;
+    private volatile OptionalInt fd = OptionalInt.empty();
+    private volatile OptionalInt wd = OptionalInt.empty();
 
     private final Path root;
 
@@ -204,10 +180,18 @@ final class Observable extends Native
         this.tag = tag;
     }
 
+    private static int getOrThrow(OptionalInt optional) {
+        if (!optional.isPresent()) {
+            throw new IllegalStateException();
+        }
+        return optional.getAsInt();
+    }
+
     void start(
             LinkOption option,
             Consumer childrenConsumer,
-            int watchLimit)
+            int watchLimit
+    )
             throws IOException, InterruptedException {
 
         requireNonNull(option);
@@ -215,14 +199,16 @@ final class Observable extends Native
 
         try {
             if (!isProcfs(root.toByteArray())) {
-                fd = inotify.init(watchLimit);
-                wd = inotifyAddWatchWillCloseOnError(option);
+                int fd = inotify.init(watchLimit);
+                int wd = inotifyAddWatchWillCloseOnError(fd, option);
+                this.fd = OptionalInt.of(fd);
+                this.wd = OptionalInt.of(wd);
             } else {
                 doClose(new IOException("procfs not supported"));
             }
         } catch (ErrnoException e) {
-            fd = -1;
-            wd = -1;
+            fd = OptionalInt.empty();
+            wd = OptionalInt.empty();
             suppressedClose(e);
             notifyIncompleteObservationOrClose(e, root);
             return;
@@ -240,7 +226,7 @@ final class Observable extends Native
              * allows them to happen at the same time, just need to make sure the
              * latest one wins.
              */
-            if (fd != -1) {
+            if (fd.isPresent()) {
                 thread = new Thread(this);
                 thread.setName(toString());
                 thread.start();
@@ -261,7 +247,8 @@ final class Observable extends Native
 
     }
 
-    private int inotifyAddWatchWillCloseOnError(LinkOption opt) throws ErrnoException {
+    private int inotifyAddWatchWillCloseOnError(int fd, LinkOption opt)
+            throws ErrnoException {
 
         try {
 
@@ -282,7 +269,8 @@ final class Observable extends Native
             Consumer childrenConsumer
     ) throws IOException, InterruptedException {
 
-        boolean limitReached = fd == -1;
+        OptionalInt fd = this.fd;
+        boolean limitReached = !fd.isPresent();
 
         try {
             DIR dir = Dirent.opendir(root.toByteArray());
@@ -308,7 +296,11 @@ final class Observable extends Native
                     try {
 
                         byte[] childPath = child.toByteArray();
-                        int wd = inotify.addWatch(fd, childPath, CHILD_DIR_MASK);
+                        int wd = inotify.addWatch(
+                                fd.getAsInt(),
+                                childPath,
+                                CHILD_DIR_MASK
+                        );
                         childDirs.put(wd, Name.of(name));
 
                     } catch (ErrnoException e) {
@@ -378,34 +370,32 @@ final class Observable extends Native
             t.interrupt();
         }
 
-        if (fd == -1) {
-            return;
-        }
-
         List<ErrnoException> suppressed = new ArrayList<>(0);
-        for (Integer wd : childDirs.keySet()) {
-            try {
-                inotify.removeWatch(fd, wd);
-            } catch (ErrnoException e) {
-                if (e.errno != EINVAL) {
-                    suppressed.add(e);
+        fd.ifPresent(fd -> {
+            for (Integer wd : childDirs.keySet()) {
+                try {
+                    inotify.removeWatch(fd, wd);
+                } catch (ErrnoException e) {
+                    if (e.errno != EINVAL) {
+                        suppressed.add(e);
+                    }
                 }
             }
-        }
 
-        if (wd != -1) {
-            try {
-                inotify.removeWatch(fd, wd);
-            } catch (ErrnoException e) {
-                if (e.errno != EINVAL) {
-                    suppressed.add(e);
+            wd.ifPresent(wd -> {
+                try {
+                    inotify.removeWatch(fd, wd);
+                } catch (ErrnoException e) {
+                    if (e.errno != EINVAL) {
+                        suppressed.add(e);
+                    }
                 }
-            }
-        }
+            });
+        });
 
         try {
 
-            inotify.close(fd);
+            inotify.close(fd, cause);
 
         } catch (ErrnoException e) {
             for (ErrnoException sup : suppressed) {
@@ -427,7 +417,7 @@ final class Observable extends Native
         released.set(true);
         for (int wd : childDirs.keySet()) {
             try {
-                inotify.removeWatch(fd, wd);
+                inotify.removeWatch(getOrThrow(fd), wd);
             } catch (ErrnoException e) {
                 Log.w(getClass().getSimpleName(),
                         "Failed to remove watch on release" +
@@ -449,7 +439,7 @@ final class Observable extends Native
 
         try {
             thread.set(currentThread());
-            observe(fd);
+            observe(getOrThrow(this.fd));
         } catch (Throwable e) {
             if (!isClosed()) {
                 throw e;
@@ -494,7 +484,7 @@ final class Observable extends Native
             return;
         }
 
-        if (wd == this.wd) {
+        if (wd == getOrThrow(this.wd)) {
 
             if (isChildCreated(event, child)) {
                 if (isDirectory(event)) {
@@ -570,7 +560,7 @@ final class Observable extends Native
         try {
 
             byte[] path = child.toByteArray();
-            int wd = inotify.addWatch(fd, path, CHILD_DIR_MASK);
+            int wd = inotify.addWatch(getOrThrow(this.fd), path, CHILD_DIR_MASK);
             childDirs.put(wd, Name.of(name));
 
         } catch (ErrnoException e) {
@@ -617,7 +607,7 @@ final class Observable extends Native
         Integer wd = childDirs.remove2(Name.of(child));
         if (wd != null) {
             try {
-                inotify.removeWatch(fd, wd);
+                inotify.removeWatch(getOrThrow(fd), wd);
             } catch (ErrnoException ignored) {
             }
         }
