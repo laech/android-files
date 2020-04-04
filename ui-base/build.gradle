@@ -23,18 +23,17 @@ dependencies {
     implementation project(':base')
     implementation project(':fs')
     implementation project(':fs-media')
-
-    implementation "androidx.recyclerview:recyclerview:$androidRecyclerViewVersion"
-    implementation "androidx.fragment:fragment:$androidFragmentVersion"
-    implementation "androidx.appcompat:appcompat:$androidAppCompatVersion"
-    implementation "androidx.annotation:annotation:$androidAnnotationVersion"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation "com.google.android.material:material:$androidMaterialVersion"
+    implementation deps.recyclerview
+    implementation deps.androidFragment
+    implementation deps.androidAppcompat
+    implementation deps.androidAnnotations
+    implementation deps.kotlinStdlibJdk7
+    implementation deps.androidMaterial
 
     androidTestImplementation project(':testing-fs')
-    androidTestImplementation "androidx.test:runner:$androidTestRunnerVersion"
+    androidTestImplementation deps.androidTestRunner
 
-    testImplementation 'junit:junit:4.12'
-    testImplementation "org.mockito:mockito-core:$mockitoVersion"
+    testImplementation deps.junit
+    testImplementation deps.mockitoCore
 
 }

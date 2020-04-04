@@ -30,13 +30,13 @@ dependencies {
     implementation project(':fs')
     implementation project(':operations')
     implementation project(':ui-base')
-    implementation "androidx.appcompat:appcompat:$androidAppCompatVersion"
-    implementation "androidx.annotation:annotation:$androidAnnotationVersion"
+    implementation deps.androidAppcompat
+    implementation deps.androidAnnotations
 
-    androidTestImplementation "org.mockito:mockito-android:$mockitoVersion"
-    androidTestImplementation "androidx.test:runner:$androidTestRunnerVersion"
+    androidTestImplementation deps.mockitoAndroid
+    androidTestImplementation deps.androidTestRunner
 
-    testImplementation 'junit:junit:4.12'
-    testImplementation "org.mockito:mockito-core:$mockitoVersion"
+    testImplementation deps.junit
+    testImplementation deps.mockitoCore
 
 }

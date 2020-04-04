@@ -19,6 +19,6 @@ android {
 }
 
 dependencies {
-    implementation "androidx.annotation:annotation:$androidAnnotationVersion"
-    testImplementation 'junit:junit:4.12'
+    implementation deps.androidAnnotations
+    testImplementation deps.junit
 }

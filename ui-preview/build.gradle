@@ -31,13 +31,13 @@ dependencies {
     implementation project(':fs-media')
     implementation project(':ui-base')
     implementation project(':ui-preview-pdf')
-    implementation 'com.caverock:androidsvg:1.3'
-    implementation "androidx.core:core:$androidCoreVersion"
-    implementation "androidx.annotation:annotation:$androidAnnotationVersion"
+    implementation deps.androidsvg
+    implementation deps.androidCore
+    implementation deps.androidAnnotations
 
     androidTestImplementation project(':testing-fs')
 
-    androidTestImplementation "org.mockito:mockito-android:$mockitoVersion"
-    androidTestImplementation "androidx.test:runner:$androidTestRunnerVersion"
+    androidTestImplementation deps.mockitoAndroid
+    androidTestImplementation deps.androidTestRunner
 
 }

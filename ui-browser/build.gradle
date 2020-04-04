@@ -34,21 +34,21 @@ dependencies {
     implementation project(':ui-preview')
     implementation project(':ui-operations')
     implementation project(':ui-bookmarks')
-    implementation "androidx.recyclerview:recyclerview:$androidRecyclerViewVersion"
-    implementation "androidx.appcompat:appcompat:$androidAppCompatVersion"
-    implementation "androidx.cardview:cardview:$androidCardViewVersion"
-    implementation "com.google.android.material:material:$androidMaterialVersion"
-    implementation "androidx.annotation:annotation:$androidAnnotationVersion"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation deps.recyclerview
+    implementation deps.androidAppcompat
+    implementation deps.cardview
+    implementation deps.androidMaterial
+    implementation deps.androidAnnotations
+    implementation deps.kotlinStdlibJdk7
 
     androidTestImplementation project(':testing')
     androidTestImplementation project(':testing-fs')
 
-    androidTestImplementation "androidx.test:runner:$androidTestRunnerVersion"
-    androidTestImplementation "androidx.test:rules:$androidTestRulesVersion"
-    androidTestImplementation "androidx.test.uiautomator:uiautomator:$androidTestUiAutomatorVersion"
+    androidTestImplementation deps.androidTestRunner
+    androidTestImplementation deps.androidTestRules
+    androidTestImplementation deps.uiautomator
 
-    testImplementation 'junit:junit:4.12'
-    testImplementation "org.mockito:mockito-core:$mockitoVersion"
+    testImplementation deps.junit
+    testImplementation deps.mockitoCore
 
 }

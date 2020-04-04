@@ -22,11 +22,11 @@ dependencies {
 
     implementation project(':base')
     implementation project(':fs')
-    implementation "androidx.annotation:annotation:$androidAnnotationVersion"
+    implementation deps.androidAnnotations
 
     androidTestImplementation project(':testing-fs')
 
-    androidTestImplementation "org.mockito:mockito-android:$mockitoVersion"
-    androidTestImplementation "androidx.test:runner:$androidTestRunnerVersion"
+    androidTestImplementation deps.mockitoAndroid
+    androidTestImplementation deps.androidTestRunner
 
 }

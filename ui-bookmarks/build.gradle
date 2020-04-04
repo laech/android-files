@@ -28,12 +28,12 @@ dependencies {
     implementation project(':bookmarks')
     implementation project(':ui-base')
     implementation project(':fs')
-    implementation "androidx.appcompat:appcompat:$androidAppCompatVersion"
-    implementation "androidx.recyclerview:recyclerview:$androidRecyclerViewVersion"
-    implementation "androidx.annotation:annotation:$androidAnnotationVersion"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation deps.androidAppcompat
+    implementation deps.recyclerview
+    implementation deps.androidAnnotations
+    implementation deps.kotlinStdlibJdk7
 
-    testImplementation 'junit:junit:4.12'
-    testImplementation "org.mockito:mockito-core:$mockitoVersion"
+    testImplementation deps.junit
+    testImplementation deps.mockitoCore
 
 }

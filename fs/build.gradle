@@ -26,12 +26,12 @@ android {
 
 dependencies {
     implementation project(':base')
-    implementation "androidx.annotation:annotation:$androidAnnotationVersion"
+    implementation deps.androidAnnotations
 
     androidTestImplementation project(':testing')
-    androidTestImplementation 'junit:junit:4.12'
-    androidTestImplementation "androidx.test:runner:$androidTestRunnerVersion"
-    androidTestImplementation "org.mockito:mockito-android:$mockitoVersion"
+    androidTestImplementation deps.junit
+    androidTestImplementation deps.androidTestRunner
+    androidTestImplementation deps.mockitoAndroid
 
-    testImplementation 'junit:junit:4.12'
+    testImplementation deps.junit
 }
