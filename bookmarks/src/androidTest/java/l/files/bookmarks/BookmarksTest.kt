@@ -2,17 +2,15 @@ package l.files.bookmarks
 
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
-import androidx.test.annotation.UiThreadTest
 import androidx.test.platform.app.InstrumentationRegistry
 import l.files.fs.Path
 import l.files.testing.fs.PathBaseTest
 import org.hamcrest.CoreMatchers.equalTo
-import org.junit.Assert.assertThat
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 
 class BookmarksTest : PathBaseTest() {
 
-    private lateinit var bookmarks: BookmarksViewModel
     private lateinit var pref: SharedPreferences
 
     override fun setUp() {
@@ -21,40 +19,11 @@ class BookmarksTest : PathBaseTest() {
             .getInstrumentation()
             .context
             .getSharedPreferences("bookmark-test", MODE_PRIVATE)
-        bookmarks = BookmarksViewModel(lazy { pref })
     }
 
     override fun tearDown() {
         assertThat(pref.edit().clear().commit(), equalTo(true))
         super.tearDown()
-    }
-
-
-    @Test
-    @UiThreadTest
-    fun can_add_bookmarks() {
-        val a = dir1().concat("a").createDirectory()
-        val b = dir2().concat("b").createDirectory()
-        bookmarks.add(a)
-        bookmarks.add(b)
-        assertThat(bookmarks.contains(a), equalTo(true))
-        assertThat(bookmarks.contains(b), equalTo(true))
-    }
-
-    @Test
-    @UiThreadTest
-    fun can_remove_bookmarks() {
-        val a = dir1().concat("a").createDirectory()
-        val b = dir1().concat("b").createDirectory()
-        val c = dir1().concat("c").createDirectory()
-        bookmarks.add(a)
-        bookmarks.add(b)
-        bookmarks.add(c)
-        bookmarks.remove(a)
-        bookmarks.remove(c)
-        assertThat(bookmarks.contains(a), equalTo(false))
-        assertThat(bookmarks.contains(b), equalTo(true))
-        assertThat(bookmarks.contains(c), equalTo(false))
     }
 
     @Test

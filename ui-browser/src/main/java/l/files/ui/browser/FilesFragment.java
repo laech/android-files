@@ -19,7 +19,7 @@ import androidx.loader.app.LoaderManager.LoaderCallbacks;
 import androidx.loader.content.Loader;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
-import l.files.bookmarks.BookmarksManager;
+import l.files.base.lifecycle.CollectionLiveData;
 import l.files.fs.Path;
 import l.files.ui.base.app.OptionsMenus;
 import l.files.ui.base.fs.FileInfo;
@@ -49,6 +49,7 @@ import l.files.ui.operations.menu.PasteMenu;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
@@ -59,7 +60,7 @@ import static android.view.View.VISIBLE;
 import static androidx.core.content.ContextCompat.checkSelfPermission;
 import static androidx.recyclerview.widget.StaggeredGridLayoutManager.VERTICAL;
 import static java.util.Collections.emptyList;
-import static l.files.bookmarks.BookmarksKt.getBookmarkManager;
+import static l.files.bookmarks.BookmarksKt.getBookmarks;
 import static l.files.ui.base.fs.IOExceptions.message;
 import static l.files.ui.browser.FilesAdapter.VIEW_TYPE_FILE;
 import static l.files.ui.browser.FilesAdapter.VIEW_TYPE_HEADER;
@@ -102,7 +103,7 @@ public final class FilesFragment
 
     private FilesAdapter adapter;
 
-    private BookmarksManager bookmarks;
+    private CollectionLiveData<Path, Set<Path>, Set<Path>> bookmarks;
 
     public RecyclerView recycler;
 
@@ -182,7 +183,7 @@ public final class FilesFragment
         directory = args.getParcelable(ARG_DIRECTORY);
         watchLimit = args.getInt(ARG_WATCH_LIMIT, -1);
 
-        bookmarks = getBookmarkManager(this);
+        bookmarks = getBookmarks(this);
 
         View view = getView();
         assert view != null;
@@ -190,9 +191,13 @@ public final class FilesFragment
         recycler = view.findViewById(android.R.id.list);
         recycler.setHasFixedSize(true);
         recycler.setItemViewCacheSize(spanCount * 3);
-        recycler.setLayoutManager(new StaggeredGridLayoutManager(spanCount, VERTICAL));
+        recycler.setLayoutManager(new StaggeredGridLayoutManager(
+                spanCount,
+                VERTICAL
+        ));
         recycler.getRecycledViewPool().setMaxRecycledViews(VIEW_TYPE_FILE, 50);
-        recycler.getRecycledViewPool().setMaxRecycledViews(VIEW_TYPE_HEADER, 50);
+        recycler.getRecycledViewPool()
+                .setMaxRecycledViews(VIEW_TYPE_HEADER, 50);
         recycler.setAdapter(adapter = new FilesAdapter(
                 recycler,
                 this,
@@ -236,7 +241,8 @@ public final class FilesFragment
     public void onRequestPermissionsResult(
             int requestCode,
             @NonNull String[] permissions,
-            @NonNull int[] grantResults) {
+            @NonNull int[] grantResults
+    ) {
 
         super.onRequestPermissionsResult(
                 requestCode,
@@ -339,7 +345,8 @@ public final class FilesFragment
                 new CopyAction(selection()),
                 new DeleteAction(selection(), manager),
                 new RenameAction(selection(), manager),
-                new ShareAction(selection(), activity));
+                new ShareAction(selection(), activity)
+        );
     }
 
     @Override

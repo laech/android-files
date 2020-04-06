@@ -7,7 +7,7 @@ public final class ActionModes {
     private ActionModes() {
     }
 
-    public static CompositeItem compose(ActionMode.Callback... callbacks) {
+    public static ActionMode.Callback compose(ActionMode.Callback... callbacks) {
         return new CompositeItem(callbacks);
     }
 }

@@ -8,10 +8,14 @@ import android.util.Base64
 import android.util.Log
 import androidx.annotation.MainThread
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.*
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import l.files.base.lifecycle.CollectionLiveData.Companion.setLiveData
+import l.files.base.lifecycle.SetLiveData
 import l.files.base.text.CollationKey
 import l.files.fs.LinkOption
 import l.files.fs.Path
@@ -20,59 +24,28 @@ import java.io.IOException
 import java.text.Collator
 import java.util.Collections.unmodifiableSet
 
-@MainThread
-interface BookmarksManager {
-    val liveData: LiveData<Set<Path>>
-    fun contains(item: Path): Boolean
-    fun add(item: Path)
-    fun remove(item: Path)
-    fun removeAll(items: Collection<Path>)
-}
-
 private const val TAG = "bookmarks"
 internal const val PREF_KEY = "bookmarks"
 
-internal class BookmarksViewModel(
-    private val pref: Lazy<SharedPreferences>
-) : ViewModel(), BookmarksManager {
+private class BookmarksViewModel(
+    private val app: Application
+) : ViewModel() {
 
-    override val liveData: MutableLiveData<Set<Path>> by lazy {
-        val data = MutableLiveData<Set<Path>>()
+    val liveData: SetLiveData<Path> by lazy {
+        val data = setLiveData<Path>()
         viewModelScope.launch {
-            data.value =
-                (data.value ?: emptySet()) + withContext(Dispatchers.IO) {
-                    loadBookmarks(pref.value)
+            val (pref, bookmarks) = withContext(Dispatchers.IO) {
+                val pref = app.getSharedPreferences("bookmarks", MODE_PRIVATE)
+                Pair(pref, loadBookmarks(pref))
+            }
+            data.addAll(bookmarks)
+            data.observeForever {
+                if (data.oldValue != null && data.oldValue != it) {
+                    pref.edit().putStringSet(PREF_KEY, encode(it)).apply()
                 }
+            }
         }
         data
-    }
-
-    private val items = mutableSetOf<Path>()
-
-    override fun contains(item: Path): Boolean = items.contains(item)
-
-    override fun add(item: Path) {
-        if (items.add(item)) {
-            update()
-        }
-    }
-
-    override fun remove(item: Path) {
-        if (items.remove(item)) {
-            update()
-        }
-    }
-
-    override fun removeAll(items: Collection<Path>) {
-        if (this.items.removeAll(items)) {
-            update()
-        }
-    }
-
-    private fun update() {
-        val copy = unmodifiableSet(HashSet(items))
-        liveData.value = copy
-        pref.value.edit().putStringSet(PREF_KEY, encode(copy)).apply()
     }
 }
 
@@ -81,17 +54,15 @@ private class BookmarksViewModelFactory(
 ) : ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T =
-        modelClass.cast(BookmarksViewModel(lazy {
-            app.getSharedPreferences("bookmarks", MODE_PRIVATE)
-        }))!!
+        modelClass.cast(BookmarksViewModel(app))!!
 }
 
 @MainThread
-fun Fragment.getBookmarkManager(): BookmarksManager =
+fun Fragment.getBookmarks(): SetLiveData<Path> =
     ViewModelProvider(
         requireActivity(),
         BookmarksViewModelFactory(requireActivity().application)
-    ).get(BookmarksViewModel::class.java)
+    ).get(BookmarksViewModel::class.java).liveData
 
 fun Collection<Path>.collate(
     alwaysOnTop: (Path) -> Boolean = { false },

@@ -1,4 +1,6 @@
-apply plugin: 'com.android.library'
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+apply plugin: "kotlin-android-extensions"
 
 android {
     compileSdkVersion project.compileSdkVersion
@@ -9,6 +11,7 @@ android {
         targetSdkVersion project.targetSdkVersion
         versionCode 1
         versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     packagingOptions {
@@ -20,6 +23,10 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
 }
 
 dependencies {
@@ -30,8 +37,12 @@ dependencies {
     implementation project(':fs')
     implementation deps.androidAppcompat
     implementation deps.recyclerview
-    implementation deps.androidAnnotations
+    implementation deps.lifecycleLivedataKtx
     implementation deps.kotlinStdlibJdk7
+
+    androidTestImplementation deps.androidTestRunner
+    androidTestImplementation deps.androidTestRules
+    androidTestImplementation deps.mockitoAndroid
 
     testImplementation deps.junit
     testImplementation deps.mockitoCore
