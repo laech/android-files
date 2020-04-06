@@ -32,6 +32,8 @@ dependencies {
     implementation deps.lifecycleLivedataKtx
     implementation deps.lifecycleViewModelKtx
     implementation deps.kotlinStdlibJdk7
+    implementation deps.kotlinCoroutinesCore
+    implementation deps.kotlinCoroutinesAndroid
 
     androidTestImplementation project(':testing-fs')
 
