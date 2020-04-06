@@ -13,8 +13,8 @@ buildscript {
     }
 
     ext.minSdkVersion = 24
-    ext.targetSdkVersion = 29
-    ext.compileSdkVersion = 29
+    ext.targetSdkVersion = 28 // 29+ denies access to shared storage
+    ext.compileSdkVersion = 28
     ext.buildToolsVersion = '29.0.3'
 
     ext.deps = [
