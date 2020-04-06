@@ -8,10 +8,8 @@ import android.util.Base64
 import android.util.Log
 import androidx.annotation.MainThread
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import l.files.base.lifecycle.CollectionLiveData.Companion.setLiveData
@@ -27,42 +25,32 @@ import java.util.Collections.unmodifiableSet
 private const val TAG = "bookmarks"
 internal const val PREF_KEY = "bookmarks"
 
-private class BookmarksViewModel(
-    private val app: Application
-) : ViewModel() {
-
-    val liveData: SetLiveData<Path> by lazy {
-        val data = setLiveData<Path>()
-        viewModelScope.launch {
-            val (pref, bookmarks) = withContext(Dispatchers.IO) {
-                val pref = app.getSharedPreferences("bookmarks", MODE_PRIVATE)
-                Pair(pref, loadBookmarks(pref))
-            }
-            data.addAll(bookmarks)
-            data.observeForever {
-                if (data.oldValue != null && data.oldValue != it) {
-                    pref.edit().putStringSet(PREF_KEY, encode(it)).apply()
-                }
-            }
-        }
-        data
-    }
-}
-
-private class BookmarksViewModelFactory(
-    private val app: Application
-) : ViewModelProvider.Factory {
-
-    override fun <T : ViewModel> create(modelClass: Class<T>): T =
-        modelClass.cast(BookmarksViewModel(app))!!
-}
+private var bookmarks: SetLiveData<Path>? = null
 
 @MainThread
-fun Fragment.getBookmarks(): SetLiveData<Path> =
-    ViewModelProvider(
-        requireActivity(),
-        BookmarksViewModelFactory(requireActivity().application)
-    ).get(BookmarksViewModel::class.java).liveData
+fun Fragment.getBookmarks(): SetLiveData<Path> {
+    if (bookmarks == null) {
+        bookmarks = initBookmarks(requireActivity().application)
+    }
+    return bookmarks!!
+}
+
+private fun initBookmarks(app: Application): SetLiveData<Path> {
+    val bookmarks = setLiveData<Path>()
+    GlobalScope.launch(Dispatchers.Main) {
+        val (pref, paths) = withContext(Dispatchers.IO) {
+            val pref = app.getSharedPreferences("bookmarks", MODE_PRIVATE)
+            Pair(pref, loadBookmarks(pref))
+        }
+        bookmarks.addAll(paths)
+        bookmarks.observeForever {
+            if (bookmarks.oldValue != null && bookmarks.oldValue != it) {
+                pref.edit().putStringSet(PREF_KEY, encode(it)).apply()
+            }
+        }
+    }
+    return bookmarks
+}
 
 fun Collection<Path>.collate(
     alwaysOnTop: (Path) -> Boolean = { false },
