@@ -5,25 +5,21 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.FragmentManager;
-import androidx.loader.app.LoaderManager.LoaderCallbacks;
-import androidx.loader.content.Loader;
-import androidx.appcompat.view.ActionMode;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.view.ActionMode;
+import androidx.fragment.app.FragmentManager;
+import androidx.loader.app.LoaderManager.LoaderCallbacks;
+import androidx.loader.content.Loader;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
+import l.files.bookmarks.BookmarksManager;
 import l.files.fs.Path;
 import l.files.ui.base.app.OptionsMenus;
 import l.files.ui.base.fs.FileInfo;
@@ -50,22 +46,24 @@ import l.files.ui.operations.action.CutAction;
 import l.files.ui.operations.action.DeleteAction;
 import l.files.ui.operations.menu.PasteMenu;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static androidx.core.content.ContextCompat.checkSelfPermission;
-import static androidx.recyclerview.widget.StaggeredGridLayoutManager.VERTICAL;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
+import static androidx.core.content.ContextCompat.checkSelfPermission;
+import static androidx.recyclerview.widget.StaggeredGridLayoutManager.VERTICAL;
 import static java.util.Collections.emptyList;
+import static l.files.bookmarks.BookmarksKt.getBookmarkManager;
 import static l.files.ui.base.fs.IOExceptions.message;
 import static l.files.ui.browser.FilesAdapter.VIEW_TYPE_FILE;
 import static l.files.ui.browser.FilesAdapter.VIEW_TYPE_HEADER;
-import static l.files.ui.browser.preference.Preferences.getShowHiddenFiles;
-import static l.files.ui.browser.preference.Preferences.getSort;
-import static l.files.ui.browser.preference.Preferences.isShowHiddenFilesKey;
-import static l.files.ui.browser.preference.Preferences.isSortKey;
+import static l.files.ui.browser.preference.Preferences.*;
 
 public final class FilesFragment
 
@@ -103,6 +101,8 @@ public final class FilesFragment
     private int watchLimit;
 
     private FilesAdapter adapter;
+
+    private BookmarksManager bookmarks;
 
     public RecyclerView recycler;
 
@@ -181,6 +181,8 @@ public final class FilesFragment
         assert args != null;
         directory = args.getParcelable(ARG_DIRECTORY);
         watchLimit = args.getInt(ARG_WATCH_LIMIT, -1);
+
+        bookmarks = getBookmarkManager(this);
 
         View view = getView();
         assert view != null;
@@ -296,7 +298,7 @@ public final class FilesFragment
         FragmentManager manager = activity.getSupportFragmentManager();
         setOptionsMenu(OptionsMenus.compose(
                 new RefreshMenu(() -> refreshEnabled, this::refresh),
-                new BookmarkMenu(directory(), activity),
+                new BookmarkMenu(directory(), bookmarks),
                 new NewDirMenu(manager, directory()),
                 new PasteMenu(activity, directory()),
                 new SortMenu(manager),

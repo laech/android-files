@@ -2,17 +2,15 @@ package l.files.ui.bookmarks.menus;
 
 import android.view.Menu;
 import android.view.MenuItem;
-
+import l.files.bookmarks.BookmarksManager;
+import l.files.fs.Path;
+import l.files.ui.bookmarks.R;
 import org.junit.Before;
 import org.junit.Test;
 
-import l.files.bookmarks.BookmarkManager;
-import l.files.fs.Path;
-import l.files.ui.bookmarks.R;
-
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -20,12 +18,12 @@ public final class BookmarkMenuTest {
 
     private Path file;
     private BookmarkMenu action;
-    private BookmarkManager bookmarks;
+    private BookmarksManager bookmarks;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         file = mock(Path.class, "bookmark");
-        bookmarks = mock(BookmarkManager.class);
+        bookmarks = mock(BookmarksManager.class);
         action = new BookmarkMenu(file, bookmarks);
     }
 
@@ -34,11 +32,21 @@ public final class BookmarkMenuTest {
 
         MenuItem item = mock(MenuItem.class);
         Menu menu = mock(Menu.class);
-        given(menu.add(anyInt(), anyInt(), anyInt(), anyInt())).willReturn(item);
+        given(menu.add(
+                anyInt(),
+                anyInt(),
+                anyInt(),
+                anyInt()
+        )).willReturn(item);
 
         action.onCreateOptionsMenu(menu);
 
-        verify(menu).add(anyInt(), eq(R.id.bookmark), anyInt(), eq(R.string.bookmark));
+        verify(menu).add(
+                anyInt(),
+                eq(R.id.bookmark),
+                anyInt(),
+                eq(R.string.bookmark)
+        );
         verify(item).setCheckable(true);
     }
 
@@ -57,7 +65,7 @@ public final class BookmarkMenuTest {
         MenuItem item = mock(MenuItem.class);
         Menu menu = mock(Menu.class);
         given(menu.findItem(R.id.bookmark)).willReturn(item);
-        given(bookmarks.hasBookmark(file)).willReturn(bookmarked);
+        given(bookmarks.contains(file)).willReturn(bookmarked);
 
         action.onPrepareOptionsMenu(menu);
 
@@ -83,9 +91,9 @@ public final class BookmarkMenuTest {
         verify(item).setChecked(!alreadyBookmarkedBeforeClick);
 
         if (alreadyBookmarkedBeforeClick) {
-            verify(bookmarks).removeBookmark(file);
+            verify(bookmarks).remove(file);
         } else {
-            verify(bookmarks).addBookmark(file);
+            verify(bookmarks).add(file);
         }
     }
 

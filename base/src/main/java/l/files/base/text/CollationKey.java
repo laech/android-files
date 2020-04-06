@@ -1,4 +1,4 @@
-package l.files.ui.base.text;
+package l.files.base.text;
 
 import androidx.annotation.NonNull;
 

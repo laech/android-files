@@ -1,10 +1,8 @@
 package l.files.ui.bookmarks.menus;
 
-import android.content.Context;
 import android.view.Menu;
 import android.view.MenuItem;
-
-import l.files.bookmarks.BookmarkManager;
+import l.files.bookmarks.BookmarksManager;
 import l.files.fs.Path;
 import l.files.ui.base.app.OptionsMenuAction;
 import l.files.ui.bookmarks.R;
@@ -14,14 +12,10 @@ import static l.files.base.Objects.requireNonNull;
 
 public final class BookmarkMenu extends OptionsMenuAction {
 
-    private final BookmarkManager bookmarks;
+    private final BookmarksManager bookmarks;
     private final Path path;
 
-    public BookmarkMenu(Path path, Context context) {
-        this(path, BookmarkManager.get(context));
-    }
-
-    BookmarkMenu(Path path, BookmarkManager bookmarks) {
+    public BookmarkMenu(Path path, BookmarksManager bookmarks) {
         super(R.id.bookmark);
         this.bookmarks = requireNonNull(bookmarks, "bookmarks");
         this.path = requireNonNull(path, "path");
@@ -38,7 +32,7 @@ public final class BookmarkMenu extends OptionsMenuAction {
         super.onPrepareOptionsMenu(menu);
         MenuItem item = menu.findItem(id());
         if (item != null) {
-            item.setChecked(bookmarks.hasBookmark(path));
+            item.setChecked(bookmarks.contains(path));
         }
     }
 
@@ -47,9 +41,9 @@ public final class BookmarkMenu extends OptionsMenuAction {
         boolean checked = item.isChecked();
         item.setChecked(!checked);
         if (checked) {
-            bookmarks.removeBookmark(path);
+            bookmarks.remove(path);
         } else {
-            bookmarks.addBookmark(path);
+            bookmarks.add(path);
         }
     }
 

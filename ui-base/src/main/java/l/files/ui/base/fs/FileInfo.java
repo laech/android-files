@@ -11,7 +11,7 @@ import androidx.annotation.Nullable;
 import l.files.base.Objects;
 import l.files.fs.Path;
 import l.files.fs.Stat;
-import l.files.ui.base.text.CollationKey;
+import l.files.base.text.CollationKey;
 
 import static l.files.base.Objects.requireNonNull;
 
