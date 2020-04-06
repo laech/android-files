@@ -8,14 +8,14 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.0'
+        classpath 'com.android.tools.build:gradle:3.5.3'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     }
 
     ext.minSdkVersion = 24
-    ext.targetSdkVersion = 28
-    ext.compileSdkVersion = 28
-    ext.buildToolsVersion = '28.0.3'
+    ext.targetSdkVersion = 29
+    ext.compileSdkVersion = 29
+    ext.buildToolsVersion = '29.0.3'
 
     ext.deps = [
             cardview               : "androidx.cardview:cardview:1.0.0",
