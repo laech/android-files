@@ -1,19 +1,18 @@
 package l.files.ui.base.widget;
 
-import androidx.annotation.CallSuper;
 import androidx.recyclerview.widget.RecyclerView.Adapter;
 import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 import static java.util.Collections.unmodifiableList;
 
 public abstract class StableAdapter<T, VH extends ViewHolder> extends Adapter<VH> {
-    private final Map<Object, Long> ids = new HashMap<>();
 
+    private final Map<Object, Long> ids = new WeakHashMap<>();
     private final List<T> items = new ArrayList<>();
 
     protected StableAdapter() {
@@ -24,16 +23,7 @@ public abstract class StableAdapter<T, VH extends ViewHolder> extends Adapter<VH
     public final void setItems(List<? extends T> items) {
         this.items.clear();
         this.items.addAll(items);
-        cleanIds();
         notifyDataSetChanged();
-    }
-
-    private void cleanIds() {
-        List<Object> ids = new ArrayList<>(items.size());
-        for (T item : items) {
-            ids.add(getItemIdObject(item));
-        }
-        this.ids.keySet().retainAll(ids);
     }
 
     public List<T> items() {
