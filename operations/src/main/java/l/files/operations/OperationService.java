@@ -1,14 +1,20 @@
 package l.files.operations;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,11 +23,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
-import androidx.annotation.Nullable;
-
 import l.files.fs.Path;
 import l.files.operations.Task.Callback;
 
+import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.app.PendingIntent.getService;
 import static java.util.concurrent.Executors.newFixedThreadPool;
@@ -41,6 +46,8 @@ public final class OperationService extends Service {
     static final String EXTRA_TASK_ID = "task_id";
     private static final String EXTRA_PATHS = "paths";
     private static final String EXTRA_DESTINATION = "destination";
+
+    private static final String OPERATIONS_NOTIFICATION_CHANNEL_ID = "l.files.operations";
 
     private static final ExecutorService executor = newFixedThreadPool(5);
 
@@ -147,9 +154,15 @@ public final class OperationService extends Service {
         // it less likely to be destroy, the notification will be replaced with ones
         // from operations-ui
         if (foreground) {
-            startForeground(startId, new Notification.Builder(this)
-                    .setSmallIcon(R.drawable.ic_storage_white_24dp)
-                    .build());
+            Notification.Builder builder = new Notification.Builder(this)
+                    .setSmallIcon(R.drawable.ic_storage_white_24dp);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                ensureNotificationChannelExists();
+                builder.setChannelId(OPERATIONS_NOTIFICATION_CHANNEL_ID);
+            }
+
+            startForeground(startId, builder.build());
         }
 
         Task task = newTask(data, startId, handler, state -> {
@@ -164,6 +177,24 @@ public final class OperationService extends Service {
             }
         });
         tasks.put(startId, task.executeOnExecutor(executor));
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void ensureNotificationChannelExists() {
+        NotificationManager manager =
+                getSystemService(NotificationManager.class);
+
+        NotificationChannel channel = manager.getNotificationChannel(
+                OPERATIONS_NOTIFICATION_CHANNEL_ID);
+
+        if (channel == null) {
+            channel = new NotificationChannel(
+                    OPERATIONS_NOTIFICATION_CHANNEL_ID,
+                    getString(R.string.operations_notification_channel_name),
+                    IMPORTANCE_DEFAULT
+            );
+            manager.createNotificationChannel(channel);
+        }
     }
 
     private Task newTask(Intent intent, int id, Handler handler, Callback callback) {

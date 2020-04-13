@@ -2,6 +2,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     package="l.files.operations">
 
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
     <application>
 
         <service

@@ -1,9 +1,6 @@
 package l.files.ui.browser;
 
-import androidx.test.runner.AndroidJUnit4;
-
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -18,7 +15,6 @@ import static l.files.testing.Tests.timeout;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-@RunWith(AndroidJUnit4.class)
 public final class FileOperationTest extends BaseFilesActivityTest {
 
     @Test
