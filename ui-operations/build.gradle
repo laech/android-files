@@ -1,42 +1,49 @@
-apply plugin: 'com.android.library'
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+apply plugin: "kotlin-android-extensions"
 
 android {
-    compileSdkVersion project.compileSdkVersion
-    buildToolsVersion project.buildToolsVersion
+  compileSdkVersion project.compileSdkVersion
+  buildToolsVersion project.buildToolsVersion
 
-    defaultConfig {
-        minSdkVersion project.minSdkVersion
-        targetSdkVersion project.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-    }
+  defaultConfig {
+    minSdkVersion project.minSdkVersion
+    targetSdkVersion project.targetSdkVersion
+    versionCode 1
+    versionName "1.0"
+    testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+  }
 
-    packagingOptions {
-        exclude 'META-INF/LICENSE'
-        exclude 'META-INF/NOTICE'
-    }
+  packagingOptions {
+    exclude 'META-INF/LICENSE'
+    exclude 'META-INF/NOTICE'
+  }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
 
+  kotlinOptions {
+    jvmTarget = "1.8"
+  }
 }
 
 dependencies {
 
-    implementation project(':base')
-    implementation project(':fs')
-    implementation project(':operations')
-    implementation project(':ui-base')
-    implementation deps.androidAppcompat
-    implementation deps.androidAnnotations
+  implementation project(':base')
+  implementation project(':fs')
+  implementation project(':operations')
+  implementation project(':ui-base')
+  implementation deps.androidAppcompat
+  implementation deps.androidAnnotations
+  implementation deps.androidCoreKtx
+  implementation deps.kotlinStdlibJdk7
 
-    androidTestImplementation deps.mockitoAndroid
-    androidTestImplementation deps.androidTestRunner
+  androidTestImplementation deps.mockitoAndroid
+  androidTestImplementation deps.androidTestRunner
 
-    testImplementation deps.junit
-    testImplementation deps.mockitoCore
+  testImplementation deps.junit
+  testImplementation deps.mockitoCore
 
 }
