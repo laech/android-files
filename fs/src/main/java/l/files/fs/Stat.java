@@ -71,11 +71,11 @@ public class Stat extends Native implements Parcelable {
 
     static native void mkdir(byte[] path, int mode) throws ErrnoException;
 
-    private final int mode;
-    private final long size;
-    private final long mtime;
-    private final int mtime_nsec;
-    private final long blocks;
+    final int mode;
+    final long size;
+    final long mtime;
+    final int mtime_nsec;
+    final long blocks;
 
     private Stat(
             int mode,
@@ -129,10 +129,6 @@ public class Stat extends Native implements Parcelable {
 
     public long size() {
         return this.size;
-    }
-
-    public long sizeOnDisk() {
-        return blocks * 512;
     }
 
     public boolean isSymbolicLink() {

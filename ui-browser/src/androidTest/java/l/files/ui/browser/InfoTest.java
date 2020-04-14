@@ -1,9 +1,6 @@
 package l.files.ui.browser;
 
-import androidx.test.runner.AndroidJUnit4;
-
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import l.files.fs.Path;
 import l.files.fs.Stat;
@@ -17,7 +14,6 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.fs.Instant.EPOCH;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
-@RunWith(AndroidJUnit4.class)
 public final class InfoTest extends BaseFilesActivityTest {
 
     @Test
@@ -40,11 +36,7 @@ public final class InfoTest extends BaseFilesActivityTest {
                         st1.size()
                                 + st2.size()
                                 + st3.size(),
-                        3))
-                .assertSizeOnDisk(formatSizeOnDisk(
-                        st1.sizeOnDisk()
-                                + st2.sizeOnDisk()
-                                + st3.sizeOnDisk()));
+                        3));
     }
 
     @Test
@@ -59,8 +51,7 @@ public final class InfoTest extends BaseFilesActivityTest {
                 .getInfo()
                 .assertName(path.name().toString())
                 .assertDate(formatDate(stat))
-                .assertSize(formatSize(stat.size()))
-                .assertSizeOnDisk(formatSizeOnDisk(stat.sizeOnDisk()));
+                .assertSize(formatSize(stat.size()));
     }
 
     @Test
@@ -75,8 +66,7 @@ public final class InfoTest extends BaseFilesActivityTest {
                 .getInfo()
                 .assertName(path.name().toString())
                 .assertDate(formatDate(stat))
-                .assertSize(formatSize(stat.size()))
-                .assertSizeOnDisk(formatSizeOnDisk(stat.sizeOnDisk()));
+                .assertSize(formatSize(stat.size()));
     }
 
     @Test
@@ -90,8 +80,7 @@ public final class InfoTest extends BaseFilesActivityTest {
                 .getInfo()
                 .assertName(dir.name().toString())
                 .assertDate(formatDate(stat))
-                .assertSize(formatSizeCount(stat.size(), 1))
-                .assertSizeOnDisk(formatSizeOnDisk(stat.sizeOnDisk()));
+                .assertSize(formatSizeCount(stat.size(), 1));
     }
 
     @Test
@@ -117,12 +106,7 @@ public final class InfoTest extends BaseFilesActivityTest {
                                 + childStat1.size()
                                 + childStat2.size()
                                 + childStat3.size(),
-                        4))
-                .assertSizeOnDisk(formatSizeOnDisk(
-                        stat.sizeOnDisk()
-                                + childStat1.sizeOnDisk()
-                                + childStat2.sizeOnDisk()
-                                + childStat3.sizeOnDisk()));
+                        4));
     }
 
     private String formatDate(Stat stat) {
@@ -134,12 +118,6 @@ public final class InfoTest extends BaseFilesActivityTest {
 
     private String formatSize(long size) {
         return formatFileSize(getActivity(), size);
-    }
-
-    private String formatSizeOnDisk(long sizeOnDisk) {
-        return getActivity().getString(
-                l.files.ui.info.R.string.x_size_on_disk,
-                formatSize(sizeOnDisk));
     }
 
     private String formatSizeCount(long size, int count) {

@@ -38,7 +38,6 @@ public abstract class InfoBaseFragment
     private List<Name> children;
 
     private TextView sizeView;
-    private TextView sizeOnDiskView;
     private ProgressBar calculatingSizeView;
 
     Path getParentDirectory() {
@@ -51,10 +50,6 @@ public abstract class InfoBaseFragment
 
     public CharSequence getDisplayedSize() {
         return sizeView.getText();
-    }
-
-    public CharSequence getDisplayedSizeOnDisk() {
-        return sizeOnDiskView.getText();
     }
 
     @Override
@@ -85,7 +80,6 @@ public abstract class InfoBaseFragment
 
     private void findViews(View root) {
         sizeView = root.findViewById(R.id.size);
-        sizeOnDiskView = root.findViewById(R.id.size_on_disk);
         calculatingSizeView = root.findViewById(R.id.calculate_size_progress_bar);
     }
 
@@ -110,7 +104,6 @@ public abstract class InfoBaseFragment
         if (loader != null && loader.isRunning()) {
             Size size = loader.progress();
             updateSizeView(size);
-            updateSizeOnDiskView(size);
             showCalculatingSizeView();
             calculatingSizeView.postDelayed(this::updateViews, 100);
         }
@@ -118,10 +111,6 @@ public abstract class InfoBaseFragment
 
     private void updateSizeView(Size data) {
         sizeView.setText(formatSize(data.size, data.count));
-    }
-
-    private void updateSizeOnDiskView(Size data) {
-        sizeOnDiskView.setText(formatSizeOnDisk(data.sizeOnDisk));
     }
 
     private void showCalculatingSizeView() {
@@ -145,10 +134,6 @@ public abstract class InfoBaseFragment
         );
     }
 
-    String formatSizeOnDisk(long size) {
-        return getString(R.string.x_size_on_disk, formatSize(size));
-    }
-
     @Nullable
     private CalculateSizeLoader findLoader() {
         if (getActivity() == null) {
@@ -170,7 +155,6 @@ public abstract class InfoBaseFragment
     @Override
     public void onLoadFinished(Loader<Size> loader, Size data) {
         updateSizeView(data);
-        updateSizeOnDiskView(data);
         hideCalculatingSizeView();
     }
 

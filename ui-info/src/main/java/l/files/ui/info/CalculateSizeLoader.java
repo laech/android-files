@@ -23,7 +23,6 @@ final class CalculateSizeLoader
     private boolean started;
     private volatile int currentCount;
     private volatile long currentSize;
-    private volatile long currentSizeOnDisk;
 
     @Nullable
     private volatile Size result;
@@ -55,7 +54,6 @@ final class CalculateSizeLoader
 
         currentCount = 0;
         currentSize = 0;
-        currentSizeOnDisk = 0;
 
         for (Name child : children) {
             Path path = parentDirectory.concat(child);
@@ -69,7 +67,6 @@ final class CalculateSizeLoader
         if (isLoadInBackgroundCanceled()) {
             currentCount = 0;
             currentSize = 0;
-            currentSizeOnDisk = 0;
         }
 
         return (result = progress());
@@ -78,8 +75,7 @@ final class CalculateSizeLoader
     Size progress() {
         return new Size(
                 currentCount,
-                currentSize,
-                currentSizeOnDisk
+                currentSize
         );
     }
 
@@ -93,7 +89,6 @@ final class CalculateSizeLoader
 
         currentCount++;
         currentSize += stat.size();
-        currentSizeOnDisk += stat.sizeOnDisk();
 
         return Result.CONTINUE;
     }
@@ -115,12 +110,10 @@ final class CalculateSizeLoader
     static final class Size {
         final int count;
         final long size;
-        final long sizeOnDisk;
 
-        Size(int count, long size, long sizeOnDisk) {
+        Size(int count, long size) {
             this.count = count;
             this.size = size;
-            this.sizeOnDisk = sizeOnDisk;
         }
     }
 }

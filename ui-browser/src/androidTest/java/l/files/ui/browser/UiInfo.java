@@ -1,7 +1,5 @@
 package l.files.ui.browser;
 
-import java.io.IOException;
-
 import l.files.ui.info.InfoBaseFragment;
 import l.files.ui.info.InfoFragment;
 
@@ -18,24 +16,18 @@ final class UiInfo {
         this.context = requireNonNull(context);
     }
 
-    UiInfo assertName(String value) throws IOException {
+    UiInfo assertName(String value) {
         awaitOnMainThread(context.instrumentation(), () -> assertEquals(value, getName()));
         return this;
     }
 
-    UiInfo assertDate(String value) throws IOException {
+    UiInfo assertDate(String value) {
         awaitOnMainThread(context.instrumentation(), () -> assertEquals(value, getDate()));
         return this;
     }
 
-    UiInfo assertSize(String value) throws IOException {
+    UiInfo assertSize(String value) {
         awaitOnMainThread(context.instrumentation(), () -> assertEquals(value, getSize()));
-        return this;
-    }
-
-
-    UiInfo assertSizeOnDisk(String value) throws IOException {
-        awaitOnMainThread(context.instrumentation(), () -> assertEquals(value, getSizeOnDisk()));
         return this;
     }
 
@@ -49,10 +41,6 @@ final class UiInfo {
 
     private String getSize() {
         return fragment().getDisplayedSize().toString();
-    }
-
-    private String getSizeOnDisk() {
-        return fragment().getDisplayedSizeOnDisk().toString();
     }
 
     private InfoBaseFragment fragment() {

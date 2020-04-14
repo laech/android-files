@@ -64,8 +64,8 @@ public final class VfsTest {
         File file = new File("/");
         Statfs statfs = new Statfs();
         statfs(file.getPath().getBytes(), statfs);
-        assertEquals(file.getFreeSpace(), statfs.f_bfree);
-        assertEquals(file.getUsableSpace(), statfs.f_bavail);
-        assertEquals(file.getTotalSpace(), statfs.f_blocks * statfs.f_bsize);
+        assertEquals(file.getFreeSpace(), statfs.f_bfree * statfs.f_frsize);
+        assertEquals(file.getUsableSpace(), statfs.f_bavail * statfs.f_frsize);
+        assertEquals(file.getTotalSpace(), statfs.f_blocks * statfs.f_frsize);
     }
 }

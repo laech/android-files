@@ -1,6 +1,8 @@
 package l.files.fs;
 
 import android.os.Parcel;
+import android.system.Os;
+import android.system.StructStat;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -28,8 +30,6 @@ import static l.files.fs.Stat.lstat;
 import static l.files.fs.Stat.mkdir;
 import static l.files.fs.Stat.stat;
 import static linux.Errno.ENOENT;
-import static linux.Fcntl.open;
-import static linux.Unistd.close;
 import static linux.Unistd.symlink;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -88,14 +88,13 @@ public final class StatTest extends PathBaseTest {
 
         File file = createNonEmptyFile();
 
-        try (FileInputStream in = new FileInputStream(file)) {
+        try (FileInputStream input = new FileInputStream(file)) {
 
             Field field = FileDescriptor.class.getDeclaredField("descriptor");
             field.setAccessible(true);
-            int fd = field.getInt(in.getFD());
+            int fd = field.getInt(input.getFD());
 
-            Stat stat = fstat(fd);
-            assertStat(file, stat);
+            assertStat(file, Os.fstat(input.getFD()), fstat(fd));
         }
     }
 
@@ -103,14 +102,15 @@ public final class StatTest extends PathBaseTest {
     public void fstat_returns_correct_information_for_directory() throws Exception {
 
         File dir = temporaryFolder.newFolder();
-        int fd = open(dir.getPath().getBytes(), 0, 0);
+        FileDescriptor fd = Os.open(dir.getPath(), 0, 0);
         try {
 
-            Stat stat = fstat(fd);
-            assertStat(dir, stat);
+            Field field = FileDescriptor.class.getDeclaredField("descriptor");
+            field.setAccessible(true);
+            assertStat(dir, Os.fstat(fd), fstat(field.getInt(fd)));
 
         } finally {
-            close(fd);
+            Os.close(fd);
         }
     }
 
@@ -142,25 +142,23 @@ public final class StatTest extends PathBaseTest {
         assertStat(link);
     }
 
-    private static void assertStat(File file) throws ErrnoException {
-        Stat stat = stat(file.getPath().getBytes());
-        assertStat(file, stat);
+    private static void assertStat(File file) throws Exception {
+        assertStat(file, Os.stat(file.getPath()), stat(file.getPath().getBytes()));
     }
 
-    private static void assertLstat(File file) throws ErrnoException {
-        Stat stat = lstat(file.getPath().getBytes());
-        assertStat(file, stat);
+    private static void assertLstat(File file) throws Exception {
+        assertStat(file, Os.lstat(file.getPath()), lstat(file.getPath().getBytes()));
     }
 
-    private static void assertStat(File file, Stat stat) {
-        assertEquals(file.length(), stat.size());
-        assertEquals(file.length() / 512 * 512, stat.sizeOnDisk());
-        assertEquals(file.lastModified() / 1000, stat.lastModifiedEpochSecond());
-        assertEquals(file.isFile(), stat.isRegularFile());
-        assertEquals(file.isDirectory(), stat.isDirectory());
-        assertTrue(
-                String.valueOf(stat.lastModifiedNanoOfSecond()),
-                stat.lastModifiedNanoOfSecond() > 0);
+    private static void assertStat(File expectedFile, StructStat expectedStat, Stat actual) {
+        assertEquals(expectedStat.st_size, actual.size);
+        assertEquals(expectedStat.st_blocks, actual.blocks);
+        assertEquals(expectedStat.st_mode, actual.mode);
+        assertEquals(expectedStat.st_mtime, actual.mtime);
+        assertEquals(expectedStat.st_mtim.tv_sec, actual.mtime);
+        assertEquals(expectedStat.st_mtim.tv_nsec, actual.mtime_nsec);
+        assertEquals(expectedFile.isFile(), actual.isRegularFile());
+        assertEquals(expectedFile.isDirectory(), actual.isDirectory());
     }
 
     @Test
