@@ -7,7 +7,7 @@ import java.io.DataOutput
 internal class NoPreviewCache(cacheDir: () -> Path) :
   PersistenceCache<Boolean>(cacheDir, 2) {
 
-  override fun cacheFileName() = "non-images"
+  override val cacheFileName = "non-images"
 
   override fun read(input: DataInput): Boolean = input.readBoolean()
 

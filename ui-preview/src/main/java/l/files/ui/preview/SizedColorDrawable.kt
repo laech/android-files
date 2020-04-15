@@ -1,28 +1,17 @@
-package l.files.ui.preview;
+package l.files.ui.preview
 
-import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.ColorDrawable
 
 /**
  * A color drawable with fixed width and height.
  */
-public final class SizedColorDrawable extends ColorDrawable {
+class SizedColorDrawable(
+  color: Int,
+  private val width: Int,
+  private val height: Int
+) : ColorDrawable(color) {
 
-    private final int width;
-    private final int height;
+  override fun getIntrinsicHeight(): Int = height
+  override fun getIntrinsicWidth(): Int = width
 
-    public SizedColorDrawable(int color, int width, int height) {
-        super(color);
-        this.width = width;
-        this.height = height;
-    }
-
-    @Override
-    public int getIntrinsicHeight() {
-        return height;
-    }
-
-    @Override
-    public int getIntrinsicWidth() {
-        return width;
-    }
 }

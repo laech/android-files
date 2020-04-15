@@ -10,6 +10,18 @@ import l.files.ui.base.graphics.ScaledBitmap
 import java.io.IOException
 import java.util.concurrent.Future
 
+internal data class BlurredThumbnail(val bitmap: Bitmap)
+
+internal data class NoPreview(val cause: Any) {
+  companion object {
+    val FILE_UNREADABLE = NoPreview("file is unreadable")
+    val NOT_REGULAR_FILE = NoPreview("not a regular file")
+    val PATH_IN_CACHE_DIR = NoPreview("path is in cache directory")
+    val IN_NO_PREVIEW_CACHE = NoPreview("file marked in no preview cache")
+    val DECODE_RETURNED_NULL = NoPreview("decode returned null")
+  }
+}
+
 class Preview internal constructor(
   context: Context,
   getCacheDir: () -> Path

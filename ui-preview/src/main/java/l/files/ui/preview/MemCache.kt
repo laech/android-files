@@ -1,45 +1,45 @@
-package l.files.ui.preview;
+package l.files.ui.preview
 
-import androidx.collection.LruCache;
+import androidx.collection.LruCache
+import l.files.fs.Path
+import l.files.fs.Stat
+import l.files.ui.base.graphics.Rect
+import java.util.concurrent.TimeUnit
 
-import l.files.fs.Path;
-import l.files.fs.Stat;
-import l.files.ui.base.graphics.Rect;
+internal abstract class MemCache<K, V> : Cache<V> {
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
+  private fun lastModifiedTime(stat: Stat): Long =
+    stat.lastModifiedTime().to(TimeUnit.MILLISECONDS)
 
-abstract class MemCache<K, V> implements Cache<V> {
-
-    private long lastModifiedTime(Stat stat) {
-        return stat.lastModifiedTime().to(MILLISECONDS);
+  override operator fun get(
+    path: Path,
+    stat: Stat,
+    constraint: Rect,
+    matchTime: Boolean
+  ): V? {
+    val key = getKey(path, constraint)
+    val value = delegate[key] ?: return null
+    return if (matchTime && lastModifiedTime(stat) != value.time) {
+      null
+    } else {
+      value.value
     }
+  }
 
-    @Override
-    public V get(Path path, Stat stat, Rect constraint, boolean matchTime) {
-        K key = getKey(path, constraint);
-        Snapshot<V> value = delegate().get(key);
-        if (value == null) {
-            return null;
-        }
-        if (matchTime && lastModifiedTime(stat) != value.time()) {
-            return null;
-        }
-        return value.get();
-    }
+  abstract fun getKey(path: Path, constraint: Rect): K
 
-    abstract K getKey(Path path, Rect constraint);
+  override fun put(
+    path: Path,
+    stat: Stat,
+    constraint: Rect,
+    value: V
+  ): Snapshot<V>? = delegate.put(
+    getKey(path, constraint),
+    Snapshot(value, lastModifiedTime(stat))
+  )
 
-    @Override
-    public Snapshot<V> put(Path path, Stat stat, Rect constraint, V value) {
-        return delegate().put(
-                getKey(path, constraint),
-                Snapshot.of(value, lastModifiedTime(stat)));
-    }
+  fun remove(path: Path, constraint: Rect): Snapshot<V>? =
+    delegate.remove(getKey(path, constraint))
 
-    Snapshot<V> remove(Path path, Rect constraint) {
-        return delegate().remove(getKey(path, constraint));
-    }
-
-    abstract LruCache<K, Snapshot<V>> delegate();
-
+  abstract val delegate: LruCache<K, Snapshot<V>>
 }

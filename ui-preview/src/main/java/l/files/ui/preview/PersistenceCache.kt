@@ -1,200 +1,167 @@
-package l.files.ui.preview;
+package l.files.ui.preview
 
-import android.util.Log;
-import androidx.collection.LruCache;
-import l.files.fs.Path;
-import l.files.fs.Stat;
-import l.files.ui.base.graphics.Rect;
+import android.os.AsyncTask
+import android.util.Log
+import androidx.collection.LruCache
+import l.files.base.Throwables
+import l.files.fs.Path
+import l.files.fs.Stat
+import l.files.ui.base.graphics.Rect
+import java.io.*
+import java.lang.System.nanoTime
+import java.util.concurrent.TimeUnit.MILLISECONDS
+import java.util.concurrent.atomic.AtomicBoolean
 
-import java.io.*;
-import java.util.Map;
-import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Supplier;
+private const val SUPERCLASS_VERSION = 5
 
-import static android.os.AsyncTask.SERIAL_EXECUTOR;
-import static java.lang.System.nanoTime;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static l.files.base.Objects.requireNonNull;
-import static l.files.base.Throwables.addSuppressed;
+internal abstract class PersistenceCache<V>(
+  cacheDir: () -> Path,
+  private val subclassVersion: Int
+) : MemCache<Path, V>() {
 
-abstract class PersistenceCache<V> extends MemCache<Path, V> {
+  private val loader = AsyncTask.SERIAL_EXECUTOR
+  private val loaded = AtomicBoolean(false)
+  private val dirty = AtomicBoolean(false)
 
-    private final Executor loader = SERIAL_EXECUTOR;
-    private final AtomicBoolean loaded = new AtomicBoolean(false);
-    private final AtomicBoolean dirty = new AtomicBoolean(false);
-
-    private final LruCache<Path, Snapshot<V>> cache =
-            new LruCache<Path, Snapshot<V>>(2000) {
-
-                @Override
-                protected void entryRemoved(
-                        boolean evicted,
-                        Path key,
-                        Snapshot<V> oldValue,
-                        Snapshot<V> newValue) {
-
-                    super.entryRemoved(evicted, key, oldValue, newValue);
-                    if (!oldValue.equals(newValue)) {
-                        dirty.set(true);
-                    }
-                }
-
-            };
-
-    private static final int SUPERCLASS_VERSION = 4;
-
-    private final Supplier<Path> cacheDir;
-    private final int subclassVersion;
-
-    PersistenceCache(Supplier<Path> cacheDir, int version) {
-        this.cacheDir = requireNonNull(cacheDir);
-        this.subclassVersion = version;
+  override val delegate = object : LruCache<Path, Snapshot<V>>(2000) {
+    override fun entryRemoved(
+      evicted: Boolean,
+      key: Path,
+      oldValue: Snapshot<V>,
+      newValue: Snapshot<V>?
+    ) {
+      super.entryRemoved(evicted, key, oldValue, newValue)
+      if (oldValue != newValue) {
+        dirty.set(true)
+      }
     }
+  }
 
-    @Override
-    Path getKey(Path path, Rect constraint) {
-        return path;
+  private val cacheDir by lazy { cacheDir() }
+
+  override fun getKey(path: Path, constraint: Rect): Path = path
+
+  override fun put(
+    path: Path,
+    stat: Stat,
+    constraint: Rect,
+    value: V
+  ): Snapshot<V>? {
+    val old = super.put(path, stat, constraint, value)
+    if (old == null
+      || old.value != value
+      || old.time != stat.lastModifiedTime().to(MILLISECONDS)
+    ) {
+      dirty.set(true)
     }
+    return old
+  }
 
-    @Override
-    public Snapshot<V> put(Path path, Stat stat, Rect constraint, V value) {
-        Snapshot<V> old = super.put(path, stat, constraint, value);
-        if (old == null
-                || !old.get().equals(value)
-                || old.time() != stat.lastModifiedTime().to(MILLISECONDS)) {
-            dirty.set(true);
+  private fun cacheFile(): Path = cacheDir.concat(cacheFileName)
+
+  abstract val cacheFileName: String
+
+  fun readAsyncIfNeeded() {
+    if (loaded.get()) {
+      return
+    }
+    loader.execute {
+      try {
+        readIfNeeded()
+      } catch (e: IOException) {
+        Log.w(
+          this@PersistenceCache.javaClass.simpleName,
+          "Failed to read cache.",
+          e
+        )
+      }
+    }
+  }
+
+  fun readIfNeeded() {
+    if (!loaded.compareAndSet(false, true)) {
+      return
+    }
+    val file = cacheFile()
+    try {
+      newBufferedDataInputStream(file).use {
+        if (it.readInt() != SUPERCLASS_VERSION) return
+        if (it.readInt() != subclassVersion) return
+
+        while (true) {
+          try {
+            val len = it.readShort()
+            val bytes = ByteArray(len.toInt())
+            it.readFully(bytes)
+            val key = Path.of(bytes) // TODO
+            val time = it.readLong()
+            val value = read(it)
+            delegate.put(key, Snapshot(value, time))
+          } catch (e: EOFException) {
+            break
+          }
         }
-        return old;
+      }
+    } catch (ignore: FileNotFoundException) {
     }
+  }
 
-    @Override
-    LruCache<Path, Snapshot<V>> delegate() {
-        return cache;
+  private fun newBufferedDataInputStream(path: Path) =
+    DataInputStream(path.newInputStream().buffered())
+
+  abstract fun read(input: DataInput): V
+
+  fun writeAsyncIfNeeded() {
+    if (!dirty.get()) {
+      return
     }
-
-    private Path cacheFile() {
-        return cacheDir.get().concat(cacheFileName());
+    loader.execute {
+      try {
+        writeIfNeeded()
+      } catch (e: IOException) {
+        Log.w(
+          this@PersistenceCache.javaClass.simpleName,
+          "Failed to write cache.", e
+        )
+      }
     }
+  }
 
-    abstract String cacheFileName();
-
-    final void readAsyncIfNeeded() {
-        if (loaded.get()) {
-            return;
+  fun writeIfNeeded() {
+    if (!dirty.compareAndSet(true, false)) {
+      return
+    }
+    val file = cacheFile()
+    val parent = file.parent()!!
+    parent.createDirectories()
+    val tmp = parent.concat("${file.name()}-${nanoTime()}")
+    try {
+      newBufferedDataOutputStream(tmp).use {
+        it.writeInt(SUPERCLASS_VERSION)
+        it.writeInt(subclassVersion)
+        val snapshot = delegate.snapshot()
+        for ((key, value) in snapshot) {
+          val bytes = key.toByteArray()
+          it.writeShort(bytes.size)
+          it.write(bytes)
+          it.writeLong(value.time)
+          write(it, value.value)
         }
-
-        loader.execute(() -> {
-            try {
-                readIfNeeded();
-            } catch (IOException e) {
-                Log.w(PersistenceCache.this.getClass().getSimpleName(),
-                    "Failed to read cache.", e);
-            }
-        });
+      }
+    } catch (e: Exception) {
+      try {
+        tmp.delete()
+      } catch (sup: IOException) {
+        Throwables.addSuppressed(e, sup)
+      }
+      throw e
     }
+    tmp.rename(file)
+  }
 
-    final void readIfNeeded() throws IOException {
-        if (!loaded.compareAndSet(false, true)) {
-            return;
-        }
+  private fun newBufferedDataOutputStream(path: Path) =
+    DataOutputStream(path.newOutputStream(false).buffered())
 
-        Path file = cacheFile();
-        try (DataInputStream in = newBufferedDataInputStream(file)) {
-
-            if (in.readInt() != SUPERCLASS_VERSION) {
-                return;
-            }
-            if (in.readInt() != subclassVersion) {
-                return;
-            }
-
-            while (true) {
-                try {
-
-                    in.readUTF(); // For backward compatibility
-                    short len = in.readShort();
-                    byte[] bytes = new byte[len];
-                    in.readFully(bytes);
-                    Path key = Path.of(bytes); // TODO
-                    long time = in.readLong();
-                    V value = read(in);
-
-                    cache.put(key, Snapshot.of(value, time));
-
-                } catch (EOFException e) {
-                    break;
-                }
-            }
-
-        } catch (FileNotFoundException ignore) {
-        }
-    }
-
-    private DataInputStream newBufferedDataInputStream(Path path) throws IOException {
-        return new DataInputStream(new BufferedInputStream(path.newInputStream()));
-    }
-
-    abstract V read(DataInput in) throws IOException;
-
-    final void writeAsyncIfNeeded() {
-        if (!dirty.get()) {
-            return;
-        }
-
-        loader.execute(() -> {
-            try {
-                writeIfNeeded();
-            } catch (IOException e) {
-                Log.w(PersistenceCache.this.getClass().getSimpleName(),
-                    "Failed to write cache.", e);
-            }
-        });
-    }
-
-    final void writeIfNeeded() throws IOException {
-        if (!dirty.compareAndSet(true, false)) {
-            return;
-        }
-
-        Path file = cacheFile();
-        Path parent = file.parent();
-        assert parent != null;
-        parent.createDirectories();
-
-        Path tmp = parent.concat(file.name() + "-" + nanoTime());
-        try (DataOutputStream out = newBufferedDataOutputStream(tmp)) {
-
-            out.writeInt(SUPERCLASS_VERSION);
-            out.writeInt(subclassVersion);
-
-            Map<Path, Snapshot<V>> snapshot = cache.snapshot();
-            for (Map.Entry<Path, Snapshot<V>> entry : snapshot.entrySet()) {
-
-                byte[] bytes = entry.getKey().toByteArray();
-                out.writeUTF(""); // For backward compatibility
-                out.writeShort(bytes.length);
-                out.write(bytes);
-                out.writeLong(entry.getValue().time());
-                write(out, entry.getValue().get());
-            }
-
-        } catch (Exception e) {
-            try {
-                tmp.delete();
-            } catch (IOException sup) {
-                addSuppressed(e, sup);
-            }
-            throw e;
-        }
-
-        tmp.rename(file);
-    }
-
-    private DataOutputStream newBufferedDataOutputStream(Path path) throws IOException {
-        return new DataOutputStream(new BufferedOutputStream(path.newOutputStream(false)));
-    }
-
-    abstract void write(DataOutput out, V value) throws IOException;
+  abstract fun write(out: DataOutput, value: V)
 
 }

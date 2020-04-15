@@ -5,6 +5,11 @@ import l.files.fs.Stat
 import l.files.ui.base.graphics.Rect
 import java.io.IOException
 
+internal data class Snapshot<V>(
+  val value: V,
+  val time: Long
+)
+
 internal interface Cache<V> {
 
   @Throws(IOException::class)

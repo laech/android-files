@@ -1,75 +1,54 @@
-package l.files.ui.preview;
+package l.files.ui.preview
 
-import android.app.ActivityManager;
-import android.content.Context;
-import android.graphics.Bitmap;
-import androidx.collection.LruCache;
+import android.app.ActivityManager
+import android.content.Context
+import android.graphics.Bitmap
+import androidx.collection.LruCache
+import androidx.core.content.getSystemService
+import l.files.fs.Path
+import l.files.ui.base.graphics.Rect
 
-import java.util.AbstractMap.SimpleImmutableEntry;
+internal class ThumbnailMemCache(
+  size: Int,
+  private val keyIncludeConstraint: Boolean
+) : MemCache<Any, Bitmap>() {
 
-import l.files.fs.Path;
-import l.files.ui.base.graphics.Rect;
+  override val delegate = object : LruCache<Any, Snapshot<Bitmap>>(size) {
+    override fun sizeOf(key: Any, value: Snapshot<Bitmap>): Int =
+      value.value.allocationByteCount
+  }
 
-import static android.content.Context.ACTIVITY_SERVICE;
-import static android.os.Build.VERSION.SDK_INT;
-import static android.os.Build.VERSION_CODES.KITKAT;
+  constructor(
+    context: Context,
+    keyIncludeConstraint: Boolean,
+    appMemoryPercentageToUseForCache: Float
+  ) : this(
+    calculateSize(context, appMemoryPercentageToUseForCache),
+    keyIncludeConstraint
+  )
 
-final class ThumbnailMemCache extends MemCache<Object, Bitmap> {
-
-    private final LruCache<Object, Snapshot<Bitmap>> delegate;
-    private final boolean keyIncludeConstraint;
-
-    ThumbnailMemCache(
-            Context context,
-            boolean keyIncludeConstraint,
-            float appMemoryPercentageToUseForCache) {
-
-        this(
-                calculateSize(context, appMemoryPercentageToUseForCache),
-                keyIncludeConstraint
-        );
+  override fun getKey(path: Path, constraint: Rect): Any =
+    if (keyIncludeConstraint) {
+      Pair(path, constraint)
+    } else {
+      path
     }
 
-    ThumbnailMemCache(int size, boolean keyIncludeConstraint) {
-        this.keyIncludeConstraint = keyIncludeConstraint;
-        this.delegate = new LruCache<Object, Snapshot<Bitmap>>(size) {
-            @Override
-            protected int sizeOf(Object key, Snapshot<Bitmap> value) {
-                if (SDK_INT >= KITKAT) {
-                    return value.get().getAllocationByteCount();
-                } else {
-                    return value.get().getByteCount();
-                }
-            }
-        };
-    }
+  fun clear() {
+    delegate.evictAll()
+  }
+}
 
-    private static int calculateSize(Context context, float appMemoryPercentageToUseForCache) {
-        if (appMemoryPercentageToUseForCache <= 0 ||
-                appMemoryPercentageToUseForCache >= 1) {
-            throw new IllegalArgumentException();
-        }
-
-        ActivityManager manager = (ActivityManager) context.getSystemService(ACTIVITY_SERVICE);
-        int megabytes = manager.getMemoryClass();
-        int bytes = megabytes * 1024 * 1024;
-        return (int) (bytes * appMemoryPercentageToUseForCache);
-    }
-
-    @Override
-    Object getKey(Path path, Rect constraint) {
-        return keyIncludeConstraint
-                ? new SimpleImmutableEntry<>(path, constraint)
-                : path;
-    }
-
-    @Override
-    LruCache<Object, Snapshot<Bitmap>> delegate() {
-        return delegate;
-    }
-
-    void clear() {
-        delegate().evictAll();
-    }
-
+private fun calculateSize(
+  context: Context,
+  appMemoryPercentageToUseForCache: Float
+): Int {
+  require(
+    !(appMemoryPercentageToUseForCache <= 0 ||
+      appMemoryPercentageToUseForCache >= 1)
+  )
+  val manager = context.getSystemService<ActivityManager>()!!
+  val megabytes = manager.memoryClass
+  val bytes = megabytes * 1024 * 1024
+  return (bytes * appMemoryPercentageToUseForCache).toInt()
 }

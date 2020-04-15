@@ -39,6 +39,7 @@ dependencies {
   implementation project(':ui-preview-pdf')
   implementation deps.androidsvg
   implementation deps.androidCore
+  implementation deps.androidCoreKtx
   implementation deps.androidAnnotations
   implementation deps.kotlinStdlibJdk7
 
