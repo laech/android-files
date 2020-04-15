@@ -1,62 +1,57 @@
-package l.files.ui.preview;
+package l.files.ui.preview
 
-import org.junit.Test;
+import l.files.fs.Path
+import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertNull
+import org.junit.Test
 
-import l.files.fs.Path;
-import l.files.ui.base.graphics.Rect;
+internal abstract class PersistenceCacheTest<V, C : PersistenceCache<V>> :
+  MemCacheTest<Path, V, C>() {
 
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNull;
+  @Test
+  fun removed_item_will_not_be_persisted() {
+    val constraint = newConstraint()
+    val value: V = newValue()
 
-public abstract class PersistenceCacheTest<V, C extends PersistenceCache<V>>
-        extends MemCacheTest<Path, V, C> {
+    val c1: C = newCache()
+    c1.put(file, stat, constraint, value)
+    c1.writeIfNeeded()
 
-    @Test
-    public void removed_item_will_not_be_persisted() throws Exception {
+    val c2: C = newCache()
+    c2.readIfNeeded()
+    assertValueEquals(value, c2[file, stat, constraint, true])
 
-        Rect constraint = newConstraint();
-        V value = newValue();
+    c2.remove(file, constraint)
+    c2.writeIfNeeded()
 
-        C c1 = newCache();
-        c1.put(file, stat, constraint, value);
-        c1.writeIfNeeded();
+    val c3: C = newCache()
+    c3.readIfNeeded()
+    assertNull(c3[file, stat, constraint, true])
+  }
 
-        C c2 = newCache();
-        c2.readIfNeeded();
-        assertValueEquals(value, c2.get(file, stat, constraint, true));
-        c2.remove(file, constraint);
-        c2.writeIfNeeded();
+  @Test
+  fun reads_persisted_cache_from_put() {
+    val constraint = newConstraint()
+    val value: V = newValue()
 
-        C c3 = newCache();
-        c3.readIfNeeded();
-        assertNull(c3.get(file, stat, constraint, true));
-    }
+    val c1: C = newCache()
+    c1.put(file, stat, constraint, value)
+    c1.writeIfNeeded()
 
-    @Test
-    public void reads_persisted_cache_from_put() throws Exception {
+    val c2: C? = newCache()
+    assertNull(c2!![file, stat, constraint, true])
 
-        Rect constraint = newConstraint();
-        V value = newValue();
+    c2.readIfNeeded()
+    assertValueEquals(value, c2[file, stat, constraint, true])
+  }
 
-        C c1 = newCache();
-        c1.put(file, stat, constraint, value);
-        c1.writeIfNeeded();
-
-        C c2 = newCache();
-        assertNull(c2.get(file, stat, constraint, true));
-        c2.readIfNeeded();
-        assertValueEquals(value, c2.get(file, stat, constraint, true));
-    }
-
-    @Test
-    public void constraint_is_not_used_as_part_of_key() throws Exception {
-
-        V value = newValue();
-        cache.put(file, stat, newConstraint(), value);
-        assertValueEquals(value, cache.get(file, stat, newConstraint(), true));
-        assertValueEquals(value, cache.get(file, stat, newConstraint(), true));
-        assertValueEquals(value, cache.get(file, stat, newConstraint(), true));
-        assertNotEquals(newConstraint(), newConstraint());
-    }
-
+  @Test
+  fun constraint_is_not_used_as_part_of_key() {
+    val value: V = newValue()
+    cache.put(file, stat, newConstraint(), value)
+    assertValueEquals(value, cache[file, stat, newConstraint(), true])
+    assertValueEquals(value, cache[file, stat, newConstraint(), true])
+    assertValueEquals(value, cache[file, stat, newConstraint(), true])
+    assertNotEquals(newConstraint(), newConstraint())
+  }
 }

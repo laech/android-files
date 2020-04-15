@@ -1,39 +1,30 @@
-package l.files.thumbnail;
+package l.files.thumbnail
 
-import org.junit.Test;
+import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
+import l.files.ui.base.graphics.Rect
+import org.junit.Assert.assertEquals
+import org.junit.Test
+import java.io.ByteArrayInputStream
+import java.io.InputStream
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+class SvgThumbnailerTest {
 
-import l.files.ui.base.graphics.Rect;
-import l.files.ui.base.graphics.ScaledBitmap;
+  @Test
+  fun create_thumbnail_from_svg() {
+    val input: InputStream = ByteArrayInputStream(
+      """<svg fill="#000000" height="24" width="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"/>"""
+        .toByteArray()
+    )
+    val originalSize = Rect.of(24, 24)
+    val decodedSize = Rect.of(10, 10)
+    val result = thumbnailer().create(
+      input,
+      decodedSize,
+      getInstrumentation().context
+    )!!
+    assertEquals(decodedSize, Rect.of(result.bitmap()))
+    assertEquals(originalSize, result.originalSize())
+  }
 
-import static androidx.test.InstrumentationRegistry.getContext;
-import static l.files.base.io.Charsets.UTF_8;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
-public final class SvgThumbnailerTest {
-
-    @Test
-    public void create_thumbnail_from_svg() throws Exception {
-        InputStream in = new ByteArrayInputStream(("" +
-                "<svg" +
-                " fill=\"#000000\"" +
-                " height=\"24\"" +
-                " width=\"24\"" +
-                " viewBox=\"0 0 24 24\"" +
-                " xmlns=\"http://www.w3.org/2000/svg\"/>").getBytes(UTF_8));
-        Rect originalSize = Rect.of(24, 24);
-        Rect decodedSize = Rect.of(10, 10);
-        ScaledBitmap result = thumbnailer().create(in, decodedSize, getContext());
-        assertNotNull(result);
-        assertEquals(decodedSize, Rect.of(result.bitmap()));
-        assertEquals(originalSize, result.originalSize());
-    }
-
-    private SvgThumbnailer thumbnailer() {
-        return new SvgThumbnailer();
-    }
-
+  private fun thumbnailer() = SvgThumbnailer()
 }

@@ -1,25 +1,21 @@
-package l.files.ui.preview;
+package l.files.ui.preview
 
-import org.junit.Test;
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Test
 
-import l.files.ui.base.graphics.Rect;
+internal abstract class MemCacheTest<K, V, C : MemCache<K, V>> :
+  CacheTest<V, C>() {
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+  @Test
+  fun removed_item_no_longer_available() {
+    val constraint = newConstraint()
+    val value: V = newValue()
+    assertNull(cache.remove(file, constraint))
 
-public abstract class MemCacheTest<K, V, C extends MemCache<K, V>>
-        extends CacheTest<V, C> {
-
-    @Test
-    public void removed_item_no_longer_available() throws Exception {
-        Rect constraint = newConstraint();
-        V value = newValue();
-        assertNull(cache.remove(file, constraint));
-
-        cache.put(file, stat, constraint, value);
-        assertEquals(value, cache.remove(file, constraint).get());
-        assertNull(cache.remove(file, constraint));
-        assertNull(cache.get(file, stat, constraint, true));
-    }
-
+    cache.put(file, stat, constraint, value)
+    assertEquals(value, cache.remove(file, constraint)!!.value)
+    assertNull(cache.remove(file, constraint))
+    assertNull(cache[file, stat, constraint, true])
+  }
 }

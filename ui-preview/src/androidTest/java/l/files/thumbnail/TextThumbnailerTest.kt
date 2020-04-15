@@ -1,31 +1,26 @@
-package l.files.thumbnail;
+package l.files.thumbnail
 
-import org.junit.Test;
+import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
+import l.files.ui.base.graphics.Rect
+import org.junit.Assert.assertEquals
+import org.junit.Test
+import java.io.ByteArrayInputStream
+import java.io.InputStream
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+class TextThumbnailerTest {
 
-import l.files.ui.base.graphics.Rect;
-import l.files.ui.base.graphics.ScaledBitmap;
+  private fun thumbnailer() = TextThumbnailer()
 
-import static androidx.test.InstrumentationRegistry.getContext;
-import static l.files.base.io.Charsets.UTF_8;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
-public final class TextThumbnailerTest {
-
-    private TextThumbnailer thumbnailer() {
-        return new TextThumbnailer();
-    }
-
-    @Test
-    public void create_thumbnail_from_utf8() throws Exception {
-        InputStream in = new ByteArrayInputStream("hello world".getBytes(UTF_8));
-        ScaledBitmap result = thumbnailer().create(in, Rect.of(10, 999), getContext());
-        Rect square = Rect.of(10, 10);
-        assertNotNull(result);
-        assertEquals(square, Rect.of(result.bitmap()));
-        assertEquals(square, result.originalSize());
-    }
+  @Test
+  fun create_thumbnail_from_utf8() {
+    val input: InputStream = ByteArrayInputStream("hello world".toByteArray())
+    val result = thumbnailer().create(
+      input,
+      Rect.of(10, 999),
+      getInstrumentation().context
+    )!!
+    val square = Rect.of(10, 10)
+    assertEquals(square, Rect.of(result.bitmap()))
+    assertEquals(square, result.originalSize())
+  }
 }
