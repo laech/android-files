@@ -56,3 +56,6 @@ allprojects {
     mavenCentral()
   }
 }
+
+// ./gradlew connectedAndroidTest mergeAndroidReports --continue
+apply plugin: "android-reporting"
