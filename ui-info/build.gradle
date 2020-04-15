@@ -1,31 +1,40 @@
-apply plugin: 'com.android.library'
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+apply plugin: "kotlin-android-extensions"
 
 android {
 
-    compileSdkVersion project.compileSdkVersion
-    buildToolsVersion project.buildToolsVersion
+  compileSdkVersion project.compileSdkVersion
+  buildToolsVersion project.buildToolsVersion
 
-    defaultConfig {
-        minSdkVersion project.minSdkVersion
-        targetSdkVersion project.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
-    }
+  defaultConfig {
+    minSdkVersion project.minSdkVersion
+    targetSdkVersion project.targetSdkVersion
+    versionCode 1
+    versionName "1.0"
+  }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
 
+  kotlinOptions {
+    jvmTarget = "1.8"
+  }
 }
 
 dependencies {
 
-    implementation project(':base')
-    implementation project(':fs')
-    implementation project(':ui-base')
-    implementation project(':ui-preview')
-    implementation deps.androidAppcompat
-    implementation deps.androidAnnotations
-
+  implementation project(':base')
+  implementation project(':fs')
+  implementation project(':ui-base')
+  implementation project(':ui-preview')
+  implementation deps.androidAppcompat
+  implementation deps.androidAnnotations
+  implementation deps.androidFragment
+  implementation deps.androidFragmentKtx
+  implementation deps.kotlinStdlibJdk7
+  implementation deps.lifecycleViewModelKtx
+  implementation deps.lifecycleLivedataKtx
 }

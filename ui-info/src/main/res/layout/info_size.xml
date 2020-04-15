@@ -15,7 +15,7 @@
       android:textIsSelectable="true" />
 
     <ProgressBar
-      android:id="@+id/calculate_size_progress_bar"
+      android:id="@+id/calculateSizeProgressBar"
       style="?android:attr/progressBarStyleHorizontal"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
@@ -26,7 +26,7 @@
   </LinearLayout>
 
   <TextView
-    android:id="@+id/size"
+    android:id="@+id/sizeView"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:textColor="?android:attr/textColorPrimary"

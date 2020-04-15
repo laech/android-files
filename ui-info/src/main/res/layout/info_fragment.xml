@@ -4,7 +4,7 @@
     android:layout_height="match_parent">
 
     <LinearLayout
-        android:id="@+id/root"
+        android:id="@+id/backgroundView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
@@ -12,13 +12,13 @@
         android:paddingBottom="12dp">
 
         <ImageView
-            android:id="@+id/image"
+            android:id="@+id/thumbnailView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:contentDescription="@string/thumbnail" />
 
         <TextView
-            android:id="@+id/name"
+            android:id="@+id/nameView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
@@ -52,7 +52,7 @@
                 android:textIsSelectable="true" />
 
             <TextView
-                android:id="@+id/modified"
+                android:id="@+id/lastModifiedView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="?android:attr/textColorPrimary"
