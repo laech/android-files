@@ -1,17 +1,10 @@
-package l.files.ui.preview;
+package l.files.ui.preview
 
-import static java.lang.System.currentTimeMillis;
+import java.lang.System.currentTimeMillis
 
-public final class NoPreviewCacheTest
-        extends PersistenceCacheTest<Boolean, NoPreviewCache> {
+internal class NoPreviewCacheTest :
+  PersistenceCacheTest<Boolean, NoPreviewCache>() {
 
-    @Override
-    NoPreviewCache newCache() {
-        return new NoPreviewCache(mockCacheDir());
-    }
-
-    @Override
-    Boolean newValue() {
-        return currentTimeMillis() % 2 == 0;
-    }
+  override fun newCache() = NoPreviewCache { mockCacheDir() }
+  override fun newValue() = currentTimeMillis() % 2 == 0L
 }

@@ -28,7 +28,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.ui.base.content.Contexts.isDebugBuild;
 
-final class Decode extends AsyncTask<Context, Object, Object> {
+public final class Decode extends AsyncTask<Context, Object, Object> {
 
     private static final BlockingQueue<Runnable> queue =
             new LinkedBlockingQueue<>();
@@ -148,7 +148,7 @@ final class Decode extends AsyncTask<Context, Object, Object> {
     }
 
     private boolean checkIsCacheFile() {
-        if (path.startsWith(preview.cacheDir)) {
+        if (path.startsWith(preview.getCacheDir$ui_preview_debug())) {
             publishProgress(NoPreview.PATH_IN_CACHE_DIR);
             return true;
         }
@@ -156,7 +156,7 @@ final class Decode extends AsyncTask<Context, Object, Object> {
     }
 
     private boolean checkNoPreviewCache() {
-        NoPreview reason = preview.getNoPreviewReason(path, stat, constraint);
+        NoPreview reason = preview.getNoPreviewReason$ui_preview_debug(path, stat, constraint);
         if (reason != null) {
             publishProgress(reason);
             return true;

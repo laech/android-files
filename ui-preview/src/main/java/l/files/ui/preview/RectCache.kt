@@ -1,34 +1,23 @@
-package l.files.ui.preview;
+package l.files.ui.preview
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
+import l.files.fs.Path
+import l.files.ui.base.graphics.Rect
+import java.io.DataInput
+import java.io.DataOutput
 
-import l.files.fs.Path;
-import l.files.ui.base.graphics.Rect;
+internal class RectCache(cacheDir: () -> Path) :
+  PersistenceCache<Rect>(cacheDir, 1) {
 
-final class RectCache extends PersistenceCache<Rect> {
+  override fun cacheFileName() = "sizes"
 
-    RectCache(Path cacheDir) {
-        super(cacheDir, 1);
-    }
+  override fun read(input: DataInput): Rect {
+    val width = input.readInt()
+    val height = input.readInt()
+    return Rect.of(width, height)
+  }
 
-    @Override
-    String cacheFileName() {
-        return "sizes";
-    }
-
-    @Override
-    Rect read(DataInput in) throws IOException {
-        int width = in.readInt();
-        int height = in.readInt();
-        return Rect.of(width, height);
-    }
-
-    @Override
-    void write(DataOutput out, Rect rect) throws IOException {
-        out.writeInt(rect.width());
-        out.writeInt(rect.height());
-    }
-
+  override fun write(out: DataOutput, rect: Rect) {
+    out.writeInt(rect.width())
+    out.writeInt(rect.height())
+  }
 }

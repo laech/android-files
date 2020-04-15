@@ -1,98 +1,85 @@
-package l.files.ui.preview;
+package l.files.ui.preview
 
-import org.junit.Before;
-import org.junit.Test;
+import l.files.fs.Instant.EPOCH
+import l.files.fs.LinkOption
+import l.files.fs.LinkOption.NOFOLLOW
+import l.files.fs.Path
+import l.files.fs.Stat
+import l.files.ui.base.graphics.Rect
+import org.junit.After
+import org.junit.Assert.*
+import org.junit.Before
+import org.junit.Test
+import java.io.File
+import java.util.*
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Random;
+internal abstract class CacheTest<V, C : Cache<V>> {
 
-import l.files.fs.Instant;
-import l.files.fs.Path;
-import l.files.fs.Stat;
-import l.files.ui.base.graphics.Rect;
+  lateinit var cache: C
+  lateinit var random: Random
+  lateinit var file: Path
+  lateinit var stat: Stat
+  private lateinit var tempDir: File
 
-import static java.io.File.createTempFile;
-import static l.files.fs.LinkOption.FOLLOW;
-import static l.files.fs.LinkOption.NOFOLLOW;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+  private fun createTempDir(): File {
+    val dir = File.createTempFile(javaClass.simpleName, null)
+    assertTrue(dir.delete())
+    assertTrue(dir.mkdir())
+    return dir
+  }
 
-public abstract class CacheTest<V, C extends Cache<V>> {
+  @Before
+  fun setUp() {
+    tempDir = createTempDir()
+    cache = newCache()
+    random = Random()
+    val localFile = File.createTempFile("123", null, tempDir)
+    file = Path.of(localFile)
+    stat = file.stat(LinkOption.FOLLOW)
+  }
 
-    C cache;
-    Random random;
+  @After
+  fun tearDown() {
+    assertTrue(tempDir.deleteRecursively() || !tempDir.exists())
+  }
 
-    Path file;
-    Stat stat;
+  @Test
+  fun gets_what_has_put_in() {
+    val constraint = newConstraint()
+    val value = newValue()
+    cache.put(file, stat, constraint, value)
+    assertValueEquals(value, cache.get(file, stat, constraint, true))
+  }
 
-    private File tempDir;
+  @Test
+  fun gets_null_when_time_changes() {
+    val constraint = newConstraint()
+    val value = newValue()
+    cache.put(file, stat, constraint, value)
+    file.setLastModifiedTime(NOFOLLOW, EPOCH)
+    assertNull(cache.get(file, file.stat(NOFOLLOW), constraint, true))
+  }
 
-    private File createTempDir() throws IOException {
-        File dir = File.createTempFile(getClass().getSimpleName(), null);
-        assertTrue(dir.delete());
-        assertTrue(dir.mkdir());
-        return dir;
-    }
+  @Test
+  fun gets_old_value_if_stat_not_provided() {
+    val constraint = newConstraint()
+    val value = newValue()
+    cache.put(file, stat, constraint, value)
+    assertValueEquals(value, cache.get(file, stat, constraint, false))
+  }
 
-    @Before
-    public void setUp() throws Exception {
+  abstract fun newCache(): C
 
-        tempDir = createTempDir();
+  abstract fun newValue(): V
 
-        cache = newCache();
-        random = new Random();
+  open fun newConstraint(): Rect = Rect.of(
+    random.nextInt(100) + 1,
+    random.nextInt(100) + 1
+  )
 
-        File localFile = createTempFile("123", null, tempDir);
-        file = Path.of(localFile);
-        stat = file.stat(FOLLOW);
-    }
+  open fun assertValueEquals(a: V?, b: V?) {
+    assertEquals(a, b)
+  }
 
-    @Test
-    public void gets_what_has_put_in() throws Exception {
-        Rect constraint = newConstraint();
-        V value = newValue();
-        cache.put(file, stat, constraint, value);
-        assertValueEquals(value, cache.get(file, stat, constraint, true));
-    }
-
-    @Test
-    public void gets_null_when_time_changes() throws Exception {
-        Rect constraint = newConstraint();
-        V value = newValue();
-        cache.put(file, stat, constraint, value);
-
-        file.setLastModifiedTime(NOFOLLOW, Instant.EPOCH);
-        assertNull(cache.get(file, file.stat(NOFOLLOW), constraint, true));
-    }
-
-    @Test
-    public void gets_old_value_if_stat_not_provided() throws Exception {
-
-        Rect constraint = newConstraint();
-        V value = newValue();
-        cache.put(file, stat, constraint, value);
-
-        assertValueEquals(value, cache.get(file, stat, constraint, false));
-    }
-
-    abstract C newCache();
-
-    abstract V newValue();
-
-    Rect newConstraint() {
-        return Rect.of(
-                random.nextInt(100) + 1,
-                random.nextInt(100) + 1
-        );
-    }
-
-    void assertValueEquals(V a, V b) {
-        assertEquals(a, b);
-    }
-
-    Path mockCacheDir() {
-        return Path.of(tempDir);
-    }
+  fun mockCacheDir(): Path = Path.of(tempDir)
 }

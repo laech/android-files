@@ -1,61 +1,66 @@
-apply plugin: 'com.android.application'
+apply plugin: "com.android.application"
+apply plugin: "kotlin-android"
 
 android {
 
-    compileSdkVersion project.compileSdkVersion
-    buildToolsVersion project.buildToolsVersion
+  compileSdkVersion project.compileSdkVersion
+  buildToolsVersion project.buildToolsVersion
 
-    defaultConfig {
-        applicationId 'l.files'
-        minSdkVersion project.minSdkVersion
-        targetSdkVersion project.targetSdkVersion
-        versionCode 31
-        versionName '4.6.3'
+  defaultConfig {
+    applicationId 'l.files'
+    minSdkVersion project.minSdkVersion
+    targetSdkVersion project.targetSdkVersion
+    versionCode 31
+    versionName '4.6.3'
+  }
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+
+  kotlinOptions {
+    jvmTarget = "1.8"
+  }
+
+  signingConfigs {
+
+    debug {
+      storeFile file('debug.keystore')
+      storePassword 'android'
+      keyAlias 'mykey'
+      keyPassword 'android'
     }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+    release {
+      if (System.console() != null) {
+        storeFile file(System.console().readLine("\nKeystore location: "))
+        storePassword new String(System.console().readPassword("Keystore password: "))
+        keyAlias "files"
+        keyPassword new String(System.console().readPassword("Key password: "))
+      }
     }
 
-    signingConfigs {
+  }
 
-        debug {
-            storeFile file('debug.keystore')
-            storePassword 'android'
-            keyAlias 'mykey'
-            keyPassword 'android'
-        }
+  buildTypes {
 
-        release {
-            if (System.console() != null) {
-                storeFile file(System.console().readLine("\nKeystore location: "))
-                storePassword new String(System.console().readPassword("Keystore password: "))
-                keyAlias "files"
-                keyPassword new String(System.console().readPassword("Key password: "))
-            }
-        }
-
+    debug {
+      applicationIdSuffix ".debug"
+      signingConfig signingConfigs.debug
     }
 
-    buildTypes {
-
-        debug {
-            applicationIdSuffix ".debug"
-            signingConfig signingConfigs.debug
-        }
-
-        release {
-            signingConfig signingConfigs.release
-        }
-
+    release {
+      signingConfig signingConfigs.release
     }
 
-    splits {
-        abi {
-            enable true
-        }
+  }
+
+  splits {
+    abi {
+      enable true
     }
+  }
 
 }
 
@@ -67,37 +72,38 @@ android {
 // mips < mips64
 
 ext.abiCodes = [
-        'armeabi'    : 1,
-        'armeabi-v7a': 2,
-        'arm64-v8a'  : 3,
-        'x86'        : 4,
-        'x86_64'     : 5,
-        'mips'       : 6,
-        'mips64'     : 7,
+  'armeabi'    : 1,
+  'armeabi-v7a': 2,
+  'arm64-v8a'  : 3,
+  'x86'        : 4,
+  'x86_64'     : 5,
+  'mips'       : 6,
+  'mips64'     : 7,
 ]
 
 import com.android.build.OutputFile
 
 android.applicationVariants.all { variant ->
-    variant.outputs.each { output ->
-        output.versionCodeOverride = android.defaultConfig.versionCode * 1000 +
-                project.ext.abiCodes.get(output.getFilter(OutputFile.ABI))
-    }
+  variant.outputs.each { output ->
+    output.versionCodeOverride = android.defaultConfig.versionCode * 1000 +
+      project.ext.abiCodes.get(output.getFilter(OutputFile.ABI))
+  }
 }
 
 android.applicationVariants.all { variant ->
-    if (variant.buildType.name == 'debug') {
-        variant.outputs.each { output ->
-            output.versionNameOverride =
-                    android.defaultConfig.versionName + "-" + output.baseName
-        }
+  if (variant.buildType.name == 'debug') {
+    variant.outputs.each { output ->
+      output.versionNameOverride =
+        android.defaultConfig.versionName + "-" + output.baseName
     }
+  }
 }
 
 dependencies {
 
-    implementation project(':fs')
-    implementation project(':ui-browser')
-    implementation project(':ui-preview')
+  implementation project(':fs')
+  implementation project(':ui-browser')
+  implementation project(':ui-preview')
+  implementation deps.kotlinStdlibJdk7
 
 }

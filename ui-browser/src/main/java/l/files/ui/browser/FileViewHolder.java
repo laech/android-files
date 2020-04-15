@@ -41,6 +41,7 @@ import l.files.ui.browser.text.FileTextLayouts;
 import l.files.ui.browser.widget.ActivatedCardView;
 import l.files.ui.browser.widget.ActivatedCardView.ActivatedListener;
 import l.files.ui.preview.Preview;
+import l.files.ui.preview.PreviewKt;
 import l.files.ui.preview.SizedColorDrawable;
 
 import static android.graphics.Color.TRANSPARENT;
@@ -96,7 +97,7 @@ public final class FileViewHolder
         super(itemView, selection, actionModeProvider, actionModeCallback);
 
         this.recyclerView = requireNonNull(recyclerView, "recyclerView");
-        this.preview = Preview.get(itemView.getContext());
+        this.preview = PreviewKt.getPreview(itemView.getContext());
         this.topic = requireNonNull(topic, "topic");
         this.backgroundView = itemView.findViewById(R.id.blur);
         this.cardView = itemView.findViewById(R.id.card);

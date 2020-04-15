@@ -1,123 +1,107 @@
-package l.files.ui.preview;
+package l.files.ui.preview
 
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
+import android.graphics.Bitmap
+import android.graphics.Bitmap.Config.ARGB_8888
+import android.graphics.Canvas
+import android.graphics.Color.BLUE
+import l.files.fs.Instant
+import l.files.fs.LinkOption.NOFOLLOW
+import l.files.ui.base.graphics.Rect
+import l.files.ui.base.graphics.ScaledBitmap
+import org.junit.Assert.*
+import org.junit.Test
+import java.lang.System.currentTimeMillis
+import java.util.concurrent.TimeUnit.DAYS
 
-import org.junit.Test;
+internal class ThumbnailDiskCacheTest :
+  CacheTest<ScaledBitmap, ThumbnailDiskCache>() {
 
-import l.files.fs.Instant;
-import l.files.fs.Path;
-import l.files.ui.base.graphics.Rect;
-import l.files.ui.base.graphics.ScaledBitmap;
+  @Test
+  fun cache_file_stored_in_cache_dir() {
+    val cacheFilePath = cache.cacheFile(file, stat, newConstraint(), true)
+    val cacheDirPath = cache.cacheDir
+    assertTrue(
+      "\ncacheFile: $cacheFilePath,\ncacheDir:  $cacheDirPath",
+      cacheFilePath.startsWith(cacheDirPath)
+    )
+  }
 
-import static android.graphics.Bitmap.Config.ARGB_8888;
-import static android.graphics.Bitmap.createBitmap;
-import static android.graphics.Color.BLUE;
-import static java.lang.System.currentTimeMillis;
-import static java.util.concurrent.TimeUnit.DAYS;
-import static l.files.fs.LinkOption.NOFOLLOW;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+  @Test
+  fun cleans_old_cache_files_not_accessed_in_30_days() {
+    val constraint = newConstraint()
+    val value = newValue()
+    val cacheFile = cache.cacheFile(file, stat, constraint, true)
+    assertFalse(cacheFile.exists(NOFOLLOW))
 
-public final class ThumbnailDiskCacheTest
-        extends CacheTest<ScaledBitmap, ThumbnailDiskCache> {
+    cache.put(file, stat, constraint, value)
+    assertTrue(cacheFile.exists(NOFOLLOW))
 
-    @Test
-    public void cache_file_stored_in_cache_dir() throws Exception {
-        Path cacheFilePath = cache.cacheFile(this.file, stat, newConstraint(), true);
-        Path cacheDirPath = cache.cacheDir;
-        assertTrue(
-                "\ncacheFile: " + cacheFilePath + ",\ncacheDir:  " + cacheDirPath,
-                cacheFilePath.startsWith(cacheDirPath));
-    }
+    cache.cleanup()
+    assertTrue(cacheFile.exists(NOFOLLOW))
 
-    @Test
-    public void cleans_old_cache_files_not_accessed_in_30_days() throws Exception {
-        Rect constraint = newConstraint();
-        ScaledBitmap value = newValue();
+    cacheFile.setLastModifiedTime(
+      NOFOLLOW,
+      Instant.ofMillis(currentTimeMillis() - DAYS.toMillis(29))
+    )
+    cache.cleanup()
+    assertTrue(cacheFile.exists(NOFOLLOW))
 
-        Path cacheFile = cache.cacheFile(file, stat, constraint, true);
-        assertFalse(cacheFile.exists(NOFOLLOW));
+    cacheFile.setLastModifiedTime(
+      NOFOLLOW,
+      Instant.ofMillis(currentTimeMillis() - DAYS.toMillis(31))
+    )
+    cache.cleanup()
+    assertFalse(cacheFile.exists(NOFOLLOW))
+    assertFalse(cacheFile.parent()!!.exists(NOFOLLOW))
+  }
 
-        cache.put(file, stat, constraint, value);
-        assertTrue(cacheFile.exists(NOFOLLOW));
+  @Test
+  fun updates_modified_time_on_read() {
+    val constraint = newConstraint()
+    val value = newValue()
+    cache.put(file, stat, constraint, value)
+    val cacheFile = cache.cacheFile(file, stat, constraint, true)
 
-        cache.cleanup();
-        assertTrue(cacheFile.exists(NOFOLLOW));
+    val oldTime = Instant.ofMillis(1000)
+    cacheFile.setLastModifiedTime(NOFOLLOW, oldTime)
+    assertEquals(oldTime, cacheFile.stat(NOFOLLOW).lastModifiedTime())
 
-        cacheFile.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(
-                currentTimeMillis() - DAYS.toMillis(29)));
-        cache.cleanup();
-        assertTrue(cacheFile.exists(NOFOLLOW));
+    cache.get(file, stat, constraint, true)
+    val newTime = cacheFile.stat(NOFOLLOW).lastModifiedTime()
+    assertNotEquals(oldTime, newTime)
+    assertTrue(oldTime.to(DAYS) < newTime.to(DAYS))
+  }
 
-        cacheFile.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(
-                currentTimeMillis() - DAYS.toMillis(31)));
-        cache.cleanup();
-        assertFalse(cacheFile.exists(NOFOLLOW));
-        assertFalse(cacheFile.parent().exists(NOFOLLOW));
-    }
+  @Test
+  fun constraint_is_used_as_part_of_key() {
+    val constraint = newConstraint()
+    val value = newValue()
+    cache.put(file, stat, constraint, value)
+    assertValueEquals(value, cache.get(file, stat, constraint, true))
+    assertNull(cache.get(file, stat, newConstraint(), true))
+    assertNull(cache.get(file, stat, newConstraint(), true))
+  }
 
-    @Test
-    public void updates_modified_time_on_read() throws Exception {
-        Rect constraint = newConstraint();
-        ScaledBitmap value = newValue();
+  override fun assertValueEquals(a: ScaledBitmap?, b: ScaledBitmap?) {
+    assertNotNull(a)
+    assertNotNull(b)
+  }
 
-        cache.put(file, stat, constraint, value);
+  override fun newCache() = ThumbnailDiskCache { mockCacheDir() }
 
-        Path cacheFile = cache.cacheFile(file, stat, constraint, true);
-        Instant oldTime = Instant.ofMillis(1000);
-        cacheFile.setLastModifiedTime(NOFOLLOW, oldTime);
-        assertEquals(oldTime, cacheFile.stat(NOFOLLOW).lastModifiedTime());
+  override fun newConstraint(): Rect = Rect.of(
+    random.nextInt(100) + 1000,
+    random.nextInt(100) + 1000
+  )
 
-        cache.get(file, stat, constraint, true);
-        Instant newTime = cacheFile.stat(NOFOLLOW).lastModifiedTime();
-        assertNotEquals(oldTime, newTime);
-        assertTrue(oldTime.to(DAYS) < newTime.to(DAYS));
-    }
-
-    @Test
-    public void constraint_is_used_as_part_of_key() throws Exception {
-        Rect constraint = newConstraint();
-        ScaledBitmap value = newValue();
-        cache.put(file, stat, constraint, value);
-        assertValueEquals(value, cache.get(file, stat, constraint, true));
-        assertNull(cache.get(file, stat, newConstraint(), true));
-        assertNull(cache.get(file, stat, newConstraint(), true));
-    }
-
-    @Override
-    void assertValueEquals(ScaledBitmap a, ScaledBitmap b) {
-        assertNotNull(a);
-        assertNotNull(b);
-    }
-
-    @Override
-    ThumbnailDiskCache newCache() {
-        return new ThumbnailDiskCache(mockCacheDir());
-    }
-
-    @Override
-    Rect newConstraint() {
-        return Rect.of(
-                random.nextInt(100) + 1000,
-                random.nextInt(100) + 1000
-        );
-    }
-
-    @Override
-    ScaledBitmap newValue() {
-        Bitmap bitmap = createBitmap(
-                random.nextInt(5) + 1,
-                random.nextInt(10) + 1,
-                ARGB_8888
-        );
-        Canvas canvas = new Canvas(bitmap);
-        canvas.drawColor(BLUE);
-        return new ScaledBitmap(bitmap, Rect.of(bitmap));
-    }
-
+  override fun newValue(): ScaledBitmap {
+    val bitmap = Bitmap.createBitmap(
+      random.nextInt(5) + 1,
+      random.nextInt(10) + 1,
+      ARGB_8888
+    )
+    val canvas = Canvas(bitmap)
+    canvas.drawColor(BLUE)
+    return ScaledBitmap(bitmap, Rect.of(bitmap))
+  }
 }

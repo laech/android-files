@@ -1,15 +1,8 @@
-package l.files.ui.preview;
+package l.files.ui.preview
 
-public final class MediaTypeCacheTest
-        extends PersistenceCacheTest<String, MediaTypeCache> {
+internal class MediaTypeCacheTest :
+  PersistenceCacheTest<String, MediaTypeCache>() {
 
-    @Override
-    MediaTypeCache newCache() {
-        return new MediaTypeCache(mockCacheDir());
-    }
-
-    @Override
-    String newValue() {
-        return "application/xml";
-    }
+  override fun newCache() = MediaTypeCache { mockCacheDir() }
+  override fun newValue() = "application/xml"
 }

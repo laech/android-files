@@ -3,24 +3,19 @@ package l.files.ui.browser;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.FragmentManager.OnBackStackChangedListener;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.graphics.drawable.DrawerArrowDrawable;
-import androidx.appcompat.view.ActionMode;
-import androidx.appcompat.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Spinner;
-
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.util.List;
-
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.graphics.drawable.DrawerArrowDrawable;
+import androidx.appcompat.view.ActionMode;
+import androidx.appcompat.widget.Toolbar;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.FragmentManager.OnBackStackChangedListener;
 import l.files.base.Consumer;
 import l.files.fs.Path;
 import l.files.fs.Stat;
@@ -30,21 +25,20 @@ import l.files.ui.base.fs.OpenFileEvent;
 import l.files.ui.browser.menu.ActionBarDrawerToggleMenu;
 import l.files.ui.browser.menu.GoBackOnHomePressedMenu;
 import l.files.ui.browser.menu.NewTabMenu;
-import l.files.ui.preview.Preview;
+import l.files.ui.preview.PreviewKt;
+
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.util.List;
 
 import static android.content.ContentResolver.SCHEME_FILE;
 import static android.graphics.Color.WHITE;
-import static android.os.Build.VERSION.SDK_INT;
-import static android.os.Build.VERSION_CODES.LOLLIPOP;
-import static androidx.fragment.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
-import static androidx.core.view.GravityCompat.START;
-import static androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED;
-import static androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_LOCKED_OPEN;
-import static androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_UNLOCKED;
 import static android.view.KeyEvent.KEYCODE_BACK;
-import static android.view.View.VISIBLE;
 import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
+import static androidx.core.view.GravityCompat.START;
+import static androidx.drawerlayout.widget.DrawerLayout.*;
+import static androidx.fragment.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.ui.base.fs.IOExceptions.message;
@@ -82,7 +76,7 @@ public final class FilesActivity extends BaseActivity implements
     protected void onCreate(Bundle state) {
         super.onCreate(state);
         setContentView(R.layout.files_activity);
-        Preview.get(getApplicationContext()).readCacheAsyncIfNeeded();
+        PreviewKt.getPreview(getApplicationContext()).readCacheAsyncIfNeeded();
 
         navigationIcon = new DrawerArrowDrawable(this);
         navigationIcon.setColor(WHITE);
@@ -162,7 +156,7 @@ public final class FilesActivity extends BaseActivity implements
 
     @Override
     protected void onPause() {
-        Preview.get(this).writeCacheAsyncIfNeeded();
+        PreviewKt.getPreview(this).writeCacheAsyncIfNeeded();
         super.onPause();
     }
 

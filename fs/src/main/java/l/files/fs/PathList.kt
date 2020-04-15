@@ -33,6 +33,9 @@ fun Path.list(): Stream<PathEntry> {
     .onClose(iterator::close)
 }
 
+@Throws(IOException::class)
+fun Path.listPaths(): Stream<Path> = list().map(PathEntry::first).map(::concat)
+
 private class PathIterator(
   private val path: Path
 ) : CloseableIterator<PathEntry>() {

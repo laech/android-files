@@ -1,51 +1,44 @@
-package l.files;
+package l.files
 
-import android.app.Application;
-import android.os.StrictMode;
-import android.os.StrictMode.ThreadPolicy;
-import android.os.StrictMode.VmPolicy;
+import android.app.Application
+import android.os.StrictMode
+import android.os.StrictMode.VmPolicy
+import l.files.ui.preview.getPreview
 
-import l.files.ui.preview.Preview;
+class FilesApp : Application() {
 
-import static l.files.BuildConfig.DEBUG;
+  override fun onCreate() {
+    super.onCreate()
 
-public final class FilesApp extends Application {
+    if (BuildConfig.DEBUG) {
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
+      StrictMode.setThreadPolicy(
+        StrictMode.ThreadPolicy.Builder()
+          .detectAll()
+          .penaltyDialog()
+          .penaltyLog()
+          .build()
+      )
 
-        if (DEBUG) {
-            StrictMode.setThreadPolicy(
-                    new ThreadPolicy.Builder()
-                            .detectAll()
-                            .penaltyDialog()
-                            .penaltyLog()
-                            .build());
-
-            StrictMode.setVmPolicy(
-                    new VmPolicy.Builder()
-                            .detectActivityLeaks()
-                            .detectLeakedClosableObjects()
-                            .detectLeakedRegistrationObjects()
-                            .detectLeakedSqlLiteObjects()
-                            .penaltyLog()
-                            .build());
-        }
+      StrictMode.setVmPolicy(
+        VmPolicy.Builder()
+          .detectActivityLeaks()
+          .detectLeakedClosableObjects()
+          .detectLeakedRegistrationObjects()
+          .detectLeakedSqlLiteObjects()
+          .penaltyLog()
+          .build()
+      )
     }
+  }
 
-    @Override
-    public void onTrimMemory(int level) {
-        super.onTrimMemory(level);
-
-        if (level >= TRIM_MEMORY_RUNNING_CRITICAL) {
-            Preview.get(this).clearThumbnailCache();
-        }
-
-        if (level >= TRIM_MEMORY_MODERATE) {
-            Preview.get(this).clearBlurredThumbnailCache();
-        }
-
+  override fun onTrimMemory(level: Int) {
+    super.onTrimMemory(level)
+    if (level >= TRIM_MEMORY_RUNNING_CRITICAL) {
+      getPreview().clearThumbnailCache()
     }
-
+    if (level >= TRIM_MEMORY_MODERATE) {
+      getPreview().clearBlurredThumbnailCache()
+    }
+  }
 }

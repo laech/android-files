@@ -1,30 +1,15 @@
-package l.files.ui.preview;
+package l.files.ui.preview
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
+import l.files.fs.Path
+import java.io.DataInput
+import java.io.DataOutput
 
-import l.files.fs.Path;
+internal class MediaTypeCache(cacheDir: () -> Path) :
+  PersistenceCache<String>(cacheDir, 1) {
 
-final class MediaTypeCache extends PersistenceCache<String> {
+  override fun cacheFileName() = "media-types"
 
-    MediaTypeCache(Path cacheDir) {
-        super(cacheDir, 1);
-    }
+  override fun read(input: DataInput): String = input.readUTF()
 
-    @Override
-    String cacheFileName() {
-        return "media-types";
-    }
-
-    @Override
-    String read(DataInput in) throws IOException {
-        return in.readUTF();
-    }
-
-    @Override
-    void write(DataOutput out, String media) throws IOException {
-        out.writeUTF(media);
-    }
-
+  override fun write(out: DataOutput, media: String) = out.writeUTF(media)
 }

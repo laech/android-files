@@ -1,27 +1,16 @@
 package l.files.ui.preview;
 
-import android.os.AsyncTask;
-import androidx.collection.LruCache;
 import android.util.Log;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.DataInput;
-import java.io.DataInputStream;
-import java.io.DataOutput;
-import java.io.DataOutputStream;
-import java.io.EOFException;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Map;
-import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import androidx.annotation.Nullable;
-
+import androidx.collection.LruCache;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.graphics.Rect;
+
+import java.io.*;
+import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 import static android.os.AsyncTask.SERIAL_EXECUTOR;
 import static java.lang.System.nanoTime;
@@ -55,10 +44,10 @@ abstract class PersistenceCache<V> extends MemCache<Path, V> {
 
     private static final int SUPERCLASS_VERSION = 4;
 
-    private final Path cacheDir;
+    private final Supplier<Path> cacheDir;
     private final int subclassVersion;
 
-    PersistenceCache(Path cacheDir, int version) {
+    PersistenceCache(Supplier<Path> cacheDir, int version) {
         this.cacheDir = requireNonNull(cacheDir);
         this.subclassVersion = version;
     }
@@ -85,7 +74,7 @@ abstract class PersistenceCache<V> extends MemCache<Path, V> {
     }
 
     private Path cacheFile() {
-        return cacheDir.concat(cacheFileName());
+        return cacheDir.get().concat(cacheFileName());
     }
 
     abstract String cacheFileName();
@@ -95,19 +84,14 @@ abstract class PersistenceCache<V> extends MemCache<Path, V> {
             return;
         }
 
-        new AsyncTask<Object, Object, Object>() {
-            @Nullable
-            @Override
-            protected Object doInBackground(Object... params) {
-                try {
-                    readIfNeeded();
-                } catch (IOException e) {
-                    Log.w(PersistenceCache.this.getClass().getSimpleName(),
-                            "Failed to read cache.", e);
-                }
-                return null;
+        loader.execute(() -> {
+            try {
+                readIfNeeded();
+            } catch (IOException e) {
+                Log.w(PersistenceCache.this.getClass().getSimpleName(),
+                    "Failed to read cache.", e);
             }
-        }.executeOnExecutor(loader);
+        });
     }
 
     final void readIfNeeded() throws IOException {
@@ -116,10 +100,8 @@ abstract class PersistenceCache<V> extends MemCache<Path, V> {
         }
 
         Path file = cacheFile();
-        DataInputStream in = null;
-        try {
+        try (DataInputStream in = newBufferedDataInputStream(file)) {
 
-            in = newBufferedDataInputStream(file);
             if (in.readInt() != SUPERCLASS_VERSION) {
                 return;
             }
@@ -146,10 +128,6 @@ abstract class PersistenceCache<V> extends MemCache<Path, V> {
             }
 
         } catch (FileNotFoundException ignore) {
-        } finally {
-            if (in != null) {
-                in.close();
-            }
         }
     }
 
@@ -164,19 +142,14 @@ abstract class PersistenceCache<V> extends MemCache<Path, V> {
             return;
         }
 
-        new AsyncTask<Object, Object, Object>() {
-            @Nullable
-            @Override
-            protected Object doInBackground(Object... params) {
-                try {
-                    writeIfNeeded();
-                } catch (IOException e) {
-                    Log.w(PersistenceCache.this.getClass().getSimpleName(),
-                            "Failed to write cache.", e);
-                }
-                return null;
+        loader.execute(() -> {
+            try {
+                writeIfNeeded();
+            } catch (IOException e) {
+                Log.w(PersistenceCache.this.getClass().getSimpleName(),
+                    "Failed to write cache.", e);
             }
-        }.executeOnExecutor(loader);
+        });
     }
 
     final void writeIfNeeded() throws IOException {

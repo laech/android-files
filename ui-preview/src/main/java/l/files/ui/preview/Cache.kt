@@ -1,21 +1,25 @@
-package l.files.ui.preview;
+package l.files.ui.preview
 
-import androidx.annotation.Nullable;
+import l.files.fs.Path
+import l.files.fs.Stat
+import l.files.ui.base.graphics.Rect
+import java.io.IOException
 
-import java.io.IOException;
+internal interface Cache<V> {
 
-import l.files.fs.Path;
-import l.files.fs.Stat;
-import l.files.ui.base.graphics.Rect;
+  @Throws(IOException::class)
+  fun get(
+    path: Path,
+    stat: Stat,
+    constraint: Rect,
+    matchTime: Boolean
+  ): V?
 
-interface Cache<V> {
-
-    @Nullable
-    V get(Path path, Stat stat, Rect constraint, boolean matchTime)
-            throws IOException;
-
-    @Nullable
-    Snapshot<V> put(Path path, Stat stat, Rect constraint, V value)
-            throws IOException;
-
+  @Throws(IOException::class)
+  fun put(
+    path: Path,
+    stat: Stat,
+    constraint: Rect,
+    value: V
+  ): Snapshot<V>?
 }
