@@ -13,6 +13,7 @@ import org.junit.Assert.*
 import org.junit.Test
 import org.mockito.Mockito.mock
 import java.lang.System.nanoTime
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 class PreviewTest : PathBaseTest() {
@@ -128,7 +129,7 @@ class PreviewTest : PathBaseTest() {
   }
 
   private fun testPreviewSuccess(file: Path) {
-    val callback = TestCallback()
+    val callback = TestCallback(1, 1)
     val stat = file.stat(LinkOption.FOLLOW)
     val preview = newPreview()
     val max = Rect.of(100, 100)
@@ -142,8 +143,11 @@ class PreviewTest : PathBaseTest() {
     assertNotNull(task)
 
     task!!.awaitAll(1, TimeUnit.MINUTES)
-    assertEquals(listOf(Pair(file, stat)), callback.onPreviewAvailable)
-    assertEquals(listOf(Pair(file, stat)), callback.onBlurredThumbnailAvailable)
+    callback.onPreviewLatch.await()
+    callback.onBlurredThumbnailLatch.await()
+
+    assertEquals(listOf(Pair(file, stat)), callback.onPreviews)
+    assertEquals(listOf(Pair(file, stat)), callback.onBlurredThumbnails)
 
     assertNotNull(preview.getSize(file, stat, max, true))
     assertNotNull(preview.getThumbnail(file, stat, max, true))
@@ -161,13 +165,20 @@ class PreviewTest : PathBaseTest() {
   }
 }
 
-private class TestCallback : Preview.Callback {
+private class TestCallback(
+  onPreviewCount: Int,
+  onBlurredThumbnailCount: Int
+) : Preview.Callback {
 
-  val onPreviewAvailable = ArrayList<Pair<Path, Stat>>()
-  val onBlurredThumbnailAvailable = ArrayList<Pair<Path, Stat>>()
+  val onPreviewLatch = CountDownLatch(onPreviewCount)
+  val onBlurredThumbnailLatch = CountDownLatch(onBlurredThumbnailCount)
+
+  val onPreviews = ArrayList<Pair<Path, Stat>>()
+  val onBlurredThumbnails = ArrayList<Pair<Path, Stat>>()
 
   override fun onPreviewAvailable(path: Path, stat: Stat, thumbnail: Bitmap) {
-    onPreviewAvailable.add(Pair(path, stat))
+    onPreviews.add(Pair(path, stat))
+    onPreviewLatch.countDown()
   }
 
   override fun onBlurredThumbnailAvailable(
@@ -175,7 +186,8 @@ private class TestCallback : Preview.Callback {
     stat: Stat,
     thumbnail: Bitmap
   ) {
-    onBlurredThumbnailAvailable.add(Pair(path, stat))
+    onBlurredThumbnails.add(Pair(path, stat))
+    onBlurredThumbnailLatch.countDown()
   }
 
   override fun onPreviewFailed(path: Path, stat: Stat, cause: Any) {

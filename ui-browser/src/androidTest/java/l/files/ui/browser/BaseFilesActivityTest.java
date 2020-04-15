@@ -1,6 +1,7 @@
 package l.files.ui.browser;
 
 import android.content.Intent;
+import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.uiautomator.UiDevice;
 import androidx.test.uiautomator.UiObject;
@@ -121,9 +122,8 @@ public class BaseFilesActivityTest {
         // Only do this once otherwise will slow down every test
         if (SDK_INT >= M && !permissionAllowed) {
             permissionAllowed = true;
-            UiDevice device = UiDevice.getInstance(getInstrumentation());
-            UiObject allowPermissions = device.findObject(new UiSelector().resourceId(
-                    "com.android.packageinstaller:id/permission_allow_button"));
+            UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
+            UiObject allowPermissions = device.findObject(new UiSelector().textMatches("^(?i)allow$"));
             if (allowPermissions.exists()) {
                 try {
                     allowPermissions.click();
