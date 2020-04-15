@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.Nullable;
 
+import kotlin.jvm.functions.Function2;
 import l.files.base.Bytes;
 import l.files.base.Function;
 import l.files.base.Optional;
@@ -694,7 +695,9 @@ public abstract class Path implements Parcelable {
      * @throws NotDirectory if path is not a directory
      *                      and not a symbolic link to a directory
      * @throws IOException  other errors
+     * @deprecated use {@link PathListKt#list(Path)} instead
      */
+    @Deprecated
     public void list(Consumer consumer) throws IOException {
         try {
             FileSystem.INSTANCE.list(this, consumer);
@@ -707,7 +710,9 @@ public abstract class Path implements Parcelable {
      * Collects the content of this directory to the collection.
      *
      * @see #list(Consumer)
+     * @deprecated use {@link PathListKt#list(Path)} instead
      */
+    @Deprecated
     public <C extends Collection<? super Path>> C list(
             C collection
     ) throws IOException {
@@ -738,7 +743,9 @@ public abstract class Path implements Parcelable {
      * </pre>
      *
      * @param option applies to root only, child links are never followed
+     * @deprecated use {@link PathTraversalKt#traverse(Path, Function2)} instead
      */
+    @Deprecated
     public void traverse(
             LinkOption option,
             TraversalCallback<? super Path> visitor,
@@ -748,6 +755,10 @@ public abstract class Path implements Parcelable {
         new Traverser(this, option, visitor, childrenComparator).traverse();
     }
 
+    /**
+     * @deprecated use {@link PathTraversalKt#traverse(Path, Function2)} instead
+     */
+    @Deprecated
     public void traverse(
             LinkOption option,
             TraversalCallback<? super Path> visitor

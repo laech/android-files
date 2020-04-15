@@ -111,6 +111,19 @@ public class Stat extends Native implements Parcelable {
         }
     }
 
+    PathType type() {
+        if (isRegularFile()) {
+            return PathType.FILE;
+        }
+        if (isDirectory()) {
+            return PathType.DIRECTORY;
+        }
+        if (isSymbolicLink()) {
+            return PathType.SYMLINK;
+        }
+        return PathType.OTHER;
+    }
+
     int mode() {
         return mode;
     }

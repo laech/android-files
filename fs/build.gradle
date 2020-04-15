@@ -1,37 +1,44 @@
-apply plugin: 'com.android.library'
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+apply plugin: "kotlin-android-extensions"
 
 android {
-    compileSdkVersion project.compileSdkVersion
-    buildToolsVersion project.buildToolsVersion
+  compileSdkVersion project.compileSdkVersion
+  buildToolsVersion project.buildToolsVersion
 
-    defaultConfig {
-        minSdkVersion project.minSdkVersion
-        targetSdkVersion project.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-    }
+  defaultConfig {
+    minSdkVersion project.minSdkVersion
+    targetSdkVersion project.targetSdkVersion
+    versionCode 1
+    versionName "1.0"
+    testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+  }
 
-    externalNativeBuild {
-        cmake {
-            path 'CMakeLists.txt'
-        }
+  externalNativeBuild {
+    cmake {
+      path 'CMakeLists.txt'
     }
+  }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+
+  kotlinOptions {
+    jvmTarget = "1.8"
+  }
 }
 
 dependencies {
-    implementation project(':base')
-    implementation deps.androidAnnotations
+  implementation project(':base')
+  implementation deps.androidAnnotations
+  implementation deps.kotlinStdlibJdk7
 
-    androidTestImplementation project(':testing')
-    androidTestImplementation deps.junit
-    androidTestImplementation deps.androidTestRunner
-    androidTestImplementation deps.mockitoAndroid
+  androidTestImplementation project(':testing')
+  androidTestImplementation deps.junit
+  androidTestImplementation deps.androidTestRunner
+  androidTestImplementation deps.mockitoAndroid
 
-    testImplementation deps.junit
+  testImplementation deps.junit
 }

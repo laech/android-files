@@ -278,7 +278,7 @@ final class Observable extends Native
                 Dirent entry = new Dirent();
                 while ((entry = Dirent.readdir(dir, entry)) != null) {
 
-                    if (FileSystem.isSelfOrParent(entry)) {
+                    if (entry.isSelfOrParent()) {
                         continue;
                     }
 

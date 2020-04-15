@@ -21,7 +21,7 @@ final class FileSystem extends Native {
         try {
             Dirent entry = new Dirent();
             while ((entry = Dirent.readdir(dir, entry)) != null) {
-                if (isSelfOrParent(entry)) {
+                if (entry.isSelfOrParent()) {
                     continue;
                 }
                 byte[] name = Arrays.copyOfRange(entry.d_name, 0, entry.d_name_len);
@@ -32,13 +32,6 @@ final class FileSystem extends Native {
         } finally {
             Dirent.closedir(dir);
         }
-    }
-
-    static boolean isSelfOrParent(Dirent entry) {
-        int len = entry.d_name_len;
-        byte[] name = entry.d_name;
-        return (len == 1 && name[0] == '.') ||
-                (len == 2 && name[0] == '.' && name[1] == '.');
     }
 
 }

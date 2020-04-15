@@ -1,6 +1,7 @@
 package linux;
 
 import l.files.fs.Native;
+import l.files.fs.PathType;
 
 import static linux.Limits.NAME_MAX;
 
@@ -35,6 +36,26 @@ public final class Dirent extends Native {
 
     static {
         init();
+    }
+
+    public PathType type() {
+        if (d_type == DT_REG) {
+            return PathType.FILE;
+        }
+        if (d_type == DT_DIR) {
+            return PathType.DIRECTORY;
+        }
+        if (d_type == DT_LNK) {
+            return PathType.SYMLINK;
+        }
+        return PathType.OTHER;
+    }
+
+    public boolean isSelfOrParent() {
+        int len = d_name_len;
+        byte[] name = d_name;
+        return (len == 1 && name[0] == '.') ||
+            (len == 2 && name[0] == '.' && name[1] == '.');
     }
 
     private static native void init();
