@@ -2,25 +2,20 @@ package l.files.ui.base.media;
 
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
-
+import l.files.base.Consumer;
+import l.files.fs.Path;
+import l.files.testing.fs.Paths;
+import l.files.ui.base.graphics.Rect;
+import l.files.ui.base.graphics.ScaledBitmap;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import l.files.base.Consumer;
-import l.files.fs.Path;
-import l.files.testing.fs.Paths;
-import l.files.ui.base.graphics.Rect;
-import l.files.ui.base.graphics.ScaledBitmap;
-
-import static androidx.test.InstrumentationRegistry.getContext;
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 import static java.io.File.createTempFile;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public final class MediaMetadataRetrieversTest {
 
@@ -65,7 +60,7 @@ public final class MediaMetadataRetrieversTest {
             MediaMetadataRetriever retriever = new MediaMetadataRetriever();
             try {
                 Uri uri = path.toUri();
-                retriever.setDataSource(getContext(), uri);
+                retriever.setDataSource(getInstrumentation().getContext(), uri);
                 test.accept(retriever);
             } finally {
                 retriever.release();
@@ -79,7 +74,7 @@ public final class MediaMetadataRetrieversTest {
         File file = createTempFile("MediaMetadataRetrieversTest", null);
         try {
             Path path = Path.of(file);
-            try (InputStream in = getContext().getAssets().open(name)) {
+            try (InputStream in = getInstrumentation().getContext().getAssets().open(name)) {
                 Paths.copy(in, path);
             }
             return path;
