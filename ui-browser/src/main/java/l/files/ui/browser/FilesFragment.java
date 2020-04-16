@@ -362,8 +362,8 @@ public final class FilesFragment
         return new FilesLoader(
                 context,
                 directory,
-                getSort(context),
-                getShowHiddenFiles(context),
+                () -> getSort(context),
+                () -> getShowHiddenFiles(context),
                 watchLimit
         );
     }
@@ -430,12 +430,8 @@ public final class FilesFragment
             return;
         }
 
-        if (isShowHiddenFilesKey(key)) {
-            loader.setShowHidden(getShowHiddenFiles(activity));
-
-        } else if (isSortKey(key)) {
-            loader.setSort(getSort(activity));
-
+        if (isShowHiddenFilesKey(key) || isSortKey(key)) {
+            loader.updateAll();
         }
     }
 

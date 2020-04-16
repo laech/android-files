@@ -18,6 +18,8 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
+import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 import androidx.annotation.Nullable;
 
@@ -57,8 +59,8 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     private final Collator collator;
 
-    private volatile FileSort sort;
-    private volatile boolean showHidden;
+    private final Supplier<FileSort> sort;
+    private final BooleanSupplier showHidden;
 
     private volatile boolean observing;
 
@@ -115,8 +117,8 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     FilesLoader(
             Context context,
             Path root,
-            FileSort sort,
-            boolean showHidden,
+            Supplier<FileSort> sort,
+            BooleanSupplier showHidden,
             int watchLimit) {
         super(context);
 
@@ -137,13 +139,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         return data.size();
     }
 
-    void setSort(FileSort sort) {
-        this.sort = requireNonNull(sort, "sort");
-        updateAll(emptyMap(), true);
-    }
-
-    void setShowHidden(boolean showHidden) {
-        this.showHidden = showHidden;
+    void updateAll() {
         updateAll(emptyMap(), true);
     }
 
@@ -269,7 +265,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     private Result buildResult() {
         List<FileInfo> files = new ArrayList<>(data.size());
-        if (showHidden) {
+        if (showHidden.getAsBoolean()) {
             files.addAll(data.values());
         } else {
             for (FileInfo item : data.values()) {
@@ -279,7 +275,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
             }
         }
         Resources res = getContext().getResources();
-        List<Object> sorted = sort.sort(files, res);
+        List<Object> sorted = sort.get().sort(files, res);
         Result result = Result.of(unmodifiableList(sorted));
         cachedResult = result;
         return result;
