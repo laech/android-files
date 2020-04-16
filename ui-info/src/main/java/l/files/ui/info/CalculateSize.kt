@@ -2,6 +2,7 @@ package l.files.ui.info
 
 import androidx.lifecycle.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import l.files.fs.*
 import l.files.fs.LinkOption.NOFOLLOW
@@ -41,10 +42,14 @@ private suspend fun LiveDataScope<Size>.calculate(
   var currentSize = 0L
 
   for (child in children) {
+    ensureActive()
+
     try {
       parent.concat(child).traverse(TraverseOrder.PRE).use {
         // TODO? handle error
         for ((path, _) in it.iterator()) {
+          ensureActive()
+
           currentCount++
           try {
             currentSize += path.stat(NOFOLLOW).size()
