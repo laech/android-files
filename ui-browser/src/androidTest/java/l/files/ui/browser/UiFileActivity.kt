@@ -1,493 +1,483 @@
-package l.files.ui.browser;
+package l.files.ui.browser
 
-import android.app.Instrumentation;
-import android.content.res.Resources;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.core.graphics.drawable.RoundedBitmapDrawable;
-import androidx.collection.SimpleArrayMap;
-import androidx.appcompat.view.ActionMode;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.Toolbar;
-import android.text.TextUtils;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.app.Instrumentation
+import android.graphics.drawable.BitmapDrawable
+import android.text.TextUtils
+import android.view.KeyEvent.KEYCODE_BACK
+import android.view.MenuItem
+import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
+import android.widget.TextView
+import androidx.collection.SimpleArrayMap
+import androidx.core.graphics.drawable.RoundedBitmapDrawable
+import androidx.core.view.GravityCompat.START
+import androidx.recyclerview.widget.RecyclerView
+import kotlinx.android.synthetic.main.files_activity.*
+import kotlinx.android.synthetic.main.files_grid_item.view.*
+import l.files.base.Function
+import l.files.base.Provider
+import l.files.fs.LinkOption
+import l.files.fs.Path
+import l.files.fs.Stat
+import l.files.fs.listPaths
+import l.files.ui.base.fs.FileInfo
+import l.files.ui.base.fs.FileLabels
+import l.files.ui.browser.Instrumentations.*
+import org.junit.Assert.*
+import java.io.IOException
+import java.util.concurrent.TimeUnit
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
-import l.files.base.Consumer;
-import l.files.base.Provider;
-import l.files.fs.Path;
-import l.files.fs.Stat;
-import l.files.ui.base.fs.FileInfo;
-import l.files.ui.base.fs.FileLabels;
+internal class UiFileActivity(
+  val instrumentation: Instrumentation,
+  provider: Provider<FilesActivity>
+) {
 
-import static androidx.core.view.GravityCompat.START;
-import static android.view.KeyEvent.KEYCODE_BACK;
-import static android.view.View.GONE;
-import static android.view.View.VISIBLE;
-import static java.util.Arrays.asList;
-import static java.util.concurrent.TimeUnit.MINUTES;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
-import static kotlin.collections.CollectionsKt.filterIsInstance;
-import static l.files.base.Objects.requireNonNull;
-import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.ui.browser.Instrumentations.await;
-import static l.files.ui.browser.Instrumentations.awaitOnMainThread;
-import static l.files.ui.browser.Instrumentations.clickItemOnMainThread;
-import static l.files.ui.browser.Instrumentations.longClickItemOnMainThread;
+  val activity: FilesActivity by lazy { provider.get() }
 
-final class UiFileActivity {
+  private val fragment: FilesFragment
+    get() = activity.fragment
 
-    private final Instrumentation instrument;
-    private final Provider<FilesActivity> activity;
+  fun refresh(): UiFileActivity {
+    selectMenuAction(R.id.refresh)
+    return this
+  }
 
-    UiFileActivity(
-            Instrumentation instrumentation,
-            Provider<FilesActivity> provider
+  fun bookmark(): UiFileActivity {
+    assertBookmarkMenuChecked(false)
+    selectMenuAction(R.id.bookmark)
+    return this
+  }
+
+  fun unbookmark(): UiFileActivity {
+    assertBookmarkMenuChecked(true)
+    selectMenuAction(R.id.bookmark)
+    return this
+  }
+
+  fun newFolder(): UiNewDir {
+    selectMenuAction(R.id.new_dir)
+    return UiNewDir(this)
+  }
+
+  fun rename(): UiRename {
+    selectActionModeAction(R.id.rename)
+    return UiRename(this)
+  }
+
+  fun delete(): UiDelete {
+    selectActionModeAction(R.id.delete)
+    return UiDelete(this)
+  }
+
+  fun copy(): UiFileActivity {
+    selectActionModeAction(android.R.id.copy)
+    waitForActionModeToFinish()
+    return this
+  }
+
+  fun cut(): UiFileActivity {
+    selectActionModeAction(android.R.id.cut)
+    waitForActionModeToFinish()
+    return this
+  }
+
+  fun paste(): UiFileActivity {
+    selectMenuAction(android.R.id.paste)
+    return this
+  }
+
+  fun sort(): UiSort {
+    selectMenuAction(R.id.sort_by)
+    return UiSort(this)
+  }
+
+  fun selectFromNavigationMode(dir: Path): UiFileActivity {
+    awaitOnMainThread(instrumentation) {
+      val position = activity.hierarchy().indexOf(dir)
+      activity.titleView.setSelection(position)
+    }
+    return this
+  }
+
+  fun clickInto(file: Path): UiFileActivity {
+    click(file)
+    assertCurrentDirectory(file)
+    return this
+  }
+
+  fun click(file: Path): UiFileActivity {
+    clickItemOnMainThread(instrumentation, Provider(recycler), file)
+    return this
+  }
+
+  fun longClick(file: Path?): UiFileActivity {
+    longClickItemOnMainThread(
+      instrumentation,
+      Provider(recycler),
+      file
+    )
+    return this
+  }
+
+  fun openBookmarksDrawer(): UiBookmarksFragment {
+    awaitOnMainThread(instrumentation) {
+      activity.drawerView.openDrawer(START)
+    }
+    assertDrawerIsOpened(true)
+    return UiBookmarksFragment(this)
+  }
+
+  fun assertDrawerIsOpened(opened: Boolean): UiFileActivity {
+    awaitOnMainThread(
+      instrumentation
     ) {
-        requireNonNull(instrumentation);
-        requireNonNull(provider);
+      assertEquals(
+        opened,
+        activity.drawerView.isDrawerOpen(START)
+      )
+    }
+    return this
+  }
 
-        this.instrument = instrumentation;
-        this.activity = provider;
+  fun pressBack(): UiFileActivity {
+    instrumentation.waitForIdleSync()
+    instrumentation.sendKeyDownUpSync(KEYCODE_BACK)
+    instrumentation.waitForIdleSync()
+    return this
+  }
+
+  fun longPressBack(): UiFileActivity {
+    awaitOnMainThread(instrumentation) {
+      assertTrue(activity.onKeyLongPress(KEYCODE_BACK, null))
+    }
+    return this
+  }
+
+  fun pressActionBarUpIndicator(): UiFileActivity {
+    waitForUpIndicatorToAppear()
+    awaitOnMainThread(instrumentation) {
+      val item = TestMenuItem(android.R.id.home)
+      assertTrue(activity.onOptionsItemSelected(item))
+    }
+    return this
+  }
+
+  private fun waitForUpIndicatorToAppear() {
+    awaitOnMainThread(instrumentation) {
+      assertEquals(1f, activity.navigationIcon.progress)
+    }
+  }
+
+  fun assertCanRename(can: Boolean): UiFileActivity {
+    assertEquals(can, renameMenu().isEnabled)
+    return this
+  }
+
+  fun assertCanPaste(can: Boolean): UiFileActivity =
+    findOptionMenuItem(android.R.id.paste) {
+      assertEquals("Paste menu enabled to be $can", can, it.isEnabled)
     }
 
-    private FilesFragment fragment() {
-        Fragment fragment = activity().fragment();
-        assertNotNull(fragment);
-        return (FilesFragment) fragment;
+  private fun findOptionMenuItem(
+    id: Int,
+    consumer: (MenuItem) -> Unit
+  ): UiFileActivity {
+    awaitOnMainThread(instrumentation) {
+
+      val toolbar = activity.toolbarView
+      toolbar.hideOverflowMenu()
+      toolbar.showOverflowMenu()
+
+      val item = toolbar.menu.findItem(id)
+      assertNotNull(item)
+      consumer(item)
+      toolbar.hideOverflowMenu()
+    }
+    return this
+  }
+
+  private fun clickOptionMenuItem(id: Int): UiFileActivity {
+    awaitOnMainThread(instrumentation) {
+      activity.toolbarView.menu.performIdentifierAction(id, 0)
+    }
+    return this
+  }
+
+  fun assertCurrentDirectory(expected: Path): UiFileActivity {
+    awaitOnMainThread(instrumentation) {
+      val fragment = activity.fragment
+      val actual = fragment.directory()
+      assertEquals(expected, actual)
+    }
+    return this
+  }
+
+  fun assertListViewContains(item: Path, contains: Boolean): UiFileActivity {
+    awaitOnMainThread(instrumentation) {
+      assertEquals(contains, resources().contains(item))
+    }
+    return this
+  }
+
+  fun assertActionBarTitle(title: String): UiFileActivity {
+    awaitOnMainThread(instrumentation) {
+      assertEquals(title, label(activity.titleView.selectedItem as Path))
+    }
+    return this
+  }
+
+  private fun label(file: Path): String =
+    FileLabels.get(activity.resources, file)
+
+  fun assertActionBarUpIndicatorIsVisible(visible: Boolean): UiFileActivity {
+    awaitOnMainThread(instrumentation) {
+      assertEquals(if (visible) 1f else 0f, activity.navigationIcon.progress)
+    }
+    return this
+  }
+
+  private fun <R> findItemOnMainThread(file: Path, function: (View) -> R): R =
+    findItemOnMainThread(
+      instrumentation,
+      Provider(recycler),
+      file,
+      Function(function)
+    )
+
+  private val recycler: () -> RecyclerView = {
+    awaitOnMainThread<RecyclerView>(instrumentation) { fragment.recycler }
+  }
+
+  private fun renameMenu(): MenuItem =
+    activity.currentActionMode()!!.menu.findItem(R.id.rename)
+
+  private fun selectMenuAction(id: Int): UiFileActivity {
+    findOptionMenuItem(id) { assertTrue(it.isEnabled) }
+    return clickOptionMenuItem(id)
+  }
+
+  fun selectActionModeAction(id: Int) {
+    awaitOnMainThread(instrumentation) {
+      val mode = activity.currentActionMode()!!
+      val item = mode.menu.findItem(id)
+      assertTrue(
+        activity
+          .currentActionModeCallback()!!
+          .onActionItemClicked(mode, item)
+      )
+    }
+  }
+
+  fun waitForActionModeToFinish() {
+    awaitOnMainThread(instrumentation) {
+      assertNull(activity.currentActionMode())
+    }
+  }
+
+  /**
+   * Clicks the "Select All" action item.
+   */
+  fun selectAll(): UiFileActivity {
+    selectActionModeAction(android.R.id.selectAll)
+    return this
+  }
+
+  /**
+   * Asserts whether the given item is currently checked.
+   */
+  fun assertChecked(file: Path, checked: Boolean): UiFileActivity {
+    findItemOnMainThread(file) {
+      assertEquals(
+        checked,
+        it.isActivated
+      )
+    }
+    return this
+  }
+
+  /**
+   * Asserts whether the activity.get() currently in an action mode.
+   */
+  fun assertActionModePresent(present: Boolean): UiFileActivity {
+    awaitOnMainThread(instrumentation) {
+      assertEquals(present, activity.currentActionMode() != null)
+    }
+    return this
+  }
+
+  fun assertActionModeTitle(title: Any): UiFileActivity {
+    awaitOnMainThread(instrumentation) {
+      val mode = activity.currentActionMode()!!
+      assertEquals(title.toString(), mode.title.toString())
+    }
+    return this
+  }
+
+  fun assertBookmarkMenuChecked(checked: Boolean): UiFileActivity =
+    findOptionMenuItem(R.id.bookmark) {
+      assertEquals(checked, it.isChecked)
     }
 
-    FilesActivity activity() {
-        return activity.get();
+  fun assertRefreshMenuVisible(visible: Boolean): UiFileActivity =
+    findOptionMenuItem(R.id.refresh) {
+      assertEquals("Refresh menu visible to be $visible", visible, it.isVisible)
     }
 
-    Instrumentation instrumentation() {
-        return instrument;
+  fun assertThumbnailShown(
+    path: Path,
+    shown: Boolean
+  ): UiFileActivity {
+    findItemOnMainThread(path) {
+      val drawable = it.image.drawable
+      assertEquals(
+        shown,
+        drawable is BitmapDrawable || drawable is RoundedBitmapDrawable
+      )
+    }
+    return this
+  }
+
+  fun assertLinkPathDisplayed(
+    link: Path,
+    target: Path?
+  ): UiFileActivity {
+    findItemOnMainThread(link) {
+      val linkView = it.findViewById<TextView>(R.id.link)
+      if (target != null) {
+        val res = it.resources
+        val expected = res.getString(R.string.link_x, target)
+        val actual = linkView.text.toString()
+        assertEquals(expected, actual)
+        assertEquals(VISIBLE, linkView.visibility)
+      } else {
+        assertEquals(GONE, linkView.visibility)
+      }
+    }
+    return this
+  }
+
+  fun assertSummary(path: Path, expected: CharSequence): UiFileActivity =
+    assertSummary(path) {
+      assertEquals(expected, it)
     }
 
-    UiFileActivity refresh() {
-        selectMenuAction(R.id.refresh);
-        return this;
+  fun assertSummary(path: Path, assertion: (String) -> Unit): UiFileActivity {
+    findItemOnMainThread(path) { assertion(it.summary.text.toString()) }
+    return this
+  }
+
+  fun getSummary(path: Path): String =
+    findItemOnMainThread(path) { it.summary.text.toString() }
+
+  fun assertBookmarksSidebarIsClosed(): UiFileActivity {
+    awaitOnMainThread(instrumentation) {
+      assertEquals(false, activity.drawerView.isDrawerOpen(START))
     }
+    return this
+  }
 
-    UiFileActivity bookmark() {
-        assertBookmarkMenuChecked(false);
-        selectMenuAction(R.id.bookmark);
-        return this;
+  fun assertDisabled(path: Path): UiFileActivity {
+    findItemOnMainThread(path) {
+      assertFalse(it.title.isEnabled)
+      assertFalse(it.summary.isEnabled)
+      assertFalse(it.link.isEnabled)
     }
+    return this
+  }
 
-    UiFileActivity unbookmark() {
-        assertBookmarkMenuChecked(true);
-        selectMenuAction(R.id.bookmark);
-        return this;
+  fun assertNavigationModeHierarchy(dir: Path): UiFileActivity {
+    awaitOnMainThread(instrumentation) {
+      val actual = activity.hierarchy()
+      val expected = dir.hierarchy().reversed()
+      assertEquals(expected, actual)
+      assertEquals(dir, activity.titleView.selectedItem)
     }
+    return this
+  }
 
-    UiNewDir newFolder() {
-        selectMenuAction(R.id.new_dir);
-        return new UiNewDir(this);
-    }
+  @JvmOverloads
+  @Throws(IOException::class)
+  fun assertListMatchesFileSystem(
+    dir: Path,
+    timeout: Int = 1,
+    timeoutUnit: TimeUnit = TimeUnit.MINUTES
+  ): UiFileActivity {
+    await(
+      {
+        val filesInView = filesInView()
+        dir.listPaths().use {
+          it.forEach { child ->
 
-    UiRename rename() {
-        selectActionModeAction(R.id.rename);
-        return new UiRename(this);
-    }
-
-    UiDelete delete() {
-        selectActionModeAction(R.id.delete);
-        return new UiDelete(this);
-    }
-
-    UiFileActivity copy() {
-        selectActionModeAction(android.R.id.copy);
-        waitForActionModeToFinish();
-        return this;
-    }
-
-    UiFileActivity cut() {
-        selectActionModeAction(android.R.id.cut);
-        waitForActionModeToFinish();
-        return this;
-    }
-
-    UiFileActivity paste() {
-        selectMenuAction(android.R.id.paste);
-        return this;
-    }
-
-    UiSort sort() {
-        selectMenuAction(R.id.sort_by);
-        return new UiSort(this);
-    }
-
-    UiFileActivity selectFromNavigationMode(Path dir) {
-        awaitOnMainThread(instrument, () -> {
-            int position = activity().hierarchy().indexOf(dir);
-            activity().title().setSelection(position);
-        });
-        return this;
-    }
-
-    UiFileActivity clickInto(Path file) {
-        click(file);
-        assertCurrentDirectory(file);
-        return this;
-    }
-
-    UiFileActivity click(Path file) {
-        clickItemOnMainThread(instrument, recycler(), file);
-        return this;
-    }
-
-    UiFileActivity longClick(Path file) {
-        longClickItemOnMainThread(instrument, recycler(), file);
-        return this;
-    }
-
-    UiBookmarksFragment openBookmarksDrawer() {
-        awaitOnMainThread(instrument, () -> activity().drawerLayout().openDrawer(START));
-        assertDrawerIsOpened(true);
-        return new UiBookmarksFragment(this);
-    }
-
-    UiFileActivity assertDrawerIsOpened(boolean opened) {
-        awaitOnMainThread(instrument, () -> assertEquals(opened, activity().drawerLayout().isDrawerOpen(START)));
-        return this;
-    }
-
-    UiFileActivity pressBack() {
-        instrument.waitForIdleSync();
-        instrument.sendKeyDownUpSync(KEYCODE_BACK);
-        instrument.waitForIdleSync();
-        return this;
-    }
-
-    UiFileActivity longPressBack() {
-        awaitOnMainThread(instrument, () -> assertTrue(activity().onKeyLongPress(KEYCODE_BACK, null)));
-        return this;
-    }
-
-    UiFileActivity pressActionBarUpIndicator() {
-        waitForUpIndicatorToAppear();
-        awaitOnMainThread(instrument, () -> {
-            MenuItem item = new TestMenuItem(android.R.id.home);
-            assertTrue(activity().onOptionsItemSelected(item));
-        });
-        return this;
-    }
-
-    private void waitForUpIndicatorToAppear() {
-        awaitOnMainThread(instrument, () -> assertEquals(1F, activity().navigationIcon().getProgress()));
-    }
-
-    UiFileActivity assertCanRename(boolean can) {
-        assertEquals(can, renameMenu().isEnabled());
-        return this;
-    }
-
-    UiFileActivity assertCanPaste(boolean can) {
-        return findOptionMenuItem(android.R.id.paste, input -> {
-            String msg = "Paste menu enabled to be " + can;
-            assertEquals(msg, can, input.isEnabled());
-        });
-    }
-
-    private UiFileActivity findOptionMenuItem(int id, Consumer<MenuItem> consumer) {
-
-        awaitOnMainThread(instrument, () -> {
-            Toolbar toolbar = activity().toolbar();
-            toolbar.hideOverflowMenu();
-            toolbar.showOverflowMenu();
-            MenuItem item = toolbar.getMenu().findItem(id);
-            assertNotNull(item);
-            consumer.accept(item);
-            toolbar.hideOverflowMenu();
-        });
-        return this;
-    }
-
-    private UiFileActivity clickOptionMenuItem(int id) {
-        awaitOnMainThread(instrument, (Runnable) () -> activity().toolbar().getMenu().performIdentifierAction(id, 0));
-        return this;
-    }
-
-    UiFileActivity assertCurrentDirectory(Path expected) {
-        awaitOnMainThread(instrument, () -> {
-            FilesFragment fragment = activity().fragment();
-            assertNotNull(fragment);
-            Path actual = fragment.directory();
-            assertEquals(expected, actual);
-        });
-        return this;
-    }
-
-    UiFileActivity assertListViewContains(Path item, boolean contains) {
-        awaitOnMainThread(instrument, () -> assertEquals(contains, resources().contains(item)));
-        return this;
-    }
-
-    UiFileActivity assertActionBarTitle(String title) {
-        awaitOnMainThread(instrument, () -> assertEquals(title, label((Path) activity().title().getSelectedItem())));
-        return this;
-    }
-
-    private String label(Path file) {
-        return FileLabels.get(activity().getResources(), file);
-    }
-
-    UiFileActivity assertActionBarUpIndicatorIsVisible(boolean visible) {
-        awaitOnMainThread(instrument, () -> assertEquals(visible ? 1F : 0F, activity().navigationIcon().getProgress()));
-        return this;
-    }
-
-    private void findItemOnMainThread(
-            Path file,
-            Consumer<View> consumer) {
-        Instrumentations.findItemOnMainThread(
-                instrument, recycler(), file, consumer);
-    }
-
-    private Provider<RecyclerView> recycler() {
-        return () -> awaitOnMainThread(instrument, () -> fragment().recycler);
-    }
-
-    private MenuItem renameMenu() {
-        return activity().currentActionMode().getMenu().findItem(R.id.rename);
-    }
-
-    private UiFileActivity selectMenuAction(int id) {
-        findOptionMenuItem(id, item -> assertTrue(item.isEnabled()));
-        return clickOptionMenuItem(id);
-    }
-
-    void selectActionModeAction(int id) {
-        awaitOnMainThread(instrument, () -> {
-            ActionMode mode = activity().currentActionMode();
-            assertNotNull(mode);
-            MenuItem item = mode.getMenu().findItem(id);
-            //noinspection ConstantConditions
-            assertTrue(activity()
-                    .currentActionModeCallback()
-                    .onActionItemClicked(mode, item));
-        });
-    }
-
-    void waitForActionModeToFinish() {
-        awaitOnMainThread(instrument, () -> assertNull(activity().currentActionMode()));
-    }
-
-    /**
-     * Clicks the "Select All" action item.
-     */
-    UiFileActivity selectAll() {
-        selectActionModeAction(android.R.id.selectAll);
-        return this;
-    }
-
-    /**
-     * Asserts whether the given item is currently checked.
-     */
-    UiFileActivity assertChecked(Path file, boolean checked) {
-        findItemOnMainThread(file, view -> assertEquals(checked, view.isActivated()));
-        return this;
-    }
-
-    /**
-     * Asserts whether the activity.get() currently in an action mode.
-     */
-    UiFileActivity assertActionModePresent(boolean present) {
-        awaitOnMainThread(instrument, () -> assertEquals(present, activity().currentActionMode() != null));
-        return this;
-    }
-
-    UiFileActivity assertActionModeTitle(Object title) {
-        awaitOnMainThread(instrument, () -> {
-            ActionMode mode = activity().currentActionMode();
-            assertNotNull(mode);
-            assertEquals(title.toString(), mode.getTitle().toString());
-        });
-        return this;
-    }
-
-    UiFileActivity assertBookmarkMenuChecked(boolean checked) {
-        return findOptionMenuItem(R.id.bookmark, item -> assertEquals(checked, item.isChecked()));
-    }
-
-    UiFileActivity assertRefreshMenuVisible(boolean visible) {
-        return findOptionMenuItem(R.id.refresh, input -> {
-            String msg = "Refresh menu visible to be " + visible;
-            assertEquals(msg, visible, input.isVisible());
-        });
-    }
-
-    UiFileActivity assertThumbnailShown(Path path, boolean shown) {
-        findItemOnMainThread(path, view -> {
-            ImageView imageView = view.findViewById(R.id.image);
-            Drawable drawable = imageView.getDrawable();
-            assertEquals(shown, drawable instanceof BitmapDrawable
-                    || drawable instanceof RoundedBitmapDrawable);
-        });
-        return this;
-    }
-
-    UiFileActivity assertLinkPathDisplayed(Path link, @Nullable Path target) {
-
-        findItemOnMainThread(link, view -> {
-            TextView linkView = view.findViewById(R.id.link);
-            if (target != null) {
-                Resources res = view.getResources();
-                String expected = res.getString(R.string.link_x, target);
-                CharSequence actual = linkView.getText().toString();
-                assertEquals(expected, actual);
-                assertEquals(VISIBLE, linkView.getVisibility());
-            } else {
-                assertEquals(GONE, linkView.getVisibility());
-            }
-        });
-
-        return this;
-    }
-
-    UiFileActivity assertSummary(Path path, CharSequence expected) {
-        return assertSummary(path, summary -> assertEquals(expected, summary));
-    }
-
-    UiFileActivity assertSummary(
-            Path path,
-            Consumer<String> assertion
-    ) {
-        findItemOnMainThread(path, view -> {
-            TextView summaryView = view.findViewById(R.id.summary);
-            assertion.accept(summaryView.getText().toString());
-        });
-        return this;
-    }
-
-    UiFileActivity assertBookmarksSidebarIsClosed() {
-        awaitOnMainThread(instrument, () -> assertEquals(false, activity().drawerLayout().isDrawerOpen(START)));
-        return this;
-    }
-
-    UiFileActivity assertDisabled(Path path) {
-        findItemOnMainThread(path, view -> {
-            assertFalse(view.findViewById(R.id.title).isEnabled());
-            assertFalse(view.findViewById(R.id.summary).isEnabled());
-            assertFalse(view.findViewById(R.id.link).isEnabled());
-        });
-        return this;
-    }
-
-    UiFileActivity assertNavigationModeHierarchy(Path dir) {
-        awaitOnMainThread(instrument, () -> {
-            List<Path> actual = activity().hierarchy();
-            List<Path> expected = new ArrayList<>(dir.hierarchy());
-            Collections.reverse(expected);
-            assertEquals(expected, actual);
-            assertEquals(dir, activity().title().getSelectedItem());
-        });
-        return this;
-    }
-
-    UiFileActivity assertListMatchesFileSystem(Path dir)
-            throws IOException {
-        return assertListMatchesFileSystem(dir, 1, MINUTES);
-    }
-
-    UiFileActivity assertListMatchesFileSystem(
-            Path dir,
-            int timeout,
-            TimeUnit timeoutUnit
-    ) throws IOException {
-
-        await((Callable<Void>) () -> {
-
-
-            SimpleArrayMap<Path, Stat> filesInView = filesInView();
-
-            dir.list((Path.Consumer) child -> {
-                Stat oldStat = filesInView.remove(child);
-                if (oldStat == null) {
-                    fail("Path in file system but not in view: " + child);
-                }
-
-                Stat newStat = child.stat(NOFOLLOW);
-                if (!newStat.equals(oldStat)) {
-                    fail("Path details differ for : " + child
-                            + "\nnew: " + newStat
-                            + "\nold: " + oldStat);
-                }
-                return true;
-            });
-
-            if (!filesInView.isEmpty()) {
-                fail("Path in view but not on file system: "
-                        + filesInView.keyAt(0) + "="
-                        + filesInView.valueAt(0));
+            val oldStat = filesInView.remove(child)
+            if (oldStat == null) {
+              fail("Path in file system but not in view: $child")
             }
 
-            return null;
-
-        }, timeout, timeoutUnit);
-
-        return this;
-    }
-
-    private SimpleArrayMap<Path, Stat> filesInView() {
-        List<FileInfo> items = fileItems();
-        SimpleArrayMap<Path, Stat> result = new SimpleArrayMap<>(items.size());
-        for (FileInfo item : items) {
-            result.put(item.selfPath(), item.selfStat());
+            val newStat = child.stat(LinkOption.NOFOLLOW)
+            if (newStat != oldStat) {
+              fail(
+                """
+                    Path details differ for : $child
+                    new: $newStat
+                    old: $oldStat
+                    """.trimIndent()
+              )
+            }
+          }
         }
-        return result;
-    }
 
-    private List<FileInfo> fileItems() {
-        return filterIsInstance(fragment().items(), FileInfo.class);
-    }
-
-    private List<Path> resources() {
-        List<FileInfo> items = fileItems();
-        List<Path> files = new ArrayList<>(items.size());
-        for (FileInfo item : items) {
-            files.add(item.selfPath());
+        if (!filesInView.isEmpty) {
+          fail(
+            "Path in view but not on file system:" +
+              " ${filesInView.keyAt(0)}" +
+              "=${filesInView.valueAt(0)}"
+          )
         }
-        return files;
+        null
+      },
+      timeout.toLong(),
+      timeoutUnit
+    )
+    return this
+  }
+
+  private fun filesInView(): SimpleArrayMap<Path, Stat> {
+    val items = fileItems()
+    val result = SimpleArrayMap<Path, Stat>(items.size)
+    for (item in items) {
+      result.put(item.selfPath(), item.selfStat())
+    }
+    return result
+  }
+
+  private fun fileItems(): List<FileInfo> =
+    fragment.items().filterIsInstance<FileInfo>()
+
+  private fun resources(): List<Path> = fileItems().map { it.selfPath() }
+
+  fun assertAllItemsDisplayedInOrder(vararg expected: Path): UiFileActivity {
+    awaitOnMainThread(instrumentation) {
+      val actual = resources()
+      if (listOf(*expected) != actual) {
+        throw AssertionError(
+          """
+                expected in order:
+                ${TextUtils.join("\n", expected)}
+                bus was:
+                ${TextUtils.join("\n", actual)}
+                """.trimIndent()
+        )
+      }
+    }
+    return this
+  }
+
+  val info: UiInfo
+    get() {
+      selectActionModeAction(R.id.info)
+      return UiInfo(this)
     }
 
-    UiFileActivity assertAllItemsDisplayedInOrder(Path... expected) {
-        awaitOnMainThread(instrument, () -> {
-            List<FileInfo> items = fileItems();
-            List<Path> actual = new ArrayList<>(items.size());
-            for (FileInfo item : items) {
-                actual.add(item.selfPath());
-            }
-
-            if (!asList(expected).equals(actual)) {
-                throw new AssertionError("" +
-                        "\nexpected in order:\n" + TextUtils.join("\n", expected) +
-                        "\nbus was:\n" + TextUtils.join("\n", actual));
-            }
-        });
-        return this;
-    }
-
-    UiInfo getInfo() {
-        selectActionModeAction(R.id.info);
-        return new UiInfo(this);
-    }
 }

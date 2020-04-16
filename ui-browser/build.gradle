@@ -1,54 +1,60 @@
-apply plugin: 'com.android.library'
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+apply plugin: "kotlin-android-extensions"
 
 android {
-    compileSdkVersion project.compileSdkVersion
-    buildToolsVersion project.buildToolsVersion
+  compileSdkVersion project.compileSdkVersion
+  buildToolsVersion project.buildToolsVersion
 
-    defaultConfig {
-        minSdkVersion project.minSdkVersion
-        targetSdkVersion project.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-    }
+  defaultConfig {
+    minSdkVersion project.minSdkVersion
+    targetSdkVersion project.targetSdkVersion
+    versionCode 1
+    versionName "1.0"
+    testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+  }
 
-    packagingOptions {
-        exclude 'META-INF/LICENSE'
-        exclude 'META-INF/NOTICE'
-    }
+  packagingOptions {
+    exclude 'META-INF/LICENSE'
+    exclude 'META-INF/NOTICE'
+  }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+
+  kotlinOptions {
+    jvmTarget = "1.8"
+  }
 }
 
 dependencies {
 
-    implementation project(':base')
-    implementation project(':fs')
-    implementation project(':fs-media')
-    implementation project(':bookmarks')
-    implementation project(':ui-base')
-    implementation project(':ui-info')
-    implementation project(':ui-preview')
-    implementation project(':ui-operations')
-    implementation project(':ui-bookmarks')
-    implementation deps.recyclerview
-    implementation deps.androidAppcompat
-    implementation deps.cardview
-    implementation deps.androidMaterial
-    implementation deps.androidAnnotations
-    implementation deps.kotlinStdlibJdk7
+  implementation project(':base')
+  implementation project(':fs')
+  implementation project(':fs-media')
+  implementation project(':bookmarks')
+  implementation project(':ui-base')
+  implementation project(':ui-info')
+  implementation project(':ui-preview')
+  implementation project(':ui-operations')
+  implementation project(':ui-bookmarks')
+  implementation deps.recyclerview
+  implementation deps.androidAppcompat
+  implementation deps.cardview
+  implementation deps.androidMaterial
+  implementation deps.androidAnnotations
+  implementation deps.kotlinStdlibJdk7
 
-    androidTestImplementation project(':testing')
-    androidTestImplementation project(':testing-fs')
+  androidTestImplementation project(':testing')
+  androidTestImplementation project(':testing-fs')
 
-    androidTestImplementation deps.androidTestRunner
-    androidTestImplementation deps.androidTestRules
-    androidTestImplementation deps.uiautomator
+  androidTestImplementation deps.androidTestRunner
+  androidTestImplementation deps.androidTestRules
+  androidTestImplementation deps.uiautomator
 
-    testImplementation deps.junit
-    testImplementation deps.mockitoCore
+  testImplementation deps.junit
+  testImplementation deps.mockitoCore
 
 }

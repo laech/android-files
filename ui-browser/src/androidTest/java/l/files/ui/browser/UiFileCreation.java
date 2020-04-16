@@ -38,12 +38,12 @@ abstract class UiFileCreation<T extends UiFileCreation> {
     }
 
     T setFilename(CharSequence name) {
-        awaitOnMainThread(context.instrumentation(), () -> editText().setText(name));
+        awaitOnMainThread(context.getInstrumentation(), () -> editText().setText(name));
         return self();
     }
 
     UiFileActivity ok() {
-        awaitOnMainThread(context.instrumentation(), () -> {
+        awaitOnMainThread(context.getInstrumentation(), () -> {
             AlertDialog dialog = dialog();
             Button button = dialog.getButton(BUTTON_POSITIVE);
             assertTrue(dialog.isShowing());
@@ -64,20 +64,20 @@ abstract class UiFileCreation<T extends UiFileCreation> {
             messages.add(input);
         };
 
-        awaitOnMainThread(context.instrumentation(), () -> {
+        awaitOnMainThread(context.getInstrumentation(), () -> {
             original[0] = fragment().toaster;
             fragment().toaster = consumer;
         });
 
         ok();
 
-        awaitOnMainThread(context.instrumentation(), () -> assertEquals(singletonList(message), messages));
+        awaitOnMainThread(context.getInstrumentation(), () -> assertEquals(singletonList(message), messages));
 
         return context;
     }
 
     T assertOkButtonEnabled(boolean enabled) {
-        awaitOnMainThread(context.instrumentation(), () -> {
+        awaitOnMainThread(context.getInstrumentation(), () -> {
             FileCreationFragment fragment = fragment();
             assertNotNull(fragment);
             assertEquals(
@@ -88,19 +88,19 @@ abstract class UiFileCreation<T extends UiFileCreation> {
     }
 
     T assertHasError(int resId, Object... args) {
-        awaitOnMainThread(context.instrumentation(), () -> assertEquals(
-                context.activity().getString(resId, args),
+        awaitOnMainThread(context.getInstrumentation(), () -> assertEquals(
+                context.getActivity().getString(resId, args),
                 error()));
         return self();
     }
 
     T assertHasNoError() {
-        awaitOnMainThread(context.instrumentation(), () -> assertNull(error()));
+        awaitOnMainThread(context.getInstrumentation(), () -> assertNull(error()));
         return self();
     }
 
     T assertError(CharSequence error) {
-        awaitOnMainThread(context.instrumentation(), () -> assertEquals(error, error()));
+        awaitOnMainThread(context.getInstrumentation(), () -> assertEquals(error, error()));
         return self();
     }
 
@@ -122,7 +122,7 @@ abstract class UiFileCreation<T extends UiFileCreation> {
 
     private FileCreationFragment fragment() {
         FileCreationFragment fragment = (FileCreationFragment) context
-                .activity()
+                .getActivity()
                 .getSupportFragmentManager()
                 .findFragmentByTag(tag);
         assertNotNull(fragment);
@@ -130,7 +130,7 @@ abstract class UiFileCreation<T extends UiFileCreation> {
     }
 
     T assertFilename(CharSequence name) {
-        awaitOnMainThread(context.instrumentation(), () -> assertEquals(name.toString(), filename()));
+        awaitOnMainThread(context.getInstrumentation(), () -> assertEquals(name.toString(), filename()));
         return self();
     }
 
@@ -139,7 +139,7 @@ abstract class UiFileCreation<T extends UiFileCreation> {
     }
 
     T assertSelection(String selection) {
-        awaitOnMainThread(context.instrumentation(), () -> assertEquals(selection, selection()));
+        awaitOnMainThread(context.getInstrumentation(), () -> assertEquals(selection, selection()));
         return self();
     }
 

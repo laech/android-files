@@ -20,14 +20,14 @@ final class UiDelete {
     }
 
     UiFileActivity ok() {
-        awaitOnMainThread(context.instrumentation(), () ->
+        awaitOnMainThread(context.getInstrumentation(), () ->
                 assertTrue(dialog().getButton(BUTTON_POSITIVE).performClick()));
         return context;
     }
 
     private AlertDialog dialog() {
         DeleteDialog fragment = (DeleteDialog) context
-                .activity()
+                .getActivity()
                 .getSupportFragmentManager()
                 .findFragmentByTag(DeleteDialog.FRAGMENT_TAG);
         assertNotNull(fragment);

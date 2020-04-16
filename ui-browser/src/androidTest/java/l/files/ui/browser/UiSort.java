@@ -22,7 +22,7 @@ final class UiSort {
     }
 
     UiFileActivity by(FileSort sort) {
-        awaitOnMainThread(context.instrumentation(), () -> {
+        awaitOnMainThread(context.getInstrumentation(), () -> {
             ListView list = listView();
             for (int i = 0; i < list.getChildCount(); i++) {
                 FileSort that = (FileSort) list.getItemAtPosition(i);
@@ -42,7 +42,7 @@ final class UiSort {
 
     private AlertDialog dialog() {
         SortDialog fragment = (SortDialog) context
-                .activity()
+                .getActivity()
                 .getSupportFragmentManager()
                 .findFragmentByTag(SortDialog.FRAGMENT_TAG);
         assertNotNull(fragment);

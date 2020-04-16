@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.ViewHolder;
-import l.files.base.Consumer;
+import l.files.base.Function;
 import l.files.base.Provider;
 import l.files.ui.base.widget.StableAdapter;
 
@@ -135,8 +135,10 @@ final class Instrumentations {
             Instrumentation in,
             Provider<RecyclerView> recycler,
             Object itemId) {
-        findItemOnMainThread(in, recycler, itemId, input ->
-                assertTrue(input.performClick()));
+        findItemOnMainThread(in, recycler, itemId, input -> {
+            assertTrue(input.performClick());
+            return null;
+        });
     }
 
     static void longClickItemOnMainThread(
@@ -145,22 +147,23 @@ final class Instrumentations {
             Object itemId) {
         findItemOnMainThread(in, recycler, itemId, input -> {
             assertTrue(input.performLongClick());
+            return null;
         });
     }
 
-    static void findItemOnMainThread(
+    static <R> R findItemOnMainThread(
             Instrumentation in,
             Provider<RecyclerView> recycler,
             Object itemId,
-            Consumer<View> consumer) {
+            Function<View, R> function) {
         scrollToTop(in, recycler);
-        awaitOnMainThread(in, () -> find(recycler, itemId, consumer));
+        return awaitOnMainThread(in, () -> find(recycler, itemId, function));
     }
 
-    private static void find(
+    private static <R> R find(
             Provider<RecyclerView> recycler,
             Object itemId,
-            Consumer<View> consumer) {
+            Function<View, R> function) {
 
         RecyclerView view = recycler.get();
         StableAdapter<Object, ViewHolder> adapter = getStableAdapter(recycler);
@@ -177,14 +180,14 @@ final class Instrumentations {
                 if (position == i) {
                     Object thatId = adapter.getItemIdObjectAt(position);
                     if (itemId.equals(thatId)) {
-                        consumer.accept(child);
-                        return;
+                        return function.apply(child);
                     }
                 }
             }
         }
 
         fail("Item not found: " + itemId);
+        return null;
     }
 
 }

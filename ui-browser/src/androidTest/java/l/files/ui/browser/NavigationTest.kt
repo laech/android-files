@@ -1,410 +1,372 @@
-package l.files.ui.browser;
+package l.files.ui.browser
 
-import android.content.Context;
-import android.content.Intent;
-import android.util.Log;
+import android.content.Intent
+import android.os.Build.VERSION
+import android.os.Build.VERSION_CODES
+import android.text.format.DateFormat.getDateFormat
+import android.text.format.DateFormat.getTimeFormat
+import android.text.format.DateUtils.*
+import android.text.format.Formatter.formatShortFileSize
+import android.util.Log
+import l.files.base.io.Charsets.UTF_8
+import l.files.fs.Instant
+import l.files.fs.Instant.EPOCH
+import l.files.fs.LinkOption.NOFOLLOW
+import l.files.fs.Path
+import l.files.fs.Permission
+import l.files.testing.fs.Paths
+import l.files.ui.browser.sort.FileSort
+import org.junit.Assert.*
+import org.junit.Assume.assumeTrue
+import org.junit.Test
+import java.lang.System.currentTimeMillis
+import java.lang.System.nanoTime
+import java.util.*
+import java.util.concurrent.TimeUnit.DAYS
+import java.util.concurrent.TimeUnit.MILLISECONDS
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+class NavigationTest : BaseFilesActivityTest() {
 
-import java.io.IOException;
-import java.text.DateFormat;
-import java.util.Arrays;
-import java.util.Date;
-
-import androidx.test.runner.AndroidJUnit4;
-import l.files.fs.Instant;
-import l.files.fs.Path;
-import l.files.fs.Permission;
-import l.files.fs.Stat;
-import l.files.testing.fs.Paths;
-
-import static android.os.Build.VERSION.SDK_INT;
-import static android.text.format.DateFormat.getDateFormat;
-import static android.text.format.DateFormat.getTimeFormat;
-import static android.text.format.DateUtils.FORMAT_ABBREV_MONTH;
-import static android.text.format.DateUtils.FORMAT_NO_YEAR;
-import static android.text.format.DateUtils.FORMAT_SHOW_DATE;
-import static android.text.format.DateUtils.formatDateTime;
-import static android.text.format.Formatter.formatShortFileSize;
-import static java.lang.System.currentTimeMillis;
-import static java.lang.System.nanoTime;
-import static java.util.concurrent.TimeUnit.DAYS;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static l.files.base.io.Charsets.UTF_8;
-import static l.files.fs.Instant.EPOCH;
-import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.ui.browser.sort.FileSort.NAME;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
-
-@RunWith(AndroidJUnit4.class)
-public final class NavigationTest extends BaseFilesActivityTest {
-
-    @Test
-    public void can_see_file_renamed_to_different_casing() throws Exception {
-
-        Path dir;
-        try {
-            dir = createCaseInsensitiveFileSystemDir("can_see_file_renamed_to_different_casing");
-        } catch (CannotRenameFileToDifferentCasing e) {
-            Log.d("NavigationTest", "skipping test_can_see_file_renamed_to_different_casing()", e);
-            return;
-        }
-
-        try {
-
-            Path src = dir.concat("a").createDirectory();
-            Path dst = dir.concat("A");
-
-            screen().assertAllItemsDisplayedInOrder(src);
-
-            src.rename(dst);
-
-            screen()
-                    .sort()
-                    .by(NAME)
-                    .assertAllItemsDisplayedInOrder(dst);
-
-        } finally {
-            Paths.deleteRecursiveIfExists(dir);
-        }
+  @Test
+  fun can_see_file_renamed_to_different_casing() {
+    val dir = try {
+      createCaseInsensitiveFileSystemDir("can_see_file_renamed_to_different_casing")
+    } catch (e: CannotRenameFileToDifferentCasing) {
+      Log.d(
+        "NavigationTest",
+        "skipping test_can_see_file_renamed_to_different_casing()",
+        e
+      )
+      return
     }
 
-    @Test
-    public void can_start_from_data_uri() throws Exception {
-        Path dir = dir().concat("dir").createDirectories();
-        Path file = dir.concat("file").createFile();
-        setActivityIntent(new Intent().setData(dir.toUri()));
-        screen()
-                .assertCurrentDirectory(dir)
-                .assertListViewContains(file, true);
+    try {
+
+      val src = dir.concat("a").createDirectory()
+      val dst = dir.concat("A")
+      screen().assertAllItemsDisplayedInOrder(src)
+      src.rename(dst)
+      screen()
+        .sort()
+        .by(FileSort.NAME)
+        .assertAllItemsDisplayedInOrder(dst)
+
+    } finally {
+      Paths.deleteRecursiveIfExists(dir)
     }
+  }
 
-    @Test
-    public void can_preview() throws Exception {
-        Path dir = dir().concat("test_can_preview").createDirectory();
-        Path empty = dir.concat("empty").createFile();
-        Path file = dir.concat("file");
-        Path link = dir.concat("link").createSymbolicLink(file);
-        Paths.writeUtf8(file, "hello");
-        screen()
-                .clickInto(dir)
-                .assertThumbnailShown(file, true)
-                .assertThumbnailShown(link, true)
-                .assertThumbnailShown(empty, false);
+  @Test
+  fun can_start_from_data_uri() {
+    val dir = dir().concat("dir").createDirectories()
+    val file = dir.concat("file").createFile()
+    setActivityIntent(Intent().setData(dir.toUri()))
+    screen()
+      .assertCurrentDirectory(dir)
+      .assertListViewContains(file, true)
+  }
+
+  @Test
+  fun can_preview() {
+    val dir = dir().concat("test_can_preview").createDirectory()
+    val empty = dir.concat("empty").createFile()
+    val file = dir.concat("file")
+    val link = dir.concat("link").createSymbolicLink(file)
+    Paths.writeUtf8(file, "hello")
+    screen()
+      .clickInto(dir)
+      .assertThumbnailShown(file, true)
+      .assertThumbnailShown(link, true)
+      .assertThumbnailShown(empty, false)
+  }
+
+  @Test
+  fun can_navigate_into_non_utf8_named_dir() {
+    val nonUtf8Name = byteArrayOf(-19, -96, -67, -19, -80, -117)
+    assertNotEquals(
+      nonUtf8Name.clone(),
+      nonUtf8Name.toString(UTF_8).toByteArray(UTF_8)
+    )
+    val nonUtf8NamedDir = dir().concat(nonUtf8Name).createDirectory()
+    val child = nonUtf8NamedDir.concat("a").createFile()
+    screen()
+      .clickInto(nonUtf8NamedDir)
+      .assertListViewContains(child, true)
+  }
+
+  @Test
+  fun can_shows_dirs_with_same_name_but_different_name_bytes() {
+    val notUtf8 = byteArrayOf(-19, -96, -67, -19, -80, -117)
+    val utf8 = notUtf8.toString(UTF_8).toByteArray(UTF_8)
+    assertFalse(notUtf8.contentEquals(utf8))
+    assertEquals(notUtf8.toString(UTF_8), utf8.toString(UTF_8))
+
+    val notUtf8Dir = dir().concat(notUtf8).createDirectory()
+    val notUtf8Child = notUtf8Dir.concat("notUtf8").createFile()
+    val utf8Dir = dir().concat(utf8).createDirectory()
+    val utf8Child = utf8Dir.concat("utf8").createFile()
+
+    screen()
+      .assertListViewContains(notUtf8Dir, true)
+      .assertListViewContains(utf8Dir, true)
+
+      .clickInto(notUtf8Dir)
+      .assertListViewContains(notUtf8Child, true)
+      .assertListViewContains(utf8Child, false)
+      .pressBack()
+
+      .clickInto(utf8Dir)
+      .assertListViewContains(utf8Child, true)
+      .assertListViewContains(notUtf8Child, false)
+  }
+
+  @Test
+  fun can_navigate_into_etc_proc_self_fdinfo_without_crashing() {
+    assumeTrue(
+      "Skipping test, no permission to read /proc on Android N",
+      VERSION.SDK_INT < VERSION_CODES.N
+    )
+    screen().selectFromNavigationMode(Path.of("/"))
+    screen().clickInto(Path.of("/proc"))
+    screen().clickInto(Path.of("/proc/self"))
+    screen().clickInto(Path.of("/proc/self/fdinfo"))
+  }
+
+  @Test
+  fun can_navigate_through_title_list_drop_down() {
+    val parent = dir().parent()!!
+    screen()
+      .selectFromNavigationMode(parent)
+      .assertNavigationModeHierarchy(parent)
+  }
+
+  @Test
+  fun updates_navigation_list_when_going_into_a_new_dir() {
+    screen().assertNavigationModeHierarchy(dir())
+    val dir = dir().concat("dir").createDirectory()
+    screen().clickInto(dir).assertNavigationModeHierarchy(dir)
+  }
+
+  @Test
+  fun shows_size_only_if_unable_to_determine_modified_date() {
+    val file = dir().concat("file").createFile()
+    file.setLastModifiedTime(NOFOLLOW, EPOCH)
+
+    val size = file.stat(NOFOLLOW).size()
+    val expected = formatShortFileSize(activity, size)
+
+    screen().assertSummary(file) {
+      assertTrue(it.contains(expected))
     }
+  }
 
-    @Test
-    public void can_navigate_into_non_utf8_named_dir() throws Exception {
+  @Test
+  fun shows_time_and_size_for_file() {
+    val file = dir().concat("file").createFile()
+    Paths.appendUtf8(file, file.toString())
 
-        byte[] nonUtf8Name = {-19, -96, -67, -19, -80, -117};
-        assertNotEquals(
-                nonUtf8Name.clone(),
-                new String(nonUtf8Name.clone(), UTF_8).getBytes(UTF_8)
-        );
+    val stat = file.stat(NOFOLLOW)
+    val lastModifiedMillis = stat.lastModifiedTime().to(MILLISECONDS)
+    val date = getTimeFormat(activity).format(Date(lastModifiedMillis))
+    val size = formatShortFileSize(activity, stat.size())
+    val expected = activity.getString(R.string.x_dot_y, date, size)
+    screen().assertSummary(file, expected)
+  }
 
-        Path nonUtf8NamedDir = dir().concat(nonUtf8Name).createDirectory();
-        Path child = nonUtf8NamedDir.concat("a").createFile();
+  @Test
+  fun shows_time_only_for_today() {
+    val time = currentTimeMillis()
+    val format = getTimeFormat(activity)
+    val expected = format.format(Date(time))
+    testDirectorySummary(expected, time)
+  }
 
-        screen()
-                .clickInto(nonUtf8NamedDir)
-                .assertListViewContains(child, true);
+  @Test
+  fun shows_time_as_month_day_for_date_of_current_year() {
+    val time = currentTimeMillis() - DAYS.toMillis(2)
+    val flags = (FORMAT_SHOW_DATE or FORMAT_ABBREV_MONTH or FORMAT_NO_YEAR)
+    val expected = formatDateTime(activity, time, flags)
+    testDirectorySummary(expected, time)
+  }
+
+  @Test
+  fun shows_time_as_year_month_day_for_date_outside_of_current_year() {
+    val time = currentTimeMillis() - DAYS.toMillis(400)
+    val format = getDateFormat(activity)
+    val expected = format.format(Date(time))
+    testDirectorySummary(expected, time)
+  }
+
+  private fun testDirectorySummary(expected: String, modifiedAt: Long) {
+    val d = dir().concat("dir").createDirectory()
+    d.setLastModifiedTime(NOFOLLOW, Instant.of(modifiedAt / 1000, 0))
+    screen().assertSummary(d, expected)
+  }
+
+  @Test
+  fun directory_view_is_disabled_if_no_read_permission() {
+    val dir = dir().concat("dir").createDirectory()
+    Paths.removePermissions(dir, Permission.read())
+    screen().assertDisabled(dir)
+  }
+
+  @Test
+  fun link_displayed() {
+    val dir = dir().concat("dir").createDirectory()
+    val link = dir().concat("link").createSymbolicLink(dir)
+    screen()
+      .assertLinkPathDisplayed(dir, null)
+      .assertLinkPathDisplayed(link, dir)
+  }
+
+  @Test
+  fun can_see_changes_in_parent_directory() {
+    val level1Dir = dir()
+    val level2Dir = level1Dir.concat("level2Dir").createDirectory()
+    val level3Dir = level2Dir.concat("level3Dir").createDirectory()
+
+    screen()
+      .sort()
+      .by(FileSort.NAME)
+      .clickInto(level2Dir)
+      .clickInto(level3Dir)
+      .assertCurrentDirectory(level3Dir)
+
+    val level3File = level2Dir.concat("level3File").createFile()
+    val level2File = level1Dir.concat("level2File").createFile()
+
+    screen()
+      .pressBack()
+      .assertAllItemsDisplayedInOrder(level3Dir, level3File)
+      .pressBack()
+      .assertAllItemsDisplayedInOrder(level2Dir, level2File)
+  }
+
+  @Test
+  fun can_see_changes_in_linked_directory() {
+    val dir = dir().concat("dir").createDirectory()
+    val link = dir().concat("link").createSymbolicLink(dir)
+
+    screen()
+      .clickInto(link)
+      .assertCurrentDirectory(link)
+
+    val child = link.concat("child").createDirectory()
+
+    screen()
+      .clickInto(child)
+      .assertCurrentDirectory(child)
+  }
+
+  @Test
+  fun press_action_bar_up_indicator_will_go_back() {
+    val dir = dir().concat("dir").createDirectory()
+    val parent = dir.parent()!!
+
+    screen()
+      .clickInto(dir)
+      .assertCurrentDirectory(dir)
+      .pressActionBarUpIndicator()
+      .assertCurrentDirectory(parent)
+  }
+
+  @Test
+  fun action_bar_title_shows_name_of_directory() {
+    screen()
+      .clickInto(dir().concat("a").createDirectory())
+      .assertActionBarTitle("a")
+  }
+
+  @Test
+  fun action_bar_hides_up_indicator_when_there_is_no_back_stack_initially() {
+    screen().assertActionBarUpIndicatorIsVisible(false)
+  }
+
+  @Test
+  fun action_bar_shows_up_indicator_when_there_is_back_stack() {
+    screen()
+      .clickInto(dir().concat("dir").createDirectory())
+      .assertActionBarUpIndicatorIsVisible(true)
+  }
+
+  @Test
+  fun action_bar_hides_up_indicator_when_there_is_no_back_stack_to_go_back_to() {
+    screen()
+      .clickInto(dir().concat("dir").createDirectory())
+      .pressBack()
+      .assertActionBarUpIndicatorIsVisible(false)
+  }
+
+  @Test
+  fun long_press_back_will_clear_back_stack() {
+    screen()
+      .clickInto(dir().concat("a").createDirectory())
+      .clickInto(dir().concat("a/b").createDirectory())
+      .clickInto(dir().concat("a/b/c").createDirectory())
+      .longPressBack()
+      .assertCurrentDirectory(dir())
+  }
+
+  @Test
+  fun observes_on_current_directory_and_shows_added_deleted_files() {
+    val a = dir().concat("a").createDirectory()
+    screen().assertListViewContains(a, true)
+
+    val b = dir().concat("b").createFile()
+    screen()
+      .assertListViewContains(a, true)
+      .assertListViewContains(b, true)
+
+    b.delete()
+    screen()
+      .assertListViewContains(a, true)
+      .assertListViewContains(b, false)
+  }
+
+  @Test
+  fun updates_view_on_child_directory_modified() {
+    val dir = dir().concat("a").createDirectory()
+    testUpdatesDateViewOnChildModified(dir)
+  }
+
+  @Test
+  fun updates_view_on_child_file_modified() {
+    val file = dir().concat("a").createFile()
+    testUpdatesDateViewOnChildModified(file)
+    testUpdatesSizeViewOnChildModified(file)
+  }
+
+  private fun testUpdatesSizeViewOnChildModified(file: Path) {
+    file.setLastModifiedTime(NOFOLLOW, EPOCH)
+
+    val outdated = screen().getSummary(file)
+    modify(file)
+
+    screen().assertSummary(file) {
+      assertNotEquals(outdated, it)
     }
+  }
 
-    @Test
-    public void can_shows_dirs_with_same_name_but_different_name_bytes() throws Exception {
+  private fun testUpdatesDateViewOnChildModified(file: Path) {
+    file.setLastModifiedTime(NOFOLLOW, Instant.of(100000, 1))
 
-        byte[] notUtf8 = {-19, -96, -67, -19, -80, -117};
-        byte[] utf8 = new String(notUtf8, UTF_8).getBytes(UTF_8);
+    val outdated = screen().getSummary(file)
+    modify(file)
 
-        assertFalse(Arrays.equals(notUtf8, utf8));
-        assertEquals(new String(notUtf8, UTF_8), new String(utf8, UTF_8));
-
-        Path notUtf8Dir = dir().concat(notUtf8).createDirectory();
-        Path notUtf8Child = notUtf8Dir.concat("notUtf8").createFile();
-
-        Path utf8Dir = dir().concat(utf8).createDirectory();
-        Path utf8Child = utf8Dir.concat("utf8").createFile();
-
-        screen()
-                .assertListViewContains(notUtf8Dir, true)
-                .assertListViewContains(utf8Dir, true)
-
-                .clickInto(notUtf8Dir)
-                .assertListViewContains(notUtf8Child, true)
-                .assertListViewContains(utf8Child, false)
-
-                .pressBack()
-                .clickInto(utf8Dir)
-                .assertListViewContains(utf8Child, true)
-                .assertListViewContains(notUtf8Child, false);
+    screen().assertSummary(file) {
+      assertNotEquals(outdated, it)
     }
+  }
 
-    @Test
-    public void can_navigate_into_etc_proc_self_fdinfo_without_crashing()
-            throws Exception {
-
-        assumeTrue("Skipping test, no permission to read /proc on Android N",
-                SDK_INT < 24);
-//                SDK_INT != N); // TODO Change to 'N' after upgrade to API 24
-
-        screen().selectFromNavigationMode(Path.of("/"));
-        screen().clickInto(Path.of("/proc"));
-        screen().clickInto(Path.of("/proc/self"));
-        screen().clickInto(Path.of("/proc/self/fdinfo"));
+  private fun modify(file: Path) {
+    val stat = file.stat(NOFOLLOW)
+    val lastModifiedBefore = stat.lastModifiedTime()
+    if (stat.isDirectory) {
+      file.concat(nanoTime().toString()).createDirectory()
+    } else {
+      Paths.appendUtf8(file, "test")
     }
-
-    @Test
-    public void can_navigate_through_title_list_drop_down() throws Exception {
-        Path parent = dir().parent();
-        assert parent != null;
-        screen()
-                .selectFromNavigationMode(parent)
-                .assertNavigationModeHierarchy(parent);
-    }
-
-    @Test
-    public void updates_navigation_list_when_going_into_a_new_dir() throws Exception {
-        screen().assertNavigationModeHierarchy(dir());
-        Path dir = dir().concat("dir").createDirectory();
-        screen().clickInto(dir).assertNavigationModeHierarchy(dir);
-    }
-
-    @Test
-    public void shows_size_only_if_unable_to_determine_modified_date() throws Exception {
-        Path file = dir().concat("file").createFile();
-        file.setLastModifiedTime(NOFOLLOW, EPOCH);
-
-        long size = file.stat(NOFOLLOW).size();
-        Context c = getActivity();
-        String expected = formatShortFileSize(c, size);
-
-        screen().assertSummary(file, summary ->
-                assertTrue(summary.contains(expected)));
-    }
-
-    @Test
-    public void shows_time_and_size_for_file() throws Exception {
-        Path file = dir().concat("file").createFile();
-        Paths.appendUtf8(file, file.toString());
-
-        Context c = getActivity();
-        Stat stat = file.stat(NOFOLLOW);
-        long lastModifiedMillis = stat.lastModifiedTime().to(MILLISECONDS);
-        String date = getTimeFormat(c).format(new Date(lastModifiedMillis));
-        String size = formatShortFileSize(c, stat.size());
-        String expected = c.getString(R.string.x_dot_y, date, size);
-        screen().assertSummary(file, expected);
-    }
-
-    @Test
-    public void shows_time_only_for_today() throws Exception {
-        long time = currentTimeMillis();
-        DateFormat format = getTimeFormat(getActivity());
-        String expected = format.format(new Date(time));
-        testDirectorySummary(expected, time);
-    }
-
-    @Test
-    public void shows_time_as_month_day_for_date_of_current_year() throws Exception {
-        long time = currentTimeMillis() - DAYS.toMillis(2);
-        int flags
-                = FORMAT_SHOW_DATE
-                | FORMAT_ABBREV_MONTH
-                | FORMAT_NO_YEAR;
-        String expected = formatDateTime(getActivity(), time, flags);
-        testDirectorySummary(expected, time);
-    }
-
-    @Test
-    public void shows_time_as_year_month_day_for_date_outside_of_current_year() throws Exception {
-        long time = currentTimeMillis() - DAYS.toMillis(400);
-        DateFormat format = getDateFormat(getActivity());
-        String expected = format.format(new Date(time));
-        testDirectorySummary(expected, time);
-    }
-
-    private void testDirectorySummary(
-            String expected, long modifiedAt) throws Exception {
-        Path d = dir().concat("dir").createDirectory();
-        d.setLastModifiedTime(NOFOLLOW, Instant.of(modifiedAt / 1000, 0));
-        screen().assertSummary(d, expected);
-    }
-
-    @Test
-    public void directory_view_is_disabled_if_no_read_permission() throws Exception {
-        Path dir = dir().concat("dir").createDirectory();
-        Paths.removePermissions(dir, Permission.read());
-        screen().assertDisabled(dir);
-    }
-
-    @Test
-    public void link_displayed() throws Exception {
-        Path dir = dir().concat("dir").createDirectory();
-        Path link = dir().concat("link").createSymbolicLink(dir);
-
-        screen()
-                .assertLinkPathDisplayed(dir, null)
-                .assertLinkPathDisplayed(link, dir);
-    }
-
-    @Test
-    public void can_see_changes_in_parent_directory() throws Exception {
-
-        Path level1Dir = dir();
-        Path level2Dir = level1Dir.concat("level2Dir").createDirectory();
-        Path level3Dir = level2Dir.concat("level3Dir").createDirectory();
-        screen()
-                .sort()
-                .by(NAME)
-                .clickInto(level2Dir)
-                .clickInto(level3Dir)
-                .assertCurrentDirectory(level3Dir);
-
-        Path level3File = level2Dir.concat("level3File").createFile();
-        Path level2File = level1Dir.concat("level2File").createFile();
-        screen()
-                .pressBack()
-                .assertAllItemsDisplayedInOrder(level3Dir, level3File)
-                .pressBack()
-                .assertAllItemsDisplayedInOrder(level2Dir, level2File);
-    }
-
-    @Test
-    public void can_see_changes_in_linked_directory() throws Exception {
-        Path dir = dir().concat("dir").createDirectory();
-        Path link = dir().concat("link").createSymbolicLink(dir);
-        screen()
-                .clickInto(link)
-                .assertCurrentDirectory(link);
-
-        Path child = link.concat("child").createDirectory();
-        screen()
-                .clickInto(child)
-                .assertCurrentDirectory(child);
-    }
-
-    @Test
-    public void press_action_bar_up_indicator_will_go_back() throws Exception {
-        Path dir = dir().concat("dir").createDirectory();
-        Path parent = dir.parent();
-        assert parent != null;
-        screen()
-                .clickInto(dir)
-                .assertCurrentDirectory(dir)
-                .pressActionBarUpIndicator()
-                .assertCurrentDirectory(parent);
-    }
-
-    @Test
-    public void action_bar_title_shows_name_of_directory() throws Exception {
-        screen()
-                .clickInto(dir().concat("a").createDirectory())
-                .assertActionBarTitle("a");
-    }
-
-    @Test
-    public void action_bar_hides_up_indicator_when_there_is_no_back_stack_initially() {
-        screen().assertActionBarUpIndicatorIsVisible(false);
-    }
-
-    @Test
-    public void action_bar_shows_up_indicator_when_there_is_back_stack() throws Exception {
-        screen()
-                .clickInto(dir().concat("dir").createDirectory())
-                .assertActionBarUpIndicatorIsVisible(true);
-    }
-
-    @Test
-    public void action_bar_hides_up_indicator_when_there_is_no_back_stack_to_go_back_to() throws Exception {
-        screen()
-                .clickInto(dir().concat("dir").createDirectory())
-                .pressBack()
-                .assertActionBarUpIndicatorIsVisible(false);
-    }
-
-    @Test
-    public void long_press_back_will_clear_back_stack() throws Exception {
-        screen()
-                .clickInto(dir().concat("a").createDirectory())
-                .clickInto(dir().concat("a/b").createDirectory())
-                .clickInto(dir().concat("a/b/c").createDirectory())
-                .longPressBack()
-                .assertCurrentDirectory(dir());
-    }
-
-    @Test
-    public void observes_on_current_directory_and_shows_added_deleted_files() throws Exception {
-        Path a = dir().concat("a").createDirectory();
-        screen().assertListViewContains(a, true);
-
-        Path b = dir().concat("b").createFile();
-        screen()
-                .assertListViewContains(a, true)
-                .assertListViewContains(b, true);
-
-        b.delete();
-        screen()
-                .assertListViewContains(a, true)
-                .assertListViewContains(b, false);
-    }
-
-    @Test
-    public void updates_view_on_child_directory_modified() throws Exception {
-        Path dir = dir().concat("a").createDirectory();
-        testUpdatesDateViewOnChildModified(dir);
-    }
-
-    @Test
-    public void updates_view_on_child_file_modified() throws Exception {
-        Path file = dir().concat("a").createFile();
-        testUpdatesDateViewOnChildModified(file);
-        testUpdatesSizeViewOnChildModified(file);
-    }
-
-    private void testUpdatesSizeViewOnChildModified(Path file)
-            throws IOException {
-        file.setLastModifiedTime(NOFOLLOW, EPOCH);
-
-        CharSequence[] chars = {null};
-        screen().assertSummary(file, summary ->
-                chars[0] = summary);
-
-        modify(file);
-
-        screen().assertSummary(file, summary ->
-                assertNotEquals(chars[0], summary));
-    }
-
-    private void testUpdatesDateViewOnChildModified(Path file)
-            throws IOException {
-
-        file.setLastModifiedTime(NOFOLLOW, Instant.of(100000, 1));
-
-        CharSequence[] date = {null};
-        screen().assertSummary(file, summary ->
-                date[0] = summary);
-
-        modify(file);
-
-        screen().assertSummary(file, summary ->
-                assertNotEquals(date[0], summary));
-    }
-
-    private void modify(Path file) throws IOException {
-        Stat stat = file.stat(NOFOLLOW);
-        Instant lastModifiedBefore = stat.lastModifiedTime();
-        if (stat.isDirectory()) {
-            file.concat(String.valueOf(nanoTime())).createDirectory();
-        } else {
-            Paths.appendUtf8(file, "test");
-        }
-        Instant lastModifiedAfter = file.stat(NOFOLLOW).lastModifiedTime();
-        assertNotEquals(lastModifiedBefore, lastModifiedAfter);
-    }
-
+    val lastModifiedAfter = file.stat(NOFOLLOW).lastModifiedTime()
+    assertNotEquals(lastModifiedBefore, lastModifiedAfter)
+  }
 }

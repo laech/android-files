@@ -1,17 +1,13 @@
 package l.files.ui.browser;
 
 import androidx.recyclerview.widget.RecyclerView;
-
 import l.files.fs.Path;
 import l.files.ui.bookmarks.BookmarksFragment;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
 import static l.files.base.Objects.requireNonNull;
-import static l.files.ui.browser.Instrumentations.awaitOnMainThread;
-import static l.files.ui.browser.Instrumentations.clickItemOnMainThread;
-import static l.files.ui.browser.Instrumentations.findItemOnMainThread;
-import static l.files.ui.browser.Instrumentations.longClickItemOnMainThread;
+import static l.files.ui.browser.Instrumentations.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 final class UiBookmarksFragment {
 
@@ -26,20 +22,28 @@ final class UiBookmarksFragment {
     }
 
     UiBookmarksFragment longClick(Path bookmark) {
-        longClickItemOnMainThread(context.instrumentation(), this::recycler, bookmark);
+        longClickItemOnMainThread(
+            context.getInstrumentation(),
+            this::recycler,
+            bookmark
+        );
         return this;
     }
 
     private BookmarksFragment fragment() {
         return (BookmarksFragment) context
-                .activity()
-                .getSupportFragmentManager()
-                .findFragmentById(R.id.bookmarks_fragment);
+            .getActivity()
+            .getSupportFragmentManager()
+            .findFragmentById(R.id.bookmarks_fragment);
     }
 
     UiBookmarksFragment click(Path bookmark) {
         assertDrawerIsOpened(true);
-        clickItemOnMainThread(context.instrumentation(), this::recycler, bookmark);
+        clickItemOnMainThread(
+            context.getInstrumentation(),
+            this::recycler,
+            bookmark
+        );
         return this;
     }
 
@@ -51,8 +55,11 @@ final class UiBookmarksFragment {
     }
 
     UiBookmarksFragment assertBookmarked(Path bookmark, boolean bookmarked) {
-        awaitOnMainThread(context.instrumentation(), () ->
-                assertEquals(bookmarked, fragment().bookmarks().contains(bookmark)));
+        awaitOnMainThread(context.getInstrumentation(), () ->
+            assertEquals(
+                bookmarked,
+                fragment().bookmarks().contains(bookmark)
+            ));
         return this;
     }
 
@@ -68,10 +75,14 @@ final class UiBookmarksFragment {
 
     UiBookmarksFragment assertChecked(Path bookmark, boolean checked) {
         findItemOnMainThread(
-                context.instrumentation(),
-                this::recycler,
-                bookmark,
-                view -> assertEquals(checked, view.isActivated()));
+            context.getInstrumentation(),
+            this::recycler,
+            bookmark,
+            view -> {
+                assertEquals(checked, view.isActivated());
+                return null;
+            }
+        );
         return this;
     }
 

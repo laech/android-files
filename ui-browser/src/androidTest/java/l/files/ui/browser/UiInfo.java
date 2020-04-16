@@ -17,17 +17,17 @@ final class UiInfo {
     }
 
     UiInfo assertName(String value) {
-        awaitOnMainThread(context.instrumentation(), () -> assertEquals(value, getName()));
+        awaitOnMainThread(context.getInstrumentation(), () -> assertEquals(value, getName()));
         return this;
     }
 
     UiInfo assertDate(String value) {
-        awaitOnMainThread(context.instrumentation(), () -> assertEquals(value, getDate()));
+        awaitOnMainThread(context.getInstrumentation(), () -> assertEquals(value, getDate()));
         return this;
     }
 
     UiInfo assertSize(String value) {
-        awaitOnMainThread(context.instrumentation(), () -> assertEquals(value, getSize()));
+        awaitOnMainThread(context.getInstrumentation(), () -> assertEquals(value, getSize()));
         return this;
     }
 
@@ -45,7 +45,7 @@ final class UiInfo {
 
     private InfoBaseFragment fragment() {
         InfoBaseFragment fragment = (InfoBaseFragment) context
-                .activity()
+                .getActivity()
                 .getSupportFragmentManager()
                 .findFragmentByTag(InfoBaseFragment.FRAGMENT_TAG);
         assertNotNull(fragment);

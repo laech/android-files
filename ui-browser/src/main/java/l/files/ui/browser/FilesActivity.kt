@@ -1,334 +1,277 @@
-package l.files.ui.browser;
+package l.files.ui.browser
 
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.os.Handler;
-import android.view.KeyEvent;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.Spinner;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.graphics.drawable.DrawerArrowDrawable;
-import androidx.appcompat.view.ActionMode;
-import androidx.appcompat.widget.Toolbar;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.FragmentManager.OnBackStackChangedListener;
-import l.files.base.Consumer;
-import l.files.fs.Path;
-import l.files.fs.Stat;
-import l.files.ui.base.app.BaseActivity;
-import l.files.ui.base.app.OptionsMenus;
-import l.files.ui.base.fs.OpenFileEvent;
-import l.files.ui.browser.menu.ActionBarDrawerToggleMenu;
-import l.files.ui.browser.menu.GoBackOnHomePressedMenu;
-import l.files.ui.browser.menu.NewTabMenu;
-import l.files.ui.preview.PreviewKt;
+import android.content.ContentResolver
+import android.graphics.Color
+import android.os.AsyncTask
+import android.os.Bundle
+import android.os.Handler
+import android.view.KeyEvent
+import android.view.View
+import android.widget.AdapterView
+import android.widget.AdapterView.OnItemSelectedListener
+import android.widget.Toast
+import android.widget.Toast.LENGTH_SHORT
+import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
+import androidx.appcompat.view.ActionMode
+import androidx.core.view.GravityCompat.START
+import androidx.drawerlayout.widget.DrawerLayout.*
+import androidx.fragment.app.FragmentManager.OnBackStackChangedListener
+import androidx.fragment.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN
+import kotlinx.android.synthetic.main.files_activity.*
+import l.files.base.Consumer
+import l.files.fs.LinkOption
+import l.files.fs.Path
+import l.files.fs.Stat
+import l.files.ui.base.app.BaseActivity
+import l.files.ui.base.app.OptionsMenus
+import l.files.ui.base.fs.IOExceptions
+import l.files.ui.base.fs.OpenFileEvent
+import l.files.ui.base.fs.UserDirs
+import l.files.ui.browser.menu.ActionBarDrawerToggleMenu
+import l.files.ui.browser.menu.GoBackOnHomePressedMenu
+import l.files.ui.browser.menu.NewTabMenu
+import l.files.ui.preview.getPreview
+import java.io.IOException
+import java.lang.ref.WeakReference
 
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.util.List;
+class FilesActivity : BaseActivity(),
+  OnBackStackChangedListener,
+  OnItemSelectedListener {
 
-import static android.content.ContentResolver.SCHEME_FILE;
-import static android.graphics.Color.WHITE;
-import static android.view.KeyEvent.KEYCODE_BACK;
-import static android.widget.Toast.LENGTH_SHORT;
-import static android.widget.Toast.makeText;
-import static androidx.core.view.GravityCompat.START;
-import static androidx.drawerlayout.widget.DrawerLayout.*;
-import static androidx.fragment.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
-import static l.files.base.Objects.requireNonNull;
-import static l.files.fs.LinkOption.FOLLOW;
-import static l.files.ui.base.fs.IOExceptions.message;
-import static l.files.ui.base.fs.UserDirs.DIR_HOME;
+  private lateinit var hierarchy: HierarchyAdapter
 
-public final class FilesActivity extends BaseActivity implements
-        OnBackStackChangedListener,
-        OnItemSelectedListener {
+  lateinit var navigationIcon: DrawerArrowDrawable
+    private set
 
-    public static final String EXTRA_DIRECTORY = "directory";
-    public static final String EXTRA_WATCH_LIMIT = "watch_limit";
+  private val openFileListener = Consumer { event: OpenFileEvent ->
+    onOpen(event)
+  }
 
-    private DrawerLayout drawer;
+  fun hierarchy(): List<Path> {
+    return hierarchy.get()
+  }
 
-    private HierarchyAdapter hierarchy;
-    private Toolbar toolbar;
-    private Spinner title;
-    private DrawerArrowDrawable navigationIcon;
+  override fun onCreate(state: Bundle?) {
+    super.onCreate(state)
+    setContentView(R.layout.files_activity)
+    getPreview().readCacheAsyncIfNeeded()
 
-    private final Consumer<OpenFileEvent> openFileListener = this::onOpen;
+    navigationIcon = DrawerArrowDrawable(this)
+    navigationIcon.color = Color.WHITE
+    toolbarView.navigationIcon = navigationIcon
+    setSupportActionBar(toolbarView)
 
-    public List<Path> hierarchy() {
-        return hierarchy.get();
+    hierarchy = HierarchyAdapter()
+
+    titleView.adapter = hierarchy
+    titleView.onItemSelectedListener = this
+
+    val actionBar = supportActionBar!!
+    actionBar.setDisplayHomeAsUpEnabled(true)
+    actionBar.setDisplayShowTitleEnabled(false)
+    setOptionsMenu(
+      OptionsMenus.compose(
+        ActionBarDrawerToggleMenu(drawerView, supportFragmentManager),
+        GoBackOnHomePressedMenu(this),
+        NewTabMenu(this)
+      )
+    )
+
+    supportFragmentManager.addOnBackStackChangedListener(this)
+    if (state == null) {
+      supportFragmentManager
+        .beginTransaction()
+        .replace(
+          R.id.content,
+          FilesFragment.create(initialDirectory, watchLimit),
+          FilesFragment.TAG
+        )
+        .commit()
     }
 
-    public Spinner title() {
-        return title;
+    Handler().post(::updateToolBar)
+    OpenFileEvent.topic.weakSubscribeOnMainThread(openFileListener)
+  }
+
+  override fun onDestroy() {
+    OpenFileEvent.topic.unsubscribeOnMainThread(openFileListener)
+    supportFragmentManager.removeOnBackStackChangedListener(this)
+    super.onDestroy()
+  }
+
+  override fun onItemSelected(
+    parent: AdapterView<*>,
+    view: View,
+    position: Int,
+    id: Long
+  ) {
+    val path = parent.adapter.getItem(position) as Path
+    if (path != fragment.directory()) {
+      onOpen(OpenFileEvent(path, null))
+    }
+  }
+
+  override fun onNothingSelected(parent: AdapterView<*>) {}
+
+  // TODO
+  private val initialDirectory: Path
+    get() {
+      var dir: Path? = intent.getParcelableExtra(EXTRA_DIRECTORY)
+      if (dir == null && intent?.data?.scheme == ContentResolver.SCHEME_FILE) {
+        dir = Path.of(intent.data!!.path) // TODO
+      }
+      return dir ?: UserDirs.DIR_HOME
     }
 
-    public Toolbar toolbar() {
-        return toolbar;
+  private val watchLimit: Int
+    get() = intent.getIntExtra(EXTRA_WATCH_LIMIT, -1)
+
+  override fun onPause() {
+    this.getPreview().writeCacheAsyncIfNeeded()
+    super.onPause()
+  }
+
+  override fun onBackPressed() {
+    if (isSidebarOpen) {
+      closeSidebar()
+    } else {
+      super.onBackPressed()
+    }
+  }
+
+  override fun onBackStackChanged() {
+    updateToolBar()
+  }
+
+  private fun updateToolBar() {
+    val directory = fragment.directory()
+    val backStacks = supportFragmentManager.backStackEntryCount
+    navigationIcon.progress = if (backStacks == 0) 0f else 1f
+    hierarchy.set(directory)
+    titleView.setSelection(hierarchy.indexOf(directory))
+  }
+
+  override fun onKeyLongPress(keyCode: Int, event: KeyEvent?): Boolean {
+    return if (keyCode == KeyEvent.KEYCODE_BACK) {
+      while (supportFragmentManager.backStackEntryCount > 0) {
+        supportFragmentManager.popBackStackImmediate()
+      }
+      true
+    } else {
+      super.onKeyLongPress(keyCode, event)
+    }
+  }
+
+  override fun onSupportActionModeFinished(mode: ActionMode) {
+    super.onSupportActionModeFinished(mode)
+    drawerView.setDrawerLockMode(LOCK_MODE_UNLOCKED)
+  }
+
+  override fun onSupportActionModeStarted(mode: ActionMode) {
+    super.onSupportActionModeStarted(mode)
+    drawerView.setDrawerLockMode(
+      if (isSidebarOpen) LOCK_MODE_LOCKED_OPEN
+      else LOCK_MODE_LOCKED_CLOSED
+    )
+  }
+
+  private val isSidebarOpen: Boolean
+    get() = drawerView.isDrawerOpen(START)
+
+  private fun closeSidebar() {
+    drawerView.closeDrawer(START)
+  }
+
+  private fun onOpen(event: OpenFileEvent) {
+    currentActionMode()?.finish()
+    if (drawerView.isDrawerOpen(START)) {
+      drawerView.closeDrawers()
+    }
+    show(event.path, event.stat)
+  }
+
+  private fun show(path: Path, stat: Stat?) {
+    if (stat != null && !stat.isSymbolicLink) {
+      doShow(path, stat)
+      return
+    }
+    ShowTask(path, this).execute()
+  }
+
+  private class ShowTask(
+    private val path: Path,
+    activity: FilesActivity
+  ) : AsyncTask<Void, Void, Any>() {
+
+    private val activityRef: WeakReference<FilesActivity> =
+      WeakReference(activity)
+
+    override fun doInBackground(vararg params: Void): Any = try {
+      path.stat(LinkOption.FOLLOW)
+    } catch (e: IOException) {
+      e
     }
 
-    @Override
-    protected void onCreate(Bundle state) {
-        super.onCreate(state);
-        setContentView(R.layout.files_activity);
-        PreviewKt.getPreview(getApplicationContext()).readCacheAsyncIfNeeded();
-
-        navigationIcon = new DrawerArrowDrawable(this);
-        navigationIcon.setColor(WHITE);
-
-        toolbar = findViewById(R.id.toolbar);
-        toolbar.setNavigationIcon(navigationIcon);
-
-        hierarchy = new HierarchyAdapter();
-        title = findViewById(R.id.title);
-        title.setAdapter(hierarchy);
-        title.setOnItemSelectedListener(this);
-
-        drawer = findViewById(R.id.drawer_layout);
-
-        setSupportActionBar(toolbar);
-        ActionBar actionBar = getSupportActionBar();
-        assert actionBar != null;
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setDisplayShowTitleEnabled(false);
-
-        setOptionsMenu(OptionsMenus.compose(
-                new ActionBarDrawerToggleMenu(drawer, getSupportFragmentManager()),
-                new GoBackOnHomePressedMenu(this),
-                new NewTabMenu(this)
-        ));
-
-        getSupportFragmentManager().addOnBackStackChangedListener(this);
-
-        if (state == null) {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(
-                            R.id.content,
-                            FilesFragment.create(getInitialDirectory(), getWatchLimit()),
-                            FilesFragment.TAG)
-                    .commit();
-        }
-
-        new Handler().post(this::updateToolBar);
-
-        OpenFileEvent.topic.weakSubscribeOnMainThread(openFileListener);
-    }
-
-    @Override
-    protected void onDestroy() {
-        OpenFileEvent.topic.unsubscribeOnMainThread(openFileListener);
-        getSupportFragmentManager().removeOnBackStackChangedListener(this);
-        super.onDestroy();
-    }
-
-    @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        Path path = (Path) parent.getAdapter().getItem(position);
-        if (!path.equals(fragment().directory())) {
-            onOpen(new OpenFileEvent(path, null));
-        }
-    }
-
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-    }
-
-    private Path getInitialDirectory() {
-        Path dir = getIntent().getParcelableExtra(EXTRA_DIRECTORY);
-        if (dir == null
-                && getIntent().getData() != null
-                && getIntent().getData().getScheme() != null
-                && getIntent().getData().getScheme().equals(SCHEME_FILE)) {
-            dir = Path.of(getIntent().getData().getPath()); // TODO
-        }
-        return dir == null ? DIR_HOME : dir;
-    }
-
-    private int getWatchLimit() {
-        return getIntent().getIntExtra(EXTRA_WATCH_LIMIT, -1);
-    }
-
-    @Override
-    protected void onPause() {
-        PreviewKt.getPreview(this).writeCacheAsyncIfNeeded();
-        super.onPause();
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (isSidebarOpen()) {
-            closeSidebar();
+    override fun onPostExecute(result: Any) {
+      super.onPostExecute(result)
+      val activity = activityRef.get()
+      if (activity != null && !activity.isFinishing) {
+        if (result is Stat) {
+          activity.doShow(path, result)
         } else {
-            super.onBackPressed();
+          val msg = IOExceptions.message(result as IOException)
+          Toast.makeText(activity, msg, LENGTH_SHORT).show()
         }
+      }
     }
+  }
 
-    @Override
-    public void onBackStackChanged() {
-        updateToolBar();
+  private fun doShow(path: Path, stat: Stat) {
+    if (!isReadable(path)) { // TODO Check in background
+      showPermissionDenied()
+    } else if (stat.isDirectory) {
+      showDirectory(path)
+    } else {
+      showFile(path, stat)
     }
+  }
 
-    private void updateToolBar() {
-        Path directory = fragment().directory();
-        int backStacks = getSupportFragmentManager().getBackStackEntryCount();
-        if (backStacks == 0) {
-            navigationIcon.setProgress(0);
-        } else {
-            navigationIcon.setProgress(1);
-        }
-        hierarchy.set(directory);
-        title.setSelection(hierarchy.indexOf(directory));
+  private fun isReadable(path: Path): Boolean = try {
+    path.isReadable
+  } catch (e: IOException) {
+    false
+  }
+
+  private fun showPermissionDenied() {
+    Toast.makeText(this, R.string.permission_denied, LENGTH_SHORT).show()
+  }
+
+  private fun showDirectory(path: Path) {
+    if (fragment.directory() == path) {
+      return
     }
+    val f = FilesFragment.create(path, watchLimit)
+    supportFragmentManager
+      .beginTransaction()
+      .setBreadCrumbTitle(
+        path.toAbsolutePath().name.orObject(path).toString()
+      )
+      .setTransition(TRANSIT_FRAGMENT_OPEN)
+      .replace(R.id.content, f, FilesFragment.TAG)
+      .addToBackStack(null)
+      .commit()
+  }
 
-    @Override
-    public boolean onKeyLongPress(int keyCode, KeyEvent event) {
-        if (keyCode == KEYCODE_BACK) {
-            while (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-                getSupportFragmentManager().popBackStackImmediate();
-            }
-            return true;
-        }
-        return super.onKeyLongPress(keyCode, event);
-    }
+  private fun showFile(file: Path, stat: Stat) {
+    OpenFile(this, file, stat).execute()
+  }
 
-    @Override
-    public void onSupportActionModeFinished(@NonNull ActionMode mode) {
-        super.onSupportActionModeFinished(mode);
-        drawer.setDrawerLockMode(LOCK_MODE_UNLOCKED);
-    }
+  val fragment: FilesFragment
+    get() = supportFragmentManager
+      .findFragmentByTag(FilesFragment.TAG) as FilesFragment
 
-    @Override
-    public void onSupportActionModeStarted(@NonNull ActionMode mode) {
-        super.onSupportActionModeStarted(mode);
-
-        if (isSidebarOpen()) {
-            drawer.setDrawerLockMode(LOCK_MODE_LOCKED_OPEN);
-        } else {
-            drawer.setDrawerLockMode(LOCK_MODE_LOCKED_CLOSED);
-        }
-    }
-
-    private boolean isSidebarOpen() {
-        return drawer.isDrawerOpen(START);
-    }
-
-    private void closeSidebar() {
-        drawer.closeDrawer(START);
-    }
-
-    public DrawerLayout drawerLayout() {
-        return drawer;
-    }
-
-    public DrawerArrowDrawable navigationIcon() {
-        return navigationIcon;
-    }
-
-    private void onOpen(OpenFileEvent event) {
-        ActionMode mode = currentActionMode();
-        if (mode != null) {
-            mode.finish();
-        }
-
-        if (drawer.isDrawerOpen(START)) {
-            drawer.closeDrawers();
-        }
-
-        show(event.path, event.stat);
-    }
-
-    private void show(Path path, @Nullable Stat stat) {
-        if (stat != null && !stat.isSymbolicLink()) {
-            doShow(path, stat);
-            return;
-        }
-        new ShowTask(path, this).execute();
-    }
-
-    private static final class ShowTask extends AsyncTask<Void, Void, Object> {
-
-        private final Path path;
-        private final WeakReference<FilesActivity> activityRef;
-
-        private ShowTask(Path path, FilesActivity activity) {
-            this.path = requireNonNull(path);
-            this.activityRef = new WeakReference<>(activity);
-        }
-
-        @Override
-        protected Object doInBackground(Void... params) {
-            try {
-                return path.stat(FOLLOW);
-            } catch (IOException e) {
-                return e;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Object result) {
-            super.onPostExecute(result);
-            FilesActivity activity = activityRef.get();
-            if (activity != null && !activity.isFinishing()) {
-                if (result instanceof Stat) {
-                    activity.doShow(path, (Stat) result);
-                } else {
-                    String msg = message((IOException) result);
-                    makeText(activity, msg, LENGTH_SHORT).show();
-                }
-            }
-        }
-
-    }
-
-    private void doShow(Path path, Stat stat) {
-        if (!isReadable(path)) { // TODO Check in background
-            showPermissionDenied();
-        } else if (stat.isDirectory()) {
-            showDirectory(path);
-        } else {
-            showFile(path, stat);
-        }
-    }
-
-    private boolean isReadable(Path path) {
-        try {
-            return path.isReadable();
-        } catch (IOException e) {
-            return false;
-        }
-    }
-
-    private void showPermissionDenied() {
-        makeText(this, R.string.permission_denied, LENGTH_SHORT).show();
-    }
-
-    private void showDirectory(Path path) {
-        FilesFragment fragment = fragment();
-        if (fragment.directory().equals(path)) {
-            return;
-        }
-        FilesFragment f = FilesFragment.create(path, getWatchLimit());
-        getSupportFragmentManager()
-                .beginTransaction()
-                .setBreadCrumbTitle(String.valueOf(path.toAbsolutePath().getName().orObject(path)))
-                .setTransition(TRANSIT_FRAGMENT_OPEN)
-                .replace(R.id.content, f, FilesFragment.TAG)
-                .addToBackStack(null)
-                .commit();
-    }
-
-    private void showFile(Path file, Stat stat) {
-        new OpenFile(this, file, stat).execute();
-    }
-
-    public FilesFragment fragment() {
-        return (FilesFragment) getSupportFragmentManager()
-                .findFragmentByTag(FilesFragment.TAG);
-    }
+  companion object {
+    const val EXTRA_DIRECTORY = "directory"
+    const val EXTRA_WATCH_LIMIT = "watch_limit"
+  }
 }
