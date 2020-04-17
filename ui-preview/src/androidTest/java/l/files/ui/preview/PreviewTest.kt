@@ -59,11 +59,16 @@ class PreviewTest : PathBaseTest() {
   @Test
   fun preview_mp4() {
     // TODO this one is flaky sometimes
-    try {
-      testPreviewSuccessForTestFile("preview_test.mp4")
-    } catch (e: AssertionError) {
-      testPreviewSuccessForTestFile("preview_test.mp4")
+    var error: AssertionError? = null
+    for (i in 0..9) {
+      try {
+        testPreviewSuccessForTestFile("preview_test.mp4")
+        return
+      } catch (e: AssertionError) {
+        error = e
+      }
     }
+    throw error!!
   }
 
   @Test
