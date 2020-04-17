@@ -4,15 +4,40 @@ import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import l.files.fs.Path
 import l.files.testing.fs.Paths
 import l.files.ui.base.graphics.Rect
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
+import org.junit.Rule
 import org.junit.Test
-import java.io.File
+import org.junit.rules.TemporaryFolder
+import java.io.IOException
 
 class PdfThumbnailerTest {
 
+  @Rule
+  @JvmField
+  val folder = TemporaryFolder()
+
   private val context get() = getInstrumentation().context
   private val assets get() = context.assets
+
+  @Test
+  fun create_mix_failures() {
+    // https://issuetracker.google.com/issues/37016953
+
+    val valid = createTestPdf()
+    val invalid = createInvalidPdf()
+    val max = Rect.of(10, 100)
+
+    PdfThumbnailer.create(valid, max, context)
+
+    try {
+      PdfThumbnailer.create(invalid, max, context)
+      fail()
+    } catch (e: IOException) {
+      // Pass
+    }
+
+    PdfThumbnailer.create(valid, max, context)
+  }
 
   @Test
   fun create_thumbnail_from_pdf() {
@@ -32,15 +57,17 @@ class PdfThumbnailerTest {
   }
 
   private fun createTestPdf(): Path {
-    val file = File.createTempFile("PdfThumbnailerTest", null)
-    return try {
-      val path = Path.of(file)
-      openTestPdf().use { Paths.copy(it, path) }
-      path
-    } catch (e: Throwable) {
-      assertTrue(file.delete() || !file.exists())
-      throw e
-    }
+    val file = folder.newFile("PdfThumbnailerTest")
+    val path = Path.of(file)
+    openTestPdf().use { Paths.copy(it, path) }
+    return path
+  }
+
+  private fun createInvalidPdf(): Path {
+    val file = folder.newFile("PdfThumbnailerTestInvalid")
+    val path = Path.of(file)
+    Paths.writeUtf8(path, "hello")
+    return path
   }
 
   private fun openTestPdf() = assets.open("PdfThumbnailerTest.pdf")

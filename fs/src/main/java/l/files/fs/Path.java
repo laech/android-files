@@ -732,9 +732,13 @@ public abstract class Path implements Parcelable {
         traverse(option, visitor, null);
     }
 
+    public ParcelFileDescriptor newInputFileDescriptor() throws IOException {
+        return ParcelFileDescriptor.adoptFd(open(O_RDONLY, 0));
+    }
+
     public FileInputStream newInputStream() throws IOException {
 
-        ParcelFileDescriptor fd = adoptFd(open(O_RDONLY, 0));
+        ParcelFileDescriptor fd = newInputFileDescriptor();
         try {
 
             checkNotDirectory(fd.getFd(), this);

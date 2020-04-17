@@ -24,86 +24,25 @@ android {
   }
 
   signingConfigs {
-
     debug {
       storeFile file('debug.keystore')
       storePassword 'android'
       keyAlias 'mykey'
       keyPassword 'android'
     }
-
-    release {
-      if (System.console() != null) {
-        storeFile file(System.console().readLine("\nKeystore location: "))
-        storePassword new String(System.console().readPassword("Keystore password: "))
-        keyAlias "files"
-        keyPassword new String(System.console().readPassword("Key password: "))
-      }
-    }
-
   }
 
   buildTypes {
-
     debug {
       applicationIdSuffix ".debug"
       signingConfig signingConfigs.debug
-    }
-
-    release {
-      signingConfig signingConfigs.release
-    }
-
-  }
-
-  splits {
-    abi {
-      enable true
-    }
-  }
-
-}
-
-// See https://sites.google.com/a/android.com/tools/tech-docs/new-build-system/user-guide/apk-splits
-// See https://developer.android.com/google/play/publishing/multiple-apks.html#VersionCodes
-// Codes must be ordered so that newer API of the same type should have higher version code
-// armeabi < armeabi-v7a < arm64-v8a
-// x86 < x86_64
-// mips < mips64
-
-ext.abiCodes = [
-  'armeabi'    : 1,
-  'armeabi-v7a': 2,
-  'arm64-v8a'  : 3,
-  'x86'        : 4,
-  'x86_64'     : 5,
-  'mips'       : 6,
-  'mips64'     : 7,
-]
-
-import com.android.build.OutputFile
-
-android.applicationVariants.all { variant ->
-  variant.outputs.each { output ->
-    output.versionCodeOverride = android.defaultConfig.versionCode * 1000 +
-      project.ext.abiCodes.get(output.getFilter(OutputFile.ABI))
-  }
-}
-
-android.applicationVariants.all { variant ->
-  if (variant.buildType.name == 'debug') {
-    variant.outputs.each { output ->
-      output.versionNameOverride =
-        android.defaultConfig.versionName + "-" + output.baseName
     }
   }
 }
 
 dependencies {
-
   implementation project(':fs')
   implementation project(':ui-browser')
   implementation project(':ui-preview')
   implementation deps.kotlinStdlibJdk7
-
 }

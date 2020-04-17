@@ -36,7 +36,6 @@ dependencies {
   implementation project(':fs')
   implementation project(':fs-media')
   implementation project(':ui-base')
-  implementation project(':ui-preview-pdf')
   implementation deps.androidsvg
   implementation deps.androidCore
   implementation deps.androidCoreKtx

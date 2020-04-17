@@ -12,7 +12,7 @@ buildscript {
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
   }
 
-  ext.minSdkVersion = 24
+  ext.minSdkVersion = 26
   ext.targetSdkVersion = 28 // 29+ denies access to shared storage
   ext.compileSdkVersion = 28
   ext.buildToolsVersion = '29.0.3'
