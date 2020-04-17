@@ -1,6 +1,7 @@
 package l.files.ui.preview
 
 import android.graphics.Bitmap
+import android.graphics.Bitmap.Config.ARGB_8888
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -20,6 +21,5 @@ internal class ThumbnailMemCacheTest :
 
   override fun newCache() = ThumbnailMemCache(1024 * 1024, true)
 
-  override fun newValue(): Bitmap =
-    Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+  override fun newValue(): Bitmap = Bitmap.createBitmap(1, 1, ARGB_8888)
 }

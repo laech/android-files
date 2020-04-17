@@ -96,7 +96,7 @@ class Decode internal constructor(
       mediaType = MediaTypes.detect(context, path, stat)
       preview.putMediaType(path, stat, constraint, mediaType)
     }
-    return mediaType!!
+    return mediaType
   }
 
   private fun checkIsCacheFile(): Boolean =

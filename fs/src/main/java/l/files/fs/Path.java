@@ -6,47 +6,24 @@ import android.os.ParcelFileDescriptor;
 import android.os.ParcelFileDescriptor.AutoCloseInputStream;
 import android.os.ParcelFileDescriptor.AutoCloseOutputStream;
 import android.os.Parcelable;
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
 import androidx.annotation.Nullable;
-
 import kotlin.jvm.functions.Function2;
 import l.files.base.Bytes;
-import l.files.base.Function;
 import l.files.base.Optional;
 import l.files.fs.event.BatchObserver;
 import l.files.fs.event.BatchObserverNotifier;
 import l.files.fs.event.Observation;
 import l.files.fs.event.Observer;
-import l.files.fs.exception.AccessDenied;
-import l.files.fs.exception.AlreadyExist;
-import l.files.fs.exception.CrossDevice;
-import l.files.fs.exception.DirectoryNotEmpty;
-import l.files.fs.exception.FileSystemReadOnly;
-import l.files.fs.exception.InvalidArgument;
-import l.files.fs.exception.IsDirectory;
-import l.files.fs.exception.NameTooLong;
-import l.files.fs.exception.NoSuchEntry;
-import l.files.fs.exception.NotDirectory;
-import l.files.fs.exception.TooManySymbolicLinks;
+import l.files.fs.exception.*;
 import linux.ErrnoException;
 import linux.Fcntl;
 import linux.Stdio;
 import linux.Unistd;
+
+import java.io.*;
+import java.nio.charset.Charset;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static android.os.ParcelFileDescriptor.adoptFd;
 import static java.util.Collections.reverse;
@@ -55,20 +32,9 @@ import static l.files.base.Throwables.addSuppressed;
 import static l.files.base.io.Charsets.UTF_8;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.fs.Stat.S_IRUSR;
-import static l.files.fs.Stat.S_IRWXU;
-import static l.files.fs.Stat.S_IWUSR;
-import static l.files.fs.Stat.chmod;
-import static l.files.fs.Stat.fstat;
-import static l.files.fs.Stat.mkdir;
+import static l.files.fs.Stat.*;
 import static linux.Errno.EISDIR;
-import static linux.Fcntl.O_APPEND;
-import static linux.Fcntl.O_CREAT;
-import static linux.Fcntl.O_EXCL;
-import static linux.Fcntl.O_RDONLY;
-import static linux.Fcntl.O_RDWR;
-import static linux.Fcntl.O_TRUNC;
-import static linux.Fcntl.O_WRONLY;
+import static linux.Fcntl.*;
 
 public abstract class Path implements Parcelable {
 
@@ -766,7 +732,7 @@ public abstract class Path implements Parcelable {
         traverse(option, visitor, null);
     }
 
-    public InputStream newInputStream() throws IOException {
+    public FileInputStream newInputStream() throws IOException {
 
         ParcelFileDescriptor fd = adoptFd(open(O_RDONLY, 0));
         try {
@@ -784,7 +750,7 @@ public abstract class Path implements Parcelable {
         }
     }
 
-    public OutputStream newOutputStream(boolean append) throws IOException {
+    public FileOutputStream newOutputStream(boolean append) throws IOException {
 
         // Same flags and mode as java.io.FileOutputStream on Android
         int flags = O_WRONLY | O_CREAT | (append ? O_APPEND : O_TRUNC);

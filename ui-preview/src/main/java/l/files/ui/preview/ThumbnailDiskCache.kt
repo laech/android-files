@@ -11,11 +11,10 @@ import l.files.fs.LinkOption.NOFOLLOW
 import l.files.fs.exception.DirectoryNotEmpty
 import l.files.ui.base.graphics.Rect
 import l.files.ui.base.graphics.ScaledBitmap
-import java.io.DataInputStream
-import java.io.DataOutputStream
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.lang.System.currentTimeMillis
+import java.lang.System.nanoTime
 import java.lang.ref.WeakReference
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
@@ -104,7 +103,7 @@ internal class ThumbnailDiskCache(getCacheDir: () -> Path) :
 
     val cache = cacheFile(path, stat, constraint, matchTime)
     return try {
-      newBufferedDataInputStream(cache).use { input ->
+      cache.newBufferedDataInputStream().use { input ->
         val version = input.readByte()
         if (version != VERSION) {
           return null // TODO return failure reason to make debugging easier
@@ -134,12 +133,6 @@ internal class ThumbnailDiskCache(getCacheDir: () -> Path) :
     }
   }
 
-  private fun newBufferedDataInputStream(path: Path): DataInputStream =
-    DataInputStream(path.newInputStream().buffered())
-
-  private fun newBufferedDataOutputStream(path: Path): DataOutputStream =
-    DataOutputStream(path.newOutputStream(false).buffered())
-
   @Throws(IOException::class)
   override fun put(
     path: Path,
@@ -154,9 +147,9 @@ internal class ThumbnailDiskCache(getCacheDir: () -> Path) :
     val parent = cache.parent()!!
     parent.createDirectories()
 
-    val tmp = parent.concat(cache.name().toString() + "-" + System.nanoTime())
+    val tmp = parent.concat("${cache.name()}-${nanoTime()}")
     try {
-      newBufferedDataOutputStream(tmp).use { out ->
+      tmp.newBufferedDataOutputStream(false).use { out ->
         out.writeByte(VERSION.toInt())
         out.writeInt(value.originalSize().width())
         out.writeInt(value.originalSize().height())

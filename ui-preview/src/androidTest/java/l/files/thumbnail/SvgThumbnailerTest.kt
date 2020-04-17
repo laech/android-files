@@ -17,7 +17,7 @@ class SvgThumbnailerTest {
     )
     val originalSize = Rect.of(24, 24)
     val decodedSize = Rect.of(10, 10)
-    val result = thumbnailer().create(
+    val result = SvgThumbnailer.create(
       input,
       decodedSize,
       getInstrumentation().context
@@ -26,5 +26,4 @@ class SvgThumbnailerTest {
     assertEquals(originalSize, result.originalSize())
   }
 
-  private fun thumbnailer() = SvgThumbnailer()
 }

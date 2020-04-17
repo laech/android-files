@@ -5,16 +5,13 @@ import l.files.ui.base.graphics.Rect
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.io.ByteArrayInputStream
-import java.io.InputStream
 
 class TextThumbnailerTest {
 
-  private fun thumbnailer() = TextThumbnailer()
-
   @Test
   fun create_thumbnail_from_utf8() {
-    val input: InputStream = ByteArrayInputStream("hello world".toByteArray())
-    val result = thumbnailer().create(
+    val input = ByteArrayInputStream("hello world".toByteArray())
+    val result = TextThumbnailer.create(
       input,
       Rect.of(10, 999),
       getInstrumentation().context

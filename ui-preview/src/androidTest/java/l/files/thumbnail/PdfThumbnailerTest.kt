@@ -1,6 +1,5 @@
 package l.files.thumbnail
 
-import android.content.res.AssetManager
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import l.files.fs.Path
 import l.files.testing.fs.Paths
@@ -12,13 +11,15 @@ import java.io.File
 
 class PdfThumbnailerTest {
 
+  private val context get() = getInstrumentation().context
+  private val assets get() = context.assets
+
   @Test
   fun create_thumbnail_from_pdf() {
     val path = createTestPdf()
     try {
       val max = Rect.of(10, 100)
-      val result =
-        newThumbnailer().create(path, max, getInstrumentation().context)!!
+      val result = PdfThumbnailer.create(path, max, context)!!
       assertEquals(
         max.width().toLong(),
         result.bitmap().width.toLong()
@@ -44,8 +45,4 @@ class PdfThumbnailerTest {
 
   private fun openTestPdf() = assets.open("PdfThumbnailerTest.pdf")
 
-  private val assets: AssetManager
-    get() = getInstrumentation().context.assets
-
-  private fun newThumbnailer() = PdfThumbnailer()
 }

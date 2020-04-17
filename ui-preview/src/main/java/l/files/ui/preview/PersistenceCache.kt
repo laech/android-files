@@ -6,13 +6,15 @@ import androidx.collection.LruCache
 import l.files.base.Throwables
 import l.files.fs.Path
 import l.files.fs.Stat
+import l.files.fs.newBufferedDataInputStream
+import l.files.fs.newBufferedDataOutputStream
 import l.files.ui.base.graphics.Rect
 import java.io.*
 import java.lang.System.nanoTime
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.atomic.AtomicBoolean
 
-private const val SUPERCLASS_VERSION = 5
+private const val SUPERCLASS_VERSION = 6
 
 internal abstract class PersistenceCache<V>(
   cacheDir: () -> Path,
@@ -84,7 +86,7 @@ internal abstract class PersistenceCache<V>(
     }
     val file = cacheFile()
     try {
-      newBufferedDataInputStream(file).use {
+      file.newBufferedDataInputStream().use {
         if (it.readInt() != SUPERCLASS_VERSION) return
         if (it.readInt() != subclassVersion) return
 
@@ -93,7 +95,7 @@ internal abstract class PersistenceCache<V>(
             val len = it.readShort()
             val bytes = ByteArray(len.toInt())
             it.readFully(bytes)
-            val key = Path.of(bytes) // TODO
+            val key = Path.of(bytes)
             val time = it.readLong()
             val value = read(it)
             delegate.put(key, Snapshot(value, time))
@@ -105,9 +107,6 @@ internal abstract class PersistenceCache<V>(
     } catch (ignore: FileNotFoundException) {
     }
   }
-
-  private fun newBufferedDataInputStream(path: Path) =
-    DataInputStream(path.newInputStream().buffered())
 
   abstract fun read(input: DataInput): V
 
@@ -136,7 +135,7 @@ internal abstract class PersistenceCache<V>(
     parent.createDirectories()
     val tmp = parent.concat("${file.name()}-${nanoTime()}")
     try {
-      newBufferedDataOutputStream(tmp).use {
+      tmp.newBufferedDataOutputStream(false).use {
         it.writeInt(SUPERCLASS_VERSION)
         it.writeInt(subclassVersion)
         val snapshot = delegate.snapshot()
@@ -158,9 +157,6 @@ internal abstract class PersistenceCache<V>(
     }
     tmp.rename(file)
   }
-
-  private fun newBufferedDataOutputStream(path: Path) =
-    DataOutputStream(path.newOutputStream(false).buffered())
 
   abstract fun write(out: DataOutput, value: V)
 
