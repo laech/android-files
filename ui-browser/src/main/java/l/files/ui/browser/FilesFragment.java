@@ -39,6 +39,7 @@ import l.files.ui.browser.menu.NewDirMenu;
 import l.files.ui.browser.menu.RefreshMenu;
 import l.files.ui.browser.menu.ShowHiddenFilesMenu;
 import l.files.ui.browser.menu.SortMenu;
+import l.files.ui.browser.preference.DefaultPreferencesViewModel;
 import l.files.ui.browser.preference.Preferences;
 import l.files.ui.info.action.InfoAction;
 import l.files.ui.operations.action.CopyAction;
@@ -64,6 +65,7 @@ import static l.files.bookmarks.BookmarksKt.getBookmarks;
 import static l.files.ui.base.fs.IOExceptions.message;
 import static l.files.ui.browser.FilesAdapter.VIEW_TYPE_FILE;
 import static l.files.ui.browser.FilesAdapter.VIEW_TYPE_HEADER;
+import static l.files.ui.browser.preference.DefaultPreferencesViewModelKt.getDefaultPreferencesViewModel;
 import static l.files.ui.browser.preference.Preferences.*;
 
 public final class FilesFragment
@@ -104,6 +106,8 @@ public final class FilesFragment
     private FilesAdapter adapter;
 
     private CollectionLiveData<Path, Set<Path>, Set<Path>> bookmarks;
+
+    private DefaultPreferencesViewModel preferencesModel;
 
     public RecyclerView recycler;
 
@@ -175,6 +179,15 @@ public final class FilesFragment
     }
 
     @Override
+    public void onViewCreated(
+        @NonNull View view,
+        @Nullable Bundle savedInstanceState
+    ) {
+        super.onViewCreated(view, savedInstanceState);
+        preferencesModel = getDefaultPreferencesViewModel(this);
+    }
+
+    @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
@@ -221,13 +234,11 @@ public final class FilesFragment
             );
         }
 
-        Preferences.register(getActivity(), this);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Preferences.unregister(getActivity(), this);
+        preferencesModel.getPreferences()
+            .observe(
+                getViewLifecycleOwner(),
+                pref -> pref.registerOnSharedPreferenceChangeListener(this)
+            );
     }
 
     private boolean hasReadExternalStoragePermission() {

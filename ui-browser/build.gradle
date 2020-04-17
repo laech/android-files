@@ -45,6 +45,8 @@ dependencies {
   implementation deps.cardview
   implementation deps.androidMaterial
   implementation deps.androidAnnotations
+  implementation deps.androidFragmentKtx
+  implementation deps.lifecycleLivedataKtx
   implementation deps.kotlinStdlibJdk7
 
   androidTestImplementation project(':testing')
