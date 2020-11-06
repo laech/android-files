@@ -55,6 +55,12 @@ allprojects {
     jcenter()
     mavenCentral()
   }
+
+  tasks.withType(Test) {
+    testLogging {
+      exceptionFormat = 'full'
+    }
+  }
 }
 
 // ./gradlew connectedAndroidTest mergeAndroidReports --continue

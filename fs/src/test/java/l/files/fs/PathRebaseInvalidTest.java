@@ -34,7 +34,6 @@ public final class PathRebaseInvalidTest {
     @Parameters(name = "\"{0}\".rebase(\"{1}\", \"{2}\") throws IllegalArgumentException")
     public static Collection<Object[]> paths() {
         return asList(new Object[][]{
-                {"", " ", "a"},
                 {"", ".", "a"},
                 {"", "..", "a"},
                 {"/", "..", "a"},

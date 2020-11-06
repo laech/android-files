@@ -5,6 +5,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import java.nio.file.Paths;
 import java.util.Collection;
 
 import static java.util.Arrays.asList;
@@ -19,10 +20,11 @@ public final class PathRebaseTest {
     private final String newPath;
 
     public PathRebaseTest(
-            String oldPath,
-            String oldPrefix,
-            String newPrefix,
-            String newPath) {
+        String oldPath,
+        String oldPrefix,
+        String newPrefix,
+        String newPath
+    ) {
 
         this.oldPath = Path.of(oldPath);
         this.oldPrefix = Path.of(oldPrefix);
@@ -33,48 +35,42 @@ public final class PathRebaseTest {
     @Parameters(name = "\"{0}\".rebase(\"{1}\", \"{2}\") == {3}")
     public static Collection<Object[]> paths() {
         return asList(new Object[][]{
-                {" ", " ", " ", " "},
-                {"\t", "\t", "\t", "\t"},
-                {"\n", "\n", "\n", "\n"},
-                {".", ".", ".", "."},
-                {".", ".", "..", ".."},
-                {".", "", "a", "a/."},
-                {".", ".", "/", "/"},
-                {".", ".", "a", "a"},
-                {"", "", "", ""},
-                {"", "", "a", "a"},
-                {"", "", "/", "/"},
-                {"", "", ".", "."},
-                {"", "", "..", ".."},
-                {"a", "a", "", ""},
-                {"a", "", "a", "a/a"},
-                {"a", "a", "/", "/"},
-                {"a", "a", ".", "."},
-                {"a", "", "..", "../a"},
-                {"/", "/", "a", "a"},
-                {"//", "/", "a", "a"},
-                {"/a", "/", "b", "b/a"},
-                {"/a", "/a", "b", "b"},
-                {"a/b", "a", "/abc", "/abc/b"},
-                {"a/b", "a/b", "/abc", "/abc"},
-                {"a/b", "a///b", "/abc", "/abc"},
-                {"a/b", "a/b/", "/abc", "/abc"},
-                {"a/b", "a/b///", "/abc", "/abc"},
-                {"a/b", "a/", "c", "c/b"},
-                {"a/b", "a///", "c", "c/b"},
-                {"//a", "/a", "", ""},
-                {"/a", "/a", "", ""},
-                {"/a/hello world", "/a/hello world", "c", "c"},
-                {"/a/你好", "/a/", "hello world", "hello world/你好"},
-                {"/a/✌", "/a/✌", "abc", "abc"},
-                {"/a/\n✌", "/a", "abc", "abc/\n✌"},
-                {"\\", "\\", "a", "a"},
+            {".", ".", ".", "."},
+            {".", ".", "..", ".."},
+            {".", ".", "/", "/"},
+            {".", ".", "a", "a"},
+            {"", "", "", ""},
+            {"", "", "a", "a"},
+            {"", "", "/", "/"},
+            {"", "", ".", "."},
+            {"", "", "..", ".."},
+            {"a", "a", "", ""},
+            {"a", "a", "/", "/"},
+            {"a", "a", ".", "."},
+            {"/", "/", "a", "a"},
+            {"/a", "/", "b", "b/a"},
+            {"/a", "/a", "b", "b"},
+            {"a/b", "a", "/abc", "/abc/b"},
+            {"a/b", "a/b", "/abc", "/abc"},
+            {"a/b", "a///b", "/abc", "/abc"},
+            {"a/b", "a/b/", "/abc", "/abc"},
+            {"a/b", "a/b///", "/abc", "/abc"},
+            {"a/b", "a/", "c", "c/b"},
+            {"a/b", "a///", "c", "c/b"},
+            {"/a", "/a", "", ""},
+            {"/a/hello world", "/a/hello world", "c", "c"},
+            {"/a/你好", "/a/", "hello world", "hello world/你好"},
+            {"/a/✌", "/a/✌", "abc", "abc"},
+            {"\\", "\\", "a", "a"},
         });
     }
 
     @Test
-    public void test() throws Exception {
-        assertEquals(newPath, oldPath.rebase(oldPrefix, newPrefix).toString());
+    public void test() {
+        assertEquals(
+            Paths.get(newPath),
+            oldPath.rebase(oldPrefix, newPrefix).toJavaPath()
+        );
     }
 
 }

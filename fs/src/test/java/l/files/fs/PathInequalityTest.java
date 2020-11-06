@@ -26,9 +26,7 @@ public final class PathInequalityTest {
     @Parameters(name = "!\"{0}\".equals(\"{1}\")")
     public static Collection<Object[]> paths() {
         return asList(new Object[][]{
-                {"", " "},
                 {"a", "b"},
-                {"a", "A"},
                 {"/a", "a"},
                 {"a", "/a"},
                 {"a/b", "/a/b"},

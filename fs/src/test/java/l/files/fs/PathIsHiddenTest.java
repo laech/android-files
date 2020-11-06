@@ -24,34 +24,31 @@ public final class PathIsHiddenTest {
     @Parameters(name = "\"{0}\".isHidden() == {1}")
     public static Collection<Object[]> paths() {
         return asList(new Object[][]{
-                {"", false},
-                {".", true},
-                {"./", true},
-                {"..", true},
-                {"../", true},
-                {"a", false},
-                {".a", true},
-                {".a/", true},
-                {".a//", true},
-                {".b", true},
-                {".b.c", true},
-                {".b.c.", true},
-                {".a/b", false},
-                {".a/.b", true},
-                {"/a", false},
-                {"/a/b", false},
-                {"/a/.b", true},
-                {"/.a", true},
-                {"///.a///", true},
-                {"/.a/b", false},
-                {"///.a//b", false},
-                {"/", false},
-                {"///", false},
+            {"", false},
+            {".", true},
+            {"./", true},
+            {"..", true},
+            {"../", true},
+            {"a", false},
+            {".a", true},
+            {".a/", true},
+            {".a//", true},
+            {".b", true},
+            {".b.c", true},
+            {".b.c.", true},
+            {".a/b", false},
+            {".a/.b", true},
+            {"/a", false},
+            {"/a/b", false},
+            {"/a/.b", true},
+            {"/.a", true},
+            {"/.a/b", false},
+            {"/", false},
         });
     }
 
     @Test
-    public void test() throws Exception {
+    public void test() {
         assertEquals(hidden, path.isHidden());
     }
 }

@@ -2,14 +2,11 @@ package l.files.fs;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import java.io.ByteArrayOutputStream;
-import java.util.Arrays;
-
 import l.files.base.Bytes;
 
-import static java.util.Collections.singletonList;
+import java.util.Arrays;
 
+@Deprecated
 public class Name implements Parcelable, Comparable<Name> {
 
     /*
@@ -31,21 +28,24 @@ public class Name implements Parcelable, Comparable<Name> {
     private final byte[] bytes;
 
     /**
-     * @throws IllegalArgumentException if name is empty, or contains '/', or contains '\0'
+     * @throws IllegalArgumentException if name is empty, or contains '/', or
+     * contains '\0'
      */
     Name(byte[] bytes, int start, int end) {
         this.bytes = validateName(Arrays.copyOfRange(bytes, start, end));
     }
 
     /**
-     * @throws IllegalArgumentException if name is empty, or contains '/', or contains '\0'
+     * @throws IllegalArgumentException if name is empty, or contains '/', or
+     * contains '\0'
      */
     static Name of(byte[] bytes) {
         return new Name(bytes, 0, bytes.length);
     }
 
     /**
-     * @throws IllegalArgumentException if name is empty, or contains '/', or contains '\0'
+     * @throws IllegalArgumentException if name is empty, or contains '/', or
+     * contains '\0'
      */
     public static Name of(String name) {
         return of(name.getBytes(Path.ENCODING));
@@ -67,8 +67,8 @@ public class Name implements Parcelable, Comparable<Name> {
     private static void ensureContainsNoPathSeparator(byte[] name) {
         if (Bytes.indexOf(name, (byte) '/') >= 0) {
             throw new IllegalArgumentException(
-                    "Path separator '/' is not allowed in file name: " +
-                            new String(name, Path.ENCODING));
+                "Path separator '/' is not allowed in file name: " +
+                    new String(name, Path.ENCODING));
         }
     }
 
@@ -76,8 +76,9 @@ public class Name implements Parcelable, Comparable<Name> {
         int i = Bytes.indexOf(name, (byte) '\0');
         if (i >= 0) {
             throw new IllegalArgumentException(
-                    "Null character (index=" + i + ") is not allowed in file name: " +
-                            new String(name, Path.ENCODING));
+                "Null character (index=" + i +
+                    ") is not allowed in file name: " +
+                    new String(name, Path.ENCODING));
         }
     }
 
@@ -89,7 +90,7 @@ public class Name implements Parcelable, Comparable<Name> {
     @Override
     public boolean equals(Object o) {
         return o instanceof Name &&
-                Arrays.equals(bytes, ((Name) o).bytes);
+            Arrays.equals(bytes, ((Name) o).bytes);
     }
 
     @Override
@@ -101,16 +102,8 @@ public class Name implements Parcelable, Comparable<Name> {
         return bytes.clone();
     }
 
-    public RelativePath toPath() {
-        return new RelativePath(singletonList(this));
-    }
-
-    public boolean isHidden() {
-        return bytes[0] == '.';
-    }
-
-    public void appendTo(ByteArrayOutputStream out) {
-        out.write(bytes, 0, bytes.length);
+    public Path toPath() {
+        return Path.of(bytes);
     }
 
     private int indexOfExtensionSeparator(int defaultValue) {
