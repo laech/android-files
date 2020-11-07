@@ -22,9 +22,9 @@ class PathListTest : PathBaseTest() {
     val c = dir.concat("c").createSymbolicLink(a)
     val link = dir1().concat("link").createSymbolicLink(dir)
     val expected = listOf(
-      PathEntry(a.name()!!, PathType.FILE),
-      PathEntry(b.name()!!, PathType.DIRECTORY),
-      PathEntry(c.name()!!, PathType.SYMLINK)
+      PathEntry(a.fileName!!, PathType.FILE),
+      PathEntry(b.fileName!!, PathType.DIRECTORY),
+      PathEntry(c.fileName!!, PathType.SYMLINK)
     )
     link.list().sortedByName().use {
       assertThat(it.collect(toList()), equalTo(expected))
@@ -36,8 +36,8 @@ class PathListTest : PathBaseTest() {
     val a = dir1().concat("a").createFile()
     val b = dir1().concat("b").createDirectory()
     val expected = listOf(
-      PathEntry(a.name()!!, PathType.FILE),
-      PathEntry(b.name()!!, PathType.DIRECTORY)
+      PathEntry(a.fileName!!, PathType.FILE),
+      PathEntry(b.fileName!!, PathType.DIRECTORY)
     )
     dir1().list().sortedByName().use {
       assertThat(it.collect(toList()), equalTo(expected))

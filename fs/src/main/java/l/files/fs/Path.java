@@ -41,7 +41,7 @@ import static linux.Errno.EISDIR;
 import static linux.Fcntl.*;
 
 @Deprecated
-public class Path implements Parcelable {
+public class Path implements Parcelable, Comparable<Path> {
 
     public static final Creator<Path> CREATOR = new Creator<Path>() {
 
@@ -798,6 +798,11 @@ public class Path implements Parcelable {
         } catch (ErrnoException e) {
             throw e.toIOException(path);
         }
+    }
+
+    @Override
+    public int compareTo(Path o) {
+        return delegate.compareTo(o.delegate);
     }
 
     public interface Consumer {

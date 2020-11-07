@@ -17,10 +17,10 @@ enum class PathType {
   OTHER,
 }
 
-typealias PathEntry = Pair<Name, PathType>
+typealias PathEntry = Pair<Path, PathType>
 
 fun Stream<PathEntry>.sortedByName(): Stream<PathEntry> =
-  sorted(comparing(Pair<Name, *>::first))
+  sorted(comparing(Pair<Path, *>::first))
 
 /**
  * Lists the content of this directory, follows symbolic link.
@@ -51,7 +51,7 @@ private class PathIterator(
         continue
       }
       val name = copyOfRange(entry.d_name, 0, entry.d_name_len)
-      setNext(Pair(Name.of(name), entry.type()))
+      setNext(Pair(Path.of(name), entry.type()))
       return
     }
     done()
