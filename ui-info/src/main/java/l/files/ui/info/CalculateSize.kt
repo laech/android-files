@@ -17,7 +17,7 @@ internal data class Size(
 
 internal data class Target(
   val parent: Path,
-  val children: Set<Name>
+  val childFileNames: Set<Path>
 )
 
 internal class CalculateSizeViewModel : ViewModel() {
@@ -33,7 +33,7 @@ internal fun LiveData<Target>.calculate(): LiveData<Size> =
   }
 
 private suspend fun LiveDataScope<Size>.calculate(
-  children: Set<Name>,
+  childFileNames: Set<Path>,
   parent: Path
 ) = withContext(Dispatchers.IO) {
 
@@ -41,7 +41,7 @@ private suspend fun LiveDataScope<Size>.calculate(
   var currentCount = 0
   var currentSize = 0L
 
-  for (child in children) {
+  for (child in childFileNames) {
     ensureActive()
 
     try {

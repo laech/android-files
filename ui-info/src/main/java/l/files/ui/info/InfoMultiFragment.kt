@@ -26,7 +26,7 @@ class InfoMultiFragment : InfoBaseFragment() {
       bundle.putParcelableArrayList(
         ARG_CHILDREN,
         items.mapTo(ArrayList(items.size)) {
-          it.selfPath().name() /* TODO handle null */
+          it.selfPath().getFileName() /* TODO handle null */
         })
       return bundle
     }

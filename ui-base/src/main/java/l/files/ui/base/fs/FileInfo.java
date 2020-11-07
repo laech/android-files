@@ -73,6 +73,10 @@ public final class FileInfo implements Comparable<FileInfo> {
         return selfPath().getName().or("");
     }
 
+    public Path getFileName() {
+        return selfPath().getFileName();
+    }
+
     public Path selfPath() {
         return selfPath;
     }

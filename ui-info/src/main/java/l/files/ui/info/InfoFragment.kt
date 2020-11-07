@@ -141,7 +141,7 @@ class InfoFragment : InfoBaseFragment(), Preview.Callback {
 
     private fun newArgs(path: Path, stat: Stat?): Bundle {
       val bundle = Bundle()
-      bundle.putParcelableArrayList(ARG_CHILDREN, arrayListOf(path.name()))
+      bundle.putParcelableArrayList(ARG_CHILDREN, arrayListOf(path.fileName))
       bundle.putParcelable(ARG_PARENT_DIRECTORY, path.parent())
       bundle.putParcelable(ARG_STAT, stat)
       return bundle
