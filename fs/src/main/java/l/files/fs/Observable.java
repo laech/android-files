@@ -35,7 +35,7 @@ import static linux.Vfs.PROC_SUPER_MAGIC;
 import static linux.Vfs.statfs;
 
 final class Observable extends Native
-        implements Runnable, Observation {
+    implements Runnable, Observation {
 
     /*
      * This classes uses inotify for monitoring file system events. This
@@ -93,7 +93,8 @@ final class Observable extends Native
      * Issues:
      *
      *  - https://code.google.com/p/android/issues/detail?id=189231
-     *  - https://code.google.com/p/android-developer-preview/issues/detail?id=3099
+     *  - https://code.google.com/p/android-developer-preview/issues/detail
+     * ?id=3099
      */
 
     private static final Handler handler = new Handler(getMainLooper());
@@ -102,14 +103,14 @@ final class Observable extends Native
      * Mask to use for root file.
      */
     private static final int ROOT_MASK
-            = IN_ATTRIB
-            | IN_CREATE
-            | IN_DELETE
-            | IN_DELETE_SELF
-            | IN_MODIFY
-            | IN_MOVE_SELF
-            | IN_MOVED_FROM
-            | IN_MOVED_TO;
+        = IN_ATTRIB
+        | IN_CREATE
+        | IN_DELETE
+        | IN_DELETE_SELF
+        | IN_MODIFY
+        | IN_MOVE_SELF
+        | IN_MOVED_FROM
+        | IN_MOVED_TO;
 
     /**
      * Mask to use for immediate sub directories of root directory. Only care
@@ -117,12 +118,12 @@ final class Observable extends Native
      * reported through {@link #ROOT_MASK}.
      */
     private static final int CHILD_DIR_MASK
-            = IN_DONT_FOLLOW
-            | IN_ONLYDIR
-            | IN_CREATE
-            | IN_DELETE
-            | IN_MOVED_FROM
-            | IN_MOVED_TO;
+        = IN_DONT_FOLLOW
+        | IN_ONLYDIR
+        | IN_CREATE
+        | IN_DELETE
+        | IN_MOVED_FROM
+        | IN_MOVED_TO;
 
     static {
         init();
@@ -154,7 +155,8 @@ final class Observable extends Native
      * directories name being watched, and it will be updated as directories are
      * being created/deleted.
      */
-    private final ConcurrentBiMap<Integer, Name> childDirs = new ConcurrentBiMap<>();
+    private final ConcurrentBiMap<Integer, Path> childDirFileNames =
+        new ConcurrentBiMap<>();
 
     private final WeakReference<Observer> observerRef;
 
@@ -188,11 +190,11 @@ final class Observable extends Native
     }
 
     void start(
-            LinkOption option,
-            Consumer childrenConsumer,
-            int watchLimit
+        LinkOption option,
+        Consumer childrenConsumer,
+        int watchLimit
     )
-            throws IOException, InterruptedException {
+        throws IOException, InterruptedException {
 
         requireNonNull(option);
         requireNonNull(childrenConsumer);
@@ -222,9 +224,9 @@ final class Observable extends Native
         try {
 
             /*
-             * Start the thread then observe on the children directories, this
-             * allows them to happen at the same time, just need to make sure the
-             * latest one wins.
+             * Start the thread then observe on the children directories,
+             * this allows them to happen at the same time, just need to make
+             * sure the latest one wins.
              */
             if (fd.isPresent()) {
                 thread = new Thread(this);
@@ -248,7 +250,7 @@ final class Observable extends Native
     }
 
     private int inotifyAddWatchWillCloseOnError(int fd, LinkOption opt)
-            throws ErrnoException {
+        throws ErrnoException {
 
         try {
 
@@ -266,7 +268,7 @@ final class Observable extends Native
     }
 
     private void traverseChildren(
-            Consumer childrenConsumer
+        Consumer childrenConsumer
     ) throws IOException, InterruptedException {
 
         OptionalInt fd = this.fd;
@@ -289,7 +291,8 @@ final class Observable extends Native
                         break;
                     }
 
-                    if (limitReached || entry.d_type != Dirent.DT_DIR || released.get()) {
+                    if (limitReached || entry.d_type != Dirent.DT_DIR ||
+                        released.get()) {
                         continue;
                     }
 
@@ -297,11 +300,11 @@ final class Observable extends Native
 
                         byte[] childPath = child.toByteArray();
                         int wd = inotify.addWatch(
-                                fd.getAsInt(),
-                                childPath,
-                                CHILD_DIR_MASK
+                            fd.getAsInt(),
+                            childPath,
+                            CHILD_DIR_MASK
                         );
-                        childDirs.put(wd, Name.of(name));
+                        childDirFileNames.put(wd, Path.of(name));
 
                     } catch (ErrnoException e) {
                         handleAddChildDirWatchFailure(e, child);
@@ -327,7 +330,7 @@ final class Observable extends Native
     @Override
     public String toString() {
         return getClass().getSimpleName()
-                + "{fd=" + fd + ",wd=" + wd + ",root=" + root + "}";
+            + "{fd=" + fd + ",wd=" + wd + ",root=" + root + "}";
     }
 
     @Override
@@ -372,7 +375,7 @@ final class Observable extends Native
 
         List<ErrnoException> suppressed = new ArrayList<>(0);
         fd.ifPresent(fd -> {
-            for (Integer wd : childDirs.keySet()) {
+            for (Integer wd : childDirFileNames.keySet()) {
                 try {
                     inotify.removeWatch(fd, wd);
                 } catch (ErrnoException e) {
@@ -415,17 +418,18 @@ final class Observable extends Native
 
     private void releaseChildWatches(ErrnoException cause, Path path) {
         released.set(true);
-        for (int wd : childDirs.keySet()) {
+        for (int wd : childDirFileNames.keySet()) {
             try {
                 inotify.removeWatch(getOrThrow(fd), wd);
             } catch (ErrnoException e) {
                 Log.w(getClass().getSimpleName(),
-                        "Failed to remove watch on release" +
-                                ", fd=" + fd +
-                                ", wd=" + wd, e);
+                    "Failed to remove watch on release" +
+                        ", fd=" + fd +
+                        ", wd=" + wd, e
+                );
             }
         }
-        childDirs.clear();
+        childDirFileNames.clear();
         notifyIncompleteObservationOrClose(cause, path);
     }
 
@@ -474,7 +478,8 @@ final class Observable extends Native
         });
     }
 
-    private void handleEvent(int wd, int event, @Nullable byte[] child) throws ErrnoException {
+    private void handleEvent(int wd, int event, @Nullable byte[] child)
+        throws ErrnoException {
         // Disable to avoid getting called on large number of events,
         // even just calling isVerboseEnabled has some overhead,
         // enable when needed for debugging
@@ -520,33 +525,34 @@ final class Observable extends Native
                 onObserverStopped(wd);
 
             } else {
-                Name childDirectory = childDirs.get(wd);
-                if (childDirectory != null) {
-                    observer(MODIFY, childDirectory);
+                Path childDirFileName = childDirFileNames.get(wd);
+                if (childDirFileName != null) {
+                    observer(MODIFY, childDirFileName);
                 }
             }
         }
     }
 
     private void observer(Event kind, @Nullable byte[] name) {
-        notifyEventOrClose(kind, name == null ? null : Name.of(name));
+        notifyEventOrClose(kind, name == null ? null : Path.of(name));
     }
 
-    private void observer(Event kind, Name name) {
-        notifyEventOrClose(kind, name);
+    private void observer(Event kind, Path fileName) {
+        notifyEventOrClose(kind, fileName);
     }
 
-    private void notifyEventOrClose(Event kind, @Nullable Name name) {
+    private void notifyEventOrClose(Event kind, @Nullable Path childFileName) {
         Observer observer = observerRef.get();
         if (observer != null) {
-            observer.onEvent(kind, name);
+            observer.onEvent(kind, childFileName);
         } else {
             try {
                 doClose(new IOException("observer is gone"));
             } catch (ErrnoException e) {
                 Log.w(getClass().getSimpleName(),
-                        "Failed to close on notify event, "
-                                + kind + ", " + name, e);
+                    "Failed to close on notify event, "
+                        + kind + ", " + childFileName, e
+                );
             }
         }
     }
@@ -560,8 +566,9 @@ final class Observable extends Native
         try {
 
             byte[] path = child.toByteArray();
-            int wd = inotify.addWatch(getOrThrow(this.fd), path, CHILD_DIR_MASK);
-            childDirs.put(wd, Name.of(name));
+            int wd =
+                inotify.addWatch(getOrThrow(this.fd), path, CHILD_DIR_MASK);
+            childDirFileNames.put(wd, Path.of(name));
 
         } catch (ErrnoException e) {
             handleAddChildDirWatchFailure(e, child);
@@ -569,8 +576,8 @@ final class Observable extends Native
     }
 
     private void handleAddChildDirWatchFailure(
-            ErrnoException e,
-            Path path
+        ErrnoException e,
+        Path path
     ) throws ErrnoException {
 
         if (e.errno == ENOENT) {
@@ -589,7 +596,10 @@ final class Observable extends Native
         }
     }
 
-    private void notifyIncompleteObservationOrClose(ErrnoException cause, Path path) {
+    private void notifyIncompleteObservationOrClose(
+        ErrnoException cause,
+        Path path
+    ) {
         Observer observer = observerRef.get();
         if (observer != null) {
             observer.onIncompleteObservation(cause.toIOException(path));
@@ -598,13 +608,14 @@ final class Observable extends Native
                 doClose(cause);
             } catch (ErrnoException e) {
                 Log.w(getClass().getSimpleName(),
-                        "Failed to close on incomplete observation.", e);
+                    "Failed to close on incomplete observation.", e
+                );
             }
         }
     }
 
     private void removeChildWatch(byte[] child) {
-        Integer wd = childDirs.remove2(Name.of(child));
+        Integer wd = childDirFileNames.remove2(Path.of(child));
         if (wd != null) {
             try {
                 inotify.removeWatch(getOrThrow(fd), wd);
@@ -618,7 +629,7 @@ final class Observable extends Native
     }
 
     private void onObserverStopped(int wd) {
-        childDirs.remove(wd);
+        childDirFileNames.remove(wd);
     }
 
     private boolean isObserverStopped(int event) {
@@ -626,73 +637,106 @@ final class Observable extends Native
     }
 
     private boolean isChildCreated(int mask, @Nullable byte[] child) {
-        return (child != null && 0 != (mask & IN_CREATE)) ||
-                (child != null && 0 != (mask & IN_MOVED_TO));
+        return (child != null && 0 != (mask & IN_CREATE))
+            || (child != null && 0 != (mask & IN_MOVED_TO));
     }
 
     private boolean isChildModified(int mask, @Nullable byte[] child) {
-        return (child != null && 0 != (mask & IN_ATTRIB)) ||
-                (child != null && 0 != (mask & IN_MODIFY)) ||
-                (child != null && 0 != (mask & IN_CLOSE_WRITE));
+        return (child != null && 0 != (mask & IN_ATTRIB))
+            || (child != null && 0 != (mask & IN_MODIFY))
+            || (child != null && 0 != (mask & IN_CLOSE_WRITE));
     }
 
     private boolean isChildDeleted(int event, @Nullable byte[] child) {
-        return (child != null && 0 != (event & IN_MOVED_FROM)) ||
-                (child != null && 0 != (event & IN_DELETE));
+        return (child != null && 0 != (event & IN_MOVED_FROM))
+            || (child != null && 0 != (event & IN_DELETE));
     }
 
     private boolean isSelfModified(int mask, @Nullable byte[] child) {
-        return (child == null && 0 != (mask & IN_ATTRIB)) ||
-                (child == null && 0 != (mask & IN_MODIFY));
+        return (child == null && 0 != (mask & IN_ATTRIB))
+            || (child == null && 0 != (mask & IN_MODIFY));
     }
 
     private boolean isSelfDeleted(int mask, @Nullable byte[] child) {
-        return (child == null && 0 != (mask & IN_DELETE_SELF)) ||
-                (child == null && 0 != (mask & IN_MOVE_SELF));
+        return (child == null && 0 != (mask & IN_DELETE_SELF))
+            || (child == null && 0 != (mask & IN_MOVE_SELF));
     }
 
     private List<String> eventNames(int event) {
         List<String> events = new ArrayList<>(1);
-        if (0 != (event & IN_OPEN)) events.add("IN_OPEN");
-        if (0 != (event & IN_ACCESS)) events.add("IN_ACCESS");
-        if (0 != (event & IN_ATTRIB)) events.add("IN_ATTRIB");
-        if (0 != (event & IN_CREATE)) events.add("IN_CREATE");
-        if (0 != (event & IN_DELETE)) events.add("IN_DELETE");
-        if (0 != (event & IN_MODIFY)) events.add("IN_MODIFY");
-        if (0 != (event & IN_MOVED_TO)) events.add("IN_MOVED_TO");
-        if (0 != (event & IN_MOVE_SELF)) events.add("IN_MOVE_SELF");
-        if (0 != (event & IN_MOVED_FROM)) events.add("IN_MOVED_FROM");
-        if (0 != (event & IN_CLOSE_WRITE)) events.add("IN_CLOSE_WRITE");
-        if (0 != (event & IN_DELETE_SELF)) events.add("IN_DELETE_SELF");
-        if (0 != (event & IN_CLOSE_NOWRITE)) events.add("IN_CLOSE_NOWRITE");
-        if (0 != (event & IN_IGNORED)) events.add("IN_IGNORED");
-        if (0 != (event & IN_Q_OVERFLOW)) events.add("IN_Q_OVERFLOW");
-        if (0 != (event & IN_UNMOUNT)) events.add("IN_UNMOUNT");
-        if (0 != (event & IN_ISDIR)) events.add("IN_ISDIR");
+        if (0 != (event & IN_OPEN)) {
+            events.add("IN_OPEN");
+        }
+        if (0 != (event & IN_ACCESS)) {
+            events.add("IN_ACCESS");
+        }
+        if (0 != (event & IN_ATTRIB)) {
+            events.add("IN_ATTRIB");
+        }
+        if (0 != (event & IN_CREATE)) {
+            events.add("IN_CREATE");
+        }
+        if (0 != (event & IN_DELETE)) {
+            events.add("IN_DELETE");
+        }
+        if (0 != (event & IN_MODIFY)) {
+            events.add("IN_MODIFY");
+        }
+        if (0 != (event & IN_MOVED_TO)) {
+            events.add("IN_MOVED_TO");
+        }
+        if (0 != (event & IN_MOVE_SELF)) {
+            events.add("IN_MOVE_SELF");
+        }
+        if (0 != (event & IN_MOVED_FROM)) {
+            events.add("IN_MOVED_FROM");
+        }
+        if (0 != (event & IN_CLOSE_WRITE)) {
+            events.add("IN_CLOSE_WRITE");
+        }
+        if (0 != (event & IN_DELETE_SELF)) {
+            events.add("IN_DELETE_SELF");
+        }
+        if (0 != (event & IN_CLOSE_NOWRITE)) {
+            events.add("IN_CLOSE_NOWRITE");
+        }
+        if (0 != (event & IN_IGNORED)) {
+            events.add("IN_IGNORED");
+        }
+        if (0 != (event & IN_Q_OVERFLOW)) {
+            events.add("IN_Q_OVERFLOW");
+        }
+        if (0 != (event & IN_UNMOUNT)) {
+            events.add("IN_UNMOUNT");
+        }
+        if (0 != (event & IN_ISDIR)) {
+            events.add("IN_ISDIR");
+        }
         if (events.isEmpty()) {
-            events.add("UNKNOWN:" + String.valueOf(event));
+            events.add("UNKNOWN:" + event);
         }
         return events;
     }
 
-//    private void log(int wd, int event, byte[] child) {
-//        Path path = null;
-//        if (wd == this.wd) {
-//            path = root;
-//        } else {
-//            LocalName name = childDirs.get(wd);
-//            if (name != null) {
-//                path = root.concat(name);
-//            }
-//        }
-//
-//        android.util.Log.v(getClass().getSimpleName(), "" +
-//                "tag=" + tag +
-//                ", fd=" + fd +
-//                ", wd=" + wd +
-//                ", event=" + eventNames(event) +
-//                ", parent=" + path +
-//                ", child=" + (child != null ? new LocalName(child) : null));
-//    }
+    //    private void log(int wd, int event, byte[] child) {
+    //        Path path = null;
+    //        if (wd == this.wd) {
+    //            path = root;
+    //        } else {
+    //            LocalName name = childDirs.get(wd);
+    //            if (name != null) {
+    //                path = root.concat(name);
+    //            }
+    //        }
+    //
+    //        android.util.Log.v(getClass().getSimpleName(), "" +
+    //                "tag=" + tag +
+    //                ", fd=" + fd +
+    //                ", wd=" + wd +
+    //                ", event=" + eventNames(event) +
+    //                ", parent=" + path +
+    //                ", child=" + (child != null ? new LocalName(child) :
+    //                null));
+    //    }
 
 }

@@ -94,11 +94,11 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
 
             verify(observer, timeout(10000)).onLatestEvents(
                     false,
-                    new HashMap<Name, Event>() {{
-                        put(a.name(), MODIFY);
-                        put(b.name(), MODIFY);
-                        put(c.name(), DELETE);
-                        put(d.name(), CREATE);
+                    new HashMap<Path, Event>() {{
+                        put(a.getFileName(), MODIFY);
+                        put(b.getFileName(), MODIFY);
+                        put(c.getFileName(), DELETE);
+                        put(d.getFileName(), CREATE);
                     }});
 
             verifyNoMoreInteractions(observer);
@@ -127,8 +127,8 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
 
             verify(observer, timeout(10000)).onLatestEvents(
                     false,
-                    new HashMap<Name, Event>() {{
-                        put(file.name(), CREATE);
+                    new HashMap<Path, Event>() {{
+                        put(file.getFileName(), CREATE);
                     }});
 
             verifyNoMoreInteractions(observer);
@@ -158,15 +158,15 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
 
             verify(observer, timeout(10000)).onLatestEvents(
                     true,
-                    new HashMap<Name, Event>() {{
-                        put(child.name(), MODIFY);
+                    new HashMap<Path, Event>() {{
+                        put(child.getFileName(), MODIFY);
                     }});
 
             child.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(3));
             verify(observer, timeout(10000)).onLatestEvents(
                     false,
-                    new HashMap<Name, Event>() {{
-                        put(child.name(), MODIFY);
+                    new HashMap<Path, Event>() {{
+                        put(child.getFileName(), MODIFY);
                     }});
 
             dir1().setLastModifiedTime(NOFOLLOW, Instant.ofMillis(4));

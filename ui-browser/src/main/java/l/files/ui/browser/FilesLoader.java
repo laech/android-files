@@ -4,8 +4,16 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.os.OperationCanceledException;
-import androidx.loader.content.AsyncTaskLoader;
 import android.util.Log;
+import androidx.annotation.Nullable;
+import androidx.loader.content.AsyncTaskLoader;
+import l.files.fs.Path;
+import l.files.fs.Stat;
+import l.files.fs.event.BatchObserver;
+import l.files.fs.event.Event;
+import l.files.fs.event.Observation;
+import l.files.ui.base.fs.FileInfo;
+import l.files.ui.browser.sort.FileSort;
 
 import java.io.Closeable;
 import java.io.FileNotFoundException;
@@ -22,24 +30,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
-import androidx.annotation.Nullable;
-
-import l.files.fs.Name;
-import l.files.fs.Path;
-import l.files.fs.Stat;
-import l.files.fs.event.BatchObserver;
-import l.files.fs.event.Event;
-import l.files.fs.event.Observation;
-import l.files.ui.base.fs.FileInfo;
-import l.files.ui.browser.sort.FileSort;
-
 import static android.os.Looper.getMainLooper;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.setThreadPriority;
 import static java.lang.Thread.currentThread;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.unmodifiableList;
+import static java.util.Collections.*;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.base.Objects.requireNonNull;
@@ -79,9 +74,12 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     private final BatchObserver listener = new BatchObserver() {
 
         @Override
-        public void onLatestEvents(boolean selfChanged, Map<Name, Event> children) {
-            if (!children.isEmpty()) {
-                updateAll(children, false);
+        public void onLatestEvents(
+            boolean selfChanged,
+            Map<Path, Event> childFileNames
+        ) {
+            if (!childFileNames.isEmpty()) {
+                updateAll(childFileNames, false);
             }
         }
 
@@ -95,14 +93,14 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     };
 
     private void updateAll(
-            Map<Name, Event> changedChildren,
-            boolean forceReload
+        Map<Path, Event> changedChildFileNames,
+        boolean forceReload
     ) {
         executor.execute(() -> {
             setThreadPriority(THREAD_PRIORITY_BACKGROUND);
 
             boolean changed = false;
-            for (Entry<Name, Event> entry : changedChildren.entrySet()) {
+            for (Entry<Path, Event> entry : changedChildFileNames.entrySet()) {
                 changed |= update(entry.getKey(), entry.getValue());
             }
 
@@ -116,11 +114,12 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     private volatile int approximateChildTotal;
 
     FilesLoader(
-            Context context,
-            Path root,
-            Supplier<FileSort> sort,
-            BooleanSupplier showHidden,
-            int watchLimit) {
+        Context context,
+        Path root,
+        Supplier<FileSort> sort,
+        BooleanSupplier showHidden,
+        int watchLimit
+    ) {
         super(context);
 
         this.root = requireNonNull(root, "root");
@@ -184,12 +183,12 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
             }
         }
 
-        List<Name> children;
+        List<Path> childFileNames;
         try {
             if (observe) {
-                children = observe();
+                childFileNames = observe();
             } else {
-                children = visit();
+                childFileNames = visit();
             }
         } catch (IOException e) {
             return Result.of(e);
@@ -200,28 +199,29 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
             throw new OperationCanceledException();
         }
 
-        update(children);
+        update(childFileNames);
         return buildResult();
     }
 
-    private List<Name> observe() throws IOException, InterruptedException {
-        List<Name> children = new ArrayList<>();
+    private List<Path> observe() throws IOException, InterruptedException {
+        List<Path> childFileNames = new ArrayList<>();
         observation = root.observe(
-                FOLLOW,
-                listener,
-                collectInto(children),
-                BATCH_UPDATE_MILLIS,
-                MILLISECONDS,
-                true,
-                null,
-                watchLimit);
-        return children;
+            FOLLOW,
+            listener,
+            collectInto(childFileNames),
+            BATCH_UPDATE_MILLIS,
+            MILLISECONDS,
+            true,
+            null,
+            watchLimit
+        );
+        return childFileNames;
     }
 
-    private List<Name> visit() throws IOException {
-        List<Name> children = new ArrayList<>();
+    private List<Path> visit() throws IOException {
+        List<Path> children = new ArrayList<>();
         root.list((Path.Consumer) child -> {
-            Name name = child.name();
+            Path name = child.getFileName();
             assert name != null;
             checkedAdd(children, name);
             return true;
@@ -229,7 +229,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         return children;
     }
 
-    private void checkedAdd(List<Name> children, Name child) {
+    private void checkedAdd(List<Path> childFileNames, Path childFileName) {
         checkCancel();
 
         /*
@@ -239,20 +239,20 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
          */
         approximateChildTotal++;
 
-        children.add(child);
+        childFileNames.add(childFileName);
     }
 
-    private Path.Consumer collectInto(List<Name> children) {
+    private Path.Consumer collectInto(List<Path> childFileName) {
         return child -> {
-            Name name = child.name();
+            Path name = child.getFileName();
             assert name != null;
-            checkedAdd(children, name);
+            checkedAdd(childFileName, name);
             return true;
         };
     }
 
-    private void update(List<Name> children) {
-        for (Name child : children) {
+    private void update(List<Path> childFileNames) {
+        for (Path child : childFileNames) {
             checkCancel();
             update(child, null);
         }
@@ -302,7 +302,8 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
                 closeable.close();
             } catch (IOException e) {
                 Log.w(getClass().getSimpleName(),
-                        "Failed to close on reset " + root, e);
+                    "Failed to close on reset " + root, e
+                );
             }
         }
 
@@ -330,11 +331,9 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
      * Adds the new status of the given path to the data map. Returns true if
      * the data map is changed.
      */
-    private boolean update(Name child, @Nullable Event event) {
-        return update(root.concat(child.toPath()), event);
-    }
 
-    private boolean update(Path path, @Nullable Event event) {
+    private boolean update(Path childFileName, @Nullable Event event) {
+        Path path = root.concat(childFileName);
 
         /*
          * This if statement may seem unnecessary given the try-catch below
@@ -367,7 +366,8 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
             Stat stat = path.stat(NOFOLLOW);
             Stat targetStat = readTargetStatus(path, stat);
             Path target = readTarget(path, stat);
-            FileInfo newStat = FileInfo.create(path, stat, target, targetStat, collator);
+            FileInfo newStat =
+                FileInfo.create(path, stat, target, targetStat, collator);
             FileInfo oldStat = data.put(path.getFileName(), newStat);
             return !newStat.equals(oldStat);
 
@@ -376,8 +376,9 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
         } catch (IOException e) {
             data.put(
-                    path.getFileName(),
-                    FileInfo.create(path, null, null, null, collator));
+                path.getFileName(),
+                FileInfo.create(path, null, null, null, collator)
+            );
             return true;
         }
     }

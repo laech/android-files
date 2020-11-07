@@ -856,9 +856,9 @@ public final class ObservableTest extends PathBaseTest {
         }
 
         @Override
-        public void onEvent(Event event, Name child) {
-            observer.onEvent(event, child);
-            Path target = child == null ? root : root.concat(child.toPath());
+        public void onEvent(Event event, Path childFileName) {
+            observer.onEvent(event, childFileName);
+            Path target = childFileName == null ? root : root.concat(childFileName);
             actual.add(WatchEvent.create(event, target));
             if (expected.equals(actual)) {
                 success.countDown();

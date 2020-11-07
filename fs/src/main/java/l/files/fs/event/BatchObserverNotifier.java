@@ -1,5 +1,10 @@
 package l.files.fs.event;
 
+import androidx.annotation.Nullable;
+import l.files.fs.LinkOption;
+import l.files.fs.Path;
+import l.files.fs.Path.Consumer;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,26 +13,22 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import androidx.annotation.Nullable;
-
-import l.files.fs.LinkOption;
-import l.files.fs.Name;
-import l.files.fs.Path;
-import l.files.fs.Path.Consumer;
-
 import static java.lang.System.nanoTime;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 import static l.files.base.Throwables.addSuppressed;
 
-public final class BatchObserverNotifier implements Observer, Observation, Runnable {
+public final class BatchObserverNotifier
+    implements Observer, Observation, Runnable {
 
     private static final ScheduledExecutorService service =
-            newSingleThreadScheduledExecutor(r -> new Thread(r, "BatchObserverNotifier"));
+        newSingleThreadScheduledExecutor(r -> new Thread(
+            r, "BatchObserverNotifier"
+        ));
 
     private boolean selfChanged;
-    private final Map<Name, Event> childrenChanged;
+    private final Map<Path, Event> childFileNameChanged;
     private final BatchObserver batchObserver;
     private final long batchInterval;
     private final long batchIntervalNanos;
@@ -53,27 +54,28 @@ public final class BatchObserverNotifier implements Observer, Observation, Runna
     private final int watchLimit;
 
     public BatchObserverNotifier(
-            BatchObserver batchObserver,
-            long batchInterval,
-            TimeUnit batchInternalUnit,
-            boolean quickNotifyFirstEvent,
-            String tag,
-            int watchLimit) {
+        BatchObserver batchObserver,
+        long batchInterval,
+        TimeUnit batchInternalUnit,
+        boolean quickNotifyFirstEvent,
+        String tag,
+        int watchLimit
+    ) {
         this.batchObserver = batchObserver;
         this.batchInterval = batchInterval;
         this.batchInternalUnit = batchInternalUnit;
         this.batchIntervalNanos = batchInternalUnit.toNanos(batchInterval);
         this.quickNotifyFirstEvent = quickNotifyFirstEvent;
-        this.childrenChanged = new HashMap<>();
+        this.childFileNameChanged = new HashMap<>();
         this.tag = tag;
         this.watchLimit = watchLimit;
         this.started = new AtomicBoolean(false);
     }
 
     public Observation start(
-            Path path,
-            LinkOption option,
-            Consumer childrenConsumer
+        Path path,
+        LinkOption option,
+        Consumer childrenConsumer
     ) throws IOException, InterruptedException {
 
         if (!started.compareAndSet(false, true)) {
@@ -82,11 +84,12 @@ public final class BatchObserverNotifier implements Observer, Observation, Runna
 
         try {
 
-            Observation ob = path.observe(option, this, childrenConsumer, tag, watchLimit);
+            Observation ob =
+                path.observe(option, this, childrenConsumer, tag, watchLimit);
             observation = ob;
             if (!ob.isClosed()) {
                 checker = service.scheduleWithFixedDelay(
-                        this, batchInterval, batchInterval, batchInternalUnit);
+                    this, batchInterval, batchInterval, batchInternalUnit);
             }
 
         } catch (Throwable e) {
@@ -104,13 +107,13 @@ public final class BatchObserverNotifier implements Observer, Observation, Runna
     }
 
     @Override
-    public void onEvent(Event event, @Nullable Name child) {
+    public void onEvent(Event event, @Nullable Path childFileName) {
         synchronized (this) {
 
-            if (child == null) {
+            if (childFileName == null) {
                 selfChanged = true;
             } else {
-                childrenChanged.put(child, event);
+                childFileNameChanged.put(childFileName, event);
             }
 
         }
@@ -137,24 +140,24 @@ public final class BatchObserverNotifier implements Observer, Observation, Runna
         }
 
         boolean snapshotSelfChanged;
-        Map<Name, Event> snapshotChildrenChanged;
+        Map<Path, Event> snapshotChildFileNameChanged;
 
         synchronized (this) {
 
             snapshotSelfChanged = selfChanged;
-            snapshotChildrenChanged = childrenChanged.isEmpty()
-                    ? emptyMap()
-                    : unmodifiableMap(new HashMap<>(childrenChanged));
+            snapshotChildFileNameChanged = childFileNameChanged.isEmpty()
+                ? emptyMap()
+                : unmodifiableMap(new HashMap<>(childFileNameChanged));
 
             selfChanged = false;
-            childrenChanged.clear();
+            childFileNameChanged.clear();
 
         }
 
-        if (snapshotSelfChanged || !snapshotChildrenChanged.isEmpty()) {
+        if (snapshotSelfChanged || !snapshotChildFileNameChanged.isEmpty()) {
             batchObserver.onLatestEvents(
-                    snapshotSelfChanged,
-                    snapshotChildrenChanged
+                snapshotSelfChanged,
+                snapshotChildFileNameChanged
             );
         }
 
