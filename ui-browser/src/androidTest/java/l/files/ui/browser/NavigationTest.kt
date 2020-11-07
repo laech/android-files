@@ -95,32 +95,6 @@ class NavigationTest : BaseFilesActivityTest() {
   }
 
   @Test
-  fun can_shows_dirs_with_same_name_but_different_name_bytes() {
-    val notUtf8 = byteArrayOf(-19, -96, -67, -19, -80, -117)
-    val utf8 = notUtf8.toString(UTF_8).toByteArray(UTF_8)
-    assertFalse(notUtf8.contentEquals(utf8))
-    assertEquals(notUtf8.toString(UTF_8), utf8.toString(UTF_8))
-
-    val notUtf8Dir = dir().concat(notUtf8).createDirectory()
-    val notUtf8Child = notUtf8Dir.concat("notUtf8").createFile()
-    val utf8Dir = dir().concat(utf8).createDirectory()
-    val utf8Child = utf8Dir.concat("utf8").createFile()
-
-    screen()
-      .assertListViewContains(notUtf8Dir, true)
-      .assertListViewContains(utf8Dir, true)
-
-      .clickInto(notUtf8Dir)
-      .assertListViewContains(notUtf8Child, true)
-      .assertListViewContains(utf8Child, false)
-      .pressBack()
-
-      .clickInto(utf8Dir)
-      .assertListViewContains(utf8Child, true)
-      .assertListViewContains(notUtf8Child, false)
-  }
-
-  @Test
   fun can_navigate_into_etc_proc_self_fdinfo_without_crashing() {
     assumeTrue(
       "Skipping test, no permission to read /proc on Android N",

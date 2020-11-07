@@ -13,7 +13,7 @@ import static org.junit.Assert.assertNotNull;
 public final class StrTest {
 
     @Test
-    public void strerror_returns_string_error() throws Exception {
+    public void strerror_returns_string_error() {
         assertEquals("EPERM", "Operation not permitted", strerror(EPERM));
         assertEquals("ENOENT", "No such file or directory", strerror(ENOENT));
         assertEquals("ESRCH", "No such process", strerror(ESRCH));
@@ -38,7 +38,6 @@ public final class StrTest {
         assertEquals("EINVAL", "Invalid argument", strerror(EINVAL));
         assertEquals("ENFILE", "File table overflow", strerror(ENFILE));
         assertEquals("EMFILE", "Too many open files", strerror(EMFILE));
-        assertEquals("ENOTTY", "Not a typewriter", strerror(ENOTTY));
         assertEquals("ETXTBSY", "Text file busy", strerror(ETXTBSY));
         assertEquals("EFBIG", "File too large", strerror(EFBIG));
         assertEquals("ENOSPC", "No space left on device", strerror(ENOSPC));
