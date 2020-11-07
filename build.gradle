@@ -1,6 +1,6 @@
 buildscript {
 
-  ext.kotlinVersion = '1.3.72'
+  ext.kotlinVersion = '1.4.10'
 
   repositories {
     google()
@@ -8,14 +8,14 @@ buildscript {
   }
 
   dependencies {
-    classpath 'com.android.tools.build:gradle:3.6.2'
+    classpath 'com.android.tools.build:gradle:4.0.2'
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
   }
 
   ext.minSdkVersion = 26
   ext.targetSdkVersion = 28 // 29+ denies access to shared storage
   ext.compileSdkVersion = 28
-  ext.buildToolsVersion = '29.0.3'
+  ext.buildToolsVersion = '30.0.2'
 
   ext.deps = [
     cardview               : "androidx.cardview:cardview:1.0.0",
