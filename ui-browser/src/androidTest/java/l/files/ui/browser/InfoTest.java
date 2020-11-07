@@ -49,7 +49,7 @@ public final class InfoTest extends BaseFilesActivityTest {
         screen()
                 .longClick(path)
                 .getInfo()
-                .assertName(path.name().toString())
+                .assertName(path.getFileName().toString())
                 .assertDate(formatDate(stat))
                 .assertSize(formatSize(stat.size()));
     }
@@ -64,7 +64,7 @@ public final class InfoTest extends BaseFilesActivityTest {
         screen()
                 .longClick(path)
                 .getInfo()
-                .assertName(path.name().toString())
+                .assertName(path.getFileName().toString())
                 .assertDate(formatDate(stat))
                 .assertSize(formatSize(stat.size()));
     }
@@ -78,7 +78,7 @@ public final class InfoTest extends BaseFilesActivityTest {
         screen()
                 .longClick(dir)
                 .getInfo()
-                .assertName(dir.name().toString())
+                .assertName(dir.getFileName().toString())
                 .assertDate(formatDate(stat))
                 .assertSize(formatSizeCount(stat.size(), 1));
     }
@@ -99,7 +99,7 @@ public final class InfoTest extends BaseFilesActivityTest {
         screen()
                 .longClick(dir)
                 .getInfo()
-                .assertName(dir.name().toString())
+                .assertName(dir.getFileName().toString())
                 .assertDate(formatDate(stat))
                 .assertSize(formatSizeCount(
                         stat.size()

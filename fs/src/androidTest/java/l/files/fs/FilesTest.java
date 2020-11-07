@@ -1,23 +1,15 @@
 package l.files.fs;
 
-import org.junit.Test;
-
-import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import l.files.fs.exception.DirectoryNotEmpty;
 import l.files.testing.fs.PathBaseTest;
 import l.files.testing.fs.Paths;
+import org.junit.Test;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
@@ -27,11 +19,7 @@ import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Permission.OWNER_READ;
 import static l.files.fs.Stat.stat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public final class FilesTest extends PathBaseTest {
 
@@ -119,7 +107,8 @@ public final class FilesTest extends PathBaseTest {
 
         Path link = dir1().concat("link").createSymbolicLink(dir);
         List<Path> expected = singletonList(link.concat("b"));
-        List<Path> actual = sortByName(Paths.listDirectories(link, new ArrayList<>()));
+        List<Path> actual =
+            sortByName(Paths.listDirectories(link, new ArrayList<>()));
         assertEquals(expected, actual);
     }
 
@@ -129,7 +118,8 @@ public final class FilesTest extends PathBaseTest {
         dir1().concat("b").createDirectory();
         dir1().concat("c").createFile();
         List<?> expected = singletonList(dir1().concat("b"));
-        List<?> actual = sortByName(Paths.listDirectories(dir1(), new ArrayList<>()));
+        List<?> actual =
+            sortByName(Paths.listDirectories(dir1(), new ArrayList<>()));
         assertEquals(expected, actual);
     }
 
@@ -142,28 +132,31 @@ public final class FilesTest extends PathBaseTest {
         b.newOutputStream(false).close();
 
         assertEquals(
-                a.stat(NOFOLLOW).permissions(),
-                b.stat(NOFOLLOW).permissions()
+            a.stat(NOFOLLOW).permissions(),
+            b.stat(NOFOLLOW).permissions()
         );
     }
 
     @Test
     public void output_append_false() throws Exception {
         test_output("a", "b", "b",
-                file -> file.newOutputStream(false));
+            file -> file.newOutputStream(false)
+        );
     }
 
     @Test
     public void output_append_true() throws Exception {
         test_output("a", "b", "ab",
-                file -> file.newOutputStream(true));
+            file -> file.newOutputStream(true)
+        );
     }
 
     private void test_output(
-            String initial,
-            String write,
-            String result,
-            OutputProvider provider) throws Exception {
+        String initial,
+        String write,
+        String result,
+        OutputProvider provider
+    ) throws Exception {
 
         Path file = dir1().concat("file").createFile();
         Paths.appendUtf8(file, initial);
@@ -390,7 +383,8 @@ public final class FilesTest extends PathBaseTest {
     }
 
     @Test
-    public void deleteRecursiveIfExists_nonEmptyDirWillDelete() throws Exception {
+    public void deleteRecursiveIfExists_nonEmptyDirWillDelete()
+        throws Exception {
 
         Path dir = dir1().concat("dir").createDirectory();
         Path file = dir.concat("child").createFile();
@@ -412,7 +406,8 @@ public final class FilesTest extends PathBaseTest {
     }
 
     @Test
-    public void deleteRecursiveIfExists_linkToFileWillDeleteNoFollow() throws Exception {
+    public void deleteRecursiveIfExists_linkToFileWillDeleteNoFollow()
+        throws Exception {
 
         Path file = dir1().concat("file").createFile();
         Path link = dir1().concat("link").createSymbolicLink(file);
@@ -425,7 +420,8 @@ public final class FilesTest extends PathBaseTest {
     }
 
     @Test
-    public void deleteRecursiveIfExists_linkToDirWillDeleteNoFollow() throws Exception {
+    public void deleteRecursiveIfExists_linkToDirWillDeleteNoFollow()
+        throws Exception {
 
         Path dir = dir1().concat("dir").createDirectory();
         Path file = dir.concat("file").createFile();
@@ -443,10 +439,11 @@ public final class FilesTest extends PathBaseTest {
     @Test
     public void removePermissions() throws Exception {
         List<Set<Permission>> combinations = asList(
-                Permission.all(),
-                Permission.read(),
-                Permission.write(),
-                Permission.execute());
+            Permission.all(),
+            Permission.read(),
+            Permission.write(),
+            Permission.execute()
+        );
         for (Set<Permission> permissions : combinations) {
             dir1().setPermissions(Permission.all());
             Paths.removePermissions(dir1(), permissions);
@@ -472,9 +469,9 @@ public final class FilesTest extends PathBaseTest {
     }
 
     private List<Path> sortByName(List<Path> files) {
-        Collections.sort(files, (a, b) -> {
-            String aName = a.name().toString();
-            String bName = b.name().toString();
+        files.sort((a, b) -> {
+            String aName = a.getFileName().toString();
+            String bName = b.getFileName().toString();
             return aName.compareTo(bName);
         });
         return files;

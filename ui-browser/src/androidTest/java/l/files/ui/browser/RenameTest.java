@@ -39,7 +39,7 @@ public class RenameTest extends BaseFilesActivityTest {
             Path dst = dir.concat("file.TXT");
 
             UiRename ui = rename(src);
-            ui.setFilename(dst.name().toString());
+            ui.setFilename(dst.getFileName().toString());
 
             sleep(50); // Wait for it to finish checking file existence
 
@@ -67,7 +67,7 @@ public class RenameTest extends BaseFilesActivityTest {
         Path from = dir().concat("a").createFile();
         Path to = dir().concat("abc");
 
-        rename(from).setFilename(to.name().toString()).ok();
+        rename(from).setFilename(to.getFileName().toString()).ok();
 
         timeout(10, SECONDS, () -> {
             assertFalse(from.exists(NOFOLLOW));
@@ -84,7 +84,7 @@ public class RenameTest extends BaseFilesActivityTest {
     @Test
     public void uses_filename_as_default_text() throws Exception {
         Path file = dir().concat("a").createFile();
-        rename(file).assertFilename(file.name().toString());
+        rename(file).assertFilename(file.getFileName().toString());
     }
 
     @Test

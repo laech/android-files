@@ -1,7 +1,7 @@
 package l.files.fs;
 
 import android.text.TextUtils;
-
+import l.files.testing.fs.PathBaseTest;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -9,22 +9,19 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import l.files.testing.fs.PathBaseTest;
-
 import static java.util.Arrays.asList;
+import static java.util.Comparator.comparing;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.LocalFileTraverseTest.TraversalOrder.POST;
 import static l.files.fs.LocalFileTraverseTest.TraversalOrder.PRE;
-import static l.files.fs.TraversalCallback.Result.CONTINUE;
-import static l.files.fs.TraversalCallback.Result.SKIP;
-import static l.files.fs.TraversalCallback.Result.TERMINATE;
+import static l.files.fs.TraversalCallback.Result.*;
 
 public final class LocalFileTraverseTest extends PathBaseTest {
 
     private static final Comparator<Path> SORT_BY_NAME =
-            (a, b) -> a.name().compareTo(b.name());
+        comparing(Path::getFileName);
 
     @Test
     public void traverse_noFollowLink() throws Exception {
@@ -36,8 +33,8 @@ public final class LocalFileTraverseTest extends PathBaseTest {
         Recorder recorder = new Recorder();
         link.traverse(NOFOLLOW, recorder);
         List<TraversalEvent> expected = asList(
-                TraversalEvent.of(PRE, link),
-                TraversalEvent.of(POST, link)
+            TraversalEvent.of(PRE, link),
+            TraversalEvent.of(POST, link)
         );
         checkEquals(expected, recorder.events);
     }
@@ -54,17 +51,17 @@ public final class LocalFileTraverseTest extends PathBaseTest {
         Recorder recorder = new Recorder();
         dir1().concat("link").traverse(FOLLOW, recorder, SORT_BY_NAME);
         List<TraversalEvent> expected = asList(
-                TraversalEvent.of(PRE, dir1().concat("link")),
-                TraversalEvent.of(PRE, dir1().concat("link/a")),
-                TraversalEvent.of(POST, dir1().concat("link/a")),
-                TraversalEvent.of(PRE, dir1().concat("link/b")),
-                TraversalEvent.of(PRE, dir1().concat("link/b/1")),
-                TraversalEvent.of(POST, dir1().concat("link/b/1")),
-                TraversalEvent.of(POST, dir1().concat("link/b")),
-                TraversalEvent.of(PRE, dir1().concat("link/c")),
-                // link/c is not followed into
-                TraversalEvent.of(POST, dir1().concat("link/c")),
-                TraversalEvent.of(POST, dir1().concat("link"))
+            TraversalEvent.of(PRE, dir1().concat("link")),
+            TraversalEvent.of(PRE, dir1().concat("link/a")),
+            TraversalEvent.of(POST, dir1().concat("link/a")),
+            TraversalEvent.of(PRE, dir1().concat("link/b")),
+            TraversalEvent.of(PRE, dir1().concat("link/b/1")),
+            TraversalEvent.of(POST, dir1().concat("link/b/1")),
+            TraversalEvent.of(POST, dir1().concat("link/b")),
+            TraversalEvent.of(PRE, dir1().concat("link/c")),
+            // link/c is not followed into
+            TraversalEvent.of(POST, dir1().concat("link/c")),
+            TraversalEvent.of(POST, dir1().concat("link"))
         );
         checkEquals(expected, recorder.events);
     }
@@ -78,38 +75,40 @@ public final class LocalFileTraverseTest extends PathBaseTest {
         Recorder recorder = new Recorder();
         link.traverse(FOLLOW, recorder);
         List<TraversalEvent> expected = asList(
-                TraversalEvent.of(PRE, link),
-                TraversalEvent.of(PRE, a),
-                TraversalEvent.of(POST, a),
-                TraversalEvent.of(POST, link)
+            TraversalEvent.of(PRE, link),
+            TraversalEvent.of(PRE, a),
+            TraversalEvent.of(POST, a),
+            TraversalEvent.of(POST, link)
         );
         checkEquals(expected, recorder.events);
     }
 
     @Test
-    public void traverse_continuesIfExceptionHandlerDoesNotThrow_pre() throws Exception {
+    public void traverse_continuesIfExceptionHandlerDoesNotThrow_pre()
+        throws Exception {
         dir1().concat("a").createDirectory();
         dir1().concat("b").createDirectory();
 
         List<TraversalEvent> expected = asList(
-                TraversalEvent.of(PRE, dir1()),
-                TraversalEvent.of(PRE, dir1().concat("b")),
-                TraversalEvent.of(POST, dir1().concat("b")),
-                TraversalEvent.of(POST, dir1())
+            TraversalEvent.of(PRE, dir1()),
+            TraversalEvent.of(PRE, dir1().concat("b")),
+            TraversalEvent.of(POST, dir1().concat("b")),
+            TraversalEvent.of(POST, dir1())
         );
 
         Recorder recorder = new Recorder() {
 
             @Override
             public Result onPreVisit(Path file) throws IOException {
-                if (file.name().toString().equals("a")) {
+                if (file.getFileName().toString().equals("a")) {
                     throw new IOException("Test");
                 }
                 return super.onPreVisit(file);
             }
 
             @Override
-            public void onException(Path file, IOException e) throws IOException {
+            public void onException(Path file, IOException e)
+                throws IOException {
                 // Ignore
             }
 
@@ -120,22 +119,23 @@ public final class LocalFileTraverseTest extends PathBaseTest {
     }
 
     @Test
-    public void traverse_continuesIfExceptionHandlerDoesNotThrow_post() throws Exception {
+    public void traverse_continuesIfExceptionHandlerDoesNotThrow_post()
+        throws Exception {
         dir1().concat("a/1").createDirectories();
         dir1().concat("a/1/i").createFile();
         dir1().concat("b").createDirectories();
 
         List<TraversalEvent> expected = asList(
-                TraversalEvent.of(PRE, dir1()),
-                TraversalEvent.of(PRE, dir1().concat("a")),
-                TraversalEvent.of(PRE, dir1().concat("a/1")),
-                TraversalEvent.of(PRE, dir1().concat("a/1/i")),
-                TraversalEvent.of(POST, dir1().concat("a/1/i")),
-                TraversalEvent.of(POST, dir1().concat("a/1")),
-                TraversalEvent.of(POST, dir1().concat("a")),
-                TraversalEvent.of(PRE, dir1().concat("b")),
-                TraversalEvent.of(POST, dir1().concat("b")),
-                TraversalEvent.of(POST, dir1())
+            TraversalEvent.of(PRE, dir1()),
+            TraversalEvent.of(PRE, dir1().concat("a")),
+            TraversalEvent.of(PRE, dir1().concat("a/1")),
+            TraversalEvent.of(PRE, dir1().concat("a/1/i")),
+            TraversalEvent.of(POST, dir1().concat("a/1/i")),
+            TraversalEvent.of(POST, dir1().concat("a/1")),
+            TraversalEvent.of(POST, dir1().concat("a")),
+            TraversalEvent.of(PRE, dir1().concat("b")),
+            TraversalEvent.of(POST, dir1().concat("b")),
+            TraversalEvent.of(POST, dir1())
         );
 
         Recorder recorder = new Recorder() {
@@ -143,14 +143,15 @@ public final class LocalFileTraverseTest extends PathBaseTest {
             @Override
             public Result onPostVisit(Path file) throws IOException {
                 super.onPostVisit(file);
-                if (file.name().toString().equals("1")) {
+                if (file.getFileName().toString().equals("1")) {
                     throw new IOException("Test");
                 }
                 return CONTINUE;
             }
 
             @Override
-            public void onException(Path file, IOException e) throws IOException {
+            public void onException(Path file, IOException e)
+                throws IOException {
                 // Ignore
             }
 
@@ -161,7 +162,8 @@ public final class LocalFileTraverseTest extends PathBaseTest {
     }
 
     @Test
-    public void traverse_continuesIfExceptionHandlerDoesNotThrow_noPermission() throws Exception {
+    public void traverse_continuesIfExceptionHandlerDoesNotThrow_noPermission()
+        throws Exception {
         dir1().concat("a/1").createDirectories();
         dir1().concat("a/1/i").createFile();
         dir1().concat("a/2").createDirectories();
@@ -169,12 +171,12 @@ public final class LocalFileTraverseTest extends PathBaseTest {
         dir1().concat("a").setPermissions(Permission.none());
 
         List<TraversalEvent> expected = asList(
-                TraversalEvent.of(PRE, dir1()),
-                TraversalEvent.of(PRE, dir1().concat("a")),
-                TraversalEvent.of(POST, dir1().concat("a")),
-                TraversalEvent.of(PRE, dir1().concat("b")),
-                TraversalEvent.of(POST, dir1().concat("b")),
-                TraversalEvent.of(POST, dir1())
+            TraversalEvent.of(PRE, dir1()),
+            TraversalEvent.of(PRE, dir1().concat("a")),
+            TraversalEvent.of(POST, dir1().concat("a")),
+            TraversalEvent.of(PRE, dir1().concat("b")),
+            TraversalEvent.of(POST, dir1().concat("b")),
+            TraversalEvent.of(POST, dir1())
         );
 
         Recorder recorder = new Recorder() {
@@ -196,18 +198,18 @@ public final class LocalFileTraverseTest extends PathBaseTest {
         dir1().concat("b").createDirectories();
 
         List<TraversalEvent> expected = asList(
-                TraversalEvent.of(PRE, dir1()),
-                TraversalEvent.of(PRE, dir1().concat("a")),
-                TraversalEvent.of(PRE, dir1().concat("a/1")),
-                TraversalEvent.of(PRE, dir1().concat("a/1/i")),
-                TraversalEvent.of(POST, dir1().concat("a/1/i")),
-                TraversalEvent.of(POST, dir1().concat("a/1")),
-                TraversalEvent.of(PRE, dir1().concat("a/2")),
-                TraversalEvent.of(POST, dir1().concat("a/2")),
-                TraversalEvent.of(POST, dir1().concat("a")),
-                TraversalEvent.of(PRE, dir1().concat("b")),
-                TraversalEvent.of(POST, dir1().concat("b")),
-                TraversalEvent.of(POST, dir1())
+            TraversalEvent.of(PRE, dir1()),
+            TraversalEvent.of(PRE, dir1().concat("a")),
+            TraversalEvent.of(PRE, dir1().concat("a/1")),
+            TraversalEvent.of(PRE, dir1().concat("a/1/i")),
+            TraversalEvent.of(POST, dir1().concat("a/1/i")),
+            TraversalEvent.of(POST, dir1().concat("a/1")),
+            TraversalEvent.of(PRE, dir1().concat("a/2")),
+            TraversalEvent.of(POST, dir1().concat("a/2")),
+            TraversalEvent.of(POST, dir1().concat("a")),
+            TraversalEvent.of(PRE, dir1().concat("b")),
+            TraversalEvent.of(POST, dir1().concat("b")),
+            TraversalEvent.of(POST, dir1())
         );
 
         Recorder recorder = new Recorder();
@@ -224,18 +226,18 @@ public final class LocalFileTraverseTest extends PathBaseTest {
         dir1().concat("b").createDirectories();
 
         List<TraversalEvent> expected = asList(
-                TraversalEvent.of(PRE, dir1()),
-                TraversalEvent.of(PRE, dir1().concat("a")),
-                TraversalEvent.of(PRE, dir1().concat("b")),
-                TraversalEvent.of(POST, dir1().concat("b")),
-                TraversalEvent.of(POST, dir1())
+            TraversalEvent.of(PRE, dir1()),
+            TraversalEvent.of(PRE, dir1().concat("a")),
+            TraversalEvent.of(PRE, dir1().concat("b")),
+            TraversalEvent.of(POST, dir1().concat("b")),
+            TraversalEvent.of(POST, dir1())
         );
 
         Recorder recorder = new Recorder() {
             @Override
             public Result onPreVisit(Path file) throws IOException {
                 super.onPreVisit(file);
-                if (file.name().toString().equals("a")) {
+                if (file.getFileName().toString().equals("a")) {
                     return SKIP;
                 }
                 return CONTINUE;
@@ -253,15 +255,15 @@ public final class LocalFileTraverseTest extends PathBaseTest {
         dir1().concat("b").createDirectories();
 
         List<TraversalEvent> expected = asList(
-                TraversalEvent.of(PRE, dir1()),
-                TraversalEvent.of(PRE, dir1().concat("a"))
+            TraversalEvent.of(PRE, dir1()),
+            TraversalEvent.of(PRE, dir1().concat("a"))
         );
 
         Recorder recorder = new Recorder() {
             @Override
             public Result onPreVisit(Path file) throws IOException {
                 super.onPreVisit(file);
-                if (file.name().toString().equals("a")) {
+                if (file.getFileName().toString().equals("a")) {
                     return TERMINATE;
                 }
                 return CONTINUE;
@@ -272,12 +274,13 @@ public final class LocalFileTraverseTest extends PathBaseTest {
     }
 
     private static void checkEquals(
-            List<TraversalEvent> expected,
-            List<TraversalEvent> actual) {
+        List<TraversalEvent> expected,
+        List<TraversalEvent> actual
+    ) {
         if (!expected.equals(actual)) {
             throw new AssertionError("" +
-                    "\nexpected:\n" + TextUtils.join("\n", expected) +
-                    "\nactual:  \n" + TextUtils.join("\n", actual));
+                "\nexpected:\n" + TextUtils.join("\n", expected) +
+                "\nactual:  \n" + TextUtils.join("\n", actual));
         }
     }
 
@@ -305,7 +308,8 @@ public final class LocalFileTraverseTest extends PathBaseTest {
     }
 
     enum TraversalOrder {
-        PRE, POST
+        PRE,
+        POST
     }
 
     static final class TraversalEvent {
@@ -325,9 +329,9 @@ public final class LocalFileTraverseTest extends PathBaseTest {
         @Override
         public String toString() {
             return "TraversalEvent{" +
-                    "order=" + order +
-                    ", path=" + path +
-                    '}';
+                "order=" + order +
+                ", path=" + path +
+                '}';
         }
 
         @Override
@@ -342,7 +346,7 @@ public final class LocalFileTraverseTest extends PathBaseTest {
             TraversalEvent that = (TraversalEvent) o;
 
             return order == that.order &&
-                    path.equals(that.path);
+                path.equals(that.path);
 
         }
 

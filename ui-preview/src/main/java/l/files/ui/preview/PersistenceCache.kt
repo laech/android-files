@@ -133,7 +133,7 @@ internal abstract class PersistenceCache<V>(
     val file = cacheFile()
     val parent = file.parent()!!
     parent.createDirectories()
-    val tmp = parent.concat("${file.name()}-${nanoTime()}")
+    val tmp = parent.concat("${file.fileName}-${nanoTime()}")
     try {
       tmp.newBufferedDataOutputStream(false).use {
         it.writeInt(SUPERCLASS_VERSION)

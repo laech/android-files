@@ -1,5 +1,8 @@
 package l.files.operations;
 
+import l.files.fs.Instant;
+import l.files.fs.Path;
+import l.files.testing.fs.Paths;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -7,19 +10,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import l.files.fs.Instant;
-import l.files.fs.Path;
-import l.files.testing.fs.Paths;
-
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public final class CopyTest extends PasteTest {
 
@@ -70,9 +66,10 @@ public final class CopyTest extends PasteTest {
     }
 
     private void testCopyPreservesTimestamp(
-            Path src,
-            Path dir) throws IOException, InterruptedException {
-        Path dst = dir.concat(src.name().toPath());
+        Path src,
+        Path dir
+    ) throws IOException, InterruptedException {
+        Path dst = dir.concat(src.getFileName());
         assertFalse(dst.exists(NOFOLLOW));
 
         Instant mtime = newInstant();
@@ -152,7 +149,7 @@ public final class CopyTest extends PasteTest {
     }
 
     private void copy(Path src, Path dstDir)
-            throws IOException, InterruptedException {
+        throws IOException, InterruptedException {
         create(singleton(src), dstDir).execute();
     }
 

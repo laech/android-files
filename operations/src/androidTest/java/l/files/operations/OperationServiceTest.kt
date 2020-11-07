@@ -65,7 +65,7 @@ class OperationServiceTest : PathBaseTest() {
     listener.await()
     assertThat(src.exists(NOFOLLOW), equalTo(false))
     assertThat(
-      dst.concat(src.name()!!.toPath()).exists(NOFOLLOW),
+      dst.concat(src.fileName!!).exists(NOFOLLOW),
       equalTo(true)
     )
   }
@@ -80,7 +80,7 @@ class OperationServiceTest : PathBaseTest() {
     listener.await()
     assertThat(src.exists(NOFOLLOW), equalTo(true))
     assertThat(
-      dst.concat(src.name()!!.toPath()).exists(NOFOLLOW),
+      dst.concat(src.fileName!!).exists(NOFOLLOW),
       equalTo(true)
     )
   }

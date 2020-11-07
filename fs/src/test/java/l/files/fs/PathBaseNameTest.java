@@ -1,5 +1,6 @@
 package l.files.fs;
 
+import l.files.base.Optional;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -11,13 +12,13 @@ import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
-public final class NameBaseNameTest {
+public final class PathBaseNameTest {
 
-    private final Name name;
+    private final Path name;
     private final String expectedBaseName;
 
-    public NameBaseNameTest(String name, String expectedBaseName) {
-        this.name = Name.of(name);
+    public PathBaseNameTest(String name, String expectedBaseName) {
+        this.name = Path.of(name);
         this.expectedBaseName = expectedBaseName;
     }
 
@@ -45,6 +46,6 @@ public final class NameBaseNameTest {
 
     @Test
     public void base_name_is_expected() throws Exception {
-        assertEquals(expectedBaseName, name.base());
+        assertEquals(Optional.of(expectedBaseName), name.getBaseName());
     }
 }

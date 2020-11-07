@@ -49,7 +49,7 @@ class InfoFragment : InfoBaseFragment(), Preview.Callback {
   }
 
   private fun updateNameView(path: Path) {
-    val name = path.name()
+    val name = path.fileName
     nameView.maxWidth = constraint.width()
     nameView.text = name?.toString() ?: path.toString()
   }

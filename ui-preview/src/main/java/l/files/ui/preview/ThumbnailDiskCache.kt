@@ -147,7 +147,7 @@ internal class ThumbnailDiskCache(getCacheDir: () -> Path) :
     val parent = cache.parent()!!
     parent.createDirectories()
 
-    val tmp = parent.concat("${cache.name()}-${nanoTime()}")
+    val tmp = parent.concat("${cache.fileName}-${nanoTime()}")
     try {
       tmp.newBufferedDataOutputStream(false).use { out ->
         out.writeByte(VERSION.toInt())

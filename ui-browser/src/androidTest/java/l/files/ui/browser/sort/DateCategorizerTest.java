@@ -135,7 +135,7 @@ public final class DateCategorizerTest {
         for (Object item : items) {
             names.add(item instanceof Header
                     ? item.toString()
-                    : ((FileInfo) item).selfPath().name().toString());
+                    : ((FileInfo) item).selfPath().getFileName().toString());
         }
         return unmodifiableList(names);
     }

@@ -1,11 +1,10 @@
 package l.files.ui.browser;
 
+import l.files.fs.Path;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-
-import l.files.fs.Path;
 
 import static java.lang.System.currentTimeMillis;
 import static java.lang.Thread.sleep;
@@ -27,12 +26,12 @@ public final class FileOperationTest extends BaseFilesActivityTest {
         dir2.concat("a").createFile();
 
         screen()
-                .longClick(file)
-                .click(link)
-                .click(dir1)
-                .click(dir2)
-                .delete()
-                .ok();
+            .longClick(file)
+            .click(link)
+            .click(dir1)
+            .click(dir2)
+            .delete()
+            .ok();
 
         timeout(5, SECONDS, () -> {
             assertFalse(file.exists(NOFOLLOW));
@@ -50,14 +49,14 @@ public final class FileOperationTest extends BaseFilesActivityTest {
         Path dir = dir().concat("dir").createDirectory();
 
         screen()
-                .longClick(file)
-                .cut()
-                .click(dir)
-                .paste();
+            .longClick(file)
+            .cut()
+            .click(dir)
+            .paste();
 
         timeout(5, SECONDS, () -> {
             assertFalse(file.exists(NOFOLLOW));
-            assertTrue(dir.concat(file.name()).exists(NOFOLLOW));
+            assertTrue(dir.concat(file.getFileName()).exists(NOFOLLOW));
         });
 
     }
@@ -75,27 +74,40 @@ public final class FileOperationTest extends BaseFilesActivityTest {
         srcFull.concat("c").createSymbolicLink(srcFull.concat("a"));
 
         screen()
-                .longClick(srcEmpty)
-                .click(srcFull)
-                .click(srcFile)
-                .click(srcLink)
-                .copy()
-                .click(dstDir)
-                .paste();
+            .longClick(srcEmpty)
+            .click(srcFull)
+            .click(srcFile)
+            .click(srcLink)
+            .copy()
+            .click(dstDir)
+            .paste();
 
-        assertTrue(waitFor(dstDir.concat(srcFile.name()), 5, SECONDS));
-        assertTrue(waitFor(dstDir.concat(srcLink.name()), 5, SECONDS));
-        assertTrue(waitFor(dstDir.concat(srcEmpty.name()), 5, SECONDS));
-        assertTrue(waitFor(dstDir.concat(srcFull.name()), 5, SECONDS));
-        assertTrue(waitFor(dstDir.concat(srcFull.name()).concat("a"), 5, SECONDS));
-        assertTrue(waitFor(dstDir.concat(srcFull.name()).concat("b"), 5, SECONDS));
-        assertTrue(waitFor(dstDir.concat(srcFull.name()).concat("c"), 5, SECONDS));
+        assertTrue(waitFor(dstDir.concat(srcFile.getFileName()), 5, SECONDS));
+        assertTrue(waitFor(dstDir.concat(srcLink.getFileName()), 5, SECONDS));
+        assertTrue(waitFor(dstDir.concat(srcEmpty.getFileName()), 5, SECONDS));
+        assertTrue(waitFor(dstDir.concat(srcFull.getFileName()), 5, SECONDS));
+        assertTrue(waitFor(
+            dstDir.concat(srcFull.getFileName()).concat("a"),
+            5,
+            SECONDS
+        ));
+        assertTrue(waitFor(
+            dstDir.concat(srcFull.getFileName()).concat("b"),
+            5,
+            SECONDS
+        ));
+        assertTrue(waitFor(
+            dstDir.concat(srcFull.getFileName()).concat("c"),
+            5,
+            SECONDS
+        ));
     }
 
     private boolean waitFor(
-            Path file,
-            int time,
-            TimeUnit unit) throws InterruptedException, IOException {
+        Path file,
+        int time,
+        TimeUnit unit
+    ) throws InterruptedException, IOException {
 
         long end = currentTimeMillis() + unit.toMillis(time);
         while (currentTimeMillis() < end) {
@@ -109,19 +121,19 @@ public final class FileOperationTest extends BaseFilesActivityTest {
 
     @Test
     public void paste_menu_is_disabled_inside_folder_being_copied()
-            throws Exception {
+        throws Exception {
 
         Path dir = dir().concat("dir").createDirectory();
 
         screen()
-                .longClick(dir)
-                .copy()
-                .assertCanPaste(true)
-                .clickInto(dir)
-                .assertCanPaste(false)
-                .pressBack()
-                .assertCurrentDirectory(dir())
-                .assertCanPaste(true);
+            .longClick(dir)
+            .copy()
+            .assertCanPaste(true)
+            .clickInto(dir)
+            .assertCanPaste(false)
+            .pressBack()
+            .assertCurrentDirectory(dir())
+            .assertCanPaste(true);
     }
 
 }

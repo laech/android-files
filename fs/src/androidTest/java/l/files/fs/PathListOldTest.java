@@ -1,19 +1,18 @@
 package l.files.fs;
 
-import org.junit.Test;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import l.files.fs.exception.AccessDenied;
 import l.files.fs.exception.NoSuchEntry;
 import l.files.fs.exception.NotDirectory;
 import l.files.testing.fs.PathBaseTest;
 import l.files.testing.fs.Paths;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.util.Arrays.asList;
+import static java.util.Comparator.comparing;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -28,9 +27,9 @@ public final class PathListOldTest extends PathBaseTest {
         Path link = dir1().concat("link").createSymbolicLink(dir);
 
         List<Path> expected = asList(
-                a.rebase(dir, link),
-                b.rebase(dir, link),
-                c.rebase(dir, link)
+            a.rebase(dir, link),
+            b.rebase(dir, link),
+            c.rebase(dir, link)
         );
 
         List<Path> actual = sortByName(link.list(new ArrayList<>()));
@@ -46,13 +45,14 @@ public final class PathListOldTest extends PathBaseTest {
         assertEquals(expected, actual);
     }
 
-    private List<Path> sortByName(List<Path> paths) throws IOException {
-        Collections.sort(paths, (a, b) -> a.name().compareTo(b.name()));
+    private List<Path> sortByName(List<Path> paths) {
+        paths.sort(comparing(Path::getFileName));
         return paths;
     }
 
     @Test
-    public void access_denied_failure_if_no_permission_to_read() throws Exception {
+    public void access_denied_failure_if_no_permission_to_read()
+        throws Exception {
         Paths.removePermissions(dir1(), Permission.read());
         listWillFail(dir1(), AccessDenied.class);
     }
@@ -63,7 +63,8 @@ public final class PathListOldTest extends PathBaseTest {
     }
 
     @Test
-    public void not_such_entry_if_symbolic_link_to_directory_does_not_exist() throws Exception {
+    public void not_such_entry_if_symbolic_link_to_directory_does_not_exist()
+        throws Exception {
         Path missing = dir1().concat("missing");
         Path link = dir1().concat("link").createSymbolicLink(missing);
         listWillFail(link, NoSuchEntry.class);
@@ -81,15 +82,16 @@ public final class PathListOldTest extends PathBaseTest {
     }
 
     @Test
-    public void not_directory_failure_if_path_is_symbolic_link_to_file() throws Exception {
+    public void not_directory_failure_if_path_is_symbolic_link_to_file()
+        throws Exception {
         Path file = dir1().concat("file").createFile();
         Path link = dir1().concat("link").createSymbolicLink(file);
         listWillFail(link, NotDirectory.class);
     }
 
     private static void listWillFail(
-            Path path,
-            Class<? extends IOException> expected
+        Path path,
+        Class<? extends IOException> expected
     ) throws IOException {
 
         try {

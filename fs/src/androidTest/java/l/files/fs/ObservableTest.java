@@ -46,7 +46,7 @@ public final class ObservableTest extends PathBaseTest {
 
     @Test
     public void able_to_continue_observing_existing_dirs_when_new_dir_added_is_not_observable()
-            throws Exception {
+        throws Exception {
 
         Path readableDir = dir1().concat("readable");
         Path unreadableDir = dir1().concat("unreadable");
@@ -54,16 +54,24 @@ public final class ObservableTest extends PathBaseTest {
         readableDir.createDirectory();
         try (Recorder recorder = observe(dir1(), FOLLOW)) {
             recorder.awaitModifyByCreateFile(readableDir, "aa");
-            recorder.await(CREATE, unreadableDir, () -> unreadableDir.createDirectory(EnumSet.of(OWNER_EXECUTE, OWNER_WRITE)));
+            recorder.await(
+                CREATE,
+                unreadableDir,
+                () -> unreadableDir.createDirectory(EnumSet.of(
+                    OWNER_EXECUTE,
+                    OWNER_WRITE
+                ))
+            );
 
-            recorder.awaitNoEvent(() -> unreadableDir.concat("zz").createFile());
+            recorder.awaitNoEvent(() -> unreadableDir.concat("zz")
+                .createFile());
             recorder.awaitModifyByCreateFile(readableDir, "ab");
         }
     }
 
     @Test
     public void able_to_observe_the_rest_of_the_files_when_some_are_not_observable()
-            throws Exception {
+        throws Exception {
 
         List<Path> observables = new ArrayList<>();
         observables.add(createRandomChildDir(dir1()));
@@ -87,10 +95,17 @@ public final class ObservableTest extends PathBaseTest {
     @Test
     public void no_observe_on_procfs() throws Exception {
         try (Tracker tracker = registerMockTracker();
-             Recorder observer = observe(Path.of("/proc/self"), FOLLOW, false)) {
+             Recorder observer = observe(
+                 Path.of("/proc/self"),
+                 FOLLOW,
+                 false
+             )) {
             assertTrue(observer.isClosed());
             assertNotNull(observer.closeReason);
-            assertEquals("procfs not supported", observer.closeReason.getMessage());
+            assertEquals(
+                "procfs not supported",
+                observer.closeReason.getMessage()
+            );
             verify(tracker).onClose(any(), any());
             verifyZeroInteractions(tracker);
         }
@@ -126,13 +141,19 @@ public final class ObservableTest extends PathBaseTest {
 
             ArgumentCaptor<Integer> fd = ArgumentCaptor.forClass(Integer.class);
             ArgumentCaptor<Integer> wd = ArgumentCaptor.forClass(Integer.class);
-            verify(tracker).onWatchAdded(fd.capture(), aryEq(src.toByteArray()), anyInt(), wd.capture());
+            verify(tracker).onWatchAdded(
+                fd.capture(),
+                aryEq(src.toByteArray()),
+                anyInt(),
+                wd.capture()
+            );
             verify(tracker).onWatchRemoved(fd.getValue(), wd.getValue());
         }
     }
 
     @Test
-    public void notifies_observer_on_max_user_instances_reached() throws Exception {
+    public void notifies_observer_on_max_user_instances_reached()
+        throws Exception {
         int maxUserInstances = maxUserInstances();
         List<Observation> observations = new ArrayList<>(maxUserInstances);
         try {
@@ -140,11 +161,13 @@ public final class ObservableTest extends PathBaseTest {
             for (int i = 1; i < maxUserInstances + 10; i++) {
                 Path child = dir1().concat(String.valueOf(i)).createFile();
                 Observer observer = mock(Observer.class);
-                Observation observation = Paths.observe(child, NOFOLLOW, observer);
+                Observation observation =
+                    Paths.observe(child, NOFOLLOW, observer);
                 observations.add(observation);
                 if (i <= maxUserInstances - 30) {
                     assertFalse("Failed at " + i, observation.isClosed());
-                    verify(observer, never()).onIncompleteObservation(any(IOException.class));
+                    verify(observer, never()).onIncompleteObservation(any(
+                        IOException.class));
                 } else if (i > maxUserInstances) {
                     assertTrue("Failed at " + i, observation.isClosed());
                     verify(observer).onIncompleteObservation(any(IOException.class));
@@ -162,7 +185,8 @@ public final class ObservableTest extends PathBaseTest {
     }
 
     @Test
-    public void notifies_observer_on_max_user_watches_reached_on_observe() throws Exception {
+    public void notifies_observer_on_max_user_watches_reached_on_observe()
+        throws Exception {
 
         int limit = 10;
         int count = limit * 2;
@@ -177,14 +201,19 @@ public final class ObservableTest extends PathBaseTest {
         try (Tracker tracker = registerMockTracker();
              Observable observation = new Observable(dir1(), observer)) {
             observation.start(FOLLOW, consumer, limit);
-            verify(observer, atLeastOnce()).onIncompleteObservation(any(IOException.class));
+            verify(observer, atLeastOnce()).onIncompleteObservation(any(
+                IOException.class));
             verify(consumer, times(count)).accept(notNull(Path.class));
-            verifyAllWatchesRemovedAndRootWatchAddedOnMaxUserWatchesReached(tracker, limit);
+            verifyAllWatchesRemovedAndRootWatchAddedOnMaxUserWatchesReached(
+                tracker,
+                limit
+            );
         }
     }
 
     @Test
-    public void notifies_observer_on_max_user_watches_reached_during_observe() throws Exception {
+    public void notifies_observer_on_max_user_watches_reached_during_observe()
+        throws Exception {
 
         int limit = 10;
         int count = limit / 2;
@@ -199,15 +228,24 @@ public final class ObservableTest extends PathBaseTest {
         try (Tracker tracker = registerMockTracker();
              Observable observation = new Observable(dir1(), observer)) {
             observation.start(FOLLOW, consumer, limit);
-            verify(observer, never()).onIncompleteObservation(any(IOException.class));
+            verify(
+                observer,
+                never()
+            ).onIncompleteObservation(any(IOException.class));
             assertFalse(observation.isClosed());
             for (int i = 0; i < limit; i++) {
                 createRandomChildDir(dir1());
             }
 
-            verify(observer, timeout(10000).atLeastOnce()).onIncompleteObservation(any(IOException.class));
+            verify(
+                observer,
+                timeout(10000).atLeastOnce()
+            ).onIncompleteObservation(any(IOException.class));
             verify(consumer, times(count)).accept(notNull(Path.class));
-            verifyAllWatchesRemovedAndRootWatchAddedOnMaxUserWatchesReached(tracker, limit);
+            verifyAllWatchesRemovedAndRootWatchAddedOnMaxUserWatchesReached(
+                tracker,
+                limit
+            );
         }
     }
 
@@ -221,33 +259,39 @@ public final class ObservableTest extends PathBaseTest {
     }
 
     /**
-     * Verifies when max user watches is reached, all existing watches will be released
-     * but the root watch will be re added so that many of the modification to the root
+     * Verifies when max user watches is reached, all existing watches will
+     * be released
+     * but the root watch will be re added so that many of the modification
+     * to the root
      * dir will still be notified.
      */
     private static void verifyAllWatchesRemovedAndRootWatchAddedOnMaxUserWatchesReached(
-            Tracker tracker, int maxUserWatches) {
+        Tracker tracker, int maxUserWatches
+    ) {
 
         ArgumentCaptor<Integer> fd = ArgumentCaptor.forClass(Integer.class);
-        ArgumentCaptor<Integer> wdsAdded = ArgumentCaptor.forClass(Integer.class);
-        ArgumentCaptor<Integer> wdsRemoved = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<Integer> wdsAdded =
+            ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<Integer> wdsRemoved =
+            ArgumentCaptor.forClass(Integer.class);
 
         InOrder order = inOrder(tracker);
         order.verify(tracker).onInit(fd.capture());
         order.verify(tracker, times(maxUserWatches)).onWatchAdded(
-                eq(fd.getValue()),
-                any(byte[].class),
-                anyInt(),
-                wdsAdded.capture()
+            eq(fd.getValue()),
+            any(byte[].class),
+            anyInt(),
+            wdsAdded.capture()
         );
 
         order.verify(tracker, times(maxUserWatches - 1)).onWatchRemoved(
-                eq(fd.getValue()),
-                wdsRemoved.capture()
+            eq(fd.getValue()),
+            wdsRemoved.capture()
         );
 
         int rootWd = wdsAdded.getAllValues().get(0);
-        List<Integer> expectedWdsRemoved = new ArrayList<>(wdsAdded.getAllValues());
+        List<Integer> expectedWdsRemoved =
+            new ArrayList<>(wdsAdded.getAllValues());
         expectedWdsRemoved.remove((Object) rootWd);
         assertValuesEqual(expectedWdsRemoved, wdsRemoved.getAllValues());
         order.verifyNoMoreInteractions();
@@ -255,8 +299,9 @@ public final class ObservableTest extends PathBaseTest {
     }
 
     private static <T extends Comparable<? super T>> void assertValuesEqual(
-            List<T> xs,
-            List<T> ys) {
+        List<T> xs,
+        List<T> ys
+    ) {
         Collections.sort(xs);
         Collections.sort(ys);
         assertEquals(xs, ys);
@@ -275,19 +320,25 @@ public final class ObservableTest extends PathBaseTest {
             ArgumentCaptor<Integer> wd = ArgumentCaptor.forClass(Integer.class);
             verify(tracker).onInit(fd.capture());
             verify(tracker).onWatchAdded(
-                    eq(fd.getValue()),
-                    aryEq(a.toByteArray()),
-                    anyInt(),
-                    wd.capture()
+                eq(fd.getValue()),
+                aryEq(a.toByteArray()),
+                anyInt(),
+                wd.capture()
             );
             verify(tracker).onWatchAdded(
-                    eq(fd.getValue()),
-                    aryEq(b.toByteArray()),
-                    anyInt(),
-                    wd.capture()
+                eq(fd.getValue()),
+                aryEq(b.toByteArray()),
+                anyInt(),
+                wd.capture()
             );
-            verify(tracker).onWatchRemoved(fd.getValue(), wd.getAllValues().get(0));
-            verify(tracker).onWatchRemoved(fd.getValue(), wd.getAllValues().get(1));
+            verify(tracker).onWatchRemoved(
+                fd.getValue(),
+                wd.getAllValues().get(0)
+            );
+            verify(tracker).onWatchRemoved(
+                fd.getValue(),
+                wd.getAllValues().get(1)
+            );
             verify(tracker).onClose(eq(OptionalInt.of(fd.getValue())), any());
 
         }
@@ -342,13 +393,13 @@ public final class ObservableTest extends PathBaseTest {
 
     @Test
     public void move_unreadable_dir_in_will_notify_incomplete_observation()
-            throws Exception {
+        throws Exception {
 
         testMoveDirIn(
-                new PreActions().removeReadPermissions(),
-                new PostActions()
-                        .awaitOnIncompleteObservation()
-                        .awaitCreateFileInParent("parent watch still works")
+            new PreActions().removeReadPermissions(),
+            new PostActions()
+                .awaitOnIncompleteObservation()
+                .awaitCreateFileInParent("parent watch still works")
         );
     }
 
@@ -376,8 +427,8 @@ public final class ObservableTest extends PathBaseTest {
     @Test
     public void move_dir_in_then_delete_file_from_it() throws Exception {
         testMoveDirIn(
-                new PreActions().createFile("hello"),
-                new PostActions().awaitDelete("hello")
+            new PreActions().createFile("hello"),
+            new PostActions().awaitDelete("hello")
         );
     }
 
@@ -396,14 +447,15 @@ public final class ObservableTest extends PathBaseTest {
         try (Recorder observer = observe(dir1())) {
             observer.awaitMove(src, dir);
             observer.await(
-                    asList(
-                            event(MODIFY, dir),
-                            event(MODIFY, dir)
-                    ),
-                    compose(
-                            child::createFile,
-                            () -> child.rename(dir2().concat("b"))
-                    ));
+                asList(
+                    event(MODIFY, dir),
+                    event(MODIFY, dir)
+                ),
+                compose(
+                    child::createFile,
+                    () -> child.rename(dir2().concat("b"))
+                )
+            );
         }
     }
 
@@ -435,8 +487,9 @@ public final class ObservableTest extends PathBaseTest {
     }
 
     private void testMoveSelfOut(
-            Path src,
-            Path dst) throws Exception {
+        Path src,
+        Path dst
+    ) throws Exception {
 
         try (Recorder observer = observe(src)) {
             observer.awaitMove(src, dst);
@@ -451,8 +504,9 @@ public final class ObservableTest extends PathBaseTest {
     }
 
     private void testModifyFileContent(
-            Path file,
-            Path observable) throws Exception {
+        Path file,
+        Path observable
+    ) throws Exception {
 
         try (Recorder observer = observe(observable)) {
             observer.awaitModifyByAppend(file, "abc");
@@ -470,8 +524,8 @@ public final class ObservableTest extends PathBaseTest {
     }
 
     private void testModifyPermission(
-            Path target,
-            Path observable
+        Path target,
+        Path observable
     ) throws Exception {
 
         Set<Permission> oldPerms = target.stat(NOFOLLOW).permissions();
@@ -501,8 +555,9 @@ public final class ObservableTest extends PathBaseTest {
     }
 
     private void testModifyLastModifiedTime(
-            Path target,
-            Path observable) throws Exception {
+        Path target,
+        Path observable
+    ) throws Exception {
 
         Instant old = target.stat(NOFOLLOW).lastModifiedTime();
         Instant t = Instant.of(old.seconds() - 1, old.nanos());
@@ -543,16 +598,16 @@ public final class ObservableTest extends PathBaseTest {
             for (int i = 0; i < 10; i++) {
                 observer.awaitCreateDir(dir);
                 observer.await(
-                        asList(
-                                event(MODIFY, dir),
-                                event(MODIFY, dir),
-                                event(DELETE, dir)
-                        ),
-                        compose(
-                                () -> file.createFile(),
-                                () -> file.delete(),
-                                () -> dir.delete()
-                        )
+                    asList(
+                        event(MODIFY, dir),
+                        event(MODIFY, dir),
+                        event(DELETE, dir)
+                    ),
+                    compose(
+                        () -> file.createFile(),
+                        () -> file.delete(),
+                        () -> dir.delete()
+                    )
                 );
             }
         }
@@ -569,8 +624,9 @@ public final class ObservableTest extends PathBaseTest {
     }
 
     private void testCreateFile(
-            Path target,
-            Path observable) throws Exception {
+        Path target,
+        Path observable
+    ) throws Exception {
 
         try (Recorder observer = observe(observable)) {
             observer.awaitCreateFile(target);
@@ -578,8 +634,9 @@ public final class ObservableTest extends PathBaseTest {
     }
 
     private void testCreateDir(
-            Path target,
-            Path observable) throws Exception {
+        Path target,
+        Path observable
+    ) throws Exception {
 
         try (Recorder observer = observe(observable)) {
             observer.awaitCreateDir(target);
@@ -587,9 +644,10 @@ public final class ObservableTest extends PathBaseTest {
     }
 
     private void testCreateSymbolicLink(
-            Path link,
-            Path target,
-            Path observable) throws Exception {
+        Path link,
+        Path target,
+        Path observable
+    ) throws Exception {
 
         try (Recorder observer = observe(observable)) {
             observer.awaitCreateSymbolicLink(link, target);
@@ -598,7 +656,7 @@ public final class ObservableTest extends PathBaseTest {
 
     @Test
     public void observe_unreadable_child_dir_will_notify_incomplete_observation()
-            throws Exception {
+        throws Exception {
 
         Path dir = dir1().concat("dir").createDirectory();
         Paths.removePermissions(dir, Permission.read());
@@ -614,8 +672,9 @@ public final class ObservableTest extends PathBaseTest {
         try (Recorder observer = observe(dir1())) {
             observer.awaitCreateDir(dir);
             observer.awaitModifyBySetPermissions(
-                    dir,
-                    EnumSet.of(OWNER_WRITE, OWNER_EXECUTE));
+                dir,
+                EnumSet.of(OWNER_WRITE, OWNER_EXECUTE)
+            );
             observer.awaitModifyByCreateFile(dir, "a");
         }
     }
@@ -626,16 +685,17 @@ public final class ObservableTest extends PathBaseTest {
         try (Recorder observer = observe(dir1())) {
             observer.awaitCreateDir(dir);
             observer.await(
-                    asList(
-                            event(MODIFY, dir),
-                            event(MODIFY, dir),
-                            event(MODIFY, dir)
-                    ),
-                    compose(
-                            () -> dir.concat("file").createFile(),
-                            () -> dir.concat("dir2()").createDirectory(),
-                            () -> dir.concat("link").createSymbolicLink(dir1())
-                    ));
+                asList(
+                    event(MODIFY, dir),
+                    event(MODIFY, dir),
+                    event(MODIFY, dir)
+                ),
+                compose(
+                    () -> dir.concat("file").createFile(),
+                    () -> dir.concat("dir2()").createDirectory(),
+                    () -> dir.concat("link").createSymbolicLink(dir1())
+                )
+            );
         }
     }
 
@@ -647,18 +707,19 @@ public final class ObservableTest extends PathBaseTest {
         try (Recorder observer = observe(dir1())) {
             observer.awaitCreateDir(parent);
             observer.await(
-                    asList(
-                            event(MODIFY, parent),
-                            event(MODIFY, parent),
-                            event(MODIFY, parent),
-                            event(MODIFY, parent)
-                    ),
-                    compose(
-                            () -> file.createFile(),
-                            () -> dir.createDirectory(),
-                            () -> file.delete(),
-                            () -> dir.delete()
-                    ));
+                asList(
+                    event(MODIFY, parent),
+                    event(MODIFY, parent),
+                    event(MODIFY, parent),
+                    event(MODIFY, parent)
+                ),
+                compose(
+                    () -> file.createFile(),
+                    () -> dir.createDirectory(),
+                    () -> file.delete(),
+                    () -> dir.delete()
+                )
+            );
         }
     }
 
@@ -670,18 +731,19 @@ public final class ObservableTest extends PathBaseTest {
         try (Recorder observer = observe(dir1())) {
             observer.awaitCreateDir(parent);
             observer.await(
-                    asList(
-                            event(MODIFY, parent),
-                            event(MODIFY, parent),
-                            event(MODIFY, parent),
-                            event(MODIFY, parent)
-                    ),
-                    compose(
-                            () -> file.createFile(),
-                            () -> dir.createDirectory(),
-                            () -> file.rename(dir2().concat("file")),
-                            () -> dir.rename(dir2().concat("dir"))
-                    ));
+                asList(
+                    event(MODIFY, parent),
+                    event(MODIFY, parent),
+                    event(MODIFY, parent),
+                    event(MODIFY, parent)
+                ),
+                compose(
+                    () -> file.createFile(),
+                    () -> dir.createDirectory(),
+                    () -> file.rename(dir2().concat("file")),
+                    () -> dir.rename(dir2().concat("dir"))
+                )
+            );
         }
     }
 
@@ -693,14 +755,15 @@ public final class ObservableTest extends PathBaseTest {
         try (Recorder observer = observe(dir1())) {
             observer.awaitCreateDir(parent);
             observer.await(
-                    asList(
-                            event(MODIFY, parent),
-                            event(MODIFY, parent)
-                    ),
-                    compose(
-                            () -> file.rename(parent.concat("file")),
-                            () -> dir.rename(parent.concat("dir"))
-                    ));
+                asList(
+                    event(MODIFY, parent),
+                    event(MODIFY, parent)
+                ),
+                compose(
+                    () -> file.rename(parent.concat("file")),
+                    () -> dir.rename(parent.concat("dir"))
+                )
+            );
         }
     }
 
@@ -746,7 +809,8 @@ public final class ObservableTest extends PathBaseTest {
         private Observation observation;
         private int fd;
         private int wd;
-        private final Map<Path, Integer> allChildWds = new ConcurrentHashMap<>();
+        private final Map<Path, Integer> allChildWds =
+            new ConcurrentHashMap<>();
         private final Set<Integer> validChildWds = new CopyOnWriteArraySet<>();
 
         private final List<WatchEvent> expected = new CopyOnWriteArrayList<>();
@@ -766,9 +830,9 @@ public final class ObservableTest extends PathBaseTest {
         }
 
         static Recorder observe(
-                Path file,
-                LinkOption option,
-                boolean verifyTracker
+            Path file,
+            LinkOption option,
+            boolean verifyTracker
         ) throws Exception {
 
             try (Tracker tracker = registerMockTracker()) {
@@ -786,10 +850,10 @@ public final class ObservableTest extends PathBaseTest {
         }
 
         private static void verifyTracker(
-                Recorder observer,
-                Tracker tracker,
-                Path file,
-                LinkOption option
+            Recorder observer,
+            Tracker tracker,
+            Path file,
+            LinkOption option
         ) throws IOException {
 
             ArgumentCaptor<Integer> fd = ArgumentCaptor.forClass(Integer.class);
@@ -797,10 +861,10 @@ public final class ObservableTest extends PathBaseTest {
             InOrder order = inOrder(tracker);
             order.verify(tracker).onInit(fd.capture());
             order.verify(tracker).onWatchAdded(
-                    eq(fd.getValue()),
-                    aryEq(file.toByteArray()),
-                    anyInt(),
-                    wd.capture()
+                eq(fd.getValue()),
+                aryEq(file.toByteArray()),
+                anyInt(),
+                wd.capture()
             );
 
             observer.fd = fd.getValue();
@@ -811,10 +875,10 @@ public final class ObservableTest extends PathBaseTest {
                 Paths.listDirectories(file, (Consumer) dir -> {
                     if (dir.isReadable()) {
                         order.verify(tracker).onWatchAdded(
-                                eq(fd.getValue()),
-                                AdditionalMatchers.aryEq(dir.toByteArray()),
-                                anyInt(),
-                                wd.capture()
+                            eq(fd.getValue()),
+                            AdditionalMatchers.aryEq(dir.toByteArray()),
+                            anyInt(),
+                            wd.capture()
                         );
                     }
                     observer.allChildWds.put(dir, wd.getValue());
@@ -858,7 +922,8 @@ public final class ObservableTest extends PathBaseTest {
         @Override
         public void onEvent(Event event, Path childFileName) {
             observer.onEvent(event, childFileName);
-            Path target = childFileName == null ? root : root.concat(childFileName);
+            Path target =
+                childFileName == null ? root : root.concat(childFileName);
             actual.add(WatchEvent.create(event, target));
             if (expected.equals(actual)) {
                 success.countDown();
@@ -890,7 +955,7 @@ public final class ObservableTest extends PathBaseTest {
             action.call();
             if (!success.await(5, SECONDS)) {
                 fail("\nexpected: " + this.expected
-                        + "\nactual:   " + this.actual);
+                    + "\nactual:   " + this.actual);
             }
         }
 
@@ -916,10 +981,11 @@ public final class ObservableTest extends PathBaseTest {
             try (Tracker tracker = registerMockTracker()) {
                 await(CREATE, target, target::createDirectory);
                 verify(tracker).onWatchAdded(
-                        eq(fd),
-                        aryEq(target.toByteArray()),
-                        anyInt(),
-                        anyInt());
+                    eq(fd),
+                    aryEq(target.toByteArray()),
+                    anyInt(),
+                    anyInt()
+                );
             }
         }
 
@@ -959,39 +1025,41 @@ public final class ObservableTest extends PathBaseTest {
 
                 } else {
                     fail("\nroot=" + root +
-                            "\nsrc=" + src +
-                            "\ndst=" + dst);
+                        "\nsrc=" + src +
+                        "\ndst=" + dst);
                 }
             }
         }
 
         private void awaitMoveWithinSameDir(
-                Tracker tracker,
-                Path src,
-                Path dst) throws Exception {
+            Tracker tracker,
+            Path src,
+            Path dst
+        ) throws Exception {
 
             boolean isDir = src.stat(NOFOLLOW).isDirectory();
             await(
-                    asList(
-                            event(DELETE, src),
-                            event(CREATE, dst)
-                    ),
-                    () -> src.rename(dst)
+                asList(
+                    event(DELETE, src),
+                    event(CREATE, dst)
+                ),
+                () -> src.rename(dst)
             );
             InOrder order = inOrder(tracker);
             if (isDir) {
                 order.verify(tracker).onWatchRemoved(fd, allChildWds.get(src));
                 order.verify(tracker).onWatchAdded(
-                        eq(fd),
-                        aryEq(dst.toByteArray()),
-                        anyInt(),
-                        anyInt()
+                    eq(fd),
+                    aryEq(dst.toByteArray()),
+                    anyInt(),
+                    anyInt()
                 );
             }
             order.verifyNoMoreInteractions();
         }
 
-        private void awaitMoveFrom(Tracker tracker, Path src, Path dst) throws Exception {
+        private void awaitMoveFrom(Tracker tracker, Path src, Path dst)
+            throws Exception {
             boolean srcIsDir = src.stat(NOFOLLOW).isDirectory();
             await(DELETE, src, () -> src.rename(dst));
             if (srcIsDir) {
@@ -1000,7 +1068,8 @@ public final class ObservableTest extends PathBaseTest {
             verifyNoMoreInteractions(tracker);
         }
 
-        private void awaitMoveTo(Tracker tracker, Path src, Path dst) throws Exception {
+        private void awaitMoveTo(Tracker tracker, Path src, Path dst)
+            throws Exception {
             boolean srcIsDir = src.stat(NOFOLLOW).isDirectory();
             boolean readable = src.isReadable();
             await(CREATE, dst, () -> src.rename(dst));
@@ -1008,29 +1077,31 @@ public final class ObservableTest extends PathBaseTest {
             if (srcIsDir) {
                 if (readable) {
                     verify(tracker).onWatchAdded(
-                            eq(fd),
-                            aryEq(dst.toByteArray()),
-                            anyInt(),
-                            anyInt()
+                        eq(fd),
+                        aryEq(dst.toByteArray()),
+                        anyInt(),
+                        anyInt()
                     );
-                    verify(observer, never()).onIncompleteObservation(any(IOException.class));
+                    verify(observer, never()).onIncompleteObservation(any(
+                        IOException.class));
                 } else {
                     verify(tracker, never()).onWatchAdded(
-                            eq(fd),
-                            aryEq(dst.toByteArray()),
-                            anyInt(),
-                            anyInt()
+                        eq(fd),
+                        aryEq(dst.toByteArray()),
+                        anyInt(),
+                        anyInt()
                     );
                     verify(observer).onIncompleteObservation(any(IOException.class));
                 }
             } else {
                 verify(tracker, never()).onWatchAdded(
-                        eq(fd),
-                        aryEq(dst.toByteArray()),
-                        anyInt(),
-                        anyInt()
+                    eq(fd),
+                    aryEq(dst.toByteArray()),
+                    anyInt(),
+                    anyInt()
                 );
-                verify(observer, never()).onIncompleteObservation(any(IOException.class));
+                verify(observer, never()).onIncompleteObservation(any(
+                    IOException.class));
             }
             verifyNoMoreInteractions(tracker);
         }
@@ -1052,15 +1123,18 @@ public final class ObservableTest extends PathBaseTest {
             }
         }
 
-        void awaitModifyByCreateFile(Path target, String child) throws Exception {
+        void awaitModifyByCreateFile(Path target, String child)
+            throws Exception {
             awaitModify(target, () -> target.concat(child).createFile());
         }
 
-        void awaitModifyByCreateDir(Path target, String child) throws Exception {
+        void awaitModifyByCreateDir(Path target, String child)
+            throws Exception {
             awaitModify(target, () -> target.concat(child).createDirectory());
         }
 
-        void awaitModifyBySetPermissions(Path target, Set<Permission> perms) throws Exception {
+        void awaitModifyBySetPermissions(Path target, Set<Permission> perms)
+            throws Exception {
             awaitModify(target, () -> target.setPermissions(perms));
         }
 
@@ -1068,11 +1142,16 @@ public final class ObservableTest extends PathBaseTest {
             awaitModify(target, () -> target.concat(child).delete());
         }
 
-        void awaitModifyBySetLastModifiedTime(Path target, Instant time) throws Exception {
-            awaitModify(target, () -> target.setLastModifiedTime(NOFOLLOW, time));
+        void awaitModifyBySetLastModifiedTime(Path target, Instant time)
+            throws Exception {
+            awaitModify(
+                target,
+                () -> target.setLastModifiedTime(NOFOLLOW, time)
+            );
         }
 
-        void awaitModifyByAppend(Path target, CharSequence content) throws Exception {
+        void awaitModifyByAppend(Path target, CharSequence content)
+            throws Exception {
             awaitModify(target, () -> Paths.writeUtf8(target, content));
         }
     }
@@ -1091,7 +1170,8 @@ public final class ObservableTest extends PathBaseTest {
         return tracker;
     }
 
-    public static abstract class Tracker implements InotifyTracker.Tracker, Closeable {
+    public static abstract class Tracker
+        implements InotifyTracker.Tracker, Closeable {
 
         volatile Throwable closeReason;
 
@@ -1135,9 +1215,9 @@ public final class ObservableTest extends PathBaseTest {
         @Override
         public String toString() {
             return "WatchEvent{" +
-                    "kind=" + kind +
-                    ", path=" + path +
-                    '}';
+                "kind=" + kind +
+                ", path=" + path +
+                '}';
         }
 
         @Override
@@ -1152,7 +1232,7 @@ public final class ObservableTest extends PathBaseTest {
             WatchEvent that = (WatchEvent) o;
 
             return kind == that.kind &&
-                    path.equals(that.path);
+                path.equals(that.path);
         }
 
         @Override
@@ -1214,23 +1294,36 @@ public final class ObservableTest extends PathBaseTest {
         }
 
         PostActions awaitCreateFileInParent(String name) {
-            return add((dst, observer) -> observer.awaitCreateFile(dst.parent().concat(name)));
+            return add((dst, observer) -> observer.awaitCreateFile(dst.parent()
+                .concat(name)));
         }
 
         PostActions awaitDelete(String name) {
-            return add((dst, observer) -> observer.awaitModifyByDelete(dst, name));
+            return add((dst, observer) -> observer.awaitModifyByDelete(
+                dst,
+                name
+            ));
         }
 
         PostActions awaitRemoveAllPermissions() {
-            return add((dst, observer) -> observer.awaitModifyBySetPermissions(dst, Permission.none()));
+            return add((dst, observer) -> observer.awaitModifyBySetPermissions(
+                dst,
+                Permission.none()
+            ));
         }
 
         PostActions awaitCreateDir(String name) {
-            return add((dst, observer) -> observer.awaitModifyByCreateDir(dst, name));
+            return add((dst, observer) -> observer.awaitModifyByCreateDir(
+                dst,
+                name
+            ));
         }
 
         PostActions awaitMoveIn(Path src) {
-            return add((dst, observer) -> observer.awaitMove(src, dst.concat(src.name().toPath())));
+            return add((dst, observer) -> observer.awaitMove(
+                src,
+                dst.concat(src.getFileName())
+            ));
         }
 
         PostActions awaitOnIncompleteObservation() {
@@ -1243,7 +1336,8 @@ public final class ObservableTest extends PathBaseTest {
         testMoveDirIn(new PreActions(), post);
     }
 
-    private void testMoveDirIn(PreAction pre, PostAction post) throws Exception {
+    private void testMoveDirIn(PreAction pre, PostAction post)
+        throws Exception {
         Path dst = dir1().concat("a");
         Path src = dir2().concat("a").createDirectory();
         pre.action(src);

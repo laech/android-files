@@ -18,6 +18,7 @@ import linux.ErrnoException;
 import linux.Fcntl;
 import linux.Stdio;
 import linux.Unistd;
+import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -119,10 +120,6 @@ public class Path implements Parcelable, Comparable<Path> {
         return new Path(Paths.get(toString(), path.toString()));
     }
 
-    public Path concat(Name name) {
-        return concat(name.toPath());
-    }
-
     public Path concat(String path) {
         return concat(of(path));
     }
@@ -131,40 +128,54 @@ public class Path implements Parcelable, Comparable<Path> {
         return concat(of(path));
     }
 
-    /**
-     * Gets the name of this file, if any. For example:
-     * <pre>
-     *     "/a/b" ->  "b"
-     *     "/a"   ->  "a"
-     *     "/"    ->  null
-     *     "a"    ->  "a"
-     *     ""     ->  null
-     * </pre>
-     */
-    @Nullable // TODO old code expect not null
-    public Name name() {
-        java.nio.file.Path name = delegate.getFileName();
-        return name == null ? null : Name.of(name.toString());
-    }
-
     public Path getFileName() {
         java.nio.file.Path fileName = delegate.getFileName();
         return fileName == null ? null : new Path(fileName);
     }
 
     public Optional<String> getName() {
-        return Optional.ofNullable(name()).map(name -> name.toString());
+        return Optional.ofNullable(getFileName()).map(Path::toString);
     }
 
+    /**
+     * The name part without extension.
+     * <pre>
+     *  base.ext  ->  base
+     *  base      ->  base
+     *  base.     ->  base.
+     * .base.ext  -> .base
+     * .base      -> .base
+     * .base.     -> .base.
+     * .          -> .
+     * ..         -> ..
+     * </pre>
+     */
     public Optional<String> getBaseName() {
-        return Optional.ofNullable(name()).map(name -> name.base());
+        return getName()
+            .map(name -> name.lastIndexOf(".") == 0
+                ? name
+                : FilenameUtils.getBaseName(name));
     }
 
+    /**
+     * The extension part without base name.
+     * <pre>
+     *  base.ext  ->  ext
+     * .base.ext  ->  ext
+     *  base      ->  ""
+     *  base.     ->  ""
+     * .base      ->  ""
+     * .base.     ->  ""
+     * .          ->  ""
+     * ..         ->  ""
+     * </pre>
+     */
     public Optional<String> getExtension() {
-        return Optional.ofNullable(name()).map(name -> {
-            String extension = name.extension();
-            return "".equals(extension) ? null : extension;
-        });
+        return getName()
+            .map(name -> name.lastIndexOf(".") == 0
+                ? null
+                : FilenameUtils.getExtension(name))
+            .filter(it -> !it.isEmpty());
     }
 
     public Optional<String> getExtensionWithLeadingDot() {
