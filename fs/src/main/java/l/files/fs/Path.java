@@ -147,6 +147,11 @@ public class Path implements Parcelable {
         return name == null ? null : Name.of(name.toString());
     }
 
+    public Path getFileName() {
+        java.nio.file.Path fileName = delegate.getFileName();
+        return fileName == null ? null : new Path(fileName);
+    }
+
     public Optional<String> getName() {
         return Optional.ofNullable(name()).map(name -> name.toString());
     }

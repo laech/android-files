@@ -10,6 +10,7 @@ import android.util.Log;
 import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.NoSuchFileException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +54,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     private static final Handler handler = new Handler(getMainLooper());
 
-    private final ConcurrentMap<Name, FileInfo> data;
+    private final ConcurrentMap<Path, FileInfo> data;
     private final Path root;
     private final int watchLimit;
 
@@ -358,7 +359,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
          * resulting both "a" and "A" be displayed.
          */
         if (DELETE.equals(event)) {
-            return data.remove(path.name()) != null;
+            return data.remove(path.getFileName()) != null;
         }
 
         try {
@@ -367,15 +368,15 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
             Stat targetStat = readTargetStatus(path, stat);
             Path target = readTarget(path, stat);
             FileInfo newStat = FileInfo.create(path, stat, target, targetStat, collator);
-            FileInfo oldStat = data.put(path.name(), newStat);
+            FileInfo oldStat = data.put(path.getFileName(), newStat);
             return !newStat.equals(oldStat);
 
-        } catch (FileNotFoundException e) {
-            return data.remove(path.name()) != null;
+        } catch (FileNotFoundException | NoSuchFileException e) {
+            return data.remove(path.getFileName()) != null;
 
         } catch (IOException e) {
             data.put(
-                    path.name(),
+                    path.getFileName(),
                     FileInfo.create(path, null, null, null, collator));
             return true;
         }
