@@ -1,5 +1,8 @@
 package l.files.testing.fs;
 
+import androidx.annotation.Nullable;
+import l.files.fs.Path;
+import l.files.fs.TraversalCallback;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -9,15 +12,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.EnumSet;
 
-import androidx.annotation.Nullable;
-
-import l.files.fs.Path;
-import l.files.fs.TraversalCallback;
-
+import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
+import static java.nio.file.attribute.PosixFilePermission.*;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.fs.Permission.OWNER_EXECUTE;
-import static l.files.fs.Permission.OWNER_READ;
-import static l.files.fs.Permission.OWNER_WRITE;
 import static l.files.fs.TraversalCallback.Result.CONTINUE;
 import static org.junit.Assert.assertTrue;
 
@@ -47,7 +44,7 @@ public abstract class PathBaseTest {
     }
 
     private void delete(Path path) throws IOException {
-        if (!path.exists(NOFOLLOW)) {
+        if (!path.exists(NOFOLLOW_LINKS)) {
             return;
         }
         path.traverse(NOFOLLOW, new TraversalCallback.Base<Path>() {
@@ -56,7 +53,7 @@ public abstract class PathBaseTest {
             public Result onPreVisit(Path path) throws IOException {
                 if (path.stat(NOFOLLOW).isDirectory()) {
                     path.setPermissions(EnumSet.of(
-                            OWNER_READ, OWNER_WRITE, OWNER_EXECUTE));
+                        OWNER_READ, OWNER_WRITE, OWNER_EXECUTE));
                 }
                 return CONTINUE;
             }
@@ -93,7 +90,7 @@ public abstract class PathBaseTest {
 
     private File createTempFolder() throws IOException {
         File dir = File.createTempFile(getClass().getSimpleName()
-                + "." + testName.getMethodName(), null);
+            + "." + testName.getMethodName(), null);
         assertTrue(dir.delete());
         assertTrue(dir.mkdirs());
         return dir;

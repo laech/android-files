@@ -1,15 +1,12 @@
 package l.files.ui.browser.text;
 
 import android.content.Context;
-
 import androidx.annotation.Nullable;
-
 import l.files.fs.Stat;
 import l.files.ui.base.fs.FileInfo;
 import l.files.ui.browser.R;
 
 import static android.text.format.Formatter.formatShortFileSize;
-import static java.util.concurrent.TimeUnit.MINUTES;
 
 public final class FileTextLayouts {
 
@@ -34,7 +31,7 @@ public final class FileTextLayouts {
         }
         String date = formatter.apply(stat, context);
         String size = formatShortFileSize(context, stat.size());
-        boolean hasDate = stat.lastModifiedTime().to(MINUTES) > 0;
+        boolean hasDate = stat.lastModifiedTime().getEpochSecond() > 0;
         boolean isFile = stat.isRegularFile();
         if (hasDate && isFile) {
             return context.getString(R.string.x_dot_y, date, size);

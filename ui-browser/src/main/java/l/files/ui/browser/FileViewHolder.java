@@ -303,7 +303,7 @@ public final class FileViewHolder
     @Nullable
     private Bitmap getCachedThumbnail(Path path, Stat stat) {
         long now = currentTimeMillis();
-        long then = stat.lastModifiedTime().to(MILLISECONDS);
+        long then = stat.lastModifiedTime().toEpochMilli();
         // TODO this will cause thumbnail not to be the latest correct one
         boolean changedMoreThan5SecondsAgo = now - then > 5000;
         if (changedMoreThan5SecondsAgo) {

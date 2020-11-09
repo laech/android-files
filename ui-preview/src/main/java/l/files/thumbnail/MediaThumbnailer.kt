@@ -14,13 +14,11 @@ internal object MediaThumbnailer : Thumbnailer<Path> {
 
   override fun create(input: Path, max: Rect, context: Context) =
     MediaMetadataRetriever().let { retriever ->
-      input.newInputStream().use {
-        try {
-          retriever.setDataSource(it.fd)
-          MediaMetadataRetrievers.getAnyThumbnail(retriever, max)
-        } finally {
-          retriever.release()
-        }
+      try {
+        retriever.setDataSource(input.toString())
+        MediaMetadataRetrievers.getAnyThumbnail(retriever, max)
+      } finally {
+        retriever.release()
       }
     }
 }

@@ -15,6 +15,10 @@ import org.mockito.InOrder;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.nio.file.attribute.FileTime;
+import java.nio.file.attribute.PosixFileAttributes;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -24,16 +28,16 @@ import java.util.concurrent.CountDownLatch;
 import static java.lang.Integer.parseInt;
 import static java.lang.Math.random;
 import static java.lang.Thread.sleep;
+import static java.nio.file.attribute.PosixFilePermission.OWNER_EXECUTE;
+import static java.nio.file.attribute.PosixFilePermission.OWNER_WRITE;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.base.Objects.requireNonNull;
-import static l.files.fs.Instant.EPOCH;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.ObservableTest.Recorder.observe;
-import static l.files.fs.Permission.OWNER_EXECUTE;
-import static l.files.fs.Permission.OWNER_WRITE;
 import static l.files.fs.event.Event.*;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
@@ -78,7 +82,10 @@ public final class ObservableTest extends PathBaseTest {
         observables.add(createRandomChildDir(dir1()));
 
         Path unobservable = dir1().concat("unobservable").createDirectory();
-        Paths.removePermissions(unobservable, Permission.read());
+        Paths.removePermissions(
+            unobservable,
+            PosixFilePermissions.fromString("r--r--r--")
+        );
 
         observables.add(createRandomChildDir(dir1()));
         observables.add(createRandomChildDir(dir1()));
@@ -116,14 +123,6 @@ public final class ObservableTest extends PathBaseTest {
         Path file = dir1().concat("file").createFile();
         try (Recorder observer = observe(file, NOFOLLOW)) {
             observer.awaitModifyByAppend(file, "hello");
-        }
-    }
-
-    @Test
-    public void observe_on_link() throws Exception {
-        Path file = dir1().concat("link").createSymbolicLink(dir2());
-        try (Recorder observer = observe(file, NOFOLLOW)) {
-            observer.awaitModifyBySetLastModifiedTime(file, EPOCH);
         }
     }
 
@@ -361,26 +360,6 @@ public final class ObservableTest extends PathBaseTest {
     }
 
     @Test
-    public void observe_on_link_no_follow() throws Exception {
-
-        Path dir = dir1().concat("dir").createDirectory();
-        Path link = dir1().concat("link").createSymbolicLink(dir);
-        Path file = link.concat("file");
-        try (Recorder observer = observe(link, NOFOLLOW)) {
-            // No follow, can observe the link
-            observer.awaitModifyBySetLastModifiedTime(link, Instant.of(1, 1));
-            // But not the child content
-            try {
-                observer.awaitCreateFile(file);
-            } catch (AssertionError e) {
-                assertTrue(observer.actual.isEmpty());
-                return;
-            }
-            fail();
-        }
-    }
-
-    @Test
     public void observe_on_link_follow() throws Exception {
 
         Path dir = dir1().concat("dir").createDirectory();
@@ -453,7 +432,7 @@ public final class ObservableTest extends PathBaseTest {
                 ),
                 compose(
                     child::createFile,
-                    () -> child.rename(dir2().concat("b"))
+                    () -> child.move(dir2().concat("b"))
                 )
             );
         }
@@ -528,15 +507,21 @@ public final class ObservableTest extends PathBaseTest {
         Path observable
     ) throws Exception {
 
-        Set<Permission> oldPerms = target.stat(NOFOLLOW).permissions();
-        Set<Permission> newPerms = EnumSet.copyOf(oldPerms);
+        Set<PosixFilePermission> oldPerms = target.readAttributes(
+            PosixFileAttributes.class,
+            java.nio.file.LinkOption.NOFOLLOW_LINKS
+        ).permissions();
+        Set<PosixFilePermission> newPerms = EnumSet.copyOf(oldPerms);
+
+        Set<PosixFilePermission> writePermissions =
+            PosixFilePermissions.fromString("-w--w--w-");
 
         if (newPerms.equals(oldPerms)) {
-            newPerms.addAll(Permission.write());
+            newPerms.addAll(writePermissions);
         }
 
         if (newPerms.equals(oldPerms)) {
-            newPerms.removeAll(Permission.write());
+            newPerms.removeAll(writePermissions);
         }
 
         try (Recorder observer = observe(observable)) {
@@ -559,8 +544,8 @@ public final class ObservableTest extends PathBaseTest {
         Path observable
     ) throws Exception {
 
-        Instant old = target.stat(NOFOLLOW).lastModifiedTime();
-        Instant t = Instant.of(old.seconds() - 1, old.nanos());
+        java.time.Instant old = target.stat(NOFOLLOW).lastModifiedTime();
+        java.time.Instant t = old.minusSeconds(1);
         try (Recorder observer = observe(observable)) {
             observer.awaitModifyBySetLastModifiedTime(target, t);
         }
@@ -659,7 +644,10 @@ public final class ObservableTest extends PathBaseTest {
         throws Exception {
 
         Path dir = dir1().concat("dir").createDirectory();
-        Paths.removePermissions(dir, Permission.read());
+        Paths.removePermissions(
+            dir,
+            PosixFilePermissions.fromString("r--r--r--")
+        );
         try (Recorder observer = observe(dir1())) {
             observer.awaitOnIncompleteObservation();
             observer.awaitCreateFile(dir1().concat("parent watch still works"));
@@ -738,10 +726,10 @@ public final class ObservableTest extends PathBaseTest {
                     event(MODIFY, parent)
                 ),
                 compose(
-                    () -> file.createFile(),
-                    () -> dir.createDirectory(),
-                    () -> file.rename(dir2().concat("file")),
-                    () -> dir.rename(dir2().concat("dir"))
+                    file::createFile,
+                    dir::createDirectory,
+                    () -> file.move(dir2().concat("file")),
+                    () -> dir.move(dir2().concat("dir"))
                 )
             );
         }
@@ -760,8 +748,8 @@ public final class ObservableTest extends PathBaseTest {
                     event(MODIFY, parent)
                 ),
                 compose(
-                    () -> file.rename(parent.concat("file")),
-                    () -> dir.rename(parent.concat("dir"))
+                    () -> file.move(parent.concat("file")),
+                    () -> dir.move(parent.concat("dir"))
                 )
             );
         }
@@ -1018,10 +1006,10 @@ public final class ObservableTest extends PathBaseTest {
                     awaitMoveSelf(tracker, dst);
 
                 } else if (root.equals(src.parent().parent())) {
-                    awaitModify(src.parent(), () -> src.rename(dst));
+                    awaitModify(src.parent(), () -> src.move(dst));
 
                 } else if (root.equals(dst.parent().parent())) {
-                    awaitModify(dst.parent(), () -> src.rename(dst));
+                    awaitModify(dst.parent(), () -> src.move(dst));
 
                 } else {
                     fail("\nroot=" + root +
@@ -1043,7 +1031,7 @@ public final class ObservableTest extends PathBaseTest {
                     event(DELETE, src),
                     event(CREATE, dst)
                 ),
-                () -> src.rename(dst)
+                () -> src.move(dst)
             );
             InOrder order = inOrder(tracker);
             if (isDir) {
@@ -1061,7 +1049,7 @@ public final class ObservableTest extends PathBaseTest {
         private void awaitMoveFrom(Tracker tracker, Path src, Path dst)
             throws Exception {
             boolean srcIsDir = src.stat(NOFOLLOW).isDirectory();
-            await(DELETE, src, () -> src.rename(dst));
+            await(DELETE, src, () -> src.move(dst));
             if (srcIsDir) {
                 verify(tracker).onWatchRemoved(fd, allChildWds.get(src));
             }
@@ -1072,7 +1060,7 @@ public final class ObservableTest extends PathBaseTest {
             throws Exception {
             boolean srcIsDir = src.stat(NOFOLLOW).isDirectory();
             boolean readable = src.isReadable();
-            await(CREATE, dst, () -> src.rename(dst));
+            await(CREATE, dst, () -> src.move(dst));
 
             if (srcIsDir) {
                 if (readable) {
@@ -1107,7 +1095,7 @@ public final class ObservableTest extends PathBaseTest {
         }
 
         private void awaitMoveSelf(Tracker tracker, Path dst) throws Exception {
-            await(DELETE, root, () -> root.rename(dst));
+            await(DELETE, root, () -> root.move(dst));
             for (int wd : validChildWds) {
                 verify(tracker).onWatchRemoved(fd, wd);
             }
@@ -1133,8 +1121,10 @@ public final class ObservableTest extends PathBaseTest {
             awaitModify(target, () -> target.concat(child).createDirectory());
         }
 
-        void awaitModifyBySetPermissions(Path target, Set<Permission> perms)
-            throws Exception {
+        void awaitModifyBySetPermissions(
+            Path target,
+            Set<PosixFilePermission> perms
+        ) throws Exception {
             awaitModify(target, () -> target.setPermissions(perms));
         }
 
@@ -1142,11 +1132,13 @@ public final class ObservableTest extends PathBaseTest {
             awaitModify(target, () -> target.concat(child).delete());
         }
 
-        void awaitModifyBySetLastModifiedTime(Path target, Instant time)
-            throws Exception {
+        void awaitModifyBySetLastModifiedTime(
+            Path target,
+            java.time.Instant time
+        ) throws Exception {
             awaitModify(
                 target,
-                () -> target.setLastModifiedTime(NOFOLLOW, time)
+                () -> target.setLastModifiedTime(FileTime.from(time))
             );
         }
 
@@ -1268,7 +1260,10 @@ public final class ObservableTest extends PathBaseTest {
         }
 
         PreActions removeReadPermissions() {
-            return add(src -> Paths.removePermissions(src, Permission.read()));
+            return add(src -> Paths.removePermissions(
+                src,
+                PosixFilePermissions.fromString("r--r--r--")
+            ));
         }
 
         PreActions createFile(String name) {
@@ -1307,8 +1302,7 @@ public final class ObservableTest extends PathBaseTest {
 
         PostActions awaitRemoveAllPermissions() {
             return add((dst, observer) -> observer.awaitModifyBySetPermissions(
-                dst,
-                Permission.none()
+                dst, emptySet()
             ));
         }
 

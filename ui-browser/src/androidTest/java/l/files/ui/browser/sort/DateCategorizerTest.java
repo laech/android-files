@@ -2,26 +2,20 @@ package l.files.ui.browser.sort;
 
 import android.annotation.SuppressLint;
 import android.content.res.Resources;
-
+import l.files.fs.Path;
+import l.files.ui.base.fs.FileInfo;
+import l.files.ui.browser.Header;
+import l.files.ui.browser.R;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.IOException;
+import java.nio.file.attribute.FileTime;
 import java.text.Collator;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.GregorianCalendar;
-import java.util.List;
-
-import l.files.fs.Instant;
-import l.files.fs.Path;
-import l.files.ui.base.fs.FileInfo;
-import l.files.ui.browser.Header;
-import l.files.ui.browser.R;
+import java.util.*;
 
 import static androidx.test.InstrumentationRegistry.getInstrumentation;
 import static java.util.Arrays.asList;
@@ -77,55 +71,56 @@ public final class DateCategorizerTest {
         FileInfo prevYear2_3 = file(addDaysToMidnight(-365 * 2 - 1));
 
         List<Object> expected = asList(
-                header(R.string.future),
-                future1,
-                future2,
-                header(R.string.today),
-                today1,
-                today2,
-                header(R.string.yesterday),
-                yesterday1,
-                yesterday2,
-                header(R.string.previous_7_days),
-                prev7Days1,
-                prev7Days2,
-                header(R.string.previous_30_days),
-                prev30Days1,
-                prev30Days2,
-                header(formatMonth(addDaysToMidnight(-31))),
-                prevMonth1_1,
-                prevMonth1_2,
-                header(formatMonth(addDaysToMidnight(-31 * 2))),
-                prevMonth2,
-                header(formatMonth(addDaysToMidnight(-31 * 3))),
-                prevMonth3,
-                header("2013"),
-                prevYear1,
-                header("2012"),
-                prevYear2_1,
-                prevYear2_2,
-                prevYear2_3
+            header(R.string.future),
+            future1,
+            future2,
+            header(R.string.today),
+            today1,
+            today2,
+            header(R.string.yesterday),
+            yesterday1,
+            yesterday2,
+            header(R.string.previous_7_days),
+            prev7Days1,
+            prev7Days2,
+            header(R.string.previous_30_days),
+            prev30Days1,
+            prev30Days2,
+            header(formatMonth(addDaysToMidnight(-31))),
+            prevMonth1_1,
+            prevMonth1_2,
+            header(formatMonth(addDaysToMidnight(-31 * 2))),
+            prevMonth2,
+            header(formatMonth(addDaysToMidnight(-31 * 3))),
+            prevMonth3,
+            header("2013"),
+            prevYear1,
+            header("2012"),
+            prevYear2_1,
+            prevYear2_2,
+            prevYear2_3
         );
 
         List<Object> actual = categorizer.categorize(res, asList(
-                future1,
-                future2,
-                today1,
-                today2,
-                yesterday1,
-                yesterday2,
-                prev7Days1,
-                prev7Days2,
-                prev30Days1,
-                prev30Days2,
-                prevMonth1_1,
-                prevMonth1_2,
-                prevMonth2,
-                prevMonth3,
-                prevYear1,
-                prevYear2_1,
-                prevYear2_2,
-                prevYear2_3));
+            future1,
+            future2,
+            today1,
+            today2,
+            yesterday1,
+            yesterday2,
+            prev7Days1,
+            prev7Days2,
+            prev30Days1,
+            prev30Days2,
+            prevMonth1_1,
+            prevMonth1_2,
+            prevMonth2,
+            prevMonth3,
+            prevYear1,
+            prevYear2_1,
+            prevYear2_2,
+            prevYear2_3
+        ));
 
         assertEquals(names(expected), names(actual));
     }
@@ -134,8 +129,8 @@ public final class DateCategorizerTest {
         List<String> names = new ArrayList<>(items.size());
         for (Object item : items) {
             names.add(item instanceof Header
-                    ? item.toString()
-                    : ((FileInfo) item).selfPath().getFileName().toString());
+                ? item.toString()
+                : ((FileInfo) item).selfPath().getFileName().toString());
         }
         return unmodifiableList(names);
     }
@@ -162,38 +157,39 @@ public final class DateCategorizerTest {
     @Test
     public void modifiedToday() throws Exception {
         assertCategory(
-                res.getString(R.string.today),
-                file(midnight),
-                file(now));
+            res.getString(R.string.today),
+            file(midnight),
+            file(now)
+        );
     }
 
     @Test
     public void modifiedYesterday() throws Exception {
         assertCategory(
-                res.getString(R.string.yesterday),
-                file(millis(midnight) - 1),
-                file(millis(midnight) - HOURS.toMillis(6)),
-                file(millis(midnight) - DAYS.toMillis(1))
+            res.getString(R.string.yesterday),
+            file(millis(midnight) - 1),
+            file(millis(midnight) - HOURS.toMillis(6)),
+            file(millis(midnight) - DAYS.toMillis(1))
         );
     }
 
     @Test
     public void modified7Days() throws Exception {
         assertCategory(
-                res.getString(R.string.previous_7_days),
-                file(millis(midnight) - DAYS.toMillis(1) - 1),
-                file(millis(midnight) - DAYS.toMillis(2)),
-                file(millis(midnight) - DAYS.toMillis(7))
+            res.getString(R.string.previous_7_days),
+            file(millis(midnight) - DAYS.toMillis(1) - 1),
+            file(millis(midnight) - DAYS.toMillis(2)),
+            file(millis(midnight) - DAYS.toMillis(7))
         );
     }
 
     @Test
     public void modified30Days() throws Exception {
         assertCategory(
-                res.getString(R.string.previous_30_days),
-                file(millis(midnight) - DAYS.toMillis(7) - 1),
-                file(millis(midnight) - DAYS.toMillis(16)),
-                file(millis(midnight) - DAYS.toMillis(30))
+            res.getString(R.string.previous_30_days),
+            file(millis(midnight) - DAYS.toMillis(7) - 1),
+            file(millis(midnight) - DAYS.toMillis(16)),
+            file(millis(midnight) - DAYS.toMillis(30))
         );
     }
 
@@ -259,8 +255,9 @@ public final class DateCategorizerTest {
     @Test
     public void modifiedUnknownFuture() throws Exception {
         assertCategory(
-                res.getString(R.string.future),
-                file(millis(midnight) + DAYS.toMillis(1)));
+            res.getString(R.string.future),
+            file(millis(midnight) + DAYS.toMillis(1))
+        );
     }
 
     private FileInfo file(Calendar time) throws IOException {
@@ -269,7 +266,7 @@ public final class DateCategorizerTest {
 
     private FileInfo file(long time) throws IOException {
         Path path = Path.of(temporaryFolder.newFile());
-        path.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(time));
+        path.setLastModifiedTime(FileTime.fromMillis(time));
         return FileInfo.create(path, path.stat(NOFOLLOW), null, null, collator);
     }
 

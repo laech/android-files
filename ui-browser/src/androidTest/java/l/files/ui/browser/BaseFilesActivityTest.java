@@ -1,31 +1,28 @@
 package l.files.ui.browser;
 
 import android.content.Intent;
+import androidx.annotation.Nullable;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.uiautomator.UiDevice;
 import androidx.test.uiautomator.UiObject;
 import androidx.test.uiautomator.UiObjectNotFoundException;
 import androidx.test.uiautomator.UiSelector;
-
+import l.files.base.Throwables;
+import l.files.fs.Path;
+import l.files.fs.TraversalCallback;
+import l.files.testing.fs.Paths;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
-
-import androidx.annotation.Nullable;
-
-import l.files.base.Provider;
-import l.files.base.Throwables;
-import l.files.fs.Path;
-import l.files.fs.Permission;
-import l.files.fs.TraversalCallback;
-import l.files.testing.fs.Paths;
 
 import static android.content.Intent.ACTION_MAIN;
 import static android.os.Build.VERSION.SDK_INT;
@@ -33,25 +30,24 @@ import static android.os.Build.VERSION_CODES.M;
 import static android.os.Environment.getExternalStorageDirectory;
 import static androidx.test.InstrumentationRegistry.getInstrumentation;
 import static java.lang.System.currentTimeMillis;
+import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.TraversalCallback.Result.CONTINUE;
 import static l.files.ui.browser.FilesActivity.EXTRA_DIRECTORY;
 import static l.files.ui.browser.FilesActivity.EXTRA_WATCH_LIMIT;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class BaseFilesActivityTest {
 
     @Rule
     public final ActivityTestRule<FilesActivity> activityTestRule =
-            new ActivityTestRule<FilesActivity>(FilesActivity.class, false, false) {
-                @Nullable
-                @Override
-                protected Intent getActivityIntent() {
-                    return activityIntent;
-                }
-            };
+        new ActivityTestRule<FilesActivity>(FilesActivity.class, false, false) {
+            @Nullable
+            @Override
+            protected Intent getActivityIntent() {
+                return activityIntent;
+            }
+        };
 
 
     @Nullable
@@ -80,19 +76,15 @@ public class BaseFilesActivityTest {
         dir = Path.of(createTempFolder());
         setActivityIntent(newIntent(dir));
         screen = new UiFileActivity(
-                getInstrumentation(),
-                new Provider<FilesActivity>() {
-                    @Override
-                    public FilesActivity get() {
-                        return getActivity();
-                    }
-                });
+            getInstrumentation(),
+            () -> getActivity()
+        );
     }
 
     @After
     public void tearDown() throws Exception {
         screen = null;
-        if (dir != null && dir.exists(NOFOLLOW)) {
+        if (dir != null && dir.exists(NOFOLLOW_LINKS)) {
             dir.traverse(NOFOLLOW, delete());
         }
         dir = null;
@@ -122,8 +114,10 @@ public class BaseFilesActivityTest {
         // Only do this once otherwise will slow down every test
         if (SDK_INT >= M && !permissionAllowed) {
             permissionAllowed = true;
-            UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
-            UiObject allowPermissions = device.findObject(new UiSelector().textMatches("^(?i)allow$"));
+            UiDevice device =
+                UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
+            UiObject allowPermissions =
+                device.findObject(new UiSelector().textMatches("^(?i)allow$"));
             if (allowPermissions.exists()) {
                 try {
                     allowPermissions.click();
@@ -138,9 +132,9 @@ public class BaseFilesActivityTest {
         return new TraversalCallback.Base<Path>() {
 
             @Override
-            public Result onPreVisit(Path file) throws IOException {
+            public Result onPreVisit(Path file) {
                 try {
-                    file.setPermissions(Permission.all());
+                    file.setPermissions(EnumSet.allOf(PosixFilePermission.class));
                 } catch (IOException ignored) {
                 }
                 return CONTINUE;
@@ -172,11 +166,12 @@ public class BaseFilesActivityTest {
 
     Intent newIntent(Path dir, int watchLimit) {
         return new Intent(ACTION_MAIN)
-                .putExtra(EXTRA_DIRECTORY, dir)
-                .putExtra(EXTRA_WATCH_LIMIT, watchLimit);
+            .putExtra(EXTRA_DIRECTORY, dir)
+            .putExtra(EXTRA_WATCH_LIMIT, watchLimit);
     }
 
-    static final class CannotRenameFileToDifferentCasing extends RuntimeException {
+    static final class CannotRenameFileToDifferentCasing
+        extends RuntimeException {
         CannotRenameFileToDifferentCasing(String detailMessage) {
             super(detailMessage);
         }
@@ -200,18 +195,19 @@ public class BaseFilesActivityTest {
             Paths.deleteRecursiveIfExists(dir);
             Paths.createFiles(src);
 
-            assertTrue(src.exists(NOFOLLOW));
+            assertTrue(src.exists(NOFOLLOW_LINKS));
             assertTrue(
-                    "Assuming the underlying file system is case insensitive",
-                    dst.exists(NOFOLLOW));
+                "Assuming the underlying file system is case insensitive",
+                dst.exists(NOFOLLOW_LINKS)
+            );
 
-            src.rename(dst);
+            src.move(dst);
             List<Path> actual = dir.list(new ArrayList<Path>());
             List<Path> expected = Collections.singletonList(dst);
             assertEquals(1, actual.size());
             if (!expected.equals(actual)) {
                 throw new CannotRenameFileToDifferentCasing(
-                        "\nexpected: " + expected + "\nactual: " + actual);
+                    "\nexpected: " + expected + "\nactual: " + actual);
             }
 
             setActivityIntent(newIntent(dir));
@@ -238,8 +234,8 @@ public class BaseFilesActivityTest {
 
         }
 
-        assertFalse(src.exists(NOFOLLOW));
-        assertFalse(dst.exists(NOFOLLOW));
+        assertFalse(src.exists(NOFOLLOW_LINKS));
+        assertFalse(dst.exists(NOFOLLOW_LINKS));
 
         return dir;
     }

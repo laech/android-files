@@ -3,21 +3,20 @@ package l.files.ui.browser.menu;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
+import android.util.Log;
 import android.widget.EditText;
-
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-
+import androidx.annotation.Nullable;
 import l.files.base.Consumer;
 import l.files.fs.Path;
 import l.files.ui.browser.FileCreationFragment;
 import l.files.ui.browser.R;
 
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+
 import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
+import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static l.files.base.Objects.requireNonNull;
-import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.ui.base.fs.IOExceptions.message;
 
 public final class NewDirFragment extends FileCreationFragment {
 
@@ -53,7 +52,8 @@ public final class NewDirFragment extends FileCreationFragment {
     private void suggestName() {
         String name = getString(R.string.untitled_dir);
         Path base = parent().concat(name);
-        suggestion = new SuggestName(this).executeOnExecutor(THREAD_POOL_EXECUTOR, base);
+        suggestion =
+            new SuggestName(this).executeOnExecutor(THREAD_POOL_EXECUTOR, base);
     }
 
     private static final class SuggestName extends AsyncTask<Path, Void, Path> {
@@ -73,17 +73,13 @@ public final class NewDirFragment extends FileCreationFragment {
             Path parent = base.parent();
             assert parent != null;
             Path file = base;
-            try {
-                for (int i = 2; file.exists(NOFOLLOW); i++) {
-                    if (isCancelled()) {
-                        return null;
-                    }
-                    file = parent.concat(baseName + " " + i);
+            for (int i = 2; file.exists(NOFOLLOW_LINKS); i++) {
+                if (isCancelled()) {
+                    return null;
                 }
-                return file;
-            } catch (IOException e) {
-                return null;
+                file = parent.concat(baseName + " " + i);
             }
+            return file;
         }
 
         @Override
@@ -120,7 +116,8 @@ public final class NewDirFragment extends FileCreationFragment {
         new CreateDir(toaster, dir).executeOnExecutor(THREAD_POOL_EXECUTOR);
     }
 
-    private static final class CreateDir extends AsyncTask<Path, Void, IOException> {
+    private static final class CreateDir
+        extends AsyncTask<Path, Void, IOException> {
 
         private final Consumer<String> toaster;
         private final Path dir;
@@ -145,7 +142,8 @@ public final class NewDirFragment extends FileCreationFragment {
         protected void onPostExecute(@Nullable IOException e) {
             super.onPostExecute(e);
             if (e != null) {
-                toaster.accept(message(e));
+                Log.d(TAG, "", e);
+                toaster.accept(e.toString());
             }
         }
 

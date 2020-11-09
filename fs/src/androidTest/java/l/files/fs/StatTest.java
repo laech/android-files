@@ -3,39 +3,23 @@ package l.files.fs;
 import android.os.Parcel;
 import android.system.Os;
 import android.system.StructStat;
-
+import l.files.testing.fs.PathBaseTest;
+import linux.ErrnoException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 
-import l.files.testing.fs.PathBaseTest;
-import linux.ErrnoException;
-
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.fs.Stat.chmod;
-import static l.files.fs.Stat.fstat;
-import static l.files.fs.Stat.lstat;
-import static l.files.fs.Stat.mkdir;
-import static l.files.fs.Stat.stat;
+import static l.files.fs.Stat.*;
 import static linux.Errno.ENOENT;
 import static linux.Unistd.symlink;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public final class StatTest extends PathBaseTest {
 
@@ -63,7 +47,7 @@ public final class StatTest extends PathBaseTest {
         assertNotEquals(0, fields.length);
         for (Field field : fields) {
             if (Modifier.isStatic(field.getModifiers()) &&
-                    field.getType() == int.class) {
+                field.getType() == int.class) {
                 field.setAccessible(true);
                 int value = field.getInt(null);
                 assertNotEquals(field.getName(), Stat.placeholder(), value);
@@ -99,7 +83,8 @@ public final class StatTest extends PathBaseTest {
     }
 
     @Test
-    public void fstat_returns_correct_information_for_directory() throws Exception {
+    public void fstat_returns_correct_information_for_directory()
+        throws Exception {
 
         File dir = temporaryFolder.newFolder();
         FileDescriptor fd = Os.open(dir.getPath(), 0, 0);
@@ -115,7 +100,8 @@ public final class StatTest extends PathBaseTest {
     }
 
     @Test
-    public void stat_throws_NullPointerException_on_null_path_arg() throws Exception {
+    public void stat_throws_NullPointerException_on_null_path_arg()
+        throws Exception {
         try {
             stat(null);
             fail();
@@ -130,12 +116,14 @@ public final class StatTest extends PathBaseTest {
     }
 
     @Test
-    public void stat_returns_correct_information_for_directory() throws Exception {
+    public void stat_returns_correct_information_for_directory()
+        throws Exception {
         assertStat(new File("/"));
     }
 
     @Test
-    public void stat_returns_correct_information_for_symlink() throws Exception {
+    public void stat_returns_correct_information_for_symlink()
+        throws Exception {
         File file = createNonEmptyFile();
         File link = new File(file.getParent(), file.getName() + "-link");
         symlink(file.getPath().getBytes(), link.getPath().getBytes());
@@ -143,14 +131,26 @@ public final class StatTest extends PathBaseTest {
     }
 
     private static void assertStat(File file) throws Exception {
-        assertStat(file, Os.stat(file.getPath()), stat(file.getPath().getBytes()));
+        assertStat(
+            file,
+            Os.stat(file.getPath()),
+            stat(file.getPath().getBytes())
+        );
     }
 
     private static void assertLstat(File file) throws Exception {
-        assertStat(file, Os.lstat(file.getPath()), lstat(file.getPath().getBytes()));
+        assertStat(
+            file,
+            Os.lstat(file.getPath()),
+            lstat(file.getPath().getBytes())
+        );
     }
 
-    private static void assertStat(File expectedFile, StructStat expectedStat, Stat actual) {
+    private static void assertStat(
+        File expectedFile,
+        StructStat expectedStat,
+        Stat actual
+    ) {
         assertEquals(expectedStat.st_size, actual.size);
         assertEquals(expectedStat.st_blocks, actual.blocks);
         assertEquals(expectedStat.st_mode, actual.mode);
@@ -162,7 +162,8 @@ public final class StatTest extends PathBaseTest {
     }
 
     @Test
-    public void lstat_throws_NullPointerException_on_null_path_arg() throws Exception {
+    public void lstat_throws_NullPointerException_on_null_path_arg()
+        throws Exception {
         try {
             lstat(null);
             fail();
@@ -177,12 +178,14 @@ public final class StatTest extends PathBaseTest {
     }
 
     @Test
-    public void lstat_returns_correct_information_for_directory() throws Exception {
+    public void lstat_returns_correct_information_for_directory()
+        throws Exception {
         assertLstat(new File("/"));
     }
 
     @Test
-    public void lstat_returns_correct_information_for_symlink() throws Exception {
+    public void lstat_returns_correct_information_for_symlink()
+        throws Exception {
         File file = createNonEmptyFile();
         File link = new File(file.getParent(), file.getName() + "-link");
         symlink(file.getPath().getBytes(), link.getPath().getBytes());
@@ -192,7 +195,8 @@ public final class StatTest extends PathBaseTest {
     }
 
     @Test
-    public void chmod_throws_NullPointerException_on_null_path_arg() throws Exception {
+    public void chmod_throws_NullPointerException_on_null_path_arg()
+        throws Exception {
         try {
             chmod(null, 0);
             fail();
@@ -233,7 +237,8 @@ public final class StatTest extends PathBaseTest {
     }
 
     @Test
-    public void mkdir_throws_NullPointerException_on_null_path_arg() throws Exception {
+    public void mkdir_throws_NullPointerException_on_null_path_arg()
+        throws Exception {
         try {
             mkdir(null, 0);
             fail();
@@ -251,25 +256,5 @@ public final class StatTest extends PathBaseTest {
         } catch (ErrnoException e) {
             assertEquals(ENOENT, e.errno);
         }
-    }
-
-
-    @Test
-    @SuppressWarnings("OctalInteger")
-    public void mkdir_creates_new_dir() throws Exception {
-        File dir = new File(temporaryFolder.getRoot(), "dir");
-
-        mkdir(dir.getPath().getBytes(), 0700);
-        assertTrue(dir.exists());
-        assertTrue(dir.isDirectory());
-
-        Stat stat = stat(dir.getPath().getBytes());
-        assertEquals(
-                EnumSet.of(
-                        Permission.OWNER_READ,
-                        Permission.OWNER_WRITE,
-                        Permission.OWNER_EXECUTE),
-                stat.permissions());
-
     }
 }

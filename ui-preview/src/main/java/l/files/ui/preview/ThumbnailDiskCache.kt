@@ -6,7 +6,6 @@ import android.os.Process
 import android.os.Process.setThreadPriority
 import android.util.Log
 import l.files.fs.*
-import l.files.fs.LinkOption.FOLLOW
 import l.files.fs.LinkOption.NOFOLLOW
 import l.files.fs.exception.DirectoryNotEmpty
 import l.files.ui.base.graphics.Rect
@@ -16,6 +15,10 @@ import java.io.IOException
 import java.lang.System.currentTimeMillis
 import java.lang.System.nanoTime
 import java.lang.ref.WeakReference
+import java.nio.file.NoSuchFileException
+import java.nio.file.StandardCopyOption.REPLACE_EXISTING
+import java.nio.file.StandardOpenOption.CREATE
+import java.nio.file.attribute.FileTime
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.concurrent.ThreadFactory
@@ -40,7 +43,7 @@ internal class ThumbnailDiskCache(getCacheDir: () -> Path) :
 
   @Throws(IOException::class)
   fun cleanup() {
-    if (!cacheDir.exists(FOLLOW)) {
+    if (!cacheDir.exists()) {
       return
     }
 
@@ -55,7 +58,7 @@ internal class ThumbnailDiskCache(getCacheDir: () -> Path) :
             } catch (ignore: DirectoryNotEmpty) {
             }
           } else {
-            val lastModifiedMillis = stat.lastModifiedTime().to(MILLISECONDS)
+            val lastModifiedMillis = stat.lastModifiedTime().toEpochMilli()
             if (MILLISECONDS.toDays(now - lastModifiedMillis) > 30) {
               path.delete()
             }
@@ -87,7 +90,7 @@ internal class ThumbnailDiskCache(getCacheDir: () -> Path) :
     if (result == null) {
       val time = stat.lastModifiedTime()
       result = cacheDir(path, constraint)
-        .concat("${time.seconds()}-${time.nanos()}")
+        .concat("${time.epochSecond}-${time.nano}")
     }
 
     return result!!
@@ -119,16 +122,15 @@ internal class ThumbnailDiskCache(getCacheDir: () -> Path) :
         }
 
         try {
-          cache.setLastModifiedTime(
-            NOFOLLOW,
-            Instant.ofMillis(currentTimeMillis())
-          )
+          cache.setLastModifiedTime(FileTime.fromMillis(currentTimeMillis()))
         } catch (ignore: IOException) {
         }
 
         ScaledBitmap(bitmap, originalSize)
       }
     } catch (e: FileNotFoundException) {
+      null
+    } catch (e: NoSuchFileException) {
       null
     }
   }
@@ -149,7 +151,7 @@ internal class ThumbnailDiskCache(getCacheDir: () -> Path) :
 
     val tmp = parent.concat("${cache.fileName}-${nanoTime()}")
     try {
-      tmp.newBufferedDataOutputStream(false).use { out ->
+      tmp.newBufferedDataOutputStream(CREATE).use { out ->
         out.writeByte(VERSION.toInt())
         out.writeInt(value.originalSize().width())
         out.writeInt(value.originalSize().height())
@@ -164,7 +166,7 @@ internal class ThumbnailDiskCache(getCacheDir: () -> Path) :
       throw e
     }
 
-    tmp.rename(cache)
+    tmp.move(cache, REPLACE_EXISTING)
     return null
   }
 
@@ -183,6 +185,7 @@ internal class ThumbnailDiskCache(getCacheDir: () -> Path) :
         }
       }
     } catch (ignored: FileNotFoundException) {
+    } catch (ignored: NoSuchFileException) {
     }
   }
 

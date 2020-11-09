@@ -1,20 +1,21 @@
 package l.files.operations;
 
 import android.util.Log;
+import l.files.fs.Path;
+import l.files.fs.Stat;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.nio.channels.ClosedByInterruptException;
+import java.nio.file.attribute.FileTime;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import l.files.fs.Instant;
-import l.files.fs.Path;
-import l.files.fs.Stat;
-
+import static java.nio.file.StandardOpenOption.CREATE;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
 final class Copy extends Paste {
@@ -40,7 +41,7 @@ final class Copy extends Paste {
 
     @Override
     void paste(Path sourcePath, Path destinationPath)
-            throws IOException {
+        throws IOException {
 
         sourcePath.traverse(NOFOLLOW, new OperationVisitor() {
 
@@ -52,7 +53,11 @@ final class Copy extends Paste {
 
             @Override
             public Result onPostVisit(Path source) throws IOException {
-                updateDirectoryLastModifiedTime(source, sourcePath, destinationPath);
+                updateDirectoryLastModifiedTime(
+                    source,
+                    sourcePath,
+                    destinationPath
+                );
                 return super.onPostVisit(source);
             }
 
@@ -61,9 +66,10 @@ final class Copy extends Paste {
     }
 
     private void copyItems(
-            Path sourcePath,
-            Path sourceRoot,
-            Path destinationRoot) throws IOException {
+        Path sourcePath,
+        Path sourceRoot,
+        Path destinationRoot
+    ) throws IOException {
 
         Stat sourceStat = sourcePath.stat(NOFOLLOW);
         Path destinationPath = sourcePath.rebase(sourceRoot, destinationRoot);
@@ -84,9 +90,10 @@ final class Copy extends Paste {
     }
 
     private void updateDirectoryLastModifiedTime(
-            Path source,
-            Path sourceRoot,
-            Path destinationRoot) throws IOException {
+        Path source,
+        Path sourceRoot,
+        Path destinationRoot
+    ) throws IOException {
 
         Stat sourceStat = source.stat(NOFOLLOW);
         Path destinationPath = source.rebase(sourceRoot, destinationRoot);
@@ -96,20 +103,21 @@ final class Copy extends Paste {
     }
 
     private void copyLink(
-            Path source,
-            Stat sourceStat,
-            Path destinationPath) throws IOException {
+        Path source,
+        Stat sourceStat,
+        Path destinationPath
+    ) throws IOException {
 
         Path sourceLinkTarget = source.readSymbolicLink();
         destinationPath.createSymbolicLink(sourceLinkTarget);
         copiedByteCount.addAndGet(sourceStat.size());
         copiedItemCount.incrementAndGet();
-        updateLastModifiedTime(sourceStat, destinationPath);
     }
 
     private void createDirectory(
-            Stat sourceStat,
-            Path destinationPath) throws IOException {
+        Stat sourceStat,
+        Path destinationPath
+    ) throws IOException {
 
         destinationPath.createDirectory();
         copiedByteCount.addAndGet(sourceStat.size());
@@ -117,16 +125,17 @@ final class Copy extends Paste {
     }
 
     private void copyFile(
-            Path sourcePath,
-            Stat sourceStat,
-            Path destinationPath) throws IOException {
+        Path sourcePath,
+        Stat sourceStat,
+        Path destinationPath
+    ) throws IOException {
 
         if (isInterrupted()) {
             return;
         }
 
         try (InputStream source = sourcePath.newInputStream();
-             OutputStream sink = destinationPath.newOutputStream(false)) {
+             OutputStream sink = destinationPath.newOutputStream(CREATE)) {
 
 
             // TODO perform sync to disk
@@ -151,11 +160,12 @@ final class Copy extends Paste {
                 destinationPath.delete();
             } catch (IOException ex) {
                 Log.w(getClass().getSimpleName(),
-                        "Failed to delete file on failure " + destinationPath, ex);
+                    "Failed to delete file on failure " + destinationPath, ex
+                );
             }
 
             if (!(e instanceof ClosedByInterruptException) &&
-                    !(e instanceof InterruptedIOException)) {
+                !(e instanceof InterruptedIOException)) {
                 throw e;
             }
 
@@ -163,14 +173,16 @@ final class Copy extends Paste {
     }
 
     private void updateLastModifiedTime(
-            Stat sourceStat,
-            Path destinationPath) {
+        Stat sourceStat,
+        Path destinationPath
+    ) {
         try {
             Instant sourceLastModified = sourceStat.lastModifiedTime();
-            destinationPath.setLastModifiedTime(NOFOLLOW, sourceLastModified);
+            destinationPath.setLastModifiedTime(FileTime.from(sourceLastModified));
         } catch (IOException e) {
             Log.w(getClass().getSimpleName(),
-                    "Failed to set last modified time " + destinationPath, e);
+                "Failed to set last modified time " + destinationPath, e
+            );
         }
     }
 

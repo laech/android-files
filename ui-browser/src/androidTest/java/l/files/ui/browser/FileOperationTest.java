@@ -8,8 +8,8 @@ import java.util.concurrent.TimeUnit;
 
 import static java.lang.System.currentTimeMillis;
 import static java.lang.Thread.sleep;
+import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.testing.Tests.timeout;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -34,10 +34,10 @@ public final class FileOperationTest extends BaseFilesActivityTest {
             .ok();
 
         timeout(5, SECONDS, () -> {
-            assertFalse(file.exists(NOFOLLOW));
-            assertFalse(link.exists(NOFOLLOW));
-            assertFalse(dir1.exists(NOFOLLOW));
-            assertFalse(dir2.exists(NOFOLLOW));
+            assertFalse(file.exists(NOFOLLOW_LINKS));
+            assertFalse(link.exists(NOFOLLOW_LINKS));
+            assertFalse(dir1.exists(NOFOLLOW_LINKS));
+            assertFalse(dir2.exists(NOFOLLOW_LINKS));
         });
 
     }
@@ -55,8 +55,8 @@ public final class FileOperationTest extends BaseFilesActivityTest {
             .paste();
 
         timeout(5, SECONDS, () -> {
-            assertFalse(file.exists(NOFOLLOW));
-            assertTrue(dir.concat(file.getFileName()).exists(NOFOLLOW));
+            assertFalse(file.exists(NOFOLLOW_LINKS));
+            assertTrue(dir.concat(file.getFileName()).exists(NOFOLLOW_LINKS));
         });
 
     }
@@ -107,11 +107,11 @@ public final class FileOperationTest extends BaseFilesActivityTest {
         Path file,
         int time,
         TimeUnit unit
-    ) throws InterruptedException, IOException {
+    ) throws InterruptedException {
 
         long end = currentTimeMillis() + unit.toMillis(time);
         while (currentTimeMillis() < end) {
-            if (file.exists(NOFOLLOW)) {
+            if (file.exists(NOFOLLOW_LINKS)) {
                 return true;
             }
             sleep(20);

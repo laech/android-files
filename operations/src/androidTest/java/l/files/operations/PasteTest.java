@@ -1,5 +1,8 @@
 package l.files.operations;
 
+import l.files.fs.Path;
+import l.files.testing.fs.PathBaseTest;
+import l.files.testing.fs.Paths;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -7,14 +10,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import l.files.fs.Path;
-import l.files.testing.fs.PathBaseTest;
-import l.files.testing.fs.Paths;
-
 import static java.lang.Thread.currentThread;
+import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
-import static l.files.fs.LinkOption.NOFOLLOW;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -29,7 +28,7 @@ public abstract class PasteTest extends PathBaseTest {
         Path src = dir1().concat("empty").createDirectory();
         Path dstDir = dir1().concat("dst").createDirectory();
         create(singleton(src), dstDir).execute();
-        assertTrue(dir1().concat("dst/empty").exists(NOFOLLOW));
+        assertTrue(dir1().concat("dst/empty").exists(NOFOLLOW_LINKS));
     }
 
     /**
@@ -51,10 +50,10 @@ public abstract class PasteTest extends PathBaseTest {
 
         create(sources, dstDir).execute();
 
-        assertTrue(dir1().concat("1/a.txt").exists(NOFOLLOW));
-        assertTrue(dir1().concat("1/b.mp4").exists(NOFOLLOW));
-        assertTrue(dir1().concat("1/a 2.txt").exists(NOFOLLOW));
-        assertTrue(dir1().concat("1/b 2.mp4").exists(NOFOLLOW));
+        assertTrue(dir1().concat("1/a.txt").exists(NOFOLLOW_LINKS));
+        assertTrue(dir1().concat("1/b.mp4").exists(NOFOLLOW_LINKS));
+        assertTrue(dir1().concat("1/a 2.txt").exists(NOFOLLOW_LINKS));
+        assertTrue(dir1().concat("1/b 2.mp4").exists(NOFOLLOW_LINKS));
     }
 
     /**
@@ -73,17 +72,17 @@ public abstract class PasteTest extends PathBaseTest {
 
         create(sources, dstDir).execute();
 
-        assertTrue(dir1().concat("b/a/1.txt").exists(NOFOLLOW));
-        assertTrue(dir1().concat("b/a 2/1.txt").exists(NOFOLLOW));
-        assertTrue(dir1().concat("b/a 2/b/2.txt").exists(NOFOLLOW));
-        assertTrue(dir1().concat("b/a 2/b/3.txt").exists(NOFOLLOW));
+        assertTrue(dir1().concat("b/a/1.txt").exists(NOFOLLOW_LINKS));
+        assertTrue(dir1().concat("b/a 2/1.txt").exists(NOFOLLOW_LINKS));
+        assertTrue(dir1().concat("b/a 2/b/2.txt").exists(NOFOLLOW_LINKS));
+        assertTrue(dir1().concat("b/a 2/b/3.txt").exists(NOFOLLOW_LINKS));
     }
 
     @Test
     public void doesNothingIfAlreadyCancelledOnExecution() throws Exception {
         Set<Path> sources = new HashSet<>(asList(
-                Paths.createFiles(dir1().concat("a/1.txt")),
-                Paths.createFiles(dir1().concat("a/2.txt"))
+            Paths.createFiles(dir1().concat("a/1.txt")),
+            Paths.createFiles(dir1().concat("a/2.txt"))
         ));
         Path dstDir = dir1().concat("b").createDirectory();
 
@@ -130,8 +129,8 @@ public abstract class PasteTest extends PathBaseTest {
     }
 
     abstract Paste create(
-            Set<? extends Path> sourcePaths,
-            Path destinationDir
+        Set<? extends Path> sourcePaths,
+        Path destinationDir
     );
 
 }

@@ -1,17 +1,15 @@
 package l.files.ui.browser;
 
-import org.junit.Test;
-
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.testing.fs.Paths;
+import org.junit.Test;
 
-import static android.text.format.DateUtils.FORMAT_SHOW_DATE;
-import static android.text.format.DateUtils.FORMAT_SHOW_TIME;
-import static android.text.format.DateUtils.formatDateTime;
+import java.nio.file.attribute.FileTime;
+
+import static android.text.format.DateUtils.*;
 import static android.text.format.Formatter.formatFileSize;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static l.files.fs.Instant.EPOCH;
+import static java.time.Instant.EPOCH;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class InfoTest extends BaseFilesActivityTest {
@@ -28,15 +26,16 @@ public final class InfoTest extends BaseFilesActivityTest {
         Stat st3 = child3.stat(NOFOLLOW);
 
         screen()
-                .longClick(child1)
-                .click(child2)
-                .click(child3)
-                .getInfo()
-                .assertSize(formatSizeCount(
-                        st1.size()
-                                + st2.size()
-                                + st3.size(),
-                        3));
+            .longClick(child1)
+            .click(child2)
+            .click(child3)
+            .getInfo()
+            .assertSize(formatSizeCount(
+                st1.size()
+                    + st2.size()
+                    + st3.size(),
+                3
+            ));
     }
 
     @Test
@@ -47,26 +46,26 @@ public final class InfoTest extends BaseFilesActivityTest {
         Stat stat = path.stat(NOFOLLOW);
 
         screen()
-                .longClick(path)
-                .getInfo()
-                .assertName(path.getFileName().toString())
-                .assertDate(formatDate(stat))
-                .assertSize(formatSize(stat.size()));
+            .longClick(path)
+            .getInfo()
+            .assertName(path.getFileName().toString())
+            .assertDate(formatDate(stat))
+            .assertSize(formatSize(stat.size()));
     }
 
     @Test
     public void gets_info_of_link() throws Exception {
 
-        dir().setLastModifiedTime(NOFOLLOW, EPOCH);
+        dir().setLastModifiedTime(FileTime.from(EPOCH));
         Path path = dir().concat("link").createSymbolicLink(dir());
         Stat stat = path.stat(NOFOLLOW);
 
         screen()
-                .longClick(path)
-                .getInfo()
-                .assertName(path.getFileName().toString())
-                .assertDate(formatDate(stat))
-                .assertSize(formatSize(stat.size()));
+            .longClick(path)
+            .getInfo()
+            .assertName(path.getFileName().toString())
+            .assertDate(formatDate(stat))
+            .assertSize(formatSize(stat.size()));
     }
 
     @Test
@@ -76,11 +75,11 @@ public final class InfoTest extends BaseFilesActivityTest {
         Stat stat = dir.stat(NOFOLLOW);
 
         screen()
-                .longClick(dir)
-                .getInfo()
-                .assertName(dir.getFileName().toString())
-                .assertDate(formatDate(stat))
-                .assertSize(formatSizeCount(stat.size(), 1));
+            .longClick(dir)
+            .getInfo()
+            .assertName(dir.getFileName().toString())
+            .assertDate(formatDate(stat))
+            .assertSize(formatSizeCount(stat.size(), 1));
     }
 
     @Test
@@ -97,20 +96,21 @@ public final class InfoTest extends BaseFilesActivityTest {
         Stat childStat3 = child3.stat(NOFOLLOW);
 
         screen()
-                .longClick(dir)
-                .getInfo()
-                .assertName(dir.getFileName().toString())
-                .assertDate(formatDate(stat))
-                .assertSize(formatSizeCount(
-                        stat.size()
-                                + childStat1.size()
-                                + childStat2.size()
-                                + childStat3.size(),
-                        4));
+            .longClick(dir)
+            .getInfo()
+            .assertName(dir.getFileName().toString())
+            .assertDate(formatDate(stat))
+            .assertSize(formatSizeCount(
+                stat.size()
+                    + childStat1.size()
+                    + childStat2.size()
+                    + childStat3.size(),
+                4
+            ));
     }
 
     private String formatDate(Stat stat) {
-        long millis = stat.lastModifiedTime().to(MILLISECONDS);
+        long millis = stat.lastModifiedTime().toEpochMilli();
         int flags = FORMAT_SHOW_DATE | FORMAT_SHOW_TIME;
         return formatDateTime(getActivity(), millis, flags);
     }
@@ -122,10 +122,11 @@ public final class InfoTest extends BaseFilesActivityTest {
 
     private String formatSizeCount(long size, int count) {
         return getActivity().getResources().getQuantityString(
-                l.files.ui.info.R.plurals.x_size_y_items,
-                count,
-                formatSize(size),
-                count);
+            l.files.ui.info.R.plurals.x_size_y_items,
+            count,
+            formatSize(size),
+            count
+        );
     }
 
 }

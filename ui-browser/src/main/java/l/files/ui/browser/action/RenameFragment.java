@@ -3,6 +3,7 @@ package l.files.ui.browser.action;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.appcompat.view.ActionMode;
 import android.util.Pair;
@@ -190,7 +191,7 @@ public final class RenameFragment extends FileCreationFragment {
         @Override
         protected IOException doInBackground(Path... params) {
             try {
-                src.rename(dst);
+                src.move(dst);
                 return null;
             } catch (IOException e) {
                 return e;
@@ -201,7 +202,8 @@ public final class RenameFragment extends FileCreationFragment {
         protected void onPostExecute(@Nullable IOException e) {
             super.onPostExecute(e);
             if (e != null) {
-                toaster.accept(message(e));
+                Log.d(TAG, "", e);
+                toaster.accept(e.toString());
             }
         }
 

@@ -15,10 +15,8 @@ import kotlinx.coroutines.withContext
 import l.files.base.lifecycle.CollectionLiveData.Companion.setLiveData
 import l.files.base.lifecycle.SetLiveData
 import l.files.base.text.CollationKey
-import l.files.fs.LinkOption
 import l.files.fs.Path
 import java.io.File
-import java.io.IOException
 import java.text.Collator
 import java.util.Collections.unmodifiableSet
 
@@ -86,7 +84,7 @@ private fun decode(encoded: Collection<String>): Set<Path> {
     for (element in encoded) {
         try {
             val path = decode(element)
-            if (exists(path)) {
+            if (path.exists()) {
                 bookmarks.add(path)
             }
         } catch (e: IllegalArgumentException) {
@@ -109,15 +107,9 @@ private fun loadDefaultBookmarks(): Set<Path> {
 }
 
 private fun addIfExists(paths: MutableSet<Path>, path: Path) {
-    if (exists(path)) {
+    if (path.exists()) {
         paths.add(path)
     }
-}
-
-private fun exists(path: Path): Boolean = try {
-    path.exists(LinkOption.FOLLOW)
-} catch (e: IOException) {
-    false
 }
 
 private fun externalStoragePath(name: String): Path =

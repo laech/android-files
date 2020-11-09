@@ -6,6 +6,7 @@ import l.files.fs.exception.AccessDenied
 import l.files.testing.fs.PathBaseTest
 import l.files.testing.fs.Paths
 import org.junit.Test
+import java.nio.file.attribute.PosixFilePermissions
 import java.util.Comparator.comparing
 import java.util.stream.Collectors.toList
 
@@ -31,7 +32,7 @@ class PathTraversalTest : PathBaseTest() {
   fun traverse_continues_on_exception() {
     val a = dir1().concat("a").createDirectory()
     val b = dir1().concat("b").createDirectory()
-    Paths.removePermissions(a, Permission.read())
+    Paths.removePermissions(a, PosixFilePermissions.fromString("r--r--r--"))
 
     val expected = listOf(
       Triple(dir1(), PRE, null),

@@ -1,17 +1,19 @@
 package l.files.operations;
 
-import l.files.fs.Instant;
 import l.files.fs.Path;
 import l.files.testing.fs.Paths;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.nio.file.attribute.BasicFileAttributeView;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static android.os.Build.VERSION.SDK_INT;
-import static android.os.Build.VERSION_CODES.LOLLIPOP;
+import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static l.files.fs.LinkOption.NOFOLLOW;
@@ -70,24 +72,39 @@ public final class CopyTest extends PasteTest {
         Path dir
     ) throws IOException, InterruptedException {
         Path dst = dir.concat(src.getFileName());
-        assertFalse(dst.exists(NOFOLLOW));
+        assertFalse(dst.exists(NOFOLLOW_LINKS));
 
-        Instant mtime = newInstant();
-        src.setLastModifiedTime(NOFOLLOW, mtime);
+        BasicFileAttributeView view = src.getFileAttributeView(
+            BasicFileAttributeView.class,
+            NOFOLLOW_LINKS
+        );
+
+        Instant mtime = view.readAttributes()
+            .lastModifiedTime()
+            .toInstant()
+            .minusSeconds(10);
+
+        src.setLastModifiedTime(FileTime.from(mtime));
+        assertEquals(
+            mtime,
+            view.readAttributes().lastModifiedTime().toInstant()
+        );
 
         copy(src, dir);
 
-        assertTrue(dst.exists(NOFOLLOW));
-        assertEquals(mtime, mtime(src));
-        assertEquals(mtime, mtime(dst));
-    }
-
-    private Instant newInstant() {
-        return Instant.of(100001, SDK_INT >= LOLLIPOP ? 101 : 0);
+        assertTrue(dst.exists(NOFOLLOW_LINKS));
+        assertEquals(
+            mtime,
+            view.readAttributes().lastModifiedTime().toInstant()
+        );
+        assertEquals("src", mtime, mtime(src));
+        assertEquals("dst", mtime, mtime(dst));
     }
 
     private Instant mtime(Path srcFile) throws IOException {
-        return srcFile.stat(NOFOLLOW).lastModifiedTime();
+        return srcFile.readAttributes(BasicFileAttributes.class, NOFOLLOW_LINKS)
+            .lastModifiedTime()
+            .toInstant();
     }
 
     @Test
@@ -119,7 +136,7 @@ public final class CopyTest extends PasteTest {
         Path src = dir1().concat("empty").createDirectory();
         Path dir = dir1().concat("dst").createDirectory();
         copy(src, dir);
-        assertTrue(dir1().concat("dst/empty").exists(NOFOLLOW));
+        assertTrue(dir1().concat("dst/empty").exists(NOFOLLOW_LINKS));
     }
 
     @Test
@@ -129,7 +146,7 @@ public final class CopyTest extends PasteTest {
 
         copy(srcFile, dstDir);
         Path expected = dstDir.concat("empty");
-        if (!expected.exists(NOFOLLOW)) {
+        if (!expected.exists(NOFOLLOW_LINKS)) {
             List<Path> all = dstDir.list(new ArrayList<>());
             fail("File " + expected + " doesn't exist, all files are: " + all);
         }

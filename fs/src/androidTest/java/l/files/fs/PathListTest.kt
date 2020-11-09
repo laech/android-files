@@ -1,10 +1,8 @@
 package l.files.fs
 
-import l.files.fs.exception.AccessDenied
 import l.files.fs.exception.NoSuchEntry
 import l.files.fs.exception.NotDirectory
 import l.files.testing.fs.PathBaseTest
-import l.files.testing.fs.Paths
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.fail
@@ -42,12 +40,6 @@ class PathListTest : PathBaseTest() {
     dir1().list().sortedByName().use {
       assertThat(it.collect(toList()), equalTo(expected))
     }
-  }
-
-  @Test
-  fun access_denied_failure_if_no_permission_to_read() {
-    Paths.removePermissions(dir1(), Permission.read())
-    listWillFail<AccessDenied>(dir1())
   }
 
   @Test

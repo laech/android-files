@@ -1,18 +1,17 @@
 package l.files.ui.browser;
 
-import androidx.test.runner.AndroidJUnit4;
 import android.util.Log;
-
+import androidx.test.runner.AndroidJUnit4;
+import l.files.fs.Path;
+import l.files.testing.fs.Paths;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import l.files.fs.Path;
-import l.files.fs.Permission;
-import l.files.testing.fs.Paths;
+import java.nio.file.attribute.PosixFilePermissions;
 
 import static java.lang.Thread.sleep;
+import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.testing.Tests.timeout;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -23,13 +22,19 @@ public class RenameTest extends BaseFilesActivityTest {
     // TODO test click ok from keyboard
 
     @Test
-    public void can_rename_to_same_name_but_difference_casing() throws Exception {
+    public void can_rename_to_same_name_but_difference_casing()
+        throws Exception {
 
         Path dir;
         try {
-            dir = createCaseInsensitiveFileSystemDir("can_rename_to_same_name_but_difference_casing");
+            dir = createCaseInsensitiveFileSystemDir(
+                "can_rename_to_same_name_but_difference_casing");
         } catch (CannotRenameFileToDifferentCasing e) {
-            Log.i("RenameTest", "skipping test_can_rename_to_same_name_but_difference_casing()", e);
+            Log.i(
+                "RenameTest",
+                "skipping test_can_rename_to_same_name_but_difference_casing()",
+                e
+            );
             return;
         }
 
@@ -44,9 +49,9 @@ public class RenameTest extends BaseFilesActivityTest {
             sleep(50); // Wait for it to finish checking file existence
 
             ui.assertHasNoError()
-                    .assertOkButtonEnabled(true)
-                    .ok()
-                    .assertAllItemsDisplayedInOrder(dst);
+                .assertOkButtonEnabled(true)
+                .ok()
+                .assertAllItemsDisplayedInOrder(dst);
 
         } finally {
             Paths.deleteRecursiveIfExists(dir);
@@ -56,10 +61,13 @@ public class RenameTest extends BaseFilesActivityTest {
     @Test
     public void shows_error_when_failed_to_rename() throws Exception {
         Path file = dir().concat("a").createFile();
-        Paths.removePermissions(dir(), Permission.write());
+        Paths.removePermissions(
+            dir(),
+            PosixFilePermissions.fromString("-w--w--w-")
+        );
         rename(file)
-                .setFilename("abc")
-                .okExpectingFailure("Permission denied");
+            .setFilename("abc")
+            .okExpectingFailure(".+AccessDeniedException.+$");
     }
 
     @Test
@@ -70,8 +78,8 @@ public class RenameTest extends BaseFilesActivityTest {
         rename(from).setFilename(to.getFileName().toString()).ok();
 
         timeout(10, SECONDS, () -> {
-            assertFalse(from.exists(NOFOLLOW));
-            assertTrue(to.exists(NOFOLLOW));
+            assertFalse(from.exists(NOFOLLOW_LINKS));
+            assertTrue(to.exists(NOFOLLOW_LINKS));
         });
     }
 
@@ -89,10 +97,10 @@ public class RenameTest extends BaseFilesActivityTest {
 
     @Test
     public void disables_ok_button_with_no_error_initially_because_we_use_source_filename_as_suggestion()
-            throws Exception {
+        throws Exception {
         rename(dir().concat("a").createDirectory())
-                .assertOkButtonEnabled(false)
-                .assertHasNoError();
+            .assertOkButtonEnabled(false)
+            .assertHasNoError();
     }
 
     @Test
@@ -100,29 +108,29 @@ public class RenameTest extends BaseFilesActivityTest {
         dir().concat("abc").createFile();
         rename(dir().concat("a").createFile())
 
-                .setFilename("abc")
-                .assertOkButtonEnabled(false)
-                .assertHasError(R.string.name_exists)
+            .setFilename("abc")
+            .assertOkButtonEnabled(false)
+            .assertHasError(R.string.name_exists)
 
-                .setFilename("ab")
-                .assertOkButtonEnabled(true)
-                .assertHasNoError();
+            .setFilename("ab")
+            .assertOkButtonEnabled(true)
+            .assertHasNoError();
     }
 
     @Test
     public void rename_button_is_disable_if_there_are_more_than_one_file_checked()
-            throws Exception {
+        throws Exception {
 
         Path f1 = dir().concat("dir").createDirectory();
         Path f2 = dir().concat("a").createFile();
 
         screen()
-                .longClick(f1)
-                .click(f2)
-                .assertCanRename(false)
+            .longClick(f1)
+            .click(f2)
+            .assertCanRename(false)
 
-                .click(f1)
-                .assertCanRename(true);
+            .click(f1)
+            .assertCanRename(true);
     }
 
     private UiRename rename(Path file) {

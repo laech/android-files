@@ -3,35 +3,24 @@ package l.files.ui.browser;
 import android.content.Context;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import com.google.android.material.textfield.TextInputLayout;
-
-import androidx.fragment.app.FragmentActivity;
-import androidx.loader.app.LoaderManager.LoaderCallbacks;
-import androidx.loader.content.AsyncTaskLoader;
-import androidx.loader.content.Loader;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatDialogFragment;
-
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputFilter.LengthFilter;
 import android.text.TextWatcher;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
+import android.view.*;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
-
-import java.io.IOException;
-
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatDialogFragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.loader.app.LoaderManager.LoaderCallbacks;
+import androidx.loader.content.AsyncTaskLoader;
+import androidx.loader.content.Loader;
+import com.google.android.material.textfield.TextInputLayout;
 import l.files.base.Consumer;
 import l.files.fs.Path;
 import l.files.ui.browser.widget.Toaster;
@@ -40,19 +29,19 @@ import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE;
 import static android.view.inputmethod.EditorInfo.IME_ACTION_DONE;
 import static java.lang.System.identityHashCode;
+import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static l.files.base.Objects.requireNonNull;
-import static l.files.fs.LinkOption.NOFOLLOW;
 
 public abstract class FileCreationFragment extends AppCompatDialogFragment
-        implements OnClickListener {
+    implements OnClickListener {
 
     protected static final String ARG_PARENT_PATH = "parent";
 
     private static final int LOADER_CHECKER =
-            identityHashCode(FileCreationFragment.class);
+        identityHashCode(FileCreationFragment.class);
 
     private final LoaderCallbacks<Existence> checkerCallback =
-            new CheckerCallback();
+        new CheckerCallback();
 
     private TextInputLayout layout;
     private EditText editText;
@@ -100,14 +89,14 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
         assert activity != null;
 
         View view = LayoutInflater.from(activity)
-                .inflate(R.layout.file_name, (ViewGroup) getView(), false);
+            .inflate(R.layout.file_name, (ViewGroup) getView(), false);
 
         return new AlertDialog.Builder(activity)
-                .setView(view)
-                .setTitle(getTitleResourceId())
-                .setPositiveButton(android.R.string.ok, this)
-                .setNegativeButton(android.R.string.cancel, null)
-                .create();
+            .setView(view)
+            .setTitle(getTitleResourceId())
+            .setPositiveButton(android.R.string.ok, this)
+            .setNegativeButton(android.R.string.cancel, null)
+            .create();
     }
 
     @Nullable
@@ -161,7 +150,10 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
         }
 
         @Override
-        public void onLoadFinished(Loader<Existence> loader, @Nullable Existence existence) {
+        public void onLoadFinished(
+            Loader<Existence> loader,
+            @Nullable Existence existence
+        ) {
             if (loader.getId() == LOADER_CHECKER) {
                 onCheckFinished(existence);
             }
@@ -196,15 +188,10 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
             this.path = requireNonNull(path);
         }
 
-        @Nullable
         @Override
         public Existence loadInBackground() {
-            try {
-                boolean exists = path.exists(NOFOLLOW);
-                return new Existence(path, exists);
-            } catch (IOException e) {
-                return null;
-            }
+            boolean exists = path.exists(NOFOLLOW_LINKS);
+            return new Existence(path, exists);
         }
 
         @Override
@@ -230,7 +217,12 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
     private class FileTextWatcher implements TextWatcher {
 
         @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        public void onTextChanged(
+            CharSequence s,
+            int start,
+            int before,
+            int count
+        ) {
             if (getFilename().isEmpty()) {
                 getOkButton().setEnabled(false);
             } else {
@@ -239,7 +231,12 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
         }
 
         @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        public void beforeTextChanged(
+            CharSequence s,
+            int start,
+            int count,
+            int after
+        ) {
         }
 
         @Override
@@ -251,7 +248,8 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
 
         @Override
         public boolean onEditorAction(
-                TextView v, int actionId, KeyEvent event) {
+            TextView v, int actionId, KeyEvent event
+        ) {
 
             if (actionId == IME_ACTION_DONE) {
                 AlertDialog dialog = getDialog();

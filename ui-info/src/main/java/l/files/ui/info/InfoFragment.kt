@@ -11,7 +11,6 @@ import l.files.fs.Stat
 import l.files.ui.base.graphics.Rect
 import l.files.ui.preview.Preview
 import l.files.ui.preview.getPreview
-import java.util.concurrent.TimeUnit.MILLISECONDS
 
 class InfoFragment : InfoBaseFragment(), Preview.Callback {
 
@@ -62,7 +61,7 @@ class InfoFragment : InfoBaseFragment(), Preview.Callback {
     }
 
   private fun updateLastModifiedView(stat: Stat) {
-    val millis = stat.lastModifiedTime().to(MILLISECONDS)
+    val millis = stat.lastModifiedTime().toEpochMilli()
     val flags = FORMAT_SHOW_DATE or FORMAT_SHOW_TIME
     val text = formatDateTime(activity, millis, flags)
     lastModifiedView.text = text
@@ -121,7 +120,11 @@ class InfoFragment : InfoBaseFragment(), Preview.Callback {
   private fun animationDuration() =
     resources.getInteger(android.R.integer.config_mediumAnimTime)
 
-  override fun onBlurredThumbnailAvailable(path: Path, stat: Stat, thumbnail: Bitmap) {
+  override fun onBlurredThumbnailAvailable(
+    path: Path,
+    stat: Stat,
+    thumbnail: Bitmap
+  ) {
   }
 
   override fun onPreviewFailed(path: Path, stat: Stat, cause: Any) =

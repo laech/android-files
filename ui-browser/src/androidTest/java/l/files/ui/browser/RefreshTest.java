@@ -1,26 +1,26 @@
 package l.files.ui.browser;
 
 import androidx.test.runner.AndroidJUnit4;
-
+import l.files.fs.Path;
+import l.files.fs.Path.Consumer;
+import l.files.testing.fs.Paths;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.nio.file.attribute.FileTime;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.time.Instant;
 import java.util.Random;
-
-import l.files.fs.Instant;
-import l.files.fs.Path;
-import l.files.fs.Path.Consumer;
-import l.files.fs.Permission;
-import l.files.testing.fs.Paths;
 
 import static java.lang.System.currentTimeMillis;
 import static java.lang.System.nanoTime;
+import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
+import static java.util.Collections.emptySet;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.ui.browser.sort.FileSort.MODIFIED;
 import static l.files.ui.browser.FilesLoader.BATCH_UPDATE_MILLIS;
+import static l.files.ui.browser.sort.FileSort.MODIFIED;
 import static org.junit.Assert.assertFalse;
 
 @RunWith(AndroidJUnit4.class)
@@ -28,7 +28,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
     @Test
     public void manual_refresh_updates_outdated_files()
-            throws Exception {
+        throws Exception {
 
         int watchLimit = 5;
         setActivityIntent(newIntent(dir(), watchLimit));
@@ -38,10 +38,10 @@ public final class RefreshTest extends BaseFilesActivityTest {
         }
 
         screen()
-                .sort()
-                .by(MODIFIED)
-                .assertListMatchesFileSystem(dir())
-                .assertRefreshMenuVisible(true);
+            .sort()
+            .by(MODIFIED)
+            .assertListMatchesFileSystem(dir())
+            .assertRefreshMenuVisible(true);
 
         testRefreshInManualMode(dir());
         testFileCreationDeletionWillStillBeNotifiedInManualMode(dir());
@@ -60,7 +60,11 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
         boolean updated = false;
         try {
-            screen().assertListMatchesFileSystem(dir, BATCH_UPDATE_MILLIS + 2000, MILLISECONDS);
+            screen().assertListMatchesFileSystem(
+                dir,
+                BATCH_UPDATE_MILLIS + 2000,
+                MILLISECONDS
+            );
             updated = true;
         } catch (AssertionError e) {
             // Pass
@@ -70,13 +74,13 @@ public final class RefreshTest extends BaseFilesActivityTest {
     }
 
     private void testFileCreationDeletionWillStillBeNotifiedInManualMode(Path dir)
-            throws IOException {
+        throws IOException {
 
         dir.concat("file-" + nanoTime()).createFile();
         dir.concat("dir-" + nanoTime()).createDirectory();
         dir.concat("before-move-" + nanoTime())
-                .createFile()
-                .rename(dir.concat("after-move-" + nanoTime()));
+            .createFile()
+            .move(dir.concat("after-move-" + nanoTime()));
 
         dir.list((Consumer) file -> {
             Paths.deleteRecursive(file);
@@ -87,7 +91,8 @@ public final class RefreshTest extends BaseFilesActivityTest {
     }
 
     @Test
-    public void auto_detect_files_added_and_removed_while_loading() throws Exception {
+    public void auto_detect_files_added_and_removed_while_loading()
+        throws Exception {
 
         for (int i = 0; i < 10; i++) {
             dir().concat(String.valueOf(i)).createDirectory();
@@ -133,7 +138,8 @@ public final class RefreshTest extends BaseFilesActivityTest {
     }
 
     @Test
-    public void auto_show_correct_information_on_large_change_events() throws Exception {
+    public void auto_show_correct_information_on_large_change_events()
+        throws Exception {
         dir().concat("a").createFile();
         screen().assertListMatchesFileSystem(dir());
 
@@ -142,7 +148,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
             updatePermissions("a");
             updateFileContent("b");
             updateDirectoryChild("c");
-            updateLink("d");
+            updateLink("d", "a", "b");
             updateDirectory("e");
             updateAttributes();
         }
@@ -154,16 +160,17 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
         Random r = new Random();
         dir().list((Consumer) child -> {
-            child.setLastModifiedTime(NOFOLLOW, Instant.of(
-                    r.nextInt((int) (currentTimeMillis() / 1000)),
-                    r.nextInt(999999)));
+            child.setLastModifiedTime(FileTime.from(Instant.ofEpochSecond(
+                r.nextInt((int) (currentTimeMillis() / 1000)),
+                r.nextInt(999999)
+            )));
             return true;
         });
     }
 
     private void updateDirectory(String name) throws IOException {
         Path dir = dir().concat(name);
-        if (dir.exists(NOFOLLOW)) {
+        if (dir.exists(NOFOLLOW_LINKS)) {
             dir.delete();
         } else {
             dir.createDirectory();
@@ -174,9 +181,9 @@ public final class RefreshTest extends BaseFilesActivityTest {
         Path res = dir().concat(name);
         Paths.createFiles(res);
         if (res.isReadable()) {
-            res.setPermissions(Permission.read());
+            res.setPermissions(PosixFilePermissions.fromString("r--r--r--"));
         } else {
-            res.setPermissions(Permission.none());
+            res.setPermissions(emptySet());
         }
     }
 
@@ -189,22 +196,23 @@ public final class RefreshTest extends BaseFilesActivityTest {
     private void updateDirectoryChild(String name) throws IOException {
         Path dir = dir().concat(name).createDirectories();
         Path child = dir.concat("child");
-        if (child.exists(NOFOLLOW)) {
+        if (child.exists(NOFOLLOW_LINKS)) {
             child.delete();
         } else {
             child.createFile();
         }
     }
 
-    private void updateLink(String name) throws IOException {
+    private void updateLink(String name, String target1, String target2)
+        throws IOException {
         Path link = dir().concat(name);
-        if (link.exists(NOFOLLOW)) {
+        if (link.exists(NOFOLLOW_LINKS)) {
             link.delete();
         }
         link.createSymbolicLink(
-                new Random().nextInt() % 2 == 0
-                        ? link
-                        : link.parent()
+            new Random().nextInt() % 2 == 0
+                ? dir().concat(target1)
+                : dir().concat(target2)
         );
     }
 }

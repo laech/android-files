@@ -4,12 +4,11 @@ import androidx.collection.LruCache
 import l.files.fs.Path
 import l.files.fs.Stat
 import l.files.ui.base.graphics.Rect
-import java.util.concurrent.TimeUnit
 
 internal abstract class MemCache<K, V> : Cache<V> {
 
   private fun lastModifiedTime(stat: Stat): Long =
-    stat.lastModifiedTime().to(TimeUnit.MILLISECONDS)
+    stat.lastModifiedTime().toEpochMilli()
 
   override operator fun get(
     path: Path,

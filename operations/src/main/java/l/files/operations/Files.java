@@ -1,21 +1,22 @@
 package l.files.operations;
 
+import l.files.fs.Path;
+import l.files.fs.Stat;
+
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import l.files.fs.Path;
-import l.files.fs.Stat;
-
 import static java.lang.Long.parseLong;
+import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static l.files.fs.LinkOption.FOLLOW;
-import static l.files.fs.LinkOption.NOFOLLOW;
 
 final class Files {
 
-    // TODO match only "* (d+)" otherwise too annoying, and wrong when file is date yyyy-mm-dd or is version e.g. a-2.0
+    // TODO match only "* (d+)" otherwise too annoying, and wrong when file
+    //  is date yyyy-mm-dd or is version e.g. a-2.0
     private static final Pattern NAME_WITH_NUMBER_SUFFIX =
-            Pattern.compile("(.*?\\s*)(\\d+)");
+        Pattern.compile("(.*?\\s*)(\\d+)");
 
     private Files() {
     }
@@ -26,7 +27,8 @@ final class Files {
      * extension if it's a regular file until the returned file
      * represents a nonexistent file.
      */
-    static Path getNonExistentDestinationFile(Path source, Path dstDir) throws IOException {
+    static Path getNonExistentDestinationFile(Path source, Path dstDir)
+        throws IOException {
 
         source = source.toAbsolutePath();
 
@@ -43,7 +45,7 @@ final class Files {
         }
 
         Path dst;
-        while ((dst = dstDir.concat(base + last)).exists(NOFOLLOW)) {
+        while ((dst = dstDir.concat(base + last)).exists(NOFOLLOW_LINKS)) {
             base = increment(base);
         }
 

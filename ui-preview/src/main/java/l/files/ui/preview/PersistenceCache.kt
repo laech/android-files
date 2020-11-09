@@ -11,7 +11,9 @@ import l.files.fs.newBufferedDataOutputStream
 import l.files.ui.base.graphics.Rect
 import java.io.*
 import java.lang.System.nanoTime
-import java.util.concurrent.TimeUnit.MILLISECONDS
+import java.nio.file.NoSuchFileException
+import java.nio.file.StandardCopyOption.REPLACE_EXISTING
+import java.nio.file.StandardOpenOption.CREATE
 import java.util.concurrent.atomic.AtomicBoolean
 
 private const val SUPERCLASS_VERSION = 6
@@ -52,7 +54,7 @@ internal abstract class PersistenceCache<V>(
     val old = super.put(path, stat, constraint, value)
     if (old == null
       || old.value != value
-      || old.time != stat.lastModifiedTime().to(MILLISECONDS)
+      || old.time != stat.lastModifiedTime().toEpochMilli()
     ) {
       dirty.set(true)
     }
@@ -105,6 +107,7 @@ internal abstract class PersistenceCache<V>(
         }
       }
     } catch (ignore: FileNotFoundException) {
+    } catch (ignore: NoSuchFileException) {
     }
   }
 
@@ -135,7 +138,7 @@ internal abstract class PersistenceCache<V>(
     parent.createDirectories()
     val tmp = parent.concat("${file.fileName}-${nanoTime()}")
     try {
-      tmp.newBufferedDataOutputStream(false).use {
+      tmp.newBufferedDataOutputStream(CREATE).use {
         it.writeInt(SUPERCLASS_VERSION)
         it.writeInt(subclassVersion)
         val snapshot = delegate.snapshot()
@@ -155,7 +158,7 @@ internal abstract class PersistenceCache<V>(
       }
       throw e
     }
-    tmp.rename(file)
+    tmp.move(file, REPLACE_EXISTING)
   }
 
   abstract fun write(out: DataOutput, value: V)

@@ -2,6 +2,7 @@ package l.files.ui.browser.text;
 
 import android.content.Context;
 import android.os.Looper;
+import l.files.fs.Stat;
 
 import java.text.DateFormat;
 import java.text.FieldPosition;
@@ -10,20 +11,14 @@ import java.util.Date;
 import java.util.Formatter;
 import java.util.Locale;
 
-import l.files.fs.Stat;
-
 import static android.os.Looper.getMainLooper;
 import static android.os.Looper.myLooper;
 import static android.text.format.DateFormat.getDateFormat;
 import static android.text.format.DateFormat.getTimeFormat;
-import static android.text.format.DateUtils.FORMAT_ABBREV_MONTH;
-import static android.text.format.DateUtils.FORMAT_NO_YEAR;
-import static android.text.format.DateUtils.FORMAT_SHOW_DATE;
-import static android.text.format.DateUtils.formatDateRange;
+import static android.text.format.DateUtils.*;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Calendar.DAY_OF_YEAR;
 import static java.util.Calendar.YEAR;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 final class DateFormatter {
 
@@ -34,15 +29,16 @@ final class DateFormatter {
     private static final StringBuffer tempBuffer = new StringBuffer();
     private static final FieldPosition tempField = new FieldPosition(0);
 
-    private final Formatter tempFormatter = new Formatter(tempBuffer, Locale.getDefault());
+    private final Formatter tempFormatter =
+        new Formatter(tempBuffer, Locale.getDefault());
 
     private static final Calendar currentTime = Calendar.getInstance();
     private static final Calendar thatTime = Calendar.getInstance();
 
     private static final int flags
-            = FORMAT_SHOW_DATE
-            | FORMAT_ABBREV_MONTH
-            | FORMAT_NO_YEAR;
+        = FORMAT_SHOW_DATE
+        | FORMAT_ABBREV_MONTH
+        | FORMAT_NO_YEAR;
 
     private final Looper mainLooper;
 
@@ -55,10 +51,11 @@ final class DateFormatter {
     String apply(Stat file, Context context) {
 
         if (myLooper() != mainLooper) {
-            throw new IllegalStateException("Can only be called on the UI thread.");
+            throw new IllegalStateException(
+                "Can only be called on the UI thread.");
         }
 
-        long millis = file.lastModifiedTime().to(MILLISECONDS);
+        long millis = file.lastModifiedTime().toEpochMilli();
 
         tempDate.setTime(millis);
         tempField.setBeginIndex(0);
@@ -70,9 +67,16 @@ final class DateFormatter {
 
         if (currentTime.get(YEAR) == thatTime.get(YEAR)) {
             if (currentTime.get(DAY_OF_YEAR) == thatTime.get(DAY_OF_YEAR)) {
-                return timeFormat.format(tempDate, tempBuffer, tempField).toString();
+                return timeFormat.format(tempDate, tempBuffer, tempField)
+                    .toString();
             } else {
-                return formatDateRange(context, tempFormatter, millis, millis, flags).toString();
+                return formatDateRange(
+                    context,
+                    tempFormatter,
+                    millis,
+                    millis,
+                    flags
+                ).toString();
             }
         }
 

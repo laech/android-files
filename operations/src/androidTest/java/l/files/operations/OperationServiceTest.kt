@@ -3,7 +3,6 @@ package l.files.operations
 import android.content.ComponentName
 import android.content.Context
 import androidx.test.platform.app.InstrumentationRegistry
-import l.files.fs.LinkOption.NOFOLLOW
 import l.files.testing.fs.PathBaseTest
 import l.files.testing.fs.Paths
 import org.hamcrest.CoreMatchers.equalTo
@@ -12,6 +11,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
+import java.nio.file.LinkOption.NOFOLLOW_LINKS
 import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -63,9 +63,9 @@ class OperationServiceTest : PathBaseTest() {
     service.onCreate()
     service.onStartCommand(newMoveIntent(context, setOf(src), dst), 0, 0)
     listener.await()
-    assertThat(src.exists(NOFOLLOW), equalTo(false))
+    assertThat(src.exists(NOFOLLOW_LINKS), equalTo(false))
     assertThat(
-      dst.concat(src.fileName!!).exists(NOFOLLOW),
+      dst.concat(src.fileName!!).exists(NOFOLLOW_LINKS),
       equalTo(true)
     )
   }
@@ -78,9 +78,9 @@ class OperationServiceTest : PathBaseTest() {
     service.onCreate()
     service.onStartCommand(newCopyIntent(context, setOf(src), dst), 0, 0)
     listener.await()
-    assertThat(src.exists(NOFOLLOW), equalTo(true))
+    assertThat(src.exists(NOFOLLOW_LINKS), equalTo(true))
     assertThat(
-      dst.concat(src.fileName!!).exists(NOFOLLOW),
+      dst.concat(src.fileName!!).exists(NOFOLLOW_LINKS),
       equalTo(true)
     )
   }
@@ -95,8 +95,8 @@ class OperationServiceTest : PathBaseTest() {
     service.onCreate()
     service.onStartCommand(newDeleteIntent(context, listOf(a, b)), 0, 0)
     listener.await()
-    assertThat(a.exists(NOFOLLOW), equalTo(false))
-    assertThat(b.exists(NOFOLLOW), equalTo(false))
+    assertThat(a.exists(NOFOLLOW_LINKS), equalTo(false))
+    assertThat(b.exists(NOFOLLOW_LINKS), equalTo(false))
   }
 
   @Test

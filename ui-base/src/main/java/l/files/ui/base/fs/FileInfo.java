@@ -1,17 +1,14 @@
 package l.files.ui.base.fs;
 
 import androidx.annotation.DrawableRes;
-
-import java.io.IOException;
-import java.text.Collator;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import l.files.base.Objects;
+import l.files.base.text.CollationKey;
 import l.files.fs.Path;
 import l.files.fs.Stat;
-import l.files.base.text.CollationKey;
+
+import java.text.Collator;
 
 import static l.files.base.Objects.requireNonNull;
 
@@ -37,11 +34,12 @@ public final class FileInfo implements Comparable<FileInfo> {
     private final Stat linkTargetStat;
 
     private FileInfo(
-            Path selfPath,
-            @Nullable Stat selfStat,
-            @Nullable Path linkTargetPath,
-            @Nullable Stat linkTargetStat,
-            Collator collator) {
+        Path selfPath,
+        @Nullable Stat selfStat,
+        @Nullable Path linkTargetPath,
+        @Nullable Stat linkTargetStat,
+        Collator collator
+    ) {
 
         this.selfPath = requireNonNull(selfPath);
         this.selfStat = selfStat;
@@ -60,11 +58,7 @@ public final class FileInfo implements Comparable<FileInfo> {
 
     public boolean isReadable() {
         if (readable == null) {
-            try {
-                readable = selfPath().isReadable();
-            } catch (IOException e) {
-                readable = false;
-            }
+            readable = selfPath().isReadable();
         }
         return readable;
     }
@@ -121,11 +115,11 @@ public final class FileInfo implements Comparable<FileInfo> {
     @Override
     public String toString() {
         return "FileInfo{" +
-                "selfPath=" + selfPath +
-                ", selfStat=" + selfStat +
-                ", linkTargetPath=" + linkTargetPath +
-                ", linkTargetStat=" + linkTargetStat +
-                '}';
+            "selfPath=" + selfPath +
+            ", selfStat=" + selfStat +
+            ", linkTargetPath=" + linkTargetPath +
+            ", linkTargetStat=" + linkTargetStat +
+            '}';
     }
 
     @Override
@@ -139,10 +133,10 @@ public final class FileInfo implements Comparable<FileInfo> {
 
         FileInfo that = (FileInfo) o;
 
-        return Objects.equal(selfPath, that.selfPath) &&
-                Objects.equal(selfStat, that.selfStat) &&
-                Objects.equal(linkTargetPath, that.linkTargetPath) &&
-                Objects.equal(linkTargetStat, that.linkTargetStat);
+        return Objects.equal(selfPath, that.selfPath)
+            && Objects.equal(selfStat, that.selfStat)
+            && Objects.equal(linkTargetPath, that.linkTargetPath)
+            && Objects.equal(linkTargetStat, that.linkTargetStat);
     }
 
     @Override
@@ -151,11 +145,12 @@ public final class FileInfo implements Comparable<FileInfo> {
     }
 
     public static FileInfo create(
-            Path path,
-            @Nullable Stat stat,
-            @Nullable Path target,
-            @Nullable Stat targetStat,
-            Collator collator) {
+        Path path,
+        @Nullable Stat stat,
+        @Nullable Path target,
+        @Nullable Stat targetStat,
+        Collator collator
+    ) {
         return new FileInfo(path, stat, target, targetStat, collator);
     }
 

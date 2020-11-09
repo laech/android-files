@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Set;
 
 import androidx.annotation.Nullable;
@@ -129,7 +130,7 @@ public class Stat extends Native implements Parcelable {
     }
 
     public Instant lastModifiedTime() {
-        return Instant.of(mtime, mtime_nsec);
+        return Instant.ofEpochSecond(mtime, mtime_nsec);
     }
 
     public long lastModifiedEpochSecond() {
@@ -170,10 +171,6 @@ public class Stat extends Native implements Parcelable {
 
     public boolean isCharacterDevice() {
         return S_ISCHR(mode);
-    }
-
-    public Set<Permission> permissions() {
-        return Permission.fromStatMode(mode);
     }
 
     @Override

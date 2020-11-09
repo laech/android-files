@@ -1,6 +1,5 @@
 package l.files.ui.preview
 
-import l.files.fs.Instant.EPOCH
 import l.files.fs.LinkOption
 import l.files.fs.LinkOption.NOFOLLOW
 import l.files.fs.Path
@@ -11,6 +10,7 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import java.io.File
+import java.nio.file.attribute.FileTime
 import java.util.*
 
 internal abstract class CacheTest<V, C : Cache<V>> {
@@ -56,7 +56,7 @@ internal abstract class CacheTest<V, C : Cache<V>> {
     val constraint = newConstraint()
     val value = newValue()
     cache.put(file, stat, constraint, value)
-    file.setLastModifiedTime(NOFOLLOW, EPOCH)
+    file.setLastModifiedTime(FileTime.fromMillis(0))
     assertNull(cache.get(file, file.stat(NOFOLLOW), constraint, true))
   }
 

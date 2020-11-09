@@ -1,29 +1,26 @@
 package l.files.testing.fs;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.Writer;
-import java.nio.charset.Charset;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
 import l.files.fs.LinkOption;
 import l.files.fs.Path;
 import l.files.fs.Path.Consumer;
-import l.files.fs.Permission;
 import l.files.fs.TraversalCallback;
 import l.files.fs.event.Observation;
 import l.files.fs.event.Observer;
 import l.files.fs.exception.AlreadyExist;
 
+import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.OpenOption;
+import java.nio.file.attribute.PosixFileAttributes;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
+import static java.nio.file.StandardOpenOption.APPEND;
+import static java.nio.file.StandardOpenOption.CREATE;
 import static l.files.base.io.Charsets.UTF_8;
-import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class Paths {
@@ -32,26 +29,26 @@ public final class Paths {
     }
 
     public static Observation observe(
-            Path path,
-            LinkOption option,
-            Observer observer
+        Path path,
+        LinkOption option,
+        Observer observer
     ) throws IOException, InterruptedException {
 
         return path.observe(option, observer, entry -> true, null, -1);
     }
 
     public static void listDirectories(
-            Path path,
-            Consumer consumer
+        Path path,
+        Consumer consumer
     ) throws IOException {
 
         path.list((Consumer) entry -> !entry.stat(NOFOLLOW).isDirectory() ||
-                consumer.accept(entry));
+            consumer.accept(entry));
     }
 
     public static <C extends Collection<? super Path>> C listDirectories(
-            Path path,
-            C collection
+        Path path,
+        C collection
     ) throws IOException {
 
         listDirectories(path, (Consumer) entry -> {
@@ -71,7 +68,7 @@ public final class Paths {
             if (path.stat(NOFOLLOW).isRegularFile()) {
                 return path;
             }
-        } catch (FileNotFoundException ignore) {
+        } catch (FileNotFoundException | NoSuchFileException ignore) {
         }
 
         Path parent = path.parent();
@@ -88,24 +85,28 @@ public final class Paths {
     }
 
     public static void removePermissions(
-            Path path,
-            Set<Permission> permissions
+        Path path,
+        Set<PosixFilePermission> permissions
     ) throws IOException {
-
-        Set<Permission> existing = path.stat(FOLLOW).permissions();
-        Set<Permission> perms = new HashSet<>(existing);
+        Set<PosixFilePermission> existing = path.readAttributes(
+            PosixFileAttributes.class
+        ).permissions();
+        Set<PosixFilePermission> perms = new HashSet<>(existing);
         perms.removeAll(permissions);
         path.setPermissions(perms);
     }
 
     public static Reader newReader(Path path, Charset charset)
-            throws IOException {
+        throws IOException {
         return new InputStreamReader(path.newInputStream(), charset);
     }
 
-    public static Writer newWriter(Path path, Charset charset, boolean append)
-            throws IOException {
-        return new OutputStreamWriter(path.newOutputStream(append), charset);
+    public static Writer newWriter(
+        Path path,
+        Charset charset,
+        OpenOption... options
+    ) throws IOException {
+        return new OutputStreamWriter(path.newOutputStream(options), charset);
     }
 
     public static String readAllUtf8(Path path) throws IOException {
@@ -120,21 +121,21 @@ public final class Paths {
     }
 
     public static void writeUtf8(Path path, CharSequence content)
-            throws IOException {
+        throws IOException {
         write(path, content, UTF_8);
     }
 
     public static void write(Path path, CharSequence content, Charset charset)
-            throws IOException {
+        throws IOException {
 
-        try (Writer writer = newWriter(path, charset, false)) {
+        try (Writer writer = newWriter(path, charset, CREATE)) {
             writer.write(content.toString());
         }
     }
 
     public static void appendUtf8(Path path, CharSequence content)
-            throws IOException {
-        try (Writer writer = newWriter(path, UTF_8, true)) {
+        throws IOException {
+        try (Writer writer = newWriter(path, UTF_8, CREATE, APPEND)) {
             writer.write(content.toString());
         }
     }
@@ -143,7 +144,7 @@ public final class Paths {
     public static void deleteIfExists(Path path) throws IOException {
         try {
             path.delete();
-        } catch (FileNotFoundException ignored) {
+        } catch (FileNotFoundException | NoSuchFileException ignored) {
         }
     }
 
@@ -158,8 +159,9 @@ public final class Paths {
 
             @Override
             public void onException(Path path, IOException e)
-                    throws IOException {
-                if (e instanceof FileNotFoundException) {
+                throws IOException {
+                if (e instanceof FileNotFoundException ||
+                    e instanceof NoSuchFileException) {
                     return;
                 }
                 super.onException(path, e);
@@ -171,13 +173,13 @@ public final class Paths {
     public static void deleteRecursiveIfExists(Path path) throws IOException {
         try {
             deleteRecursive(path);
-        } catch (FileNotFoundException ignore) {
+        } catch (FileNotFoundException | NoSuchFileException ignore) {
         }
     }
 
     public static void copy(InputStream in, Path to)
-            throws IOException {
-        try (OutputStream out = to.newOutputStream(false)) {
+        throws IOException {
+        try (OutputStream out = to.newOutputStream(CREATE)) {
             byte[] buffer = new byte[8192];
             for (int i; (i = in.read(buffer)) != -1; ) {
                 out.write(buffer, 0, i);

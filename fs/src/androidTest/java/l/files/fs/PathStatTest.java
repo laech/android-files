@@ -1,16 +1,13 @@
 package l.files.fs;
 
-import org.junit.Test;
-
-import java.io.IOException;
-
-import l.files.fs.exception.AccessDenied;
 import l.files.fs.exception.NameTooLong;
 import l.files.fs.exception.NoSuchEntry;
 import l.files.fs.exception.NotDirectory;
 import l.files.fs.exception.TooManySymbolicLinks;
 import l.files.testing.fs.PathBaseTest;
-import l.files.testing.fs.Paths;
+import org.junit.Test;
+
+import java.io.IOException;
 
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
@@ -18,12 +15,6 @@ import static linux.Limits.NAME_MAX;
 import static org.junit.Assert.fail;
 
 public final class PathStatTest extends PathBaseTest {
-
-    @Test
-    public void access_denied_failure_if_parent_has_no_search_permission() throws Exception {
-        Paths.removePermissions(dir1(), Permission.execute());
-        statWillFail(dir1().concat("a"), AccessDenied.class);
-    }
 
     @Test
     public void too_many_symbolic_links_failure() throws Exception {
@@ -39,13 +30,15 @@ public final class PathStatTest extends PathBaseTest {
     }
 
     @Test
-    public void no_such_entry_failure_if_parent_does_not_exist() throws Exception {
+    public void no_such_entry_failure_if_parent_does_not_exist()
+        throws Exception {
         Path path = dir1().concat("a/b");
         statWillFail(path, NoSuchEntry.class);
     }
 
     @Test
-    public void no_such_entry_failure_if_self_does_not_exist() throws Exception {
+    public void no_such_entry_failure_if_self_does_not_exist()
+        throws Exception {
         Path path = dir1().concat("a");
         statWillFail(path, NoSuchEntry.class);
     }
@@ -62,24 +55,25 @@ public final class PathStatTest extends PathBaseTest {
     }
 
     @Test
-    public void not_directory_failure_if_parent_is_symbolic_link_to_file() throws Exception {
+    public void not_directory_failure_if_parent_is_symbolic_link_to_file()
+        throws Exception {
         Path file = dir1().concat("file").createFile();
         Path link = dir1().concat("link").createSymbolicLink(file);
         statWillFail(link.concat("invalid"), NotDirectory.class);
     }
 
     private static void statWillFail(
-            Path path,
-            Class<? extends IOException> expected
+        Path path,
+        Class<? extends IOException> expected
     ) throws IOException {
         statWillFail(path, NOFOLLOW, expected);
         statWillFail(path, FOLLOW, expected);
     }
 
     private static void statWillFail(
-            Path path,
-            LinkOption option,
-            Class<? extends IOException> expected
+        Path path,
+        LinkOption option,
+        Class<? extends IOException> expected
     ) throws IOException {
 
         try {

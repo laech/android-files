@@ -10,6 +10,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptySet;
 import static java.util.Comparator.comparing;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
@@ -168,7 +169,7 @@ public final class LocalFileTraverseTest extends PathBaseTest {
         dir1().concat("a/1/i").createFile();
         dir1().concat("a/2").createDirectories();
         dir1().concat("b").createDirectories();
-        dir1().concat("a").setPermissions(Permission.none());
+        dir1().concat("a").setPermissions(emptySet());
 
         List<TraversalEvent> expected = asList(
             TraversalEvent.of(PRE, dir1()),

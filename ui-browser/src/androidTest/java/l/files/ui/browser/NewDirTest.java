@@ -1,14 +1,13 @@
 package l.files.ui.browser;
 
-import androidx.test.runner.AndroidJUnit4;
 import android.widget.EditText;
-
+import androidx.test.runner.AndroidJUnit4;
+import l.files.base.Consumer;
+import l.files.testing.fs.Paths;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import l.files.base.Consumer;
-import l.files.fs.Permission;
-import l.files.testing.fs.Paths;
+import java.nio.file.attribute.PosixFilePermissions;
 
 import static org.junit.Assert.assertEquals;
 
@@ -19,55 +18,58 @@ public final class NewDirTest extends BaseFilesActivityTest {
 
     @Test
     public void shows_error_message_when_failed_to_create()
-            throws Exception {
-        Paths.removePermissions(dir(), Permission.write());
+        throws Exception {
+        Paths.removePermissions(
+            dir(),
+            PosixFilePermissions.fromString("-w--w--w-")
+        );
         screen()
-                .newFolder()
-                .setFilename("a")
-                .okExpectingFailure("Permission denied");
+            .newFolder()
+            .setFilename("a")
+            .okExpectingFailure(".+AccessDeniedException.+$");
     }
 
     @Test
     public void creates_folder_with_name_specified() {
         screen()
-                .newFolder()
-                .setFilename("a")
-                .ok()
-                .clickInto(dir().concat("a"));
+            .newFolder()
+            .setFilename("a")
+            .ok()
+            .clickInto(dir().concat("a"));
     }
 
     @Test
     public void name_field_has_initial_name_suggestion() {
         screen()
-                .newFolder()
-                .assertFilename(string(R.string.untitled_dir));
+            .newFolder()
+            .assertFilename(string(R.string.untitled_dir));
     }
 
     @Test
     public void name_field_has_new_name_suggestion_if_initial_names_are_taken()
-            throws Exception {
+        throws Exception {
 
         dir().concat(string(R.string.untitled_dir)).createFile();
         dir().concat(string(R.string.untitled_dir) + " " + 2).createFile();
 
         screen()
-                .newFolder()
-                .assertFilename(string(R.string.untitled_dir) + " " + 3);
+            .newFolder()
+            .assertFilename(string(R.string.untitled_dir) + " " + 3);
     }
 
     @Test
     public void can_not_create_if_folder_with_specified_name_already_exists()
-            throws Exception {
+        throws Exception {
 
         dir().concat("a").createFile();
         screen()
-                .newFolder()
-                .setFilename("a")
-                .assertError(string(R.string.name_exists))
-                .assertOkButtonEnabled(false)
-                .setFilename("b")
-                .assertError(null)
-                .assertOkButtonEnabled(true);
+            .newFolder()
+            .setFilename("a")
+            .assertError(string(R.string.name_exists))
+            .assertOkButtonEnabled(false)
+            .setFilename("b")
+            .assertError(null)
+            .assertOkButtonEnabled(true);
     }
 
     @Test
@@ -84,7 +86,7 @@ public final class NewDirTest extends BaseFilesActivityTest {
     }
 
     private void checkNameField(Consumer<EditText> assertion)
-            throws Throwable {
+        throws Throwable {
 
         UiNewDir dialog = screen().newFolder();
         runTestOnUiThread(() -> assertion.accept(dialog.editText()));

@@ -9,21 +9,21 @@ import android.text.format.DateUtils.*
 import android.text.format.Formatter.formatShortFileSize
 import android.util.Log
 import l.files.base.io.Charsets.UTF_8
-import l.files.fs.Instant
-import l.files.fs.Instant.EPOCH
 import l.files.fs.LinkOption.NOFOLLOW
 import l.files.fs.Path
-import l.files.fs.Permission
 import l.files.testing.fs.Paths
 import l.files.ui.browser.sort.FileSort
-import org.junit.Assert.*
+import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
 import org.junit.Test
 import java.lang.System.currentTimeMillis
 import java.lang.System.nanoTime
+import java.nio.file.attribute.FileTime
+import java.nio.file.attribute.PosixFilePermissions
+import java.time.Instant
 import java.util.*
 import java.util.concurrent.TimeUnit.DAYS
-import java.util.concurrent.TimeUnit.MILLISECONDS
 
 class NavigationTest : BaseFilesActivityTest() {
 
@@ -45,7 +45,7 @@ class NavigationTest : BaseFilesActivityTest() {
       val src = dir.concat("a").createDirectory()
       val dst = dir.concat("A")
       screen().assertAllItemsDisplayedInOrder(src)
-      src.rename(dst)
+      src.move(dst)
       screen()
         .sort()
         .by(FileSort.NAME)
@@ -124,7 +124,7 @@ class NavigationTest : BaseFilesActivityTest() {
   @Test
   fun shows_size_only_if_unable_to_determine_modified_date() {
     val file = dir().concat("file").createFile()
-    file.setLastModifiedTime(NOFOLLOW, EPOCH)
+    file.setLastModifiedTime(FileTime.fromMillis(0))
 
     val size = file.stat(NOFOLLOW).size()
     val expected = formatShortFileSize(activity, size)
@@ -140,7 +140,7 @@ class NavigationTest : BaseFilesActivityTest() {
     Paths.appendUtf8(file, file.toString())
 
     val stat = file.stat(NOFOLLOW)
-    val lastModifiedMillis = stat.lastModifiedTime().to(MILLISECONDS)
+    val lastModifiedMillis = stat.lastModifiedTime().toEpochMilli()
     val date = getTimeFormat(activity).format(Date(lastModifiedMillis))
     val size = formatShortFileSize(activity, stat.size())
     val expected = activity.getString(R.string.x_dot_y, date, size)
@@ -173,14 +173,18 @@ class NavigationTest : BaseFilesActivityTest() {
 
   private fun testDirectorySummary(expected: String, modifiedAt: Long) {
     val d = dir().concat("dir").createDirectory()
-    d.setLastModifiedTime(NOFOLLOW, Instant.of(modifiedAt / 1000, 0))
+    d.setLastModifiedTime(
+      FileTime.from(
+        Instant.ofEpochSecond(modifiedAt / 1000, 0)
+      )
+    )
     screen().assertSummary(d, expected)
   }
 
   @Test
   fun directory_view_is_disabled_if_no_read_permission() {
     val dir = dir().concat("dir").createDirectory()
-    Paths.removePermissions(dir, Permission.read())
+    Paths.removePermissions(dir, PosixFilePermissions.fromString("r--r--r--"))
     screen().assertDisabled(dir)
   }
 
@@ -311,7 +315,7 @@ class NavigationTest : BaseFilesActivityTest() {
   }
 
   private fun testUpdatesSizeViewOnChildModified(file: Path) {
-    file.setLastModifiedTime(NOFOLLOW, EPOCH)
+    file.setLastModifiedTime(FileTime.from(Instant.EPOCH))
 
     val outdated = screen().getSummary(file)
     modify(file)
@@ -322,7 +326,7 @@ class NavigationTest : BaseFilesActivityTest() {
   }
 
   private fun testUpdatesDateViewOnChildModified(file: Path) {
-    file.setLastModifiedTime(NOFOLLOW, Instant.of(100000, 1))
+    file.setLastModifiedTime(FileTime.from(Instant.ofEpochSecond(100000, 1)))
 
     val outdated = screen().getSummary(file)
     modify(file)

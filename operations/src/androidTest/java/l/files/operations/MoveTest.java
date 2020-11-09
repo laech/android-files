@@ -1,14 +1,13 @@
 package l.files.operations;
 
+import l.files.fs.Path;
+import l.files.testing.fs.Paths;
 import org.junit.Test;
 
 import java.util.Set;
 
-import l.files.fs.Path;
-import l.files.testing.fs.Paths;
-
+import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.util.Collections.singleton;
-import static l.files.fs.LinkOption.NOFOLLOW;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
@@ -45,7 +44,7 @@ public final class MoveTest extends PasteTest {
         Move move = create(srcFile, dstDir);
         move.execute();
 
-        assertFalse(srcFile.exists(NOFOLLOW));
+        assertFalse(srcFile.exists(NOFOLLOW_LINKS));
         assertEquals("Test", Paths.readAllUtf8(dstFile));
         assertEquals(move.getMovedItemCount(), 1);
     }
@@ -62,7 +61,7 @@ public final class MoveTest extends PasteTest {
         Move move = create(srcDir, dstDir);
         move.execute();
 
-        assertFalse(srcDir.exists(NOFOLLOW));
+        assertFalse(srcDir.exists(NOFOLLOW_LINKS));
         assertEquals("Test", Paths.readAllUtf8(dstFile));
         assertEquals(move.getMovedItemCount(), 1);
     }

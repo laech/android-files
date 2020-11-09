@@ -3,43 +3,33 @@ package l.files.fs;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
-import android.os.ParcelFileDescriptor.AutoCloseInputStream;
-import android.os.ParcelFileDescriptor.AutoCloseOutputStream;
 import android.os.Parcelable;
 import androidx.annotation.Nullable;
 import l.files.base.Optional;
-import l.files.base.io.Charsets;
 import l.files.fs.event.BatchObserver;
 import l.files.fs.event.BatchObserverNotifier;
 import l.files.fs.event.Observation;
 import l.files.fs.event.Observer;
 import l.files.fs.exception.*;
 import linux.ErrnoException;
-import linux.Fcntl;
-import linux.Stdio;
-import linux.Unistd;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Paths;
+import java.nio.file.attribute.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import static android.os.ParcelFileDescriptor.adoptFd;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.reverse;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Objects.requireNonNull;
-import static l.files.base.Throwables.addSuppressed;
-import static l.files.fs.LinkOption.FOLLOW;
-import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.fs.Stat.*;
-import static linux.Errno.EISDIR;
-import static linux.Fcntl.*;
 
 @Deprecated
 public class Path implements Parcelable, Comparable<Path> {
@@ -56,8 +46,6 @@ public class Path implements Parcelable, Comparable<Path> {
             return new Path[size];
         }
     };
-
-    static final Charset ENCODING = Charsets.UTF_8;
 
     public static Path of(File file) {
         return new Path(file.toPath());
@@ -81,6 +69,7 @@ public class Path implements Parcelable, Comparable<Path> {
         return toString().getBytes(UTF_8);
     }
 
+    @Override
     public String toString() {
         return delegate.toString();
     }
@@ -239,48 +228,14 @@ public class Path implements Parcelable, Comparable<Path> {
         dest.writeByteArray(toByteArray());
     }
 
-    /**
-     * @throws AccessDenied         search permission is denied for a parent
-     *                              path,
-     *                              or the process is not privileged for this
-     *                              operation
-     * @throws TooManySymbolicLinks too many symbolic links were encountered
-     *                              when resolving this path
-     * @throws NameTooLong          path name is too long
-     * @throws NoSuchEntry          file does not exist, or is empty
-     * @throws NotDirectory         a parent path is not a directory
-     * @throws FileSystemReadOnly   the underlying file system is read only
-     * @throws IOException          other errors
-     */
-    public void setPermissions(Set<Permission> permissions) throws IOException {
-        try {
-            chmod(toByteArray(), Permission.toStatMode(permissions));
-        } catch (ErrnoException e) {
-            throw e.toIOException(this);
-        }
+    public void setPermissions(Set<PosixFilePermission> permissions)
+        throws IOException {
+        Files.setPosixFilePermissions(delegate, permissions);
     }
 
-    /**
-     * @throws AccessDenied         no permission to perform this operation
-     * @throws TooManySymbolicLinks too many symbolic links were encountered
-     *                              when resolving this path
-     * @throws NameTooLong          path name is too long
-     * @throws NoSuchEntry          path does not exist, or is empty
-     * @throws NotDirectory         one of the ancestors is not a directory
-     * @throws FileSystemReadOnly   underlying file system is read only
-     * @throws IOException          other errors
-     */
-    public void setLastModifiedTime(LinkOption option, Instant instant)
+    public void setLastModifiedTime(FileTime time)
         throws IOException {
-        try {
-            byte[] pathBytes = toByteArray();
-            long seconds = instant.seconds();
-            int nanos = instant.nanos();
-            boolean followLink = option == FOLLOW;
-            Native.setModificationTime(pathBytes, seconds, nanos, followLink);
-        } catch (ErrnoException e) {
-            throw e.toIOException(this);
-        }
+        Files.setLastModifiedTime(delegate, time);
     }
 
     /**
@@ -297,318 +252,71 @@ public class Path implements Parcelable, Comparable<Path> {
         return Stat.stat(this, option);
     }
 
-    /**
-     * @throws AccessDenied         parent directory does not allow write
-     *                              permission, or one of the ancestor
-     *                              directory does not allow search permission,
-     *                              or the file system containing this path
-     *                              does not support creation of directories
-     * @throws AlreadyExist         an entry already exists at this path
-     * @throws NameTooLong          path name is too long
-     * @throws NoSuchEntry          one of the ancestors does not exist
-     * @throws NotDirectory         one of the ancestors is not a directory
-     * @throws TooManySymbolicLinks too many symbolic links were encountered
-     *                              when resolving this path
-     * @throws FileSystemReadOnly   this path is on a read only file system
-     * @throws IOException          other errors
-     */
+    public <A extends BasicFileAttributes> A readAttributes(
+        Class<A> type,
+        java.nio.file.LinkOption... options
+    ) throws IOException {
+        return Files.readAttributes(delegate, type, options);
+    }
+
+    public <V extends FileAttributeView> V getFileAttributeView(
+        Class<V> type,
+        java.nio.file.LinkOption... options
+    ) {
+        return Files.getFileAttributeView(delegate, type, options);
+    }
+
     public Path createDirectory() throws IOException {
-        try {
-            // Same permission bits as java.io.File.mkdir() on Android
-            mkdir(toByteArray(), S_IRWXU);
-        } catch (ErrnoException e) {
-            throw e.toIOException(this);
-        }
+        Files.createDirectory(delegate);
         return this;
     }
 
-    /**
-     * Creates directory with specified permissions, the set of permissions
-     * will be restricted so the resulting permissions may not be the same.
-     *
-     * @throws AccessDenied         parent directory does not allow write
-     *                              permission, or one of the ancestor
-     *                              directory does not allow search permission,
-     *                              or the file system containing this path
-     *                              does not support creation of directories
-     * @throws AlreadyExist         an entry already exists at this path
-     * @throws NameTooLong          path name is too long
-     * @throws NoSuchEntry          one of the ancestors does not exist
-     * @throws NotDirectory         one of the ancestors is not a directory
-     * @throws TooManySymbolicLinks too many symbolic links were encountered
-     *                              when resolving this path
-     * @throws FileSystemReadOnly   this path is on a read only file system
-     * @throws IOException          other errors
-     */
-    public Path createDirectory(Set<Permission> permissionsHint)
+    public Path createDirectory(Set<PosixFilePermission> permissionsHint)
         throws IOException {
-        try {
-            mkdir(toByteArray(), Permission.toStatMode(permissionsHint));
-        } catch (ErrnoException e) {
-            throw e.toIOException(this);
-        }
+        Files.createDirectory(
+            delegate,
+            PosixFilePermissions.asFileAttribute(permissionsHint)
+        );
         return this;
     }
 
-    /**
-     * Creates this file and any missing parents as directories. This will
-     * throw the same exceptions as {@link Path#createDirectory()} except
-     * will not error if already exists as a directory.
-     */
     public Path createDirectories() throws IOException {
-        try {
-            if (stat(NOFOLLOW).isDirectory()) {
-                return this;
-            }
-            throw new AlreadyExist(
-                "Exists but not a directory: " + this, null);
-
-        } catch (NoSuchEntry ignore) {
-        }
-
-        Path parent = parent();
-        if (parent != null) {
-            parent.createDirectories();
-        }
-
-        try {
-            createDirectory();
-        } catch (AlreadyExist e) {
-            if (!stat(NOFOLLOW).isDirectory()) {
-                throw new AlreadyExist(
-                    "Exists but not a directory: " + this, null);
-            }
-        }
-
+        Files.createDirectories(delegate);
         return this;
     }
 
-    /**
-     * @throws AccessDenied         parent directory does not allow write
-     *                              permission, or one of the ancestor
-     *                              directory does not allow search permission
-     * @throws AlreadyExist         an entry already exists at this path
-     * @throws NameTooLong          path name is too long
-     * @throws NoSuchEntry          one of the ancestors does not exist
-     * @throws NotDirectory         one of the ancestors is not a directory
-     * @throws TooManySymbolicLinks too many symbolic links were encountered
-     *                              when resolving this path
-     * @throws FileSystemReadOnly   this path is on a read only file system
-     * @throws IOException          other errors
-     */
     public Path createFile() throws IOException {
-        try {
-
-            // Same flags and mode as java.io.File.createNewFile() on Android
-            int flags = O_RDWR | O_CREAT | O_EXCL;
-            int mode = S_IRUSR | S_IWUSR;
-            int fd = Fcntl.open(toByteArray(), flags, mode);
-            Unistd.close(fd);
-
-        } catch (ErrnoException e) {
-            if (e.errno == EISDIR) {
-                throw new AlreadyExist(toString(), e);
-            }
-            throw e.toIOException(this);
-        }
+        Files.createFile(delegate);
         return this;
     }
 
-    /**
-     * @param target the target the link will point to
-     * @throws AccessDenied         parent directory does not allow write
-     *                              permission, or one of the ancestor
-     *                              directory does not allow search permission,
-     *                              or the file system containing this path
-     *                              does not support creation of symolic links
-     * @throws AlreadyExist         an entry already exists at this path
-     * @throws NameTooLong          path name is too long
-     * @throws NoSuchEntry          one of the ancestors does not exist
-     * @throws NotDirectory         one of the ancestors is not a directory
-     * @throws TooManySymbolicLinks too many symbolic links were encountered
-     *                              when resolving this path
-     * @throws FileSystemReadOnly   this path is on a read only file system
-     * @throws IOException          other errors
-     */
     public Path createSymbolicLink(Path target) throws IOException {
-        try {
-            Unistd.symlink(target.toByteArray(), toByteArray());
-        } catch (ErrnoException e) {
-            throw e.toIOException(this + " -> " + target);
-        }
+        Files.createSymbolicLink(delegate, target.delegate);
         return this;
     }
 
-    /**
-     * @throws AccessDenied         one of the ancestor directory does not
-     *                              have search permission
-     * @throws InvalidArgument      if path is not a symbolic link
-     * @throws NameTooLong          path name is too long
-     * @throws NoSuchEntry          one of the ancestors does not exist
-     * @throws NotDirectory         one of the ancestors is not a directory
-     * @throws TooManySymbolicLinks too many symbolic links were encountered
-     *                              when resolving this path
-     * @throws IOException          other errors
-     */
     public Path readSymbolicLink() throws IOException {
-        try {
-            byte[] link = Unistd.readlink(toByteArray());
-            return of(link);
-        } catch (ErrnoException e) {
-            throw e.toIOException(this);
-        }
+        return new Path(Files.readSymbolicLink(delegate));
     }
 
-    /**
-     * Renames this path to the destination.
-     * <p>
-     * Does nothing if source and destination are hard links to the same file.
-     * <p>
-     * If the destination exists, the following shows when this operation will
-     * succeed or fail:
-     * <pre>
-     * okay: link -> link
-     * okay: link -> file
-     * fail: link -> directory
-     *
-     * okay: file -> link
-     * okay: file -> file
-     * okay: file -> directory
-     *
-     * fail: directory -> link
-     * fail: directory -> file
-     * fail: directory -> non empty directory
-     * okay: directory -> empty directory
-     * </pre>
-     *
-     * @throws AccessDenied         if anyone of the following is true
-     *                              <ul>
-     *                              <li>source parent directory is not
-     *                              writable</li>
-     *                              <li>destination directory is not
-     *                              writable</li>
-     *                              <li>one of source parent directories is
-     *                              not searchable</li>
-     *                              <li>one of destination parent directories
-     *                              is not searchable</li>
-     *                              <li>this path is a directory and is not
-     *                              writable</li>
-     *                              <li>the file system containing this path
-     *                              does not
-     *                              support renaming of the type request</li>
-     *                              <li>this process is not privileged</li>
-     *                              </ul>
-     * @throws InvalidArgument      if destination is a subdirectory of this
-     * @throws IsDirectory          if destination is an existing directory but
-     *                              this path is not a directory
-     * @throws TooManySymbolicLinks too many symbolic links were encountered
-     *                              when resolving this path or destination path
-     * @throws NameTooLong          if this path name is too long,
-     *                              or destination path name is too long
-     * @throws NoSuchEntry          if anyone of the following is true
-     *                              <ul>
-     *                              <li>this path does not exist</li>
-     *                              <li>one of the parent directories of
-     *                              destination does not exist</li>
-     *                              <li>this path is empty</li>
-     *                              <li>destination path is empty</li>
-     *                              </ul>
-     * @throws NotDirectory         if:
-     *                              <ul>
-     *                              <li>a parent path of this path is not a
-     *                              directory</li>
-     *                              <li>a parent path of destination path is
-     *                              not a directory</li>
-     *                              <li>this path is directory and
-     *                              destination exists but is not a
-     *                              directory</li>
-     *                              </ul>
-     * @throws DirectoryNotEmpty    if destination is a non-empty directory
-     * @throws CrossDevice          source and destination are not on the
-     *                              same mounted file system
-     * @throws FileSystemReadOnly   path is on a read only file system
-     * @throws IOException          other errors
-     */
-    public void rename(Path destination) throws IOException {
-        try {
-            Stdio.rename(toByteArray(), destination.toByteArray());
-        } catch (ErrnoException e) {
-            throw e.toIOException(this + " -> " + destination);
-        }
+    public void move(Path destination, CopyOption... options) throws IOException {
+        Files.move(delegate, destination.delegate, options);
     }
 
-    /**
-     * @throws AccessDenied         parent directory does not allow write
-     *                              permission, or one of the ancestor
-     *                              directory does not allow search permission,
-     *                              or this process is not privileged for this
-     *                              action
-     * @throws NameTooLong          path name is too long
-     * @throws TooManySymbolicLinks too many symbolic links were encountered
-     * @throws NotDirectory         if one of the parent path is not a directory
-     * @throws NoSuchEntry          if one of the follow is true:
-     *                              <ul>
-     *                              <li>this path does not exist</li>
-     *                              <li>one of the parent path is a dangling
-     *                              symbolic link</li>
-     *                              <li>this path is empty</li>
-     *                              </ul>
-     * @throws FileSystemReadOnly   this path is on a read only file system
-     * @throws IOException          other errors
-     */
     public void delete() throws IOException {
-        try {
-            Stdio.remove(toByteArray());
-        } catch (ErrnoException e) {
-            throw e.toIOException(this);
-        }
+        Files.delete(delegate);
     }
 
-    /**
-     * Checks the existence of this file.
-     * Throws the same exceptions as {@link #stat(LinkOption)}
-     */
-    public boolean exists(LinkOption option) throws IOException {
-        try {
-            stat(option);
-            return true;
-        } catch (NoSuchEntry e) {
-            return false;
-        }
+    public boolean exists(java.nio.file.LinkOption... options) {
+        return Files.exists(delegate, options);
     }
 
-    /**
-     * Returns true if this file is readable, return false if not.
-     * <p>
-     * If this is a link, returns the result for the link target, not the link
-     * itself.
-     */
-    public boolean isReadable() throws IOException {
-        return accessible(this, Unistd.R_OK);
+    public boolean isReadable() {
+        return Files.isReadable(delegate);
     }
 
-    /**
-     * Returns true if this file is writable, return false if not.
-     * <p>
-     * If this is a link, returns the result for the link target, not the link
-     * itself.
-     */
-    public boolean isWritable() throws IOException {
-        return accessible(this, Unistd.W_OK);
-    }
-
-    /**
-     * Returns true if this file is executable, return false if not.
-     * <p>
-     * If this is a link, returns the result for the link target, not the link
-     * itself.
-     */
-    public boolean isExecutable() throws IOException {
-        return accessible(this, Unistd.X_OK);
-    }
-
-    private boolean accessible(Path path, int mode) throws IOException {
-        return Unistd.access(path.toByteArray(), mode) == 0;
+    public boolean isWritable() {
+        return Files.isWritable(delegate);
     }
 
     /**
@@ -726,7 +434,6 @@ public class Path implements Parcelable, Comparable<Path> {
      * </pre>
      *
      * @param option applies to root only, child links are never followed
-     * @deprecated use {@link PathTraversalKt#traverse(Path, Function2)} instead
      */
     @Deprecated
     public void traverse(
@@ -738,9 +445,6 @@ public class Path implements Parcelable, Comparable<Path> {
         new Traverser(this, option, visitor, childrenComparator).traverse();
     }
 
-    /**
-     * @deprecated use {@link PathTraversalKt#traverse(Path, Function2)} instead
-     */
     @Deprecated
     public void traverse(
         LinkOption option,
@@ -750,65 +454,19 @@ public class Path implements Parcelable, Comparable<Path> {
     }
 
     public ParcelFileDescriptor newInputFileDescriptor() throws IOException {
-        return ParcelFileDescriptor.adoptFd(open(O_RDONLY, 0));
+        return ParcelFileDescriptor.open(
+            delegate.toFile(),
+            ParcelFileDescriptor.MODE_READ_ONLY
+        );
     }
 
-    public FileInputStream newInputStream() throws IOException {
-
-        ParcelFileDescriptor fd = newInputFileDescriptor();
-        try {
-
-            checkNotDirectory(fd.getFd(), this);
-            return new AutoCloseInputStream(fd);
-
-        } catch (Throwable e) {
-            try {
-                fd.close();
-            } catch (Throwable sup) {
-                addSuppressed(e, sup);
-            }
-            throw e;
-        }
+    public InputStream newInputStream() throws IOException {
+        return Files.newInputStream(delegate);
     }
 
-    public FileOutputStream newOutputStream(boolean append) throws IOException {
-
-        // Same flags and mode as java.io.FileOutputStream on Android
-        int flags = O_WRONLY | O_CREAT | (append ? O_APPEND : O_TRUNC);
-
-        // noinspection OctalInteger
-        ParcelFileDescriptor fd = adoptFd(open(flags, 0600));
-        try {
-
-            checkNotDirectory(fd.getFd(), this);
-            return new AutoCloseOutputStream(fd);
-
-        } catch (Throwable e) {
-            try {
-                fd.close();
-            } catch (Throwable sup) {
-                addSuppressed(e, sup);
-            }
-            throw e;
-        }
-    }
-
-    private int open(int flags, int mode) throws IOException {
-        try {
-            return Fcntl.open(toByteArray(), flags, mode);
-        } catch (ErrnoException e) {
-            throw e.toIOException(this);
-        }
-    }
-
-    private void checkNotDirectory(int fd, Path path) throws IOException {
-        try {
-            if (fstat(fd).isDirectory()) {
-                throw new ErrnoException(EISDIR);
-            }
-        } catch (ErrnoException e) {
-            throw e.toIOException(path);
-        }
+    public OutputStream newOutputStream(OpenOption... options)
+        throws IOException {
+        return Files.newOutputStream(delegate, options);
     }
 
     @Override

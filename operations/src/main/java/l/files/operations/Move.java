@@ -21,7 +21,7 @@ final class Move extends Paste {
     @Override
     void paste(Path sourcePath, Path destinationPath) throws IOException {
         try {
-            sourcePath.rename(destinationPath);
+            sourcePath.move(destinationPath);
             movedItemCount.incrementAndGet();
         } catch (IOException e) {
             record(sourcePath, e);

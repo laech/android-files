@@ -1,22 +1,17 @@
 package l.files.ui.browser;
 
-import com.google.android.material.textfield.TextInputLayout;
-import androidx.appcompat.app.AlertDialog;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import androidx.appcompat.app.AlertDialog;
+import com.google.android.material.textfield.TextInputLayout;
+import l.files.base.Consumer;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import l.files.base.Consumer;
-
 import static android.content.DialogInterface.BUTTON_POSITIVE;
-import static java.util.Collections.singletonList;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
-import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.*;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.ui.browser.Instrumentations.awaitOnMainThread;
 
@@ -38,7 +33,10 @@ abstract class UiFileCreation<T extends UiFileCreation> {
     }
 
     T setFilename(CharSequence name) {
-        awaitOnMainThread(context.getInstrumentation(), () -> editText().setText(name));
+        awaitOnMainThread(
+            context.getInstrumentation(),
+            () -> editText().setText(name)
+        );
         return self();
     }
 
@@ -54,7 +52,7 @@ abstract class UiFileCreation<T extends UiFileCreation> {
         return context;
     }
 
-    UiFileActivity okExpectingFailure(String message) {
+    UiFileActivity okExpectingFailure(String regex) {
         @SuppressWarnings("unchecked")
         Consumer<String>[] original = new Consumer[1];
 
@@ -71,7 +69,13 @@ abstract class UiFileCreation<T extends UiFileCreation> {
 
         ok();
 
-        awaitOnMainThread(context.getInstrumentation(), () -> assertEquals(singletonList(message), messages));
+        awaitOnMainThread(context.getInstrumentation(), () -> {
+            assertFalse(messages.isEmpty());
+            assertTrue(
+                "no match: '" + messages + "'",
+                messages.get(0).matches(regex)
+            );
+        });
 
         return context;
     }
@@ -81,26 +85,34 @@ abstract class UiFileCreation<T extends UiFileCreation> {
             FileCreationFragment fragment = fragment();
             assertNotNull(fragment);
             assertEquals(
-                    enabled,
-                    dialog().getButton(BUTTON_POSITIVE).isEnabled());
+                enabled,
+                dialog().getButton(BUTTON_POSITIVE).isEnabled()
+            );
         });
         return self();
     }
 
     T assertHasError(int resId, Object... args) {
         awaitOnMainThread(context.getInstrumentation(), () -> assertEquals(
-                context.getActivity().getString(resId, args),
-                error()));
+            context.getActivity().getString(resId, args),
+            error()
+        ));
         return self();
     }
 
     T assertHasNoError() {
-        awaitOnMainThread(context.getInstrumentation(), () -> assertNull(error()));
+        awaitOnMainThread(
+            context.getInstrumentation(),
+            () -> assertNull(error())
+        );
         return self();
     }
 
     T assertError(CharSequence error) {
-        awaitOnMainThread(context.getInstrumentation(), () -> assertEquals(error, error()));
+        awaitOnMainThread(
+            context.getInstrumentation(),
+            () -> assertEquals(error, error())
+        );
         return self();
     }
 
@@ -122,15 +134,18 @@ abstract class UiFileCreation<T extends UiFileCreation> {
 
     private FileCreationFragment fragment() {
         FileCreationFragment fragment = (FileCreationFragment) context
-                .getActivity()
-                .getSupportFragmentManager()
-                .findFragmentByTag(tag);
+            .getActivity()
+            .getSupportFragmentManager()
+            .findFragmentByTag(tag);
         assertNotNull(fragment);
         return fragment;
     }
 
     T assertFilename(CharSequence name) {
-        awaitOnMainThread(context.getInstrumentation(), () -> assertEquals(name.toString(), filename()));
+        awaitOnMainThread(
+            context.getInstrumentation(),
+            () -> assertEquals(name.toString(), filename())
+        );
         return self();
     }
 
@@ -139,14 +154,18 @@ abstract class UiFileCreation<T extends UiFileCreation> {
     }
 
     T assertSelection(String selection) {
-        awaitOnMainThread(context.getInstrumentation(), () -> assertEquals(selection, selection()));
+        awaitOnMainThread(
+            context.getInstrumentation(),
+            () -> assertEquals(selection, selection())
+        );
         return self();
     }
 
     private String selection() {
         EditText text = editText();
         return text.getText().toString().substring(
-                text.getSelectionStart(),
-                text.getSelectionEnd());
+            text.getSelectionStart(),
+            text.getSelectionEnd()
+        );
     }
 }
