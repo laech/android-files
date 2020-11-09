@@ -1,11 +1,9 @@
 package l.files.ui.browser;
 
 import androidx.test.runner.AndroidJUnit4;
-
+import l.files.fs.Path;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import l.files.fs.Path;
 
 @RunWith(AndroidJUnit4.class)
 public final class BookmarksTest extends BaseFilesActivityTest {
@@ -15,21 +13,21 @@ public final class BookmarksTest extends BaseFilesActivityTest {
 
         Path a = dir().concat("a").createDirectory();
         screen()
-                .clickInto(a)
-                .bookmark()
-                .pressBack()
+            .clickInto(a)
+            .bookmark()
+            .pressBack()
 
-                .openBookmarksDrawer()
-                .longClick(a)
-                .assertActionModePresent(true)
-                .assertDrawerIsOpened(true)
-                .assertChecked(a, true)
-                .assertActionModeTitle(1)
+            .openBookmarksDrawer()
+            .longClick(a)
+            .assertActionModePresent(true)
+            .assertDrawerIsOpened(true)
+            .assertChecked(a, true)
+            .assertActionModeTitle(1)
 
-                .pressBack()
-                .assertActionModePresent(false)
-                .assertDrawerIsOpened(true)
-                .assertChecked(a, false);
+            .pressBack()
+            .assertActionModePresent(false)
+            .assertDrawerIsOpened(true)
+            .assertChecked(a, false);
     }
 
     @Test
@@ -38,20 +36,20 @@ public final class BookmarksTest extends BaseFilesActivityTest {
         Path a = dir().concat("a").createDirectory();
         Path b = dir().concat("b").createDirectory();
         screen()
-                .clickInto(a)
-                .assertCurrentDirectory(a)
-                .bookmark()
-                .pressBack()
+            .clickInto(a)
+            .assertCurrentDirectory(a)
+            .bookmark()
+            .pressBack()
 
-                .clickInto(b)
-                .assertCurrentDirectory(b)
-                .bookmark()
+            .clickInto(b)
+            .assertCurrentDirectory(b)
+            .bookmark()
 
-                .openBookmarksDrawer()
-                .click(a)
-                .activityObject()
-                .assertCurrentDirectory(a)
-                .assertBookmarksSidebarIsClosed();
+            .openBookmarksDrawer()
+            .click(a)
+            .activityObject()
+            .assertCurrentDirectory(a)
+            .assertBookmarksSidebarIsClosed();
 
     }
 
@@ -64,22 +62,22 @@ public final class BookmarksTest extends BaseFilesActivityTest {
 
         screen()
 
-                .clickInto(a).bookmark().pressBack()
-                .clickInto(b).bookmark().pressBack()
-                .clickInto(c).bookmark().pressBack()
+            .clickInto(a).bookmark().pressBack()
+            .clickInto(b).bookmark().pressBack()
+            .clickInto(c).bookmark().pressBack()
 
-                .openBookmarksDrawer()
-                .assertBookmarked(a, true)
-                .assertBookmarked(b, true)
-                .assertBookmarked(c, true)
+            .openBookmarksDrawer()
+            .assertBookmarked(a, true)
+            .assertBookmarked(b, true)
+            .assertBookmarked(c, true)
 
-                .longClick(a)
-                .click(b)
-                .delete()
+            .longClick(a)
+            .click(b)
+            .delete()
 
-                .assertBookmarked(a, false)
-                .assertBookmarked(b, false)
-                .assertBookmarked(c, true);
+            .assertBookmarked(a, false)
+            .assertBookmarked(b, false)
+            .assertBookmarked(c, true);
     }
 
 }

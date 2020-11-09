@@ -3,6 +3,7 @@ package l.files.fs
 import linux.Dirent
 import linux.ErrnoException
 import java.io.IOException
+import java.nio.file.Files
 import java.util.Arrays.copyOfRange
 import java.util.Comparator.comparing
 import java.util.Spliterator.DISTINCT

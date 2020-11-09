@@ -40,7 +40,6 @@ import l.files.ui.browser.menu.RefreshMenu;
 import l.files.ui.browser.menu.ShowHiddenFilesMenu;
 import l.files.ui.browser.menu.SortMenu;
 import l.files.ui.browser.preference.DefaultPreferencesViewModel;
-import l.files.ui.browser.preference.Preferences;
 import l.files.ui.info.action.InfoAction;
 import l.files.ui.operations.action.CopyAction;
 import l.files.ui.operations.action.CutAction;
@@ -70,13 +69,13 @@ import static l.files.ui.browser.preference.Preferences.*;
 
 public final class FilesFragment
 
-        extends
-        SelectionModeFragment<Path, FileInfo>
+    extends
+    SelectionModeFragment<Path, FileInfo>
 
-        implements
-        LoaderCallbacks<Result>,
-        OnSharedPreferenceChangeListener,
-        Selectable {
+    implements
+    LoaderCallbacks<Result>,
+    OnSharedPreferenceChangeListener,
+    Selectable {
 
     public static final String TAG = FilesFragment.class.getSimpleName();
 
@@ -84,7 +83,7 @@ public final class FilesFragment
     private static final int PERM_REQ_EXTERNAL_STORAGE_REFRESH = 2;
 
     private static final String[] PERM_EXTERNAL_STORAGE =
-            new String[]{WRITE_EXTERNAL_STORAGE};
+        new String[]{WRITE_EXTERNAL_STORAGE};
 
     private static final String ARG_DIRECTORY = "directory";
     private static final String ARG_WATCH_LIMIT = "watch_limit";
@@ -105,7 +104,9 @@ public final class FilesFragment
 
     private FilesAdapter adapter;
 
-    private CollectionLiveData<Path, Set<Path>, Set<Path>> bookmarks;
+    private CollectionLiveData<java.nio.file.Path, Set<java.nio.file.Path>,
+        Set<java.nio.file.Path>>
+        bookmarks;
 
     private DefaultPreferencesViewModel preferencesModel;
 
@@ -119,9 +120,9 @@ public final class FilesFragment
 
             Activity activity = getActivity();
             if (activity == null
-                    || activity.isFinishing()
-                    || isRemoving()
-                    || isDetached()) {
+                || activity.isFinishing()
+                || isRemoving()
+                || isDetached()) {
                 return;
             }
 
@@ -171,9 +172,9 @@ public final class FilesFragment
 
     @Override
     public View onCreateView(
-            @NonNull LayoutInflater inflater,
-            @Nullable ViewGroup container,
-            @Nullable Bundle state
+        @NonNull LayoutInflater inflater,
+        @Nullable ViewGroup container,
+        @Nullable Bundle state
     ) {
         return inflater.inflate(R.layout.files_fragment, container, false);
     }
@@ -205,19 +206,19 @@ public final class FilesFragment
         recycler.setHasFixedSize(true);
         recycler.setItemViewCacheSize(spanCount * 3);
         recycler.setLayoutManager(new StaggeredGridLayoutManager(
-                spanCount,
-                VERTICAL
+            spanCount,
+            VERTICAL
         ));
         recycler.getRecycledViewPool().setMaxRecycledViews(VIEW_TYPE_FILE, 50);
         recycler.getRecycledViewPool()
-                .setMaxRecycledViews(VIEW_TYPE_HEADER, 50);
+            .setMaxRecycledViews(VIEW_TYPE_HEADER, 50);
         recycler.setAdapter(adapter = new FilesAdapter(
-                recycler,
-                this,
-                selection(),
-                actionModeProvider(),
-                actionModeCallback(),
-                OpenFileEvent.topic
+            recycler,
+            this,
+            selection(),
+            actionModeProvider(),
+            actionModeCallback(),
+            OpenFileEvent.topic
         ));
 
         setupOptionsMenu();
@@ -229,8 +230,8 @@ public final class FilesFragment
             initLoad();
         } else {
             requestPermissions(
-                    PERM_EXTERNAL_STORAGE,
-                    PERM_REQ_EXTERNAL_STORAGE_INIT
+                PERM_EXTERNAL_STORAGE,
+                PERM_REQ_EXTERNAL_STORAGE_INIT
             );
         }
 
@@ -250,15 +251,15 @@ public final class FilesFragment
 
     @Override
     public void onRequestPermissionsResult(
-            int requestCode,
-            @NonNull String[] permissions,
-            @NonNull int[] grantResults
+        int requestCode,
+        @NonNull String[] permissions,
+        @NonNull int[] grantResults
     ) {
 
         super.onRequestPermissionsResult(
-                requestCode,
-                permissions,
-                grantResults
+            requestCode,
+            permissions,
+            grantResults
         );
 
         // Not checking grant results, load error will show in view
@@ -314,12 +315,12 @@ public final class FilesFragment
         assert activity != null;
         FragmentManager manager = activity.getSupportFragmentManager();
         setOptionsMenu(OptionsMenus.compose(
-                new RefreshMenu(() -> refreshEnabled, this::refresh),
-                new BookmarkMenu(directory(), bookmarks),
-                new NewDirMenu(manager, directory()),
-                new PasteMenu(activity, directory()),
-                new SortMenu(manager),
-                new ShowHiddenFilesMenu(activity)
+            new RefreshMenu(() -> refreshEnabled, this::refresh),
+            new BookmarkMenu(directory().toJavaPath(), bookmarks),
+            new NewDirMenu(manager, directory()),
+            new PasteMenu(activity, directory()),
+            new SortMenu(manager),
+            new ShowHiddenFilesMenu(activity)
         ));
     }
 
@@ -328,8 +329,8 @@ public final class FilesFragment
             restartLoad();
         } else {
             requestPermissions(
-                    PERM_EXTERNAL_STORAGE,
-                    PERM_REQ_EXTERNAL_STORAGE_REFRESH
+                PERM_EXTERNAL_STORAGE,
+                PERM_REQ_EXTERNAL_STORAGE_REFRESH
             );
         }
     }
@@ -348,15 +349,15 @@ public final class FilesFragment
         assert activity != null;
         FragmentManager manager = activity.getSupportFragmentManager();
         return ActionModes.compose(
-                new CountSelectedItemsAction(selection()),
-                new ClearSelectionOnDestroyActionMode(selection()),
-                new InfoAction(selection(), manager, directory()),
-                new SelectAllAction(this),
-                new CutAction(selection()),
-                new CopyAction(selection()),
-                new DeleteAction(selection(), manager),
-                new RenameAction(selection(), manager),
-                new ShareAction(selection(), activity)
+            new CountSelectedItemsAction(selection()),
+            new ClearSelectionOnDestroyActionMode(selection()),
+            new InfoAction(selection(), manager, directory()),
+            new SelectAllAction(this),
+            new CutAction(selection()),
+            new CopyAction(selection()),
+            new DeleteAction(selection(), manager),
+            new RenameAction(selection(), manager),
+            new ShareAction(selection(), activity)
         );
     }
 
@@ -371,11 +372,11 @@ public final class FilesFragment
         refreshEnabled = false;
         Activity context = getActivity();
         return new FilesLoader(
-                context,
-                directory,
-                () -> getSort(context),
-                () -> getShowHiddenFiles(context),
-                watchLimit
+            context,
+            directory,
+            () -> getSort(context),
+            () -> getShowHiddenFiles(context),
+            watchLimit
         );
     }
 

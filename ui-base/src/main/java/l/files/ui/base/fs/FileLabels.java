@@ -15,6 +15,10 @@ public final class FileLabels {
     private FileLabels() {
     }
 
+    public static String get(Resources res, java.nio.file.Path path) {
+        return get(res, Path.of(path));
+    }
+
     public static String get(Resources res, Path file) {
         if (DIR_HOME.equals(file)) return res.getString(R.string.home);
         if (DIR_ROOT.equals(file)) return Build.MODEL;

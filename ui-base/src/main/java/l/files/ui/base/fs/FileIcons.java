@@ -28,6 +28,11 @@ public final class FileIcons {
     }
 
     @DrawableRes
+    public static int getDirectory(java.nio.file.Path p) {
+        return getDirectory(Path.of(p));
+    }
+
+    @DrawableRes
     public static int getDirectory(Path p) {
         if (p.equals(DIR_ROOT)) return ic_phone_android_black_24dp;
         if (p.equals(DIR_HOME)) return ic_home_black_24dp;

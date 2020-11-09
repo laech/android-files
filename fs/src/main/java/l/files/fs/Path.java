@@ -51,6 +51,10 @@ public class Path implements Parcelable, Comparable<Path> {
         return new Path(file.toPath());
     }
 
+    public static Path of(java.nio.file.Path path) {
+        return new Path(path);
+    }
+
     public static Path of(String path) {
         return new Path(Paths.get(path));
     }
@@ -59,7 +63,7 @@ public class Path implements Parcelable, Comparable<Path> {
         return of(new String(path, UTF_8));
     }
 
-    private final java.nio.file.Path delegate;
+    final java.nio.file.Path delegate;
 
     private Path(java.nio.file.Path delegate) {
         this.delegate = requireNonNull(delegate);

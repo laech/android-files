@@ -1,8 +1,9 @@
 package l.files.ui.browser;
 
 import androidx.recyclerview.widget.RecyclerView;
-import l.files.fs.Path;
 import l.files.ui.bookmarks.BookmarksFragment;
+
+import java.nio.file.Path;
 
 import static l.files.base.Objects.requireNonNull;
 import static l.files.ui.browser.Instrumentations.*;
@@ -21,6 +22,10 @@ final class UiBookmarksFragment {
         return context;
     }
 
+    UiBookmarksFragment longClick(l.files.fs.Path bookmark) {
+        return longClick(bookmark.toJavaPath());
+    }
+
     UiBookmarksFragment longClick(Path bookmark) {
         longClickItemOnMainThread(
             context.getInstrumentation(),
@@ -35,6 +40,10 @@ final class UiBookmarksFragment {
             .getActivity()
             .getSupportFragmentManager()
             .findFragmentById(R.id.bookmarks_fragment);
+    }
+
+    UiBookmarksFragment click(l.files.fs.Path bookmark) {
+        return click(bookmark.toJavaPath());
     }
 
     UiBookmarksFragment click(Path bookmark) {
@@ -54,6 +63,13 @@ final class UiBookmarksFragment {
         return this;
     }
 
+    UiBookmarksFragment assertBookmarked(
+        l.files.fs.Path bookmark,
+        boolean bookmarked
+    ) {
+        return assertBookmarked(bookmark.toJavaPath(), bookmarked);
+    }
+
     UiBookmarksFragment assertBookmarked(Path bookmark, boolean bookmarked) {
         awaitOnMainThread(context.getInstrumentation(), () ->
             assertEquals(
@@ -71,6 +87,13 @@ final class UiBookmarksFragment {
     UiBookmarksFragment assertActionModeTitle(Object title) {
         activityObject().assertActionModeTitle(title);
         return this;
+    }
+
+    UiBookmarksFragment assertChecked(
+        l.files.fs.Path bookmark,
+        boolean checked
+    ) {
+        return assertChecked(bookmark.toJavaPath(), checked);
     }
 
     UiBookmarksFragment assertChecked(Path bookmark, boolean checked) {
