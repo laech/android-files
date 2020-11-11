@@ -2,9 +2,7 @@ package l.files.fs.media
 
 import android.content.Context
 import l.files.fs.LinkOption.FOLLOW
-import l.files.fs.Path
 import l.files.fs.Stat
-import l.files.fs.newBufferedInputStream
 import org.apache.tika.io.TaggedIOException
 import org.apache.tika.metadata.Metadata
 import org.apache.tika.metadata.TikaMetadataKeys
@@ -12,6 +10,8 @@ import org.apache.tika.mime.MimeTypeException
 import org.apache.tika.mime.MimeTypes
 import org.apache.tika.mime.MimeTypesFactory
 import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Path
 
 internal object Detector {
 
@@ -25,17 +25,15 @@ internal object Detector {
   @Volatile
   private var types: MimeTypes? = null
 
-  @JvmOverloads
-  @Throws(IOException::class)
   fun detect(
     context: Context,
     path: Path,
-    stat: Stat = path.stat(FOLLOW)
+    stat: Stat = l.files.fs.Path.of(path).stat(FOLLOW)
   ): String = when {
     stat.isSymbolicLink -> detect(
       context,
-      path.readSymbolicLink(),
-      path.stat(FOLLOW)
+      Files.readSymbolicLink(path),
+      l.files.fs.Path.of(path).stat(FOLLOW)
     )
     stat.isRegularFile -> detectFile(context, path)
     stat.isFifo -> INODE_FIFO
@@ -78,7 +76,7 @@ internal object Detector {
       .use { MimeTypesFactory.create(it) }
 
   private fun detectFile(types: MimeTypes, path: Path): String =
-    path.newBufferedInputStream().use {
+    Files.newInputStream(path).buffered().use {
       val meta = Metadata()
       meta.add(TikaMetadataKeys.RESOURCE_NAME_KEY, path.toString())
       types.detect(it, meta).baseType.toString()

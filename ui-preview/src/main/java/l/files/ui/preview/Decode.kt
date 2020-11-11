@@ -93,7 +93,7 @@ class Decode internal constructor(
   private fun decodeMediaType(context: Context): String {
     var mediaType = preview.getMediaType(path, stat, constraint)
     if (mediaType == null) {
-      mediaType = MediaTypes.detect(context, path, stat)
+      mediaType = MediaTypes.detect(context, path.toJavaPath(), stat)
       preview.putMediaType(path, stat, constraint, mediaType)
     }
     return mediaType

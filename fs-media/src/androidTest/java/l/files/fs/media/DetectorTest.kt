@@ -17,45 +17,45 @@ class DetectorTest : PathBaseTest() {
 
   @Test
   fun can_detect_by_name() {
-    val file = createTextFile("a.txt", "")
+    val file = createTextFile("a.txt", "").toJavaPath()
     assertEquals("text/plain", Detector.detect(context, file))
   }
 
   @Test
   fun can_detect_by_content() {
-    val file = createTextFile("a.png")
+    val file = createTextFile("a.png").toJavaPath()
     assertEquals("text/plain", Detector.detect(context, file))
   }
 
   @Test
   fun detects_directory_type() {
-    val dir = createDir("b")
+    val dir = createDir("b").toJavaPath()
     assertEquals("inode/directory", Detector.detect(context, dir))
   }
 
   @Test
   fun detects_file_type() {
-    val file = createTextFile("a.txt")
+    val file = createTextFile("a.txt").toJavaPath()
     assertEquals("text/plain", Detector.detect(context, file))
   }
 
   @Test
   fun detects_file_type_uppercase_extension() {
-    val file = createTextFile("a.TXT")
+    val file = createTextFile("a.TXT").toJavaPath()
     assertEquals("text/plain", Detector.detect(context, file))
   }
 
   @Test
   fun detects_linked_file_type() {
     val file = createTextFile("a.mp3")
-    val link = createSymbolicLink("b.txt", file)
+    val link = createSymbolicLink("b.txt", file).toJavaPath()
     assertEquals("text/plain", Detector.detect(context, link))
   }
 
   @Test
   fun detects_linked_directory_type() {
     val dir = createDir("a")
-    val link = createSymbolicLink("b", dir)
+    val link = createSymbolicLink("b", dir).toJavaPath()
     assertEquals("inode/directory", Detector.detect(context, link))
   }
 
@@ -63,7 +63,7 @@ class DetectorTest : PathBaseTest() {
   fun detects_multi_linked_directory_type() {
     val dir = createDir("a")
     val link1 = createSymbolicLink("b", dir)
-    val link2 = createSymbolicLink("c", link1)
+    val link2 = createSymbolicLink("c", link1).toJavaPath()
     assertEquals("inode/directory", Detector.detect(context, link2))
   }
 
@@ -74,7 +74,7 @@ class DetectorTest : PathBaseTest() {
     link1.createSymbolicLink(link2)
     link2.createSymbolicLink(link1)
     try {
-      Detector.detect(context, link1)
+      Detector.detect(context, link1.toJavaPath())
       fail()
     } catch (e: IOException) {
       // Pass

@@ -1,9 +1,9 @@
 package l.files.fs.media
 
 import android.content.Context
-import l.files.fs.Path
 import l.files.fs.Stat
 import java.io.IOException
+import java.nio.file.Path
 
 object MediaTypes {
 

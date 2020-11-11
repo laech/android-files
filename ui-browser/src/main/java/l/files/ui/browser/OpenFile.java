@@ -37,7 +37,7 @@ final class OpenFile extends AsyncTask<Void, Void, Object> {
         Context context = contextRef.get();
         if (context == null) return null;
         try {
-            return MediaTypes.detect(context, file, stat);
+            return MediaTypes.detect(context, file.toJavaPath(), stat);
         } catch (IOException e) {
             return e;
         }
