@@ -42,14 +42,14 @@ class InfoAction(
   }
 
   private fun showMultiFileInfo(values: Collection<FileInfo>) {
-    InfoMultiFragment.create(parentDirectory, values)
+    InfoMultiFragment.create(parentDirectory.toJavaPath(), values)
       .show(manager, InfoBaseFragment.FRAGMENT_TAG)
   }
 
   private fun showSingleFileInfo(values: Collection<FileInfo>) {
     val file = values.iterator().next()
     val stat = file.selfStat()
-    InfoFragment.create(file.selfPath(), stat)
+    InfoFragment.create(file.selfPath().toJavaPath(), stat)
       .show(manager, InfoBaseFragment.FRAGMENT_TAG)
   }
 

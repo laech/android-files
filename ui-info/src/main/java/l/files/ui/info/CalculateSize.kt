@@ -4,10 +4,12 @@ import androidx.lifecycle.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
-import l.files.fs.*
-import l.files.fs.LinkOption.NOFOLLOW
 import java.io.IOException
 import java.lang.System.currentTimeMillis
+import java.nio.file.Files
+import java.nio.file.LinkOption.NOFOLLOW_LINKS
+import java.nio.file.Path
+import java.nio.file.attribute.BasicFileAttributes
 
 internal data class Size(
   val count: Int,
@@ -27,7 +29,7 @@ internal class CalculateSizeViewModel : ViewModel() {
 
 internal fun LiveData<Target>.calculate(): LiveData<Size> =
   switchMap { (parent, children) ->
-    liveData<Size> {
+    liveData {
       calculate(children, parent)
     }
   }
@@ -45,14 +47,18 @@ private suspend fun LiveDataScope<Size>.calculate(
     ensureActive()
 
     try {
-      parent.concat(child).traverse(TraverseOrder.PRE).use {
+      Files.walk(parent.resolve(child)).use {
         // TODO? handle error
-        for ((path, _) in it.iterator()) {
+        for (path in it) {
           ensureActive()
 
           currentCount++
           try {
-            currentSize += path.stat(NOFOLLOW).size()
+            currentSize += Files.readAttributes(
+              path,
+              BasicFileAttributes::class.java,
+              NOFOLLOW_LINKS
+            ).size()
           } catch (e: IOException) {
             // TODO?
           }

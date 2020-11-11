@@ -12,7 +12,8 @@ import androidx.appcompat.app.AppCompatDialogFragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import kotlinx.android.synthetic.main.info_size.*
-import l.files.fs.Path
+import java.nio.file.Path
+import java.nio.file.Paths
 
 abstract class InfoBaseFragment : AppCompatDialogFragment() {
 
@@ -40,10 +41,13 @@ abstract class InfoBaseFragment : AppCompatDialogFragment() {
   }
 
   protected fun readParentDirectory(): Path =
-    requireArguments().getParcelable(ARG_PARENT_DIRECTORY)!!
+    Paths.get(requireArguments().getString(ARG_PARENT_DIRECTORY))
 
   protected fun readChildren(): Set<Path> =
-    requireArguments().getParcelableArrayList<Path>(ARG_CHILDREN)!!.toSet()
+    requireArguments()
+      .getStringArrayList(ARG_CHILDREN)!!
+      .map(Paths::get)
+      .toSet()
 
   protected fun formatSize(size: Long): String =
     Formatter.formatFileSize(activity, size)
