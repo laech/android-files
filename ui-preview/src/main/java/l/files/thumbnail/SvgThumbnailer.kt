@@ -6,10 +6,10 @@ import android.graphics.Bitmap.Config.ARGB_8888
 import android.graphics.Canvas
 import android.graphics.Color.WHITE
 import com.caverock.androidsvg.SVG
-import l.files.fs.Path
 import l.files.ui.base.graphics.Rect
 import l.files.ui.base.graphics.ScaledBitmap
 import java.io.InputStream
+import java.nio.file.Path
 
 internal object SvgThumbnailer : Thumbnailer<InputStream> {
 

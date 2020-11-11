@@ -3,11 +3,12 @@ package l.files.ui.preview
 import android.content.Context
 import android.graphics.Bitmap
 import androidx.annotation.MainThread
-import l.files.fs.Path
 import l.files.fs.Stat
 import l.files.ui.base.graphics.Rect
 import l.files.ui.base.graphics.ScaledBitmap
 import java.io.IOException
+import java.nio.file.Files.isReadable
+import java.nio.file.Path
 import java.util.concurrent.Future
 
 internal data class BlurredThumbnail(val bitmap: Bitmap)
@@ -140,7 +141,7 @@ class Preview internal constructor(
       return NoPreview.NOT_REGULAR_FILE
     }
     try {
-      if (!path.isReadable) {
+      if (!isReadable(path)) {
         return NoPreview.FILE_UNREADABLE
       }
     } catch (e: IOException) {
@@ -215,7 +216,7 @@ private var instance: Preview? = null
 fun Context.getPreview(): Preview {
   if (instance == null) {
     instance = Preview(applicationContext) {
-      Path.of(externalCacheDir ?: cacheDir)
+      (externalCacheDir ?: cacheDir).toPath()
     }
     instance!!.cleanupAsync()
   }

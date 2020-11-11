@@ -1,9 +1,9 @@
 package l.files.ui.preview
 
-import l.files.fs.Path
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
+import java.nio.file.Path
 
 internal abstract class PersistenceCacheTest<V, C : PersistenceCache<V>> :
   MemCacheTest<Path, V, C>() {

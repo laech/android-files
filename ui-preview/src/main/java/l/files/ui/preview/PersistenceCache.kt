@@ -4,19 +4,18 @@ import android.os.AsyncTask
 import android.util.Log
 import androidx.collection.LruCache
 import l.files.base.Throwables
-import l.files.fs.Path
 import l.files.fs.Stat
-import l.files.fs.newBufferedDataInputStream
-import l.files.fs.newBufferedDataOutputStream
 import l.files.ui.base.graphics.Rect
 import java.io.*
 import java.lang.System.nanoTime
+import java.nio.file.Files.*
 import java.nio.file.NoSuchFileException
+import java.nio.file.Path
+import java.nio.file.Paths
 import java.nio.file.StandardCopyOption.REPLACE_EXISTING
-import java.nio.file.StandardOpenOption.CREATE
 import java.util.concurrent.atomic.AtomicBoolean
 
-private const val SUPERCLASS_VERSION = 6
+private const val SUPERCLASS_VERSION = 7
 
 internal abstract class PersistenceCache<V>(
   cacheDir: () -> Path,
@@ -61,7 +60,7 @@ internal abstract class PersistenceCache<V>(
     return old
   }
 
-  private fun cacheFile(): Path = cacheDir.concat(cacheFileName)
+  private fun cacheFile(): Path = cacheDir.resolve(cacheFileName)
 
   abstract val cacheFileName: String
 
@@ -88,16 +87,13 @@ internal abstract class PersistenceCache<V>(
     }
     val file = cacheFile()
     try {
-      file.newBufferedDataInputStream().use {
+      DataInputStream(newInputStream(file).buffered()).use {
         if (it.readInt() != SUPERCLASS_VERSION) return
         if (it.readInt() != subclassVersion) return
 
         while (true) {
           try {
-            val len = it.readShort()
-            val bytes = ByteArray(len.toInt())
-            it.readFully(bytes)
-            val key = Path.of(bytes)
+            val key = Paths.get(it.readUTF())
             val time = it.readLong()
             val value = read(it)
             delegate.put(key, Snapshot(value, time))
@@ -134,31 +130,29 @@ internal abstract class PersistenceCache<V>(
       return
     }
     val file = cacheFile()
-    val parent = file.parent()!!
-    parent.createDirectories()
-    val tmp = parent.concat("${file.fileName}-${nanoTime()}")
+    val parent = file.parent!!
+    createDirectories(parent)
+    val tmp = parent.resolve("${file.fileName}-${nanoTime()}")
     try {
-      tmp.newBufferedDataOutputStream(CREATE).use {
+      DataOutputStream(newOutputStream(tmp).buffered()).use {
         it.writeInt(SUPERCLASS_VERSION)
         it.writeInt(subclassVersion)
         val snapshot = delegate.snapshot()
         for ((key, value) in snapshot) {
-          val bytes = key.toByteArray()
-          it.writeShort(bytes.size)
-          it.write(bytes)
+          it.writeUTF(key.toString())
           it.writeLong(value.time)
           write(it, value.value)
         }
       }
     } catch (e: Exception) {
       try {
-        tmp.delete()
+        delete(tmp)
       } catch (sup: IOException) {
         Throwables.addSuppressed(e, sup)
       }
       throw e
     }
-    tmp.move(file, REPLACE_EXISTING)
+    move(tmp, file, REPLACE_EXISTING)
   }
 
   abstract fun write(out: DataOutput, value: V)

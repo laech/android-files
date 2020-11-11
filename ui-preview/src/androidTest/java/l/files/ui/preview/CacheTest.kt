@@ -2,14 +2,14 @@ package l.files.ui.preview
 
 import l.files.fs.LinkOption
 import l.files.fs.LinkOption.NOFOLLOW
-import l.files.fs.Path
 import l.files.fs.Stat
 import l.files.ui.base.graphics.Rect
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
-import java.io.File
+import java.nio.file.Files.*
+import java.nio.file.Path
 import java.nio.file.attribute.FileTime
 import java.util.*
 
@@ -19,13 +19,10 @@ internal abstract class CacheTest<V, C : Cache<V>> {
   lateinit var random: Random
   lateinit var file: Path
   lateinit var stat: Stat
-  private lateinit var tempDir: File
+  private lateinit var tempDir: Path
 
-  private fun createTempDir(): File {
-    val dir = File.createTempFile(javaClass.simpleName, null)
-    assertTrue(dir.delete())
-    assertTrue(dir.mkdir())
-    return dir
+  private fun createTempDir(): Path {
+    return createTempDirectory(javaClass.simpleName)
   }
 
   @Before
@@ -33,14 +30,13 @@ internal abstract class CacheTest<V, C : Cache<V>> {
     tempDir = createTempDir()
     cache = newCache()
     random = Random()
-    val localFile = File.createTempFile("123", null, tempDir)
-    file = Path.of(localFile)
-    stat = file.stat(LinkOption.FOLLOW)
+    file = createTempFile(tempDir, "123", null)
+    stat = l.files.fs.Path.of(file).stat(LinkOption.FOLLOW)
   }
 
   @After
   fun tearDown() {
-    assertTrue(tempDir.deleteRecursively() || !tempDir.exists())
+    assertTrue(tempDir.toFile().deleteRecursively() || !exists(tempDir))
   }
 
   @Test
@@ -56,8 +52,15 @@ internal abstract class CacheTest<V, C : Cache<V>> {
     val constraint = newConstraint()
     val value = newValue()
     cache.put(file, stat, constraint, value)
-    file.setLastModifiedTime(FileTime.fromMillis(0))
-    assertNull(cache.get(file, file.stat(NOFOLLOW), constraint, true))
+    setLastModifiedTime(file, FileTime.fromMillis(0))
+    assertNull(
+      cache.get(
+        file,
+        l.files.fs.Path.of(file).stat(NOFOLLOW),
+        constraint,
+        true
+      )
+    )
   }
 
   @Test
@@ -81,5 +84,5 @@ internal abstract class CacheTest<V, C : Cache<V>> {
     assertEquals(a, b)
   }
 
-  fun mockCacheDir(): Path = Path.of(tempDir)
+  fun mockCacheDir(): Path = tempDir
 }

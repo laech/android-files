@@ -11,11 +11,11 @@ import android.util.TypedValue.*
 import android.view.View.MeasureSpec.*
 import android.widget.TextView
 import l.files.base.io.Readers
-import l.files.fs.Path
 import l.files.fs.media.MediaTypes.generalize
 import l.files.ui.base.graphics.Rect
 import l.files.ui.base.graphics.ScaledBitmap
 import java.io.InputStream
+import java.nio.file.Path
 import kotlin.math.min
 import kotlin.text.Charsets.UTF_8
 

@@ -1,8 +1,8 @@
 package l.files.ui.preview
 
-import l.files.fs.Path
 import java.io.DataInput
 import java.io.DataOutput
+import java.nio.file.Path
 
 internal class MediaTypeCache(cacheDir: () -> Path) :
   PersistenceCache<String>(cacheDir, 1) {

@@ -1,9 +1,9 @@
 package l.files.ui.preview
 
-import l.files.fs.Path
 import l.files.ui.base.graphics.Rect
 import java.io.DataInput
 import java.io.DataOutput
+import java.nio.file.Path
 
 internal class RectCache(cacheDir: () -> Path) :
   PersistenceCache<Rect>(cacheDir, 1) {

@@ -5,12 +5,14 @@ import android.graphics.Bitmap.Config.ARGB_8888
 import android.graphics.Canvas
 import android.graphics.Color.BLUE
 import l.files.fs.LinkOption.NOFOLLOW
+import l.files.fs.Path
 import l.files.ui.base.graphics.Rect
 import l.files.ui.base.graphics.ScaledBitmap
 import org.junit.Assert.*
 import org.junit.Test
 import java.lang.System.currentTimeMillis
-import java.nio.file.LinkOption.NOFOLLOW_LINKS
+import java.nio.file.Files.exists
+import java.nio.file.Files.setLastModifiedTime
 import java.nio.file.attribute.FileTime
 import java.util.concurrent.TimeUnit.DAYS
 
@@ -32,26 +34,28 @@ internal class ThumbnailDiskCacheTest :
     val constraint = newConstraint()
     val value = newValue()
     val cacheFile = cache.cacheFile(file, stat, constraint, true)
-    assertFalse(cacheFile.exists(NOFOLLOW_LINKS))
+    assertFalse(exists(cacheFile))
 
     cache.put(file, stat, constraint, value)
-    assertTrue(cacheFile.exists(NOFOLLOW_LINKS))
+    assertTrue(exists(cacheFile))
 
     cache.cleanup()
-    assertTrue(cacheFile.exists(NOFOLLOW_LINKS))
+    assertTrue(exists(cacheFile))
 
-    cacheFile.setLastModifiedTime(
+    setLastModifiedTime(
+      cacheFile,
       FileTime.fromMillis(currentTimeMillis() - DAYS.toMillis(29))
     )
     cache.cleanup()
-    assertTrue(cacheFile.exists(NOFOLLOW_LINKS))
+    assertTrue(exists(cacheFile))
 
-    cacheFile.setLastModifiedTime(
+    setLastModifiedTime(
+      cacheFile,
       FileTime.fromMillis(currentTimeMillis() - DAYS.toMillis(31))
     )
     cache.cleanup()
-    assertFalse(cacheFile.exists(NOFOLLOW_LINKS))
-    assertFalse(cacheFile.parent()!!.exists(NOFOLLOW_LINKS))
+    assertFalse(exists(cacheFile))
+    assertFalse(exists(cacheFile.parent))
   }
 
   @Test
@@ -62,11 +66,11 @@ internal class ThumbnailDiskCacheTest :
     val cacheFile = cache.cacheFile(file, stat, constraint, true)
 
     val oldTime = java.time.Instant.ofEpochMilli(1000)
-    cacheFile.setLastModifiedTime(FileTime.from(oldTime))
-    assertEquals(oldTime, cacheFile.stat(NOFOLLOW).lastModifiedTime())
+    setLastModifiedTime(cacheFile, FileTime.from(oldTime))
+    assertEquals(oldTime, Path.of(cacheFile).stat(NOFOLLOW).lastModifiedTime())
 
     cache.get(file, stat, constraint, true)
-    val newTime = cacheFile.stat(NOFOLLOW).lastModifiedTime()
+    val newTime = Path.of(cacheFile).stat(NOFOLLOW).lastModifiedTime()
     assertNotEquals(oldTime, newTime)
     assertTrue(oldTime.epochSecond < newTime.epochSecond)
   }

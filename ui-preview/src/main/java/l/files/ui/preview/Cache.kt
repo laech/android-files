@@ -1,9 +1,9 @@
 package l.files.ui.preview
 
-import l.files.fs.Path
 import l.files.fs.Stat
 import l.files.ui.base.graphics.Rect
 import java.io.IOException
+import java.nio.file.Path
 
 internal data class Snapshot<V>(
   val value: V,

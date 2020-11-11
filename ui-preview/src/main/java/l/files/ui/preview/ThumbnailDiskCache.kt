@@ -5,19 +5,20 @@ import android.graphics.BitmapFactory
 import android.os.Process
 import android.os.Process.setThreadPriority
 import android.util.Log
-import l.files.fs.*
-import l.files.fs.LinkOption.NOFOLLOW
-import l.files.fs.exception.DirectoryNotEmpty
+import l.files.fs.Stat
 import l.files.ui.base.graphics.Rect
 import l.files.ui.base.graphics.ScaledBitmap
+import java.io.DataInputStream
+import java.io.DataOutputStream
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.lang.System.currentTimeMillis
 import java.lang.System.nanoTime
 import java.lang.ref.WeakReference
-import java.nio.file.NoSuchFileException
+import java.nio.file.*
+import java.nio.file.Files.*
 import java.nio.file.StandardCopyOption.REPLACE_EXISTING
-import java.nio.file.StandardOpenOption.CREATE
+import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.attribute.FileTime
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
@@ -28,7 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger
 internal class ThumbnailDiskCache(getCacheDir: () -> Path) :
   Cache<ScaledBitmap> {
 
-  val cacheDir: Path by lazy { getCacheDir().concat("thumbnails") }
+  val cacheDir: Path by lazy { getCacheDir().resolve("thumbnails") }
 
   fun cleanupAsync() {
     executor.execute {
@@ -43,35 +44,54 @@ internal class ThumbnailDiskCache(getCacheDir: () -> Path) :
 
   @Throws(IOException::class)
   fun cleanup() {
-    if (!cacheDir.exists()) {
+    if (!exists(cacheDir)) {
       return
     }
 
     val now = currentTimeMillis()
-    cacheDir.traverse(TraverseOrder.POST).use {
-      it.forEach { (path, _) ->
-        try {
-          val stat = path.stat(NOFOLLOW)
-          if (stat.isDirectory) {
-            try {
-              path.delete()
-            } catch (ignore: DirectoryNotEmpty) {
-            }
-          } else {
-            val lastModifiedMillis = stat.lastModifiedTime().toEpochMilli()
-            if (MILLISECONDS.toDays(now - lastModifiedMillis) > 30) {
-              path.delete()
-            }
+    try {
+      walkFileTree(cacheDir, object : SimpleFileVisitor<Path>() {
+
+        override fun visitFile(
+          file: Path,
+          attrs: BasicFileAttributes
+        ): FileVisitResult {
+          val lastModifiedMillis = attrs.lastModifiedTime().toMillis()
+          if (MILLISECONDS.toDays(now - lastModifiedMillis) > 30) {
+            deleteIfExists(file)
           }
-        } catch (e: IOException) {
-          Log.w(javaClass.simpleName, "Failed to delete $path", e)
+          return FileVisitResult.CONTINUE
         }
-      }
+
+        override fun visitFileFailed(
+          file: Path,
+          e: IOException
+        ): FileVisitResult {
+          Log.w(javaClass.simpleName, "Failed to visit $file", e)
+          return FileVisitResult.CONTINUE
+        }
+
+        override fun postVisitDirectory(
+          dir: Path,
+          e: IOException?
+        ): FileVisitResult {
+          try {
+            deleteIfExists(dir)
+          } catch (ignore: DirectoryNotEmptyException) {
+          }
+          return FileVisitResult.CONTINUE
+        }
+      })
+    } catch (e: IOException) {
+      Log.w(javaClass.simpleName, "Failed to visit $cacheDir", e)
     }
   }
 
   private fun cacheDir(path: Path, constraint: Rect): Path =
-    cacheDir.concat("${path}_${constraint.width()}_${constraint.height()}")
+    Paths.get(
+      cacheDir.toString(),
+      "${path}_${constraint.width()}_${constraint.height()}"
+    )
 
   @Throws(IOException::class)
   internal fun cacheFile(
@@ -83,14 +103,14 @@ internal class ThumbnailDiskCache(getCacheDir: () -> Path) :
 
     var result: Path? = null
     if (!matchTime) {
-      result = cacheDir(path, constraint).listPaths()
+      result = list(cacheDir(path, constraint))
         .use { it.findFirst().orElse(null) }
     }
 
     if (result == null) {
       val time = stat.lastModifiedTime()
       result = cacheDir(path, constraint)
-        .concat("${time.epochSecond}-${time.nano}")
+        .resolve("${time.epochSecond}-${time.nano}")
     }
 
     return result!!
@@ -106,7 +126,7 @@ internal class ThumbnailDiskCache(getCacheDir: () -> Path) :
 
     val cache = cacheFile(path, stat, constraint, matchTime)
     return try {
-      cache.newBufferedDataInputStream().use { input ->
+      DataInputStream(newInputStream(cache).buffered()).use { input ->
         val version = input.readByte()
         if (version != VERSION) {
           return null // TODO return failure reason to make debugging easier
@@ -122,7 +142,7 @@ internal class ThumbnailDiskCache(getCacheDir: () -> Path) :
         }
 
         try {
-          cache.setLastModifiedTime(FileTime.fromMillis(currentTimeMillis()))
+          setLastModifiedTime(cache, FileTime.fromMillis(currentTimeMillis()))
         } catch (ignore: IOException) {
         }
 
@@ -146,12 +166,12 @@ internal class ThumbnailDiskCache(getCacheDir: () -> Path) :
     purgeOldCacheFiles(path, constraint)
 
     val cache = cacheFile(path, stat, constraint, true)
-    val parent = cache.parent()!!
-    parent.createDirectories()
+    val parent = cache.parent!!
+    createDirectories(parent)
 
-    val tmp = parent.concat("${cache.fileName}-${nanoTime()}")
+    val tmp = parent.resolve("${cache.fileName}-${nanoTime()}")
     try {
-      tmp.newBufferedDataOutputStream(CREATE).use { out ->
+      DataOutputStream(newOutputStream(tmp).buffered()).use { out ->
         out.writeByte(VERSION.toInt())
         out.writeInt(value.originalSize().width())
         out.writeInt(value.originalSize().height())
@@ -159,14 +179,14 @@ internal class ThumbnailDiskCache(getCacheDir: () -> Path) :
       }
     } catch (e: Exception) {
       try {
-        tmp.delete()
+        delete(tmp)
       } catch (sup: Exception) {
         e.addSuppressed(sup)
       }
       throw e
     }
 
-    tmp.move(cache, REPLACE_EXISTING)
+    move(tmp, cache, REPLACE_EXISTING)
     return null
   }
 
@@ -175,10 +195,10 @@ internal class ThumbnailDiskCache(getCacheDir: () -> Path) :
     constraint: Rect
   ) {
     try {
-      cacheDir(path, constraint).listPaths().use {
+      list(cacheDir(path, constraint)).use {
         it.forEach { path ->
           try {
-            path.delete()
+            delete(path)
           } catch (e: IOException) {
             Log.w(javaClass.simpleName, "Failed to purge $path", e)
           }

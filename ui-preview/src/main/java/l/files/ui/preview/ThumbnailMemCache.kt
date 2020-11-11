@@ -5,8 +5,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import androidx.collection.LruCache
 import androidx.core.content.getSystemService
-import l.files.fs.Path
 import l.files.ui.base.graphics.Rect
+import java.nio.file.Path
 
 internal class ThumbnailMemCache(
   size: Int,

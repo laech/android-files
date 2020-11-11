@@ -1,9 +1,9 @@
 package l.files.ui.preview
 
 import androidx.collection.LruCache
-import l.files.fs.Path
 import l.files.fs.Stat
 import l.files.ui.base.graphics.Rect
+import java.nio.file.Path
 
 internal abstract class MemCache<K, V> : Cache<V> {
 

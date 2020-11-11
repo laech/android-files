@@ -130,7 +130,7 @@ public final class Paths {
     public static void write(Path path, CharSequence content, Charset charset)
         throws IOException {
 
-        try (Writer writer = newWriter(path, charset, CREATE)) {
+        try (Writer writer = newWriter(path, charset)) {
             writer.write(content.toString());
         }
     }
@@ -181,7 +181,7 @@ public final class Paths {
 
     public static void copy(InputStream in, Path to)
         throws IOException {
-        try (OutputStream out = to.newOutputStream(CREATE)) {
+        try (OutputStream out = to.newOutputStream()) {
             byte[] buffer = new byte[8192];
             for (int i; (i = in.read(buffer)) != -1; ) {
                 out.write(buffer, 0, i);

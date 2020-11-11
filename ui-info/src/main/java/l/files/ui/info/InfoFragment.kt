@@ -76,12 +76,7 @@ class InfoFragment : InfoBaseFragment(), Preview.Callback {
 
   private fun updateBackgroundView(path: Path, stat: Stat) {
     val preview = requireContext().getPreview()
-    val bg = preview.getBlurredThumbnail(
-      l.files.fs.Path.of(path),
-      stat,
-      constraint,
-      true
-    )
+    val bg = preview.getBlurredThumbnail(path, stat, constraint, true)
     bg?.let { updateBackgroundView(it) }
   }
 
@@ -95,15 +90,15 @@ class InfoFragment : InfoBaseFragment(), Preview.Callback {
     val context = requireContext()
     val preview = context.getPreview()
     val thumbnail =
-      preview.getThumbnail(l.files.fs.Path.of(path), stat, constraint, true)
+      preview.getThumbnail(path, stat, constraint, true)
     if (thumbnail != null) {
       thumbnailView.setImageBitmap(thumbnail)
       return
     }
     val size =
-      preview.getSize(l.files.fs.Path.of(path), stat, constraint, false)
+      preview.getSize(path, stat, constraint, false)
     size?.let { setImageViewMinSize(it) }
-    preview.get(l.files.fs.Path.of(path), stat, constraint, this, context)
+    preview.get(path, stat, constraint, this, context)
   }
 
   private fun scaleSize(size: Rect): Rect = size.scaleDown(constraint)
@@ -114,11 +109,7 @@ class InfoFragment : InfoBaseFragment(), Preview.Callback {
     thumbnailView.minimumHeight = scaled.height()
   }
 
-  override fun onPreviewAvailable(
-    path: l.files.fs.Path,
-    stat: Stat,
-    thumbnail: Bitmap
-  ) {
+  override fun onPreviewAvailable(path: Path, stat: Stat, thumbnail: Bitmap) {
     showImageView(thumbnail)
   }
 
@@ -132,13 +123,13 @@ class InfoFragment : InfoBaseFragment(), Preview.Callback {
     resources.getInteger(android.R.integer.config_mediumAnimTime)
 
   override fun onBlurredThumbnailAvailable(
-    path: l.files.fs.Path,
+    path: Path,
     stat: Stat,
     thumbnail: Bitmap
   ) {
   }
 
-  override fun onPreviewFailed(path: l.files.fs.Path, stat: Stat, cause: Any) =
+  override fun onPreviewFailed(path: Path, stat: Stat, cause: Any) =
     hindImageView()
 
   private fun hindImageView() {

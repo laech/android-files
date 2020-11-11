@@ -4,15 +4,17 @@ import android.content.Context
 import android.graphics.Bitmap
 import androidx.test.platform.app.InstrumentationRegistry
 import l.files.fs.LinkOption
-import l.files.fs.Path
 import l.files.fs.Stat
 import l.files.testing.fs.PathBaseTest
-import l.files.testing.fs.Paths
 import l.files.ui.base.graphics.Rect
 import org.junit.Assert.*
 import org.junit.Test
 import org.mockito.Mockito.mock
 import java.lang.System.nanoTime
+import java.nio.charset.StandardCharsets.UTF_8
+import java.nio.file.Files.*
+import java.nio.file.Path
+import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -28,7 +30,7 @@ class PreviewTest : PathBaseTest() {
   }
 
   private fun newPreview() = Preview(context) {
-    dir2().concat(nanoTime().toString())
+    dir2().toJavaPath().resolve(nanoTime().toString())
   }
 
   @Test
@@ -99,22 +101,22 @@ class PreviewTest : PathBaseTest() {
     testFile: String,
     dstFileName: String = testFile
   ) {
-    val file = dir1().concat(dstFileName)
-    context.assets.open(testFile).use { Paths.copy(it, file) }
+    val file = dir1().concat(dstFileName).toJavaPath()
+    context.assets.open(testFile).use { copy(it, file, REPLACE_EXISTING) }
     testPreviewSuccess(file)
     testPreviewSuccess(file)
   }
 
   @Test
   fun preview_proc_cpuinfo() {
-    testPreviewSuccess(Path.of("/proc/cpuinfo"))
+    testPreviewSuccess(java.nio.file.Paths.get("/proc/cpuinfo"))
   }
 
   @Test
   fun preview_link() {
-    val file = dir1().concat("file").createFile()
-    val link = dir1().concat("link").createSymbolicLink(file)
-    Paths.writeUtf8(file, "hi")
+    val file = createFile(dir1().toJavaPath().resolve("file"))
+    val link = createSymbolicLink(dir1().toJavaPath().resolve("link"), file)
+    write(file, "hi".toByteArray(UTF_8))
     testPreviewSuccess(file)
     testPreviewSuccess(file)
     testPreviewSuccess(link)
@@ -123,24 +125,24 @@ class PreviewTest : PathBaseTest() {
 
   @Test
   fun preview_link_modified_target() {
-    val file = dir1().concat("file").createFile()
-    val link = dir1().concat("link").createSymbolicLink(file)
+    val file = createFile(dir1().toJavaPath().resolve("file"))
+    val link = createSymbolicLink(dir1().toJavaPath().resolve("link"), file)
     testPreviewFailure(link)
-    Paths.writeUtf8(file, "hi")
+    write(file, "hi".toByteArray(UTF_8))
     testPreviewSuccess(link)
     testPreviewSuccess(link)
   }
 
   private fun testPreviewSuccessForContent(content: String) {
-    val file = dir1().concat(nanoTime().toString())
-    Paths.writeUtf8(file, content)
+    val file = dir1().toJavaPath().resolve(nanoTime().toString())
+    write(file, content.toByteArray(UTF_8))
     testPreviewSuccess(file)
     testPreviewSuccess(file)
   }
 
   private fun testPreviewSuccess(file: Path) {
     val callback = TestCallback(1, 1)
-    val stat = file.stat(LinkOption.FOLLOW)
+    val stat = l.files.fs.Path.of(file).stat(LinkOption.FOLLOW)
     val preview = newPreview()
     val max = Rect.of(100, 100)
     val task = preview.get(
@@ -169,7 +171,7 @@ class PreviewTest : PathBaseTest() {
 
   private fun testPreviewFailure(file: Path) {
     val callback = mock(Preview.Callback::class.java)
-    val stat = file.stat(LinkOption.NOFOLLOW)
+    val stat = l.files.fs.Path.of(file).stat(LinkOption.NOFOLLOW)
     val rect = Rect.of(10, 10)
     assertNull(newPreview().get(file, stat, rect, callback, context))
   }

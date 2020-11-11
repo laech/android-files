@@ -12,6 +12,7 @@ import static java.util.Collections.unmodifiableList;
 
 public abstract class StableAdapter<T, VH extends ViewHolder> extends Adapter<VH> {
 
+    private long seq = 0;
     private final Map<Object, Long> ids = new WeakHashMap<>();
     private final List<T> items = new ArrayList<>();
 
@@ -35,7 +36,7 @@ public abstract class StableAdapter<T, VH extends ViewHolder> extends Adapter<VH
         Object object = getItemIdObjectAt(position);
         Long id = ids.get(object);
         if (id == null) {
-            id = ids.size() + 1L;
+            id = seq++;
             ids.put(object, id);
         }
         return id;

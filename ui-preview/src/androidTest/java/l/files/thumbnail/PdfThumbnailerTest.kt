@@ -1,14 +1,16 @@
 package l.files.thumbnail
 
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
-import l.files.fs.Path
-import l.files.testing.fs.Paths
 import l.files.ui.base.graphics.Rect
 import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import java.io.IOException
+import java.nio.charset.StandardCharsets.UTF_8
+import java.nio.file.Files.*
+import java.nio.file.Path
+import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 
 class PdfThumbnailerTest {
 
@@ -52,21 +54,19 @@ class PdfThumbnailerTest {
       assertTrue(result.originalSize().width() > max.width())
       assertTrue(result.originalSize().height() > max.height())
     } finally {
-      Paths.deleteIfExists(path)
+      deleteIfExists(path)
     }
   }
 
   private fun createTestPdf(): Path {
-    val file = folder.newFile("PdfThumbnailerTest")
-    val path = Path.of(file)
-    openTestPdf().use { Paths.copy(it, path) }
+    val path = folder.newFile("PdfThumbnailerTest").toPath()
+    openTestPdf().use { copy(it, path, REPLACE_EXISTING) }
     return path
   }
 
   private fun createInvalidPdf(): Path {
-    val file = folder.newFile("PdfThumbnailerTestInvalid")
-    val path = Path.of(file)
-    Paths.writeUtf8(path, "hello")
+    val path = folder.newFile("PdfThumbnailerTestInvalid").toPath()
+    write(path, "hello".toByteArray(UTF_8))
     return path
   }
 

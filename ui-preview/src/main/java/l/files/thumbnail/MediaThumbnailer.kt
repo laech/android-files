@@ -2,9 +2,9 @@ package l.files.thumbnail
 
 import android.content.Context
 import android.media.MediaMetadataRetriever
-import l.files.fs.Path
 import l.files.ui.base.graphics.Rect
 import l.files.ui.base.media.MediaMetadataRetrievers
+import java.nio.file.Path
 
 internal object MediaThumbnailer : Thumbnailer<Path> {
 

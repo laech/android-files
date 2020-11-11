@@ -6,12 +6,14 @@ import android.graphics.Bitmap.createBitmap
 import android.graphics.Color
 import android.graphics.pdf.PdfRenderer
 import android.graphics.pdf.PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY
+import android.os.ParcelFileDescriptor
+import android.os.ParcelFileDescriptor.MODE_READ_ONLY
 import android.util.DisplayMetrics
 import android.util.TypedValue.COMPLEX_UNIT_PT
 import android.util.TypedValue.applyDimension
-import l.files.fs.Path
 import l.files.ui.base.graphics.Rect
 import l.files.ui.base.graphics.ScaledBitmap
+import java.nio.file.Path
 
 internal object PdfThumbnailer : Thumbnailer<Path> {
 
@@ -19,7 +21,7 @@ internal object PdfThumbnailer : Thumbnailer<Path> {
     type == "application/pdf"
 
   override fun create(input: Path, max: Rect, context: Context) =
-    PdfRenderer(input.newInputFileDescriptor()).use { doc ->
+    PdfRenderer(newParcelFileDescriptor(input)).use { doc ->
       if (doc.pageCount < 1) {
         return@use null
       }
@@ -34,6 +36,9 @@ internal object PdfThumbnailer : Thumbnailer<Path> {
         ScaledBitmap(bitmap, originalSize)
       }
     }
+
+  private fun newParcelFileDescriptor(input: Path) =
+    ParcelFileDescriptor.open(input.toFile(), MODE_READ_ONLY)
 
   private fun getSize(page: PdfRenderer.Page, metrics: DisplayMetrics) =
     Rect.of(

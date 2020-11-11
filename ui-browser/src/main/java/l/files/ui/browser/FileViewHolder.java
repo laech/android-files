@@ -8,23 +8,20 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.AsyncTask;
-import androidx.annotation.Nullable;
-import androidx.core.graphics.drawable.DrawableCompat;
-import androidx.core.graphics.drawable.RoundedBitmapDrawable;
-import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
-import androidx.appcompat.view.ActionMode;
-import androidx.cardview.widget.CardView;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.RecyclerView.ItemAnimator;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import java.util.List;
-
+import androidx.annotation.Nullable;
+import androidx.appcompat.view.ActionMode;
+import androidx.cardview.widget.CardView;
+import androidx.core.graphics.drawable.DrawableCompat;
+import androidx.core.graphics.drawable.RoundedBitmapDrawable;
+import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView.*;
 import l.files.base.Provider;
 import l.files.fs.Path;
 import l.files.fs.Stat;
@@ -44,27 +41,26 @@ import l.files.ui.preview.Preview;
 import l.files.ui.preview.PreviewKt;
 import l.files.ui.preview.SizedColorDrawable;
 
+import java.util.List;
+
 import static android.graphics.Color.TRANSPARENT;
 import static android.graphics.Color.WHITE;
-import static androidx.core.content.ContextCompat.getColor;
-import static androidx.core.content.ContextCompat.getDrawable;
-import static androidx.core.graphics.drawable.DrawableCompat.setTintList;
-import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
-import static androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_DRAGGING;
-import static androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE;
 import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 import static android.util.TypedValue.applyDimension;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
+import static androidx.core.content.ContextCompat.getColor;
+import static androidx.core.content.ContextCompat.getDrawable;
+import static androidx.core.graphics.drawable.DrawableCompat.setTintList;
+import static androidx.recyclerview.widget.RecyclerView.*;
 import static java.lang.System.currentTimeMillis;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.ui.base.content.Contexts.isDebugBuild;
 import static l.files.ui.browser.FilesAdapter.calculateCardContentWidthPixels;
 
 public final class FileViewHolder
-        extends SelectionModeViewHolder<Path, FileInfo>
-        implements Preview.Callback, LifeCycleListener, ActivatedListener {
+    extends SelectionModeViewHolder<Path, FileInfo>
+    implements Preview.Callback, LifeCycleListener, ActivatedListener {
 
     static final int LAYOUT_ID = R.layout.files_grid_item;
 
@@ -85,13 +81,13 @@ public final class FileViewHolder
     private AsyncTask<?, ?, ?> decodeThumbnailTask;
 
     FileViewHolder(
-            View itemView,
-            RecyclerView recyclerView,
-            LifeCycleListenable listenable,
-            Selection<Path, FileInfo> selection,
-            ActionModeProvider actionModeProvider,
-            ActionMode.Callback actionModeCallback,
-            MainThreadTopic<OpenFileEvent> topic
+        View itemView,
+        RecyclerView recyclerView,
+        LifeCycleListenable listenable,
+        Selection<Path, FileInfo> selection,
+        ActionModeProvider actionModeProvider,
+        ActionMode.Callback actionModeCallback,
+        MainThreadTopic<OpenFileEvent> topic
     ) {
 
         super(itemView, selection, actionModeProvider, actionModeCallback);
@@ -120,7 +116,10 @@ public final class FileViewHolder
 
     @Override
     protected void onClick(View v, FileInfo file) {
-        topic.postOnMainThread(new OpenFileEvent(file.selfPath(), file.linkTargetOrSelfStat()));
+        topic.postOnMainThread(new OpenFileEvent(
+            file.selfPath(),
+            file.linkTargetOrSelfStat()
+        ));
     }
 
     @Override
@@ -149,12 +148,15 @@ public final class FileViewHolder
     private void bindPartial(List<Object> payloads) {
         for (Object payload : payloads) {
             if (payload instanceof Bitmap) {
-                bindThumbnail(item(), createRoundedBitmapDrawable((Bitmap) payload));
+                bindThumbnail(
+                    item(),
+                    createRoundedBitmapDrawable((Bitmap) payload)
+                );
                 thumbnailView.setAlpha(0f);
                 thumbnailView
-                        .animate()
-                        .setDuration(animateDuration())
-                        .alpha(1f);
+                    .animate()
+                    .setDuration(animateDuration())
+                    .alpha(1f);
             }
         }
     }
@@ -207,13 +209,14 @@ public final class FileViewHolder
 
         Path path = previewPath();
         Stat stat = previewStat();
-        if (stat == null || !preview.isPreviewable(path, stat, constraint)) {
+        if (stat == null ||
+            !preview.isPreviewable(path.toJavaPath(), stat, constraint)) {
             clearBackground();
             return newIcon();
         }
 
         Bitmap blurred = preview.getBlurredThumbnail(
-                path, stat, constraint, false
+            path.toJavaPath(), stat, constraint, false
         );
         if (blurred != null) {
             setBackground(blurred, false);
@@ -224,26 +227,26 @@ public final class FileViewHolder
         Bitmap thumbnail = getCachedThumbnail(path, stat);
         if (thumbnail != null) {
             // if (blurred == null) {
-                // TODO
+            // TODO
             //}
             return createRoundedBitmapDrawable(thumbnail);
         }
 
         runWhenUiIsIdle(path, this::canInterruptScrollState, () ->
-                decodeThumbnailTask = preview.get(
-                        path, stat, constraint, this, context()));
+            decodeThumbnailTask = preview.get(
+                path.toJavaPath(), stat, constraint, this, context()));
 
         return getOrNewIcon(path, stat);
     }
 
     private Drawable getOrNewIcon(Path path, Stat stat) {
-        Rect size = preview.getSize(path, stat, constraint, false);
+        Rect size = preview.getSize(path.toJavaPath(), stat, constraint, false);
         if (size != null) {
             Rect scaledSize = scaleSize(size);
             return new SizedColorDrawable(
-                    TRANSPARENT,
-                    scaledSize.width(),
-                    scaledSize.height()
+                TRANSPARENT,
+                scaledSize.width(),
+                scaledSize.height()
             );
         }
         return newIcon();
@@ -266,14 +269,15 @@ public final class FileViewHolder
     private boolean canUpdateUi() {
         ItemAnimator animator = recyclerView.getItemAnimator();
         return (animator == null || !animator.isRunning()) &&
-                canInterruptScrollState();
+            canInterruptScrollState();
     }
 
     private boolean canInterruptScrollState() {
         /*
          * SCROLL_STATE_IDLE: view not being scrolled
          * SCROLL_STATE_DRAGGING: finger touching screen, dragging
-         * SCROLL_STATE_SETTLING: finger no longer touching screen, view scrolling
+         * SCROLL_STATE_SETTLING: finger no longer touching screen, view
+         * scrolling
          *
          * Don't perform anything expensive like decoding thumbnails
          * in background during SCROLL_STATE_SETTLING as that will interrupt
@@ -282,13 +286,13 @@ public final class FileViewHolder
          *
          * Doing work in background during SCROLL_STATE_DRAGGING is okay as
          * there is only so much screen space you can drag at once, and user
-         * dragging speed is relatively slow. Updating thumbnails during dragging
-         * is actually wanted otherwise user will have to lift finger to see
-         * things updated which is annoying.
+         * dragging speed is relatively slow. Updating thumbnails during
+         * dragging is actually wanted otherwise user will have to lift
+         * finger to see things updated which is annoying.
          */
         int scrollState = recyclerView.getScrollState();
         return scrollState == SCROLL_STATE_IDLE ||
-                scrollState == SCROLL_STATE_DRAGGING;
+            scrollState == SCROLL_STATE_DRAGGING;
     }
 
     private Path previewPath() {
@@ -307,9 +311,19 @@ public final class FileViewHolder
         // TODO this will cause thumbnail not to be the latest correct one
         boolean changedMoreThan5SecondsAgo = now - then > 5000;
         if (changedMoreThan5SecondsAgo) {
-            return preview.getThumbnail(path, stat, constraint, true);
+            return preview.getThumbnail(
+                path.toJavaPath(),
+                stat,
+                constraint,
+                true
+            );
         } else {
-            return preview.getThumbnail(path, stat, constraint, false);
+            return preview.getThumbnail(
+                path.toJavaPath(),
+                stat,
+                constraint,
+                false
+            );
         }
     }
 
@@ -328,7 +342,7 @@ public final class FileViewHolder
         drawable.setColorFilter(BG_FILTER, PorterDuff.Mode.LIGHTEN);
         if (fade) {
             TransitionDrawable background = new TransitionDrawable(
-                    new Drawable[]{new ColorDrawable(TRANSPARENT), drawable}
+                new Drawable[]{new ColorDrawable(TRANSPARENT), drawable}
             );
             backgroundView.setBackground(background);
             background.startTransition(animateDuration());
@@ -340,20 +354,23 @@ public final class FileViewHolder
     private RoundedBitmapDrawable createRoundedBitmapDrawable(Bitmap bitmap) {
         Resources res = resources();
         RoundedBitmapDrawable drawable =
-                RoundedBitmapDrawableFactory.create(res, bitmap);
+            RoundedBitmapDrawableFactory.create(res, bitmap);
         drawable.setCornerRadius(res.getDimension(
-                R.dimen.files_item_card_inner_radius));
+            R.dimen.files_item_card_inner_radius));
         return drawable;
     }
 
     private int animateDuration() {
-        return resources().getInteger(
-                android.R.integer.config_shortAnimTime);
+        return resources().getInteger(android.R.integer.config_shortAnimTime);
     }
 
     @Override
-    public void onPreviewAvailable(Path path, Stat stat, Bitmap bm) {
-        runWhenUiIsIdle(path, this::canUpdateUi, () -> {
+    public void onPreviewAvailable(
+        java.nio.file.Path path,
+        Stat stat,
+        Bitmap bm
+    ) {
+        runWhenUiIsIdle(Path.of(path), this::canUpdateUi, () -> {
             int position = getAdapterPosition();
             if (position != NO_POSITION) {
                 recyclerView.getAdapter().notifyItemChanged(position, bm);
@@ -363,25 +380,26 @@ public final class FileViewHolder
 
     @Override
     public void onBlurredThumbnailAvailable(
-            Path path,
-            Stat stat,
-            Bitmap thumbnail
+        java.nio.file.Path path,
+        Stat stat,
+        Bitmap thumbnail
     ) {
-        runWhenUiIsIdle(path, this::canUpdateUi,
-                () -> setBackground(thumbnail, true));
+        runWhenUiIsIdle(Path.of(path), this::canUpdateUi,
+            () -> setBackground(thumbnail, true)
+        );
     }
 
     private void runWhenUiIsIdle(
-            Path previewPath,
-            Provider<Boolean> canUpdateUi,
-            Runnable update
+        Path previewPath,
+        Provider<Boolean> canUpdateUi,
+        Runnable update
     ) {
         if (!previewPath.equals(previewPath())) {
             return;
         }
         if (!canUpdateUi.get()) {
             itemView.postDelayed(() ->
-                    runWhenUiIsIdle(previewPath, canUpdateUi, update), 50);
+                runWhenUiIsIdle(previewPath, canUpdateUi, update), 50);
             return;
         }
         int position = getAdapterPosition();
@@ -391,15 +409,22 @@ public final class FileViewHolder
     }
 
     @Override
-    public void onPreviewFailed(Path path, Stat stat, Object cause) {
+    public void onPreviewFailed(
+        java.nio.file.Path path,
+        Stat stat,
+        Object cause
+    ) {
 
         if (isDebugBuild(context())) {
             if (cause instanceof Throwable) {
                 Log.d(getClass().getSimpleName(),
-                        "No preview " + path, (Throwable) cause);
+                    "No preview " + path, (Throwable) cause
+                );
             } else {
-                Log.d(getClass().getSimpleName(),
-                        "No preview " + path + " (" + cause + ")");
+                Log.d(
+                    getClass().getSimpleName(),
+                    "No preview " + path + " (" + cause + ")"
+                );
             }
         }
     }

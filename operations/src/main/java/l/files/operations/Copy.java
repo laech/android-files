@@ -15,7 +15,6 @@ import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static java.nio.file.StandardOpenOption.CREATE;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
 final class Copy extends Paste {
@@ -135,7 +134,7 @@ final class Copy extends Paste {
         }
 
         try (InputStream source = sourcePath.newInputStream();
-             OutputStream sink = destinationPath.newOutputStream(CREATE)) {
+             OutputStream sink = destinationPath.newOutputStream()) {
 
 
             // TODO perform sync to disk

@@ -1,9 +1,9 @@
 package l.files.thumbnail
 
 import android.content.Context
-import l.files.fs.Path
 import l.files.ui.base.content.pm.Packages
 import l.files.ui.base.graphics.Rect
+import java.nio.file.Path
 
 internal object ApkThumbnailer : Thumbnailer<Path> {
 

@@ -6,7 +6,6 @@ import android.os.AsyncTask
 import android.os.Process
 import android.os.Process.setThreadPriority
 import android.util.Log
-import l.files.fs.Path
 import l.files.fs.Stat
 import l.files.fs.media.MediaTypes
 import l.files.thumbnail.Thumbnailer
@@ -14,6 +13,7 @@ import l.files.ui.base.content.Contexts.isDebugBuild
 import l.files.ui.base.graphics.Rect
 import l.files.ui.base.graphics.ScaledBitmap
 import java.io.IOException
+import java.nio.file.Path
 import java.util.Locale.ENGLISH
 import java.util.concurrent.*
 import java.util.concurrent.atomic.AtomicInteger
@@ -93,7 +93,7 @@ class Decode internal constructor(
   private fun decodeMediaType(context: Context): String {
     var mediaType = preview.getMediaType(path, stat, constraint)
     if (mediaType == null) {
-      mediaType = MediaTypes.detect(context, path.toJavaPath(), stat)
+      mediaType = MediaTypes.detect(context, path, stat)
       preview.putMediaType(path, stat, constraint, mediaType)
     }
     return mediaType

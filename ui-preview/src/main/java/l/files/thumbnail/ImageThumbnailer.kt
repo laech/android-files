@@ -1,9 +1,10 @@
 package l.files.thumbnail
 
 import android.content.Context
-import l.files.fs.Path
 import l.files.ui.base.graphics.Bitmaps
 import l.files.ui.base.graphics.Rect
+import java.nio.file.Files.newInputStream
+import java.nio.file.Path
 
 internal object ImageThumbnailer : Thumbnailer<Path> {
 
@@ -11,5 +12,5 @@ internal object ImageThumbnailer : Thumbnailer<Path> {
     type.startsWith("image/")
 
   override fun create(input: Path, max: Rect, context: Context) =
-    Bitmaps.decodeScaledDownBitmap({ input.newInputStream() }, max)
+    Bitmaps.decodeScaledDownBitmap({ newInputStream(input) }, max)
 }
