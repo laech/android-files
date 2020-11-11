@@ -15,6 +15,7 @@ import l.files.base.lifecycle.CollectionLiveData.Companion.setLiveData
 import l.files.base.lifecycle.SetLiveData
 import l.files.base.text.CollationKey
 import java.nio.file.Files.exists
+import java.nio.file.InvalidPathException
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.text.Collator
@@ -86,7 +87,7 @@ private fun decode(encoded: Collection<String>): Set<Path> {
       if (exists(path)) {
         bookmarks.add(path)
       }
-    } catch (e: IllegalArgumentException) {
+    } catch (e: InvalidPathException) {
       Log.w(TAG, "Invalid bookmark: $element", e)
     }
   }
