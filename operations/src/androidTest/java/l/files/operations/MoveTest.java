@@ -1,13 +1,14 @@
 package l.files.operations;
 
-import l.files.fs.Path;
-import l.files.testing.fs.Paths;
 import org.junit.Test;
 
+import java.nio.file.Path;
 import java.util.Set;
 
+import static java.nio.file.Files.*;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.util.Collections.singleton;
+import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
@@ -15,54 +16,57 @@ public final class MoveTest extends PasteTest {
 
     @Test
     public void movedCountInitialZero() throws Exception {
-        Path src = dir1().concat("a").createFile();
-        Path dstDir = dir1().concat("b").createDirectory();
+        Path src = createFile(dir1().concat("a").toJavaPath());
+        Path dstDir = createDirectory(dir1().concat("b").toJavaPath());
         Move move = create(src, dstDir);
         assertEquals(move.getMovedItemCount(), 0);
     }
 
     @Test
     public void movesSymlink() throws Exception {
-        Path target = dir1().concat("target").createFile();
-        Path link = dir1().concat("link").createSymbolicLink(target);
+        Path target = createFile(dir1().concat("target").toJavaPath());
+        Path link =
+            createSymbolicLink(dir1().concat("link").toJavaPath(), target);
 
-        Move move = create(link, dir1().concat("moved").createDirectory());
+        Move move =
+            create(link, createDirectory(dir1().toJavaPath().resolve("moved")));
         move.execute();
 
-        Path actual = dir1().concat("moved/link").readSymbolicLink();
+        Path actual =
+            readSymbolicLink(dir1().toJavaPath().resolve("moved/link"));
         assertEquals(target, actual);
         assertEquals(1, move.getMovedItemCount());
     }
 
     @Test
     public void movesFile() throws Exception {
-        Path srcFile = dir1().concat("a.txt").createFile();
-        Path dstDir = dir1().concat("dst").createDirectory();
-        Path dstFile = dstDir.concat("a.txt");
-        Paths.writeUtf8(srcFile, "Test");
+        Path srcFile = createFile(dir1().concat("a.txt").toJavaPath());
+        Path dstDir = createDirectory(dir1().concat("dst").toJavaPath());
+        Path dstFile = dstDir.resolve("a.txt");
+        write(srcFile, singleton("Test"));
 
         Move move = create(srcFile, dstDir);
         move.execute();
 
-        assertFalse(srcFile.exists(NOFOLLOW_LINKS));
-        assertEquals("Test", Paths.readAllUtf8(dstFile));
+        assertFalse(exists(srcFile, NOFOLLOW_LINKS));
+        assertEquals(singletonList("Test"), readAllLines(dstFile));
         assertEquals(move.getMovedItemCount(), 1);
     }
 
 
     @Test
     public void movesDirectory() throws Exception {
-        Path srcDir = dir1().concat("a").createDirectory();
-        Path dstDir = dir1().concat("dst").createDirectory();
-        Path srcFile = srcDir.concat("test.txt");
-        Path dstFile = dstDir.concat("a/test.txt");
-        Paths.writeUtf8(srcFile, "Test");
+        Path srcDir = createDirectory(dir1().concat("a").toJavaPath());
+        Path dstDir = createDirectory(dir1().concat("dst").toJavaPath());
+        Path srcFile = srcDir.resolve("test.txt");
+        Path dstFile = dstDir.resolve("a/test.txt");
+        write(srcFile, singleton("Test"));
 
         Move move = create(srcDir, dstDir);
         move.execute();
 
-        assertFalse(srcDir.exists(NOFOLLOW_LINKS));
-        assertEquals("Test", Paths.readAllUtf8(dstFile));
+        assertFalse(exists(srcDir, NOFOLLOW_LINKS));
+        assertEquals(singletonList("Test"), readAllLines(dstFile));
         assertEquals(move.getMovedItemCount(), 1);
     }
 

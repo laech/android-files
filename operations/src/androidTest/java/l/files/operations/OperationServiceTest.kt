@@ -3,6 +3,7 @@ package l.files.operations
 import android.content.ComponentName
 import android.content.Context
 import androidx.test.platform.app.InstrumentationRegistry
+import l.files.fs.Path
 import l.files.testing.fs.PathBaseTest
 import l.files.testing.fs.Paths
 import org.hamcrest.CoreMatchers.equalTo
@@ -11,6 +12,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
+import java.nio.file.Files.*
 import java.nio.file.LinkOption.NOFOLLOW_LINKS
 import java.util.*
 import java.util.concurrent.CountDownLatch
@@ -57,52 +59,52 @@ class OperationServiceTest : PathBaseTest() {
 
   @Test
   fun moves_file() {
-    val src = dir1().concat("a").createFile()
-    val dst = dir1().concat("dst").createDirectory()
+    val src = createFile(dir1().toJavaPath().resolve("a"))
+    val dst = createDirectory(dir1().toJavaPath().resolve("dst"))
     val listener = setListener(CountDownListener(TaskKind.MOVE))
     service.onCreate()
     service.onStartCommand(newMoveIntent(context, setOf(src), dst), 0, 0)
     listener.await()
-    assertThat(src.exists(NOFOLLOW_LINKS), equalTo(false))
+    assertThat(exists(src, NOFOLLOW_LINKS), equalTo(false))
     assertThat(
-      dst.concat(src.fileName!!).exists(NOFOLLOW_LINKS),
+      exists(dst.resolve(src.fileName), NOFOLLOW_LINKS),
       equalTo(true)
     )
   }
 
   @Test
   fun copies_file() {
-    val src = dir1().concat("a").createFile()
-    val dst = dir1().concat("dst").createDirectory()
+    val src = createFile(dir1().concat("a").toJavaPath())
+    val dst = createDirectory(dir1().concat("dst").toJavaPath())
     val listener = setListener(CountDownListener(TaskKind.COPY))
     service.onCreate()
     service.onStartCommand(newCopyIntent(context, setOf(src), dst), 0, 0)
     listener.await()
-    assertThat(src.exists(NOFOLLOW_LINKS), equalTo(true))
+    assertThat(exists(src, NOFOLLOW_LINKS), equalTo(true))
     assertThat(
-      dst.concat(src.fileName!!).exists(NOFOLLOW_LINKS),
+      exists(dst.resolve(src.fileName), NOFOLLOW_LINKS),
       equalTo(true)
     )
   }
 
   @Test
   fun deletes_files() {
-    val a = dir1().concat("a")
-    val b = dir1().concat("b/c")
-    Paths.createFiles(a)
-    Paths.createFiles(b)
+    val a = dir1().toJavaPath().resolve("a")
+    val b = dir1().toJavaPath().resolve("b/c")
+    Paths.createFiles(Path.of(a))
+    Paths.createFiles(Path.of(b))
     val listener = setListener(CountDownListener(TaskKind.DELETE))
     service.onCreate()
     service.onStartCommand(newDeleteIntent(context, listOf(a, b)), 0, 0)
     listener.await()
-    assertThat(a.exists(NOFOLLOW_LINKS), equalTo(false))
-    assertThat(b.exists(NOFOLLOW_LINKS), equalTo(false))
+    assertThat(exists(a, NOFOLLOW_LINKS), equalTo(false))
+    assertThat(exists(b, NOFOLLOW_LINKS), equalTo(false))
   }
 
   @Test
   fun task_start_time_is_correct() {
-    val file1 = dir1().concat("a").createFile()
-    val file2 = dir1().concat("b").createFile()
+    val file1 = createFile(dir1().concat("a").toJavaPath())
+    val file2 = createFile(dir1().concat("b").toJavaPath())
     val listener = setListener(CountDownListener(TaskKind.DELETE))
     service.onCreate()
     val start = System.currentTimeMillis()

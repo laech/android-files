@@ -1,20 +1,19 @@
 package l.files.operations;
 
 import android.os.Handler;
-
-import org.junit.Before;
-import org.junit.Test;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-
-import l.files.fs.Path;
 import l.files.operations.Task.Callback;
 import l.files.operations.TaskState.Failed;
 import l.files.operations.TaskState.Pending;
 import l.files.operations.TaskState.Success;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
 import static android.os.Looper.getMainLooper;
@@ -30,7 +29,7 @@ public final class TaskTest {
     private Handler handler;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         handler = new Handler(getMainLooper());
     }
 
@@ -52,7 +51,7 @@ public final class TaskTest {
     public void notifiesOnFailure() throws Throwable {
         TaskState state = last(capturedExecute(task -> {
             throw new FileException(singletonList(Failure.create(
-                    Path.of("a"), new IOException("Test")
+                Paths.get("a"), new IOException("Test")
             )));
         }));
         assertTrue(state.toString(), state instanceof Failed);
@@ -79,7 +78,8 @@ public final class TaskTest {
         return states.get(states.size() - 1);
     }
 
-    private List<TaskState> capturedExecute(Command command) throws InterruptedException {
+    private List<TaskState> capturedExecute(Command command)
+        throws InterruptedException {
         Listener listener = new Listener();
         new TestTask(handler, listener) {
             @Override
@@ -94,11 +94,11 @@ public final class TaskTest {
     private static abstract class TestTask extends Task {
         TestTask(Handler handler, Callback callback) {
             super(
-                    TaskId.create(0, COPY),
-                    Target.from(emptyList(), mock(Path.class)),
-                    Clock.system(),
-                    callback,
-                    handler
+                TaskId.create(0, COPY),
+                Target.from(emptyList(), mock(Path.class)),
+                Clock.system(),
+                callback,
+                handler
             );
         }
 

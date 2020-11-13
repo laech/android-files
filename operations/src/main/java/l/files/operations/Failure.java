@@ -1,8 +1,7 @@
 package l.files.operations;
 
 import java.io.IOException;
-
-import l.files.fs.Path;
+import java.nio.file.Path;
 
 import static l.files.base.Objects.requireNonNull;
 

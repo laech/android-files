@@ -1,10 +1,11 @@
 package l.files.operations;
 
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import l.files.fs.Path;
 
 class Count extends AbstractOperation {
 
@@ -19,20 +20,33 @@ class Count extends AbstractOperation {
     }
 
     @Override
-    void process(Path path) throws InterruptedException {
+    void process(Path path) {
         traverse(path, new OperationVisitor() {
 
             @Override
-            public Result onPreVisit(Path path) throws IOException {
-                count.incrementAndGet();
-                onCount(path);
-                return super.onPreVisit(path);
+            public FileVisitResult preVisitDirectory(
+                Path dir, BasicFileAttributes attrs
+            ) throws IOException {
+                count(attrs);
+                return super.preVisitDirectory(dir, attrs);
             }
 
+            @Override
+            public FileVisitResult visitFile(
+                Path file, BasicFileAttributes attrs
+            ) throws IOException {
+                count(attrs);
+                return super.visitFile(file, attrs);
+            }
+
+            private void count(BasicFileAttributes attrs) {
+                count.incrementAndGet();
+                onCount(attrs);
+            }
         });
     }
 
-    void onCount(Path path) {
+    void onCount(BasicFileAttributes attrs) {
     }
 
 }

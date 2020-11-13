@@ -1,33 +1,26 @@
 package l.files.operations;
 
-import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collection;
-import java.util.concurrent.atomic.AtomicLong;
-
-import l.files.fs.Path;
-
-import static l.files.fs.LinkOption.NOFOLLOW;
+import java.util.concurrent.atomic.LongAdder;
 
 final class Size extends Count {
 
-    private final AtomicLong size = new AtomicLong();
+    private final LongAdder size = new LongAdder();
 
     Size(Collection<? extends Path> sourcePaths) {
         super(sourcePaths);
     }
 
     public long getSize() {
-        return size.get();
+        return size.longValue();
     }
 
     @Override
-    void onCount(Path path) {
-        super.onCount(path);
-        try {
-            size.addAndGet(path.stat(NOFOLLOW).size());
-        } catch (IOException e) {
-            // Ignore count
-        }
+    void onCount(BasicFileAttributes attrs) {
+        super.onCount(attrs);
+        size.add(attrs.size());
     }
 
 }

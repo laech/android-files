@@ -36,16 +36,16 @@ class PasteMenu(
       Clipboard.Action.COPY -> context.startService(
         newCopyIntent(
           context,
-          clipboard.paths(),
-          destination
+          clipboard.paths().map(Path::toJavaPath),
+          destination.toJavaPath()
         )
       )
       Clipboard.Action.CUT -> {
         context.startService(
           newMoveIntent(
             context,
-            clipboard.paths(),
-            destination
+            clipboard.paths().map(Path::toJavaPath),
+            destination.toJavaPath()
           )
         )
         clipboard.clear()

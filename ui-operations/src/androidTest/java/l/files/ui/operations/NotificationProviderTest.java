@@ -5,22 +5,14 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
-
+import l.files.operations.*;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
-
-import l.files.fs.Path;
-import l.files.operations.Failure;
-import l.files.operations.Progress;
-import l.files.operations.Target;
-import l.files.operations.TaskId;
-import l.files.operations.TaskNotFound;
-import l.files.operations.TaskState;
-import l.files.operations.Time;
 
 import static androidx.test.InstrumentationRegistry.getContext;
 import static java.util.Arrays.asList;
@@ -33,10 +25,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.notNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.*;
 
 public final class NotificationProviderTest {
 
@@ -47,12 +36,15 @@ public final class NotificationProviderTest {
 
     @Before
     public void setUp() throws Exception {
-        System.setProperty("dexmaker.dexcache", getContext().getCacheDir().getAbsolutePath());
+        System.setProperty(
+            "dexmaker.dexcache",
+            getContext().getCacheDir().getAbsolutePath()
+        );
         provider = new NotificationProvider();
         base = TaskState.pending(
-                TaskId.create(1, COPY),
-                Target.from(emptyList(), mock(Path.class)),
-                Time.create(0, 0)
+            TaskId.create(1, COPY),
+            Target.from(emptyList(), mock(Path.class)),
+            Time.create(0, 0)
         );
         manager = mock(NotificationManager.class);
         context = new ContextWrapper(getContext()) {
@@ -83,7 +75,10 @@ public final class NotificationProviderTest {
     @Test
     public void cancel_notification_on_success() {
 
-        provider.onUpdate(context, base.running(Time.create(1, 1)).success(Time.create(2, 2)));
+        provider.onUpdate(
+            context,
+            base.running(Time.create(1, 1)).success(Time.create(2, 2))
+        );
         verify(manager, timeout(1000)).cancel(base.task().id());
         verifyNoMoreInteractions(manager);
     }
@@ -91,8 +86,14 @@ public final class NotificationProviderTest {
     @Test
     public void notify_on_progress() {
 
-        provider.onUpdate(context, base.running(Time.create(1, 1), Progress.NONE, Progress.NONE));
-        verify(manager, timeout(1000)).notify(eq(base.task().id()), notNull(Notification.class));
+        provider.onUpdate(
+            context,
+            base.running(Time.create(1, 1), Progress.NONE, Progress.NONE)
+        );
+        verify(manager, timeout(1000)).notify(
+            eq(base.task().id()),
+            notNull(Notification.class)
+        );
         verifyNoMoreInteractions(manager);
     }
 
@@ -103,38 +104,43 @@ public final class NotificationProviderTest {
         IOException err = new IOException("test");
         List<Failure> failures = singletonList(Failure.create(file, err));
         provider.onUpdate(context, base
-                .running(Time.create(1, 1))
-                .failed(Time.create(2, 2), failures));
+            .running(Time.create(1, 1))
+            .failed(Time.create(2, 2), failures));
         // See comment in class under test for this ID
         int id = Integer.MAX_VALUE - base.task().id();
-        verify(manager, timeout(1000)).notify(eq(id), notNull(Notification.class));
+        verify(manager, timeout(1000)).notify(
+            eq(id),
+            notNull(Notification.class)
+        );
     }
 
     @Test
     public void remove_notification_on_unknown_error() throws Exception {
 
         provider.onUpdate(context, base
-                .running(Time.create(1, 1))
-                .failed(Time.create(2, 2), emptyList()));
+            .running(Time.create(1, 1))
+            .failed(Time.create(2, 2), emptyList()));
         verify(manager, timeout(1000)).cancel(base.task().id());
     }
 
     @Test
-    public void create_failure_intent_with_correct_failure_data() throws Exception {
+    public void create_failure_intent_with_correct_failure_data()
+        throws Exception {
 
         Path f1 = mock(Path.class, "1");
         Path f2 = mock(Path.class, "2");
 
         Intent intent = provider.getFailureIntent(context, base
-                .running(Time.create(1, 1))
-                .failed(Time.create(2, 2), asList(
-                        Failure.create(f1, new IOException("test1")),
-                        Failure.create(f2, new IOException("test2")))));
+            .running(Time.create(1, 1))
+            .failed(Time.create(2, 2), asList(
+                Failure.create(f1, new IOException("test1")),
+                Failure.create(f2, new IOException("test2"))
+            )));
 
         Collection<FailureMessage> actual = getFailures(intent);
         Collection<FailureMessage> expected = asList(
-                FailureMessage.create(f1, "test1"),
-                FailureMessage.create(f2, "test2")
+            FailureMessage.create(f1, "test1"),
+            FailureMessage.create(f2, "test2")
         );
 
         assertEquals(expected, actual);

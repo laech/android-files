@@ -4,9 +4,9 @@ import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatDialogFragment
 import androidx.appcompat.view.ActionMode
-import l.files.fs.Path
 import l.files.operations.newDeleteIntent
 import l.files.ui.operations.R
+import java.nio.file.Path
 
 class DeleteDialog internal constructor(
   // Null after screen rotation, in that case dismiss dialog
@@ -14,7 +14,7 @@ class DeleteDialog internal constructor(
   private val mode: ActionMode?
 ) : AppCompatDialogFragment() {
 
-  constructor() : this(null, null) {}
+  constructor() : this(null, null)
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)

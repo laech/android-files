@@ -2,11 +2,10 @@ package l.files.operations;
 
 import android.os.Handler;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import l.files.fs.Path;
 
 import static l.files.operations.TaskKind.MOVE;
 
@@ -17,19 +16,20 @@ final class MoveTask extends Task {
     private final Copy copy;
 
     MoveTask(
-            int id,
-            Clock clock,
-            Callback callback,
-            Handler handler,
-            Collection<? extends Path> sources,
-            Path destination) {
+        int id,
+        Clock clock,
+        Callback callback,
+        Handler handler,
+        Collection<? extends Path> sources,
+        Path destination
+    ) {
 
         super(
-                TaskId.create(id, MOVE),
-                Target.from(sources, destination),
-                clock,
-                callback,
-                handler
+            TaskId.create(id, MOVE),
+            Target.from(sources, destination),
+            clock,
+            callback,
+            handler
         );
 
         this.move = new Move(sources, destination);
@@ -47,7 +47,7 @@ final class MoveTask extends Task {
     }
 
     private void copyThenDelete(List<Failure> failures)
-            throws FileException, InterruptedException {
+        throws FileException, InterruptedException {
 
         List<Path> files = new ArrayList<>();
         for (Failure failure : failures) {
@@ -61,8 +61,8 @@ final class MoveTask extends Task {
     @Override
     TaskState.Running running(TaskState.Running state) {
         return state.running(
-                Progress.normalize(count.getCount(), copy.getCopiedItemCount()),
-                Progress.normalize(count.getSize(), copy.getCopiedByteCount())
+            Progress.normalize(count.getCount(), copy.getCopiedItemCount()),
+            Progress.normalize(count.getSize(), copy.getCopiedByteCount())
         );
     }
 }

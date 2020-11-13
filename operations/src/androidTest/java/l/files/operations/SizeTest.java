@@ -1,31 +1,30 @@
 package l.files.operations;
 
+import l.files.testing.fs.PathBaseTest;
 import org.junit.Test;
 
-import l.files.fs.Path;
-import l.files.testing.fs.PathBaseTest;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
+import static java.nio.file.Files.createDirectory;
+import static java.nio.file.Files.createFile;
 import static java.util.Arrays.asList;
-import static l.files.fs.LinkOption.NOFOLLOW;
 import static org.junit.Assert.assertEquals;
 
 public final class SizeTest extends PathBaseTest {
 
     @Test
     public void size() throws Exception {
-        Path a = dir1().concat("a").createDirectory();
-        Path b = dir1().concat("a/b").createFile();
-        Path c = dir1().concat("c").createFile();
-        Path d = dir1().concat("d").createDirectory();
+        Path a = createDirectory(dir1().toJavaPath().resolve("a"));
+        Path b = createFile(dir1().toJavaPath().resolve("a/b"));
+        Path c = createFile(dir1().toJavaPath().resolve("c"));
+        Path d = createDirectory(dir1().toJavaPath().resolve("d"));
 
         Size size = new Size(asList(a, b, c, d));
         size.execute();
 
-        long expected
-                = a.stat(NOFOLLOW).size()
-                + b.stat(NOFOLLOW).size()
-                + c.stat(NOFOLLOW).size()
-                + d.stat(NOFOLLOW).size();
+        long expected =
+            Files.size(a) + Files.size(b) + Files.size(c) + Files.size(d);
         assertEquals(expected, size.getSize());
     }
 

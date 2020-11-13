@@ -1,9 +1,8 @@
 package l.files.operations;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Collection;
-
-import l.files.fs.Path;
 
 import static l.files.base.Objects.requireNonNull;
 import static l.files.operations.Files.getNonExistentDestinationFile;
@@ -23,13 +22,15 @@ abstract class Paste extends AbstractOperation {
 
         if (destinationDir.startsWith(sourcePath)) {
             throw new CannotPasteIntoSelfException(
-                    "Cannot paste directory " + sourcePath +
-                            " into its own sub directory " + destinationDir
-            );
+                "Cannot paste directory " + sourcePath +
+                    " into its own sub directory " + destinationDir);
         }
 
         try {
-            Path destinationPath = getNonExistentDestinationFile(sourcePath, destinationDir);
+            Path destinationPath = getNonExistentDestinationFile(
+                l.files.fs.Path.of(sourcePath),
+                l.files.fs.Path.of(destinationDir)
+            ).toJavaPath();
             paste(sourcePath, destinationPath);
         } catch (IOException e) {
             record(sourcePath, e);
@@ -37,11 +38,10 @@ abstract class Paste extends AbstractOperation {
     }
 
     /**
-     * Pastes the source to the destination. If {@code sourcePath} is a file, write
-     * its content into {@code destinationPath}. If {@code sourcePath} is a directory,
-     * paste its content into {@code destinationPath}.
+     * Pastes the source to the destination. If {@code sourcePath} is a file,
+     * write its content into {@code destinationPath}. If {@code sourcePath}
+     * is a directory, paste its content into {@code destinationPath}.
      */
     abstract void paste(Path sourcePath, Path destinationPath)
-            throws IOException;
-
+        throws IOException;
 }

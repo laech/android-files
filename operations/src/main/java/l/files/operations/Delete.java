@@ -1,13 +1,16 @@
 package l.files.operations;
 
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import l.files.fs.Path;
-
-import static l.files.fs.LinkOption.NOFOLLOW;
+import static java.nio.file.Files.readAttributes;
+import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 
 final class Delete extends AbstractOperation {
 
@@ -27,21 +30,37 @@ final class Delete extends AbstractOperation {
     }
 
     @Override
-    void process(Path path) throws InterruptedException {
+    void process(Path path) {
         traverse(path, new OperationVisitor() {
 
             @Override
-            public Result onPostVisit(Path path) throws IOException {
-                delete(path);
-                return super.onPostVisit(path);
+            public FileVisitResult visitFile(
+                Path file,
+                BasicFileAttributes attrs
+            ) throws IOException {
+                delete(file);
+                return super.visitFile(file, attrs);
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException e)
+                throws IOException {
+                if (e == null) {
+                    delete(dir);
+                }
+                return super.postVisitDirectory(dir, e);
             }
 
         });
     }
 
     private void delete(Path path) throws IOException {
-        long size = path.stat(NOFOLLOW).size();
-        path.delete();
+        long size = readAttributes(
+            path,
+            BasicFileAttributes.class,
+            NOFOLLOW_LINKS
+        ).size();
+        Files.delete(path);
         deletedByteCount.addAndGet(size);
         deletedItemCount.incrementAndGet();
     }

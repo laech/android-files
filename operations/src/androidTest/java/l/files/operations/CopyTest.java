@@ -1,31 +1,32 @@
 package l.files.operations;
 
-import l.files.fs.Path;
-import l.files.testing.fs.Paths;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
+import static java.nio.file.Files.*;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
-import static l.files.fs.LinkOption.NOFOLLOW;
+import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.*;
 
 public final class CopyTest extends PasteTest {
 
     @Test
     public void copy_reports_summary() throws Exception {
-        Path dstDir = dir1().concat("dir").createDirectory();
-        Path srcDir = dir1().concat("a").createDirectory();
-        Path srcFile = dir1().concat("a/file").createFile();
+        Path dstDir = createDirectory(dir1().concat("dir").toJavaPath());
+        Path srcDir = createDirectory(dir1().concat("a").toJavaPath());
+        Path srcFile = createFile(dir1().concat("a/file").toJavaPath());
 
         Copy copy = create(singleton(srcDir), dstDir);
         copy.execute();
@@ -38,32 +39,36 @@ public final class CopyTest extends PasteTest {
     private long size(Iterable<Path> resources) throws IOException {
         long size = 0;
         for (Path file : resources) {
-            size += file.stat(NOFOLLOW).size();
+            size += readAttributes(
+                file,
+                BasicFileAttributes.class,
+                NOFOLLOW_LINKS
+            ).size();
         }
         return size;
     }
 
     @Test
     public void preserves_timestamps_for_file() throws Exception {
-        Path src = dir1().concat("a").createFile();
-        Path dir = dir1().concat("dir").createDirectory();
+        Path src = createFile(dir1().concat("a").toJavaPath());
+        Path dir = createDirectory(dir1().concat("dir").toJavaPath());
         testCopyPreservesTimestamp(src, dir);
     }
 
     @Test
     public void preserves_timestamps_for_empty_dir() throws Exception {
-        Path src = dir1().concat("dir1").createDirectory();
-        Path dir = dir1().concat("dir2").createDirectory();
+        Path src = createDirectory(dir1().concat("dir1").toJavaPath());
+        Path dir = createDirectory(dir1().concat("dir2").toJavaPath());
         testCopyPreservesTimestamp(src, dir);
     }
 
     @Test
     public void preserves_timestamps_for_full_dir() throws Exception {
-        Path dir = dir1().concat("dir2").createDirectory();
-        Path src = dir1().concat("dir1").createDirectory();
-        src.concat("a").createFile();
-        src.concat("b").createDirectory();
-        src.concat("c").createSymbolicLink(src);
+        Path dir = createDirectory(dir1().concat("dir2").toJavaPath());
+        Path src = createDirectory(dir1().concat("dir1").toJavaPath());
+        createFile(src.resolve("a"));
+        createDirectory(src.resolve("b"));
+        createSymbolicLink(src.resolve("c"), src);
         testCopyPreservesTimestamp(src, dir);
     }
 
@@ -71,10 +76,11 @@ public final class CopyTest extends PasteTest {
         Path src,
         Path dir
     ) throws IOException, InterruptedException {
-        Path dst = dir.concat(src.getFileName());
-        assertFalse(dst.exists(NOFOLLOW_LINKS));
+        Path dst = dir.resolve(src.getFileName());
+        assertFalse(exists(dst, NOFOLLOW_LINKS));
 
-        BasicFileAttributeView view = src.getFileAttributeView(
+        BasicFileAttributeView view = getFileAttributeView(
+            src,
             BasicFileAttributeView.class,
             NOFOLLOW_LINKS
         );
@@ -84,7 +90,7 @@ public final class CopyTest extends PasteTest {
             .toInstant()
             .minusSeconds(10);
 
-        src.setLastModifiedTime(FileTime.from(mtime));
+        setLastModifiedTime(src, FileTime.from(mtime));
         assertEquals(
             mtime,
             view.readAttributes().lastModifiedTime().toInstant()
@@ -92,7 +98,7 @@ public final class CopyTest extends PasteTest {
 
         copy(src, dir);
 
-        assertTrue(dst.exists(NOFOLLOW_LINKS));
+        assertTrue(exists(dst, NOFOLLOW_LINKS));
         assertEquals(
             mtime,
             view.readAttributes().lastModifiedTime().toInstant()
@@ -102,71 +108,81 @@ public final class CopyTest extends PasteTest {
     }
 
     private Instant mtime(Path srcFile) throws IOException {
-        return srcFile.readAttributes(BasicFileAttributes.class, NOFOLLOW_LINKS)
+        return readAttributes(
+            srcFile,
+            BasicFileAttributes.class,
+            NOFOLLOW_LINKS
+        )
             .lastModifiedTime()
             .toInstant();
     }
 
     @Test
     public void copies_link() throws Exception {
-        Path target = dir1().concat("target").createFile();
-        Path link = dir1().concat("link").createSymbolicLink(target);
+        Path target = createFile(dir1().concat("target").toJavaPath());
+        Path link =
+            createSymbolicLink(dir1().concat("link").toJavaPath(), target);
 
-        copy(link, dir1().concat("copied").createDirectory());
+        copy(link, createDirectory(dir1().toJavaPath().resolve("copied")));
 
-        Path copied = dir1().concat("copied/link");
-        assertEquals(target, copied.readSymbolicLink());
+        Path copied = dir1().toJavaPath().resolve("copied/link");
+        assertEquals(target, readSymbolicLink(copied));
     }
 
     @Test
     public void copies_directory() throws Exception {
-        Path srcDir = dir1().concat("a").createDirectory();
-        Path dstDir = dir1().concat("dst").createDirectory();
-        Path srcFile = srcDir.concat("test.txt");
-        Path dstFile = dstDir.concat("a/test.txt");
-        Paths.writeUtf8(srcFile, "Testing");
+        Path srcDir = createDirectory(dir1().concat("a").toJavaPath());
+        Path dstDir = createDirectory(dir1().concat("dst").toJavaPath());
+        Path srcFile = srcDir.resolve("test.txt");
+        Path dstFile = dstDir.resolve("a/test.txt");
+        write(srcFile, singleton("Testing"));
 
         copy(srcDir, dstDir);
-        assertEquals("Testing", Paths.readAllUtf8(srcFile));
-        assertEquals("Testing", Paths.readAllUtf8(dstFile));
+        assertEquals(singletonList("Testing"), readAllLines(srcFile));
+        assertEquals(singletonList("Testing"), readAllLines(dstFile));
     }
 
     @Test
     public void copies_empty_directory() throws Exception {
-        Path src = dir1().concat("empty").createDirectory();
-        Path dir = dir1().concat("dst").createDirectory();
+        Path src = createDirectory(dir1().concat("empty").toJavaPath());
+        Path dir = createDirectory(dir1().concat("dst").toJavaPath());
         copy(src, dir);
-        assertTrue(dir1().concat("dst/empty").exists(NOFOLLOW_LINKS));
+        assertTrue(exists(
+            dir1().toJavaPath().resolve("dst/empty"),
+            NOFOLLOW_LINKS
+        ));
     }
 
     @Test
     public void copies_empty_file() throws Exception {
-        Path srcFile = dir1().concat("empty").createFile();
-        Path dstDir = dir1().concat("dst").createDirectory();
+        Path srcFile = createFile(dir1().concat("empty").toJavaPath());
+        Path dstDir = createDirectory(dir1().concat("dst").toJavaPath());
 
         copy(srcFile, dstDir);
-        Path expected = dstDir.concat("empty");
-        if (!expected.exists(NOFOLLOW_LINKS)) {
-            List<Path> all = dstDir.list(new ArrayList<>());
-            fail("File " + expected + " doesn't exist, all files are: " + all);
+        Path expected = dstDir.resolve("empty");
+        if (!exists(expected, NOFOLLOW_LINKS)) {
+            try (Stream<Path> stream = list(dstDir)) {
+                fail("File " + expected + " doesn't exist, all files are: " +
+                    stream.collect(toList()));
+            }
         }
     }
 
 
     @Test
     public void copies_file() throws Exception {
-        Path srcFile = dir1().concat("test.txt").createFile();
-        Path dstDir = dir1().concat("dst").createDirectory();
-        Path dstFile = dstDir.concat("test.txt");
-        Paths.writeUtf8(srcFile, "Testing");
+        Path srcFile = createFile(dir1().concat("test.txt").toJavaPath());
+        Path dstDir = createDirectory(dir1().concat("dst").toJavaPath());
+        Path dstFile = dstDir.resolve("test.txt");
+        write(srcFile, singleton("Testing"));
 
         copy(srcFile, dstDir);
-        assertEquals("Testing", Paths.readAllUtf8(srcFile));
-        assertEquals("Testing", Paths.readAllUtf8(dstFile));
+        assertEquals(singletonList("Testing"), readAllLines(srcFile));
+        assertEquals(singletonList("Testing"), readAllLines(dstFile));
     }
 
     private void copy(Path src, Path dstDir)
-        throws IOException, InterruptedException {
+        throws InterruptedException {
         create(singleton(src), dstDir).execute();
     }
 

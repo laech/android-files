@@ -1,18 +1,17 @@
 package l.files.operations;
 
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import l.files.fs.Path;
-import l.files.fs.TraversalCallback;
-
 import static java.lang.Thread.currentThread;
+import static java.nio.file.Files.walkFileTree;
 import static java.util.Collections.unmodifiableSet;
-import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.fs.TraversalCallback.Result.CONTINUE;
-import static l.files.fs.TraversalCallback.Result.TERMINATE;
 
 abstract class AbstractOperation implements FileOperation {
 
@@ -47,29 +46,50 @@ abstract class AbstractOperation implements FileOperation {
 
     final void traverse(Path path, OperationVisitor visitor) {
         try {
-            path.traverse(NOFOLLOW, visitor);
+            walkFileTree(path, visitor);
         } catch (IOException e) {
             record(path, e);
         }
     }
 
-    class OperationVisitor implements TraversalCallback<Path> {
+    class OperationVisitor implements FileVisitor<Path> {
 
-        @Override
-        public Result onPreVisit(Path path) throws IOException {
-            return isInterrupted() ? TERMINATE : CONTINUE;
+        private FileVisitResult terminateOrContinue() {
+            return isInterrupted()
+                ? FileVisitResult.TERMINATE
+                : FileVisitResult.CONTINUE;
         }
 
         @Override
-        public Result onPostVisit(Path path) throws IOException {
-            return isInterrupted() ? TERMINATE : CONTINUE;
+        public FileVisitResult preVisitDirectory(
+            Path dir,
+            BasicFileAttributes attrs
+        ) throws IOException {
+            return terminateOrContinue();
         }
 
         @Override
-        public void onException(Path path, IOException e) throws IOException {
-            record(path, e);
+        public FileVisitResult visitFile(
+            Path file,
+            BasicFileAttributes attrs
+        ) throws IOException {
+            return terminateOrContinue();
         }
 
+        @Override
+        public FileVisitResult visitFileFailed(Path file, IOException e) {
+            record(file, e);
+            return terminateOrContinue();
+        }
+
+        @Override
+        public FileVisitResult postVisitDirectory(Path dir, IOException e)
+            throws IOException {
+            if (e != null) {
+                record(dir, e);
+            }
+            return terminateOrContinue();
+        }
     }
 
     @Override

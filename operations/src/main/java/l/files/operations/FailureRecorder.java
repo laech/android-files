@@ -1,10 +1,9 @@
 package l.files.operations;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-
-import l.files.fs.Path;
 
 final class FailureRecorder {
 
@@ -17,7 +16,7 @@ final class FailureRecorder {
     }
 
     void onFailure(Path path, IOException failure)
-            throws FileException {
+        throws FileException {
         if (failures.size() > limit) {
             throw new FileException(failures);
         }

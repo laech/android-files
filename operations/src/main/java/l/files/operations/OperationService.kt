@@ -15,13 +15,14 @@ import android.os.Looper
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.content.getSystemService
-import l.files.fs.Path
+import java.nio.file.Path
+import java.nio.file.Paths
 import java.util.*
 import java.util.concurrent.Executors
+import kotlin.collections.ArrayList
 
 class OperationService internal constructor(
-  private val foreground: Boolean,
-  listener: (Context) -> TaskListener
+  private val foreground: Boolean, listener: (Context) -> TaskListener
 ) : Service() {
 
   @Suppress("unused") // Used by Android
@@ -75,38 +76,29 @@ class OperationService internal constructor(
     }
 
     val task = newTask(
-      data,
-      startId,
-      handler,
-      Task.Callback { state ->
-        if (state.isFinished) {
-          tasks.remove(state.task().id())
-          if (tasks.isEmpty()) {
-            stopSelf()
-          }
+      data, startId, handler
+    ) { state ->
+      if (state.isFinished) {
+        tasks.remove(state.task().id())
+        if (tasks.isEmpty()) {
+          stopSelf()
         }
-        listener.onUpdate(this@OperationService, state)
       }
-    )
+      listener.onUpdate(this@OperationService, state)
+    }
     tasks[startId] = task.executeOnExecutor(executor)
   }
 
   private fun newTask(
-    intent: Intent,
-    id: Int,
-    handler: Handler,
-    callback: Task.Callback
+    intent: Intent, id: Int, handler: Handler, callback: Task.Callback
   ): Task =
     fileActionFromIntent(intent.action!!).newTask(intent, id, handler, callback)
 
   private fun cancelTask(intent: Intent) {
     val startId = intent.getIntExtra(EXTRA_TASK_ID, -1)
-    tasks.remove(startId)
-      ?.cancel(true)
-      ?: listener.onNotFound(
-        this,
-        TaskNotFound.create(startId)
-      )
+    tasks.remove(startId)?.cancel(true) ?: listener.onNotFound(
+      this, TaskNotFound.create(startId)
+    )
     if (tasks.isEmpty()) {
       stopSelf()
     }
@@ -133,56 +125,44 @@ internal enum class FileAction(val action: String) {
 
   DELETE("l.files.operations.DELETE") {
     override fun newTask(
-      intent: Intent,
-      id: Int,
-      handler: Handler,
-      callback: Task.Callback
+      intent: Intent, id: Int, handler: Handler, callback: Task.Callback
     ) = DeleteTask(
       id,
       Clock.system(),
       callback,
       handler,
-      intent.getParcelableArrayListExtra(EXTRA_PATHS)
+      intent.getStringArrayListExtra(EXTRA_PATHS).map(Paths::get)
     )
   },
 
   COPY("l.files.operations.COPY") {
     override fun newTask(
-      intent: Intent,
-      id: Int,
-      handler: Handler,
-      callback: Task.Callback
+      intent: Intent, id: Int, handler: Handler, callback: Task.Callback
     ) = CopyTask(
       id,
       Clock.system(),
       callback,
       handler,
-      intent.getParcelableArrayListExtra(EXTRA_PATHS),
-      intent.getParcelableExtra(EXTRA_DESTINATION)
+      intent.getStringArrayListExtra(EXTRA_PATHS).map(Paths::get),
+      Paths.get(intent.getStringExtra(EXTRA_DESTINATION))
     )
   },
 
   MOVE("l.files.operations.MOVE") {
     override fun newTask(
-      intent: Intent,
-      id: Int,
-      handler: Handler,
-      callback: Task.Callback
+      intent: Intent, id: Int, handler: Handler, callback: Task.Callback
     ) = MoveTask(
       id,
       Clock.system(),
       callback,
       handler,
-      intent.getParcelableArrayListExtra(EXTRA_PATHS),
-      intent.getParcelableExtra(EXTRA_DESTINATION)
+      intent.getStringArrayListExtra(EXTRA_PATHS).map(Paths::get),
+      Paths.get(intent.getStringExtra(EXTRA_DESTINATION))
     )
   };
 
   abstract fun newTask(
-    intent: Intent,
-    id: Int,
-    handler: Handler,
-    callback: Task.Callback
+    intent: Intent, id: Int, handler: Handler, callback: Task.Callback
   ): Task
 }
 
@@ -204,53 +184,38 @@ private const val EXTRA_DESTINATION = "destination"
 private val executor = Executors.newFixedThreadPool(5)
 
 fun newDeleteIntent(
-  context: Context,
-  files: Collection<Path>
-): Intent = Intent(context, OperationService::class.java)
-  .setAction(FileAction.DELETE.action)
-  .putParcelableArrayListExtra(EXTRA_PATHS, ArrayList(files))
+  context: Context, files: Collection<Path>
+): Intent = Intent(
+  context, OperationService::class.java
+).setAction(FileAction.DELETE.action).putStringArrayListExtra(
+  EXTRA_PATHS, files.mapTo(ArrayList(), Path::toString)
+)
 
 fun newCopyIntent(
-  context: Context,
-  sources: Collection<Path>,
-  destination: Path
+  context: Context, sources: Collection<Path>, destination: Path
 ): Intent = newPasteIntent(
-  FileAction.COPY.action,
-  context,
-  sources,
-  destination
+  FileAction.COPY.action, context, sources, destination
 )
 
 fun newMoveIntent(
-  context: Context,
-  sources: Collection<Path>,
-  destination: Path
+  context: Context, sources: Collection<Path>, destination: Path
 ): Intent = newPasteIntent(
-  FileAction.MOVE.action,
-  context,
-  sources,
-  destination
+  FileAction.MOVE.action, context, sources, destination
 )
 
 private fun newPasteIntent(
-  action: String,
-  context: Context,
-  sources: Collection<Path>,
-  destination: Path
-): Intent = Intent(context, OperationService::class.java)
-  .setAction(action)
-  .putExtra(EXTRA_DESTINATION, destination)
-  .putParcelableArrayListExtra(EXTRA_PATHS, ArrayList(sources))
+  action: String, context: Context, sources: Collection<Path>, destination: Path
+): Intent = Intent(context, OperationService::class.java).setAction(action)
+  .putExtra(EXTRA_DESTINATION, destination.toString())
+  .putStringArrayListExtra(
+    EXTRA_PATHS, sources.mapTo(ArrayList(), Path::toString)
+  )
 
 fun newCancelPendingIntent(context: Context, id: Int): PendingIntent =
   PendingIntent.getService(
-    context,
-    id,
-    newCancelIntent(context, id),
-    FLAG_UPDATE_CURRENT
+    context, id, newCancelIntent(context, id), FLAG_UPDATE_CURRENT
   )
 
 fun newCancelIntent(context: Context, id: Int): Intent =
-  Intent(context, OperationService::class.java)
-    .setAction(ACTION_CANCEL)
+  Intent(context, OperationService::class.java).setAction(ACTION_CANCEL)
     .putExtra(EXTRA_TASK_ID, id)

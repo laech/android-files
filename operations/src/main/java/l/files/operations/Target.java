@@ -1,10 +1,10 @@
 package l.files.operations;
 
+import l.files.base.Objects;
+
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-
-import l.files.base.Objects;
-import l.files.fs.Path;
 
 import static java.util.Collections.unmodifiableList;
 import static l.files.base.Objects.requireNonNull;
@@ -33,21 +33,28 @@ public final class Target {
         return dstDir;
     }
 
-    public static Target from(Collection<? extends Path> srcFiles, Path dstDir) {
+    public static Target from(
+        Collection<? extends Path> srcFiles,
+        Path dstDir
+    ) {
         return new Target(unmodifiableList(new ArrayList<>(srcFiles)), dstDir);
     }
 
     public static Target from(Collection<? extends Path> files) {
-        return from(files, files.iterator().next().parent());
+        return from(files, files.iterator().next().getParent());
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Target target = (Target) o;
         return Objects.equal(srcFiles, target.srcFiles) &&
-                Objects.equal(dstDir, target.dstDir);
+            Objects.equal(dstDir, target.dstDir);
     }
 
     @Override
@@ -58,9 +65,9 @@ public final class Target {
     @Override
     public String toString() {
         return "Target{" +
-                "srcFiles=" + srcFiles +
-                ", dstDir=" + dstDir +
-                '}';
+            "srcFiles=" + srcFiles +
+            ", dstDir=" + dstDir +
+            '}';
     }
 
 }
