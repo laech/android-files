@@ -1,33 +1,35 @@
 package l.files.operations;
 
+import l.files.testing.fs.PathBaseTest;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-import l.files.fs.Path;
-import l.files.testing.fs.PathBaseTest;
-
-import static l.files.operations.Files.getNonExistentDestinationFile;
+import static l.files.fs.PathKt.getNonExistentDestinationFile;
 import static org.junit.Assert.assertEquals;
 
-public final class FilesTest extends PathBaseTest {
+public final class PathKtTest extends PathBaseTest {
 
     private Path createFile(String name) throws IOException {
-        return dir1().concat(name).createFile();
+        return Files.createFile(dir1().concat(name).toJavaPath());
     }
 
     private Path createDir(String name) throws IOException {
-        return dir1().concat(name).createDirectory();
+        return Files.createDirectory(dir1().concat(name).toJavaPath());
     }
 
     @Test
-    public void getNonExistentDestinationFile_largeNumberSuffix() throws Exception {
+    public void getNonExistentDestinationFile_largeNumberSuffix()
+        throws Exception {
         String tooBig = Long.MAX_VALUE + "" + Long.MAX_VALUE;
         testExistent(createFile("a " + tooBig), "a " + tooBig + " 2");
     }
 
     @Test
-    public void getNonExistentDestinationFile_numberOverflow() throws Exception {
+    public void getNonExistentDestinationFile_numberOverflow()
+        throws Exception {
         String tooBig = String.valueOf(Long.MAX_VALUE);
         testExistent(createFile("a " + tooBig), "a " + tooBig + " 2");
     }
@@ -56,14 +58,15 @@ public final class FilesTest extends PathBaseTest {
     }
 
     @Test
-    public void getNonExistentDestinationFile_hiddenResourceNoExtension() throws Exception {
+    public void getNonExistentDestinationFile_hiddenResourceNoExtension()
+        throws Exception {
         testExistent(createDir(".a"), ".a 2");
         testExistent(createFile(".b"), ".b 2");
     }
 
-    private void testExistent(Path file, String expectedName) throws IOException {
-        Path expected = dir1().concat(expectedName);
-        Path actual = getNonExistentDestinationFile(file, dir1());
+    private void testExistent(Path file, String expectedName) {
+        Path expected = dir1().toJavaPath().resolve(expectedName);
+        Path actual = getNonExistentDestinationFile(file, dir1().toJavaPath());
         assertEquals(expected, actual);
     }
 

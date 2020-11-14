@@ -5,7 +5,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 
 import static l.files.base.Objects.requireNonNull;
-import static l.files.operations.Files.getNonExistentDestinationFile;
+import static l.files.fs.PathKt.getNonExistentDestinationFile;
 
 abstract class Paste extends AbstractOperation {
 
@@ -27,10 +27,8 @@ abstract class Paste extends AbstractOperation {
         }
 
         try {
-            Path destinationPath = getNonExistentDestinationFile(
-                l.files.fs.Path.of(sourcePath),
-                l.files.fs.Path.of(destinationDir)
-            ).toJavaPath();
+            Path destinationPath =
+                getNonExistentDestinationFile(sourcePath, destinationDir);
             paste(sourcePath, destinationPath);
         } catch (IOException e) {
             record(sourcePath, e);
