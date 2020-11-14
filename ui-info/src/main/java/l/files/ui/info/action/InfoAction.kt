@@ -4,7 +4,6 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.view.ActionMode
 import androidx.fragment.app.FragmentManager
-import l.files.fs.Path
 import l.files.ui.base.fs.FileInfo
 import l.files.ui.base.selection.Selection
 import l.files.ui.base.view.ActionModeItem
@@ -12,6 +11,7 @@ import l.files.ui.info.InfoBaseFragment
 import l.files.ui.info.InfoFragment
 import l.files.ui.info.InfoMultiFragment
 import l.files.ui.info.R
+import java.nio.file.Path
 
 class InfoAction(
   private val selection: Selection<*, FileInfo>,
@@ -42,7 +42,7 @@ class InfoAction(
   }
 
   private fun showMultiFileInfo(values: Collection<FileInfo>) {
-    InfoMultiFragment.create(parentDirectory.toJavaPath(), values)
+    InfoMultiFragment.create(parentDirectory, values)
       .show(manager, InfoBaseFragment.FRAGMENT_TAG)
   }
 

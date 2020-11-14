@@ -351,7 +351,7 @@ public final class FilesFragment
         return ActionModes.compose(
             new CountSelectedItemsAction(selection()),
             new ClearSelectionOnDestroyActionMode(selection()),
-            new InfoAction(selection(), manager, directory()),
+            new InfoAction(selection(), manager, directory().toJavaPath()),
             new SelectAllAction(this),
             new CutAction(selection()),
             new CopyAction(selection()),
