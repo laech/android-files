@@ -1,47 +1,33 @@
 package l.files.fs.media
 
 import android.content.Context
-import l.files.fs.LinkOption.FOLLOW
-import l.files.fs.Stat
 import org.apache.tika.io.TaggedIOException
 import org.apache.tika.metadata.Metadata
-import org.apache.tika.metadata.TikaMetadataKeys
+import org.apache.tika.metadata.TikaMetadataKeys.RESOURCE_NAME_KEY
 import org.apache.tika.mime.MimeTypeException
 import org.apache.tika.mime.MimeTypes
 import org.apache.tika.mime.MimeTypesFactory
 import java.io.IOException
-import java.nio.file.Files
+import java.nio.file.Files.*
 import java.nio.file.Path
+import java.nio.file.attribute.BasicFileAttributes
 
 internal object Detector {
 
   // Media types for file types, kept consistent with the linux "file" command
   private const val INODE_DIRECTORY = "inode/directory"
-  private const val INODE_BLOCKDEVICE = "inode/blockdevice"
-  private const val INODE_CHARDEVICE = "inode/chardevice"
-  private const val INODE_FIFO = "inode/fifo"
-  private const val INODE_SOCKET = "inode/socket"
 
   @Volatile
   private var types: MimeTypes? = null
 
-  fun detect(
-    context: Context,
-    path: Path,
-    stat: Stat = l.files.fs.Path.of(path).stat(FOLLOW)
-  ): String = when {
-    stat.isSymbolicLink -> detect(
-      context,
-      Files.readSymbolicLink(path),
-      l.files.fs.Path.of(path).stat(FOLLOW)
-    )
-    stat.isRegularFile -> detectFile(context, path)
-    stat.isFifo -> INODE_FIFO
-    stat.isSocket -> INODE_SOCKET
-    stat.isDirectory -> INODE_DIRECTORY
-    stat.isBlockDevice -> INODE_BLOCKDEVICE
-    stat.isCharacterDevice -> INODE_CHARDEVICE
-    else -> MediaTypes.MEDIA_TYPE_OCTET_STREAM
+  fun detect(context: Context, path: Path): String {
+    val attrs = readAttributes(path, BasicFileAttributes::class.java)
+    return when {
+      attrs.isSymbolicLink -> detect(context, readSymbolicLink(path))
+      attrs.isRegularFile -> detectFile(context, path)
+      attrs.isDirectory -> INODE_DIRECTORY
+      else -> MediaTypes.MEDIA_TYPE_OCTET_STREAM
+    }
   }
 
   private fun detectFile(context: Context, path: Path): String {
@@ -56,7 +42,6 @@ internal object Detector {
         }
       }
     }
-
     return try {
       detectFile(types!!, path)
     } catch (e: TaggedIOException) {
@@ -76,9 +61,9 @@ internal object Detector {
       .use { MimeTypesFactory.create(it) }
 
   private fun detectFile(types: MimeTypes, path: Path): String =
-    Files.newInputStream(path).buffered().use {
+    newInputStream(path).buffered().use {
       val meta = Metadata()
-      meta.add(TikaMetadataKeys.RESOURCE_NAME_KEY, path.toString())
+      meta.add(RESOURCE_NAME_KEY, path.toString())
       types.detect(it, meta).baseType.toString()
     }
 }

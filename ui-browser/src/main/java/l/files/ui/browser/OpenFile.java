@@ -4,13 +4,11 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import l.files.fs.Path;
+import l.files.fs.media.MediaTypes;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-
-import l.files.fs.Path;
-import l.files.fs.Stat;
-import l.files.fs.media.MediaTypes;
 
 import static android.content.Intent.ACTION_VIEW;
 import static android.widget.Toast.LENGTH_SHORT;
@@ -24,20 +22,20 @@ final class OpenFile extends AsyncTask<Void, Void, Object> {
 
     private final WeakReference<Context> contextRef;
     private final Path file;
-    private final Stat stat;
 
-    OpenFile(Context context, Path file, Stat stat) {
+    OpenFile(Context context, Path file) {
         this.contextRef = new WeakReference<>(context);
         this.file = requireNonNull(file);
-        this.stat = requireNonNull(stat);
     }
 
     @Override
     protected Object doInBackground(Void... params) {
         Context context = contextRef.get();
-        if (context == null) return null;
+        if (context == null) {
+            return null;
+        }
         try {
-            return MediaTypes.detect(context, file.toJavaPath(), stat);
+            return MediaTypes.detect(context, file.toJavaPath());
         } catch (IOException e) {
             return e;
         }
@@ -46,14 +44,18 @@ final class OpenFile extends AsyncTask<Void, Void, Object> {
     @Override
     protected void onPostExecute(Object result) {
         Context context = contextRef.get();
-        if (context == null) return;
-        if (result == null) return;
+        if (context == null) {
+            return;
+        }
+        if (result == null) {
+            return;
+        }
         if (result instanceof IOException) {
             showException((IOException) result, context);
             return;
         }
         if (!showFile((String) result, context) &&
-                !showFile(MediaTypes.generalize((String) result), context)) {
+            !showFile(MediaTypes.generalize((String) result), context)) {
             showFile(MEDIA_TYPE_ANY, context);
         }
     }

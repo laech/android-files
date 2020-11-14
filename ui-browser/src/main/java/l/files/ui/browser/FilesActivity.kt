@@ -263,7 +263,7 @@ class FilesActivity : BaseActivity(),
   }
 
   private fun showFile(file: Path, stat: Stat) {
-    OpenFile(this, file, stat).execute()
+    OpenFile(this, file).execute()
   }
 
   val fragment: FilesFragment

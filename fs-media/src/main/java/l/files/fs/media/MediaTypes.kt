@@ -1,7 +1,6 @@
 package l.files.fs.media
 
 import android.content.Context
-import l.files.fs.Stat
 import java.io.IOException
 import java.nio.file.Path
 
@@ -31,6 +30,6 @@ object MediaTypes {
    */
   @JvmStatic
   @Throws(IOException::class)
-  fun detect(context: Context, path: Path, stat: Stat): String =
-    Detector.detect(context, path, stat)
+  fun detect(context: Context, path: Path): String =
+    Detector.detect(context, path)
 }
