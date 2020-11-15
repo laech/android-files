@@ -1,12 +1,11 @@
 package l.files.ui.operations.action;
 
+import androidx.annotation.Nullable;
+
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-
-import androidx.annotation.Nullable;
-
-import l.files.fs.Path;
 
 import static java.util.Collections.emptySet;
 import static java.util.Collections.unmodifiableSet;
@@ -17,7 +16,8 @@ public enum Clipboard {
     INSTANCE;
 
     public enum Action {
-        CUT, COPY
+        CUT,
+        COPY
     }
 
     @Nullable

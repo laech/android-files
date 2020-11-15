@@ -6,16 +6,13 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import androidx.annotation.Nullable;
-
-import l.files.fs.Path;
 import l.files.ui.base.fs.FileIcons;
 import l.files.ui.base.fs.FileLabels;
+
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
 
 import static android.graphics.Color.WHITE;
 import static android.graphics.PorterDuff.Mode.SRC_ATOP;
@@ -23,6 +20,7 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
+import static l.files.fs.PathKt.hierarchy;
 import static l.files.ui.base.fs.UserDirs.DIR_HOME;
 
 final class HierarchyAdapter extends BaseAdapter {
@@ -34,9 +32,7 @@ final class HierarchyAdapter extends BaseAdapter {
 
     void set(Path dir) {
         directory = dir;
-        hierarchy = new ArrayList<>(dir.hierarchy());
-        Collections.reverse(hierarchy);
-        hierarchy = unmodifiableList(hierarchy);
+        hierarchy = unmodifiableList(hierarchy(dir));
         notifyDataSetChanged();
     }
 
@@ -79,10 +75,14 @@ final class HierarchyAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, @Nullable View convertView, ViewGroup parent) {
+    public View getView(
+        int position,
+        @Nullable View convertView,
+        ViewGroup parent
+    ) {
         View view = convertView != null
-                ? convertView
-                : inflate(R.layout.files_activity_title, parent);
+            ? convertView
+            : inflate(R.layout.files_activity_title, parent);
 
         Path path = getItem(position);
 
@@ -105,10 +105,14 @@ final class HierarchyAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getDropDownView(int position, @Nullable View convertView, ViewGroup parent) {
+    public View getDropDownView(
+        int position,
+        @Nullable View convertView,
+        ViewGroup parent
+    ) {
         View view = convertView != null
-                ? convertView
-                : inflate(R.layout.files_activity_title_item, parent);
+            ? convertView
+            : inflate(R.layout.files_activity_title_item, parent);
 
         boolean enabled = isEnabled(position);
         Path path = getItem(position);
@@ -120,7 +124,9 @@ final class HierarchyAdapter extends BaseAdapter {
         iconView.setAlpha(enabled ? 0.54f : 0.2f);
 
         TextView titleView = view.findViewById(R.id.title);
-        titleView.setText(String.valueOf(path.getName().orObject(path)));
+        titleView.setText(Optional.ofNullable(path.getFileName())
+            .map(Path::toString)
+            .orElseGet(path::toString));
         titleView.setEnabled(enabled);
 
         return view;
@@ -128,6 +134,6 @@ final class HierarchyAdapter extends BaseAdapter {
 
     private View inflate(int layout, ViewGroup parent) {
         return LayoutInflater.from(parent.getContext())
-                .inflate(layout, parent, false);
+            .inflate(layout, parent, false);
     }
 }

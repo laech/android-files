@@ -2,7 +2,6 @@ package l.files.ui.browser.sort;
 
 import android.annotation.SuppressLint;
 import android.content.res.Resources;
-import l.files.fs.Path;
 import l.files.ui.base.fs.FileInfo;
 import l.files.ui.browser.Header;
 import l.files.ui.browser.R;
@@ -12,12 +11,14 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.text.Collator;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static androidx.test.InstrumentationRegistry.getInstrumentation;
+import static java.nio.file.Files.setLastModifiedTime;
 import static java.util.Arrays.asList;
 import static java.util.Calendar.JUNE;
 import static java.util.Calendar.YEAR;
@@ -265,9 +266,11 @@ public final class DateCategorizerTest {
     }
 
     private FileInfo file(long time) throws IOException {
-        Path path = Path.of(temporaryFolder.newFile());
-        path.setLastModifiedTime(FileTime.fromMillis(time));
-        return FileInfo.create(path, path.stat(NOFOLLOW), null, null, collator);
+        Path path = temporaryFolder.newFile().toPath();
+        setLastModifiedTime(path, FileTime.fromMillis(time));
+        return FileInfo.create(path,
+            l.files.fs.Path.of(path).stat(NOFOLLOW), null, null, collator
+        );
     }
 
     private void assertCategory(String expected, FileInfo... stats) {

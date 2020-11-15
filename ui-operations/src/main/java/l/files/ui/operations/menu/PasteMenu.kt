@@ -5,11 +5,11 @@ import android.view.Menu
 import android.view.Menu.NONE
 import android.view.MenuItem
 import android.view.MenuItem.SHOW_AS_ACTION_NEVER
-import l.files.fs.Path
 import l.files.operations.newCopyIntent
 import l.files.operations.newMoveIntent
 import l.files.ui.base.app.OptionsMenuAction
 import l.files.ui.operations.action.Clipboard
+import java.nio.file.Path
 
 class PasteMenu(
   private val context: Activity,
@@ -36,16 +36,16 @@ class PasteMenu(
       Clipboard.Action.COPY -> context.startService(
         newCopyIntent(
           context,
-          clipboard.paths().map(Path::toJavaPath),
-          destination.toJavaPath()
+          clipboard.paths(),
+          destination
         )
       )
       Clipboard.Action.CUT -> {
         context.startService(
           newMoveIntent(
             context,
-            clipboard.paths().map(Path::toJavaPath),
-            destination.toJavaPath()
+            clipboard.paths(),
+            destination
           )
         )
         clipboard.clear()

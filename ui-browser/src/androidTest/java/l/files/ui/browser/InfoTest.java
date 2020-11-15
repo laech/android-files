@@ -1,29 +1,33 @@
 package l.files.ui.browser;
 
-import l.files.fs.Path;
-import l.files.fs.Stat;
-import l.files.testing.fs.Paths;
 import org.junit.Test;
 
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 
 import static android.text.format.DateUtils.*;
 import static android.text.format.Formatter.formatFileSize;
+import static java.nio.file.Files.*;
+import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.time.Instant.EPOCH;
-import static l.files.fs.LinkOption.NOFOLLOW;
+import static java.util.Collections.singleton;
 
 public final class InfoTest extends BaseFilesActivityTest {
 
     @Test
     public void gets_info_of_multiple_files() throws Exception {
 
-        Path child1 = dir().concat("1").createFile();
-        Path child2 = dir().concat("2").createDirectory();
-        Path child3 = dir().concat("3").createSymbolicLink(child2);
+        Path child1 = createFile(dir().resolve("1"));
+        Path child2 = createDirectory(dir().resolve("2"));
+        Path child3 = createSymbolicLink(dir().resolve("3"), child2);
 
-        Stat st1 = child1.stat(NOFOLLOW);
-        Stat st2 = child2.stat(NOFOLLOW);
-        Stat st3 = child3.stat(NOFOLLOW);
+        BasicFileAttributes attrs1 =
+            readAttributes(child1, BasicFileAttributes.class, NOFOLLOW_LINKS);
+        BasicFileAttributes attrs2 =
+            readAttributes(child2, BasicFileAttributes.class, NOFOLLOW_LINKS);
+        BasicFileAttributes attrs3 =
+            readAttributes(child3, BasicFileAttributes.class, NOFOLLOW_LINKS);
 
         screen()
             .longClick(child1)
@@ -31,69 +35,72 @@ public final class InfoTest extends BaseFilesActivityTest {
             .click(child3)
             .getInfo()
             .assertSize(formatSizeCount(
-                st1.size()
-                    + st2.size()
-                    + st3.size(),
-                3
-            ));
+                attrs1.size() + attrs2.size() + attrs3.size(), 3));
     }
 
     @Test
     public void gets_info_of_file() throws Exception {
 
-        Path path = dir().concat("test.txt");
-        Paths.writeUtf8(path, "hello world");
-        Stat stat = path.stat(NOFOLLOW);
+        Path path = dir().resolve("test.txt");
+        write(path, singleton("hello world"));
+        BasicFileAttributes attrs =
+            readAttributes(path, BasicFileAttributes.class, NOFOLLOW_LINKS);
 
         screen()
             .longClick(path)
             .getInfo()
             .assertName(path.getFileName().toString())
-            .assertDate(formatDate(stat))
-            .assertSize(formatSize(stat.size()));
+            .assertDate(formatDate(attrs))
+            .assertSize(formatSize(attrs.size()));
     }
 
     @Test
     public void gets_info_of_link() throws Exception {
 
-        dir().setLastModifiedTime(FileTime.from(EPOCH));
-        Path path = dir().concat("link").createSymbolicLink(dir());
-        Stat stat = path.stat(NOFOLLOW);
+        setLastModifiedTime(dir(), FileTime.from(EPOCH));
+        Path path = createSymbolicLink(dir().resolve("link"), dir());
+        BasicFileAttributes attrs =
+            readAttributes(path, BasicFileAttributes.class, NOFOLLOW_LINKS);
 
         screen()
             .longClick(path)
             .getInfo()
             .assertName(path.getFileName().toString())
-            .assertDate(formatDate(stat))
-            .assertSize(formatSize(stat.size()));
+            .assertDate(formatDate(attrs))
+            .assertSize(formatSize(attrs.size()));
     }
 
     @Test
     public void gets_info_of_empty_dir() throws Exception {
 
-        Path dir = dir().concat("dir").createDirectory();
-        Stat stat = dir.stat(NOFOLLOW);
+        Path dir = createDirectory(dir().resolve("dir"));
+        BasicFileAttributes attrs =
+            readAttributes(dir, BasicFileAttributes.class, NOFOLLOW_LINKS);
 
         screen()
             .longClick(dir)
             .getInfo()
             .assertName(dir.getFileName().toString())
-            .assertDate(formatDate(stat))
-            .assertSize(formatSizeCount(stat.size(), 1));
+            .assertDate(formatDate(attrs))
+            .assertSize(formatSizeCount(attrs.size(), 1));
     }
 
     @Test
     public void gets_info_of_non_empty_dir() throws Exception {
 
-        Path dir = dir().concat("dir").createDirectory();
-        Path child1 = dir.concat("dir").createDirectory();
-        Path child2 = dir.concat("file").createFile();
-        Path child3 = dir.concat("link").createSymbolicLink(dir);
+        Path dir = createDirectory(dir().resolve("dir"));
+        Path child1 = createDirectory(dir.resolve("dir"));
+        Path child2 = createFile(dir.resolve("file"));
+        Path child3 = createSymbolicLink(dir.resolve("link"), dir);
 
-        Stat stat = dir.stat(NOFOLLOW);
-        Stat childStat1 = child1.stat(NOFOLLOW);
-        Stat childStat2 = child2.stat(NOFOLLOW);
-        Stat childStat3 = child3.stat(NOFOLLOW);
+        BasicFileAttributes stat =
+            readAttributes(dir, BasicFileAttributes.class, NOFOLLOW_LINKS);
+        BasicFileAttributes childStat1 =
+            readAttributes(child1, BasicFileAttributes.class, NOFOLLOW_LINKS);
+        BasicFileAttributes childStat2 =
+            readAttributes(child2, BasicFileAttributes.class, NOFOLLOW_LINKS);
+        BasicFileAttributes childStat3 =
+            readAttributes(child3, BasicFileAttributes.class, NOFOLLOW_LINKS);
 
         screen()
             .longClick(dir)
@@ -109,8 +116,8 @@ public final class InfoTest extends BaseFilesActivityTest {
             ));
     }
 
-    private String formatDate(Stat stat) {
-        long millis = stat.lastModifiedTime().toEpochMilli();
+    private String formatDate(BasicFileAttributes attrs) {
+        long millis = attrs.lastModifiedTime().toMillis();
         int flags = FORMAT_SHOW_DATE | FORMAT_SHOW_TIME;
         return formatDateTime(getActivity(), millis, flags);
     }

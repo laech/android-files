@@ -20,7 +20,6 @@ import androidx.fragment.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN
 import kotlinx.android.synthetic.main.files_activity.*
 import l.files.base.Consumer
 import l.files.fs.LinkOption
-import l.files.fs.Path
 import l.files.fs.Stat
 import l.files.ui.base.app.BaseActivity
 import l.files.ui.base.app.OptionsMenus
@@ -33,6 +32,9 @@ import l.files.ui.browser.menu.NewTabMenu
 import l.files.ui.preview.getPreview
 import java.io.IOException
 import java.lang.ref.WeakReference
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 
 class FilesActivity : BaseActivity(),
   OnBackStackChangedListener,
@@ -116,9 +118,9 @@ class FilesActivity : BaseActivity(),
   // TODO
   private val initialDirectory: Path
     get() {
-      var dir: Path? = intent.getParcelableExtra(EXTRA_DIRECTORY)
+      var dir: Path? = intent.getStringExtra(EXTRA_DIRECTORY)?.let(Paths::get)
       if (dir == null && intent?.data?.scheme == ContentResolver.SCHEME_FILE) {
-        dir = Path.of(intent.data!!.path) // TODO
+        dir = Paths.get(intent.data!!.path) // TODO
       }
       return dir ?: UserDirs.DIR_HOME
     }
@@ -207,7 +209,7 @@ class FilesActivity : BaseActivity(),
       WeakReference(activity)
 
     override fun doInBackground(vararg params: Void): Any = try {
-      path.stat(LinkOption.FOLLOW)
+      l.files.fs.Path.of(path).stat(LinkOption.FOLLOW)
     } catch (e: IOException) {
       e
     }
@@ -232,12 +234,12 @@ class FilesActivity : BaseActivity(),
     } else if (stat.isDirectory) {
       showDirectory(path)
     } else {
-      showFile(path, stat)
+      showFile(path)
     }
   }
 
   private fun isReadable(path: Path): Boolean = try {
-    path.isReadable
+    Files.isReadable(path)
   } catch (e: IOException) {
     false
   }
@@ -254,7 +256,7 @@ class FilesActivity : BaseActivity(),
     supportFragmentManager
       .beginTransaction()
       .setBreadCrumbTitle(
-        path.toAbsolutePath().name.orObject(path).toString()
+        path.toAbsolutePath().fileName?.toString() ?: path.toString()
       )
       .setTransition(TRANSIT_FRAGMENT_OPEN)
       .replace(R.id.content, f, FilesFragment.TAG)
@@ -262,7 +264,7 @@ class FilesActivity : BaseActivity(),
       .commit()
   }
 
-  private fun showFile(file: Path, stat: Stat) {
+  private fun showFile(file: Path) {
     OpenFile(this, file).execute()
   }
 

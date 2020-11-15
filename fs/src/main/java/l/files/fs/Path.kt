@@ -7,6 +7,14 @@ import java.nio.file.LinkOption.NOFOLLOW_LINKS
 import java.nio.file.Path
 import java.util.regex.Pattern
 
+fun Path.isHidden(): Boolean = fileName?.toString()?.startsWith(".") ?: false
+
+/**
+ * e.g. `"/a/b/c" => ["/a/b/c", "/a/b", "/a", "/"]`
+ */
+fun Path.hierarchy(): List<Path> =
+  generateSequence(this, Path::getParent).toList()
+
 /**
  * Returns a file at `dstDir` with the name of `source`, if such
  * file exists, append a number at the end of the file name (and before the
@@ -57,7 +65,7 @@ private fun increment(base: String): String {
  * ..         -> ..
  * ```
  */
-private val Path.baseName: String?
+val Path.baseName: String?
   get() {
     val name = fileName?.toString() ?: return null
     return when {

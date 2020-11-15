@@ -5,11 +5,11 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Locale;
 
-import l.files.fs.Path;
-import l.files.testing.fs.Paths;
-
+import static java.nio.file.Files.write;
+import static java.util.Collections.singleton;
 import static l.files.ui.browser.sort.FileSort.SIZE;
 
 public final class FileSortSizeTest extends FileSortTest {
@@ -21,7 +21,12 @@ public final class FileSortSizeTest extends FileSortTest {
     public void sorts_files_by_size() throws Exception {
         Path smaller = createFile("a", 2);
         Path larger = createFile("b", 4);
-        testSortMatches(Locale.getDefault(), SIZE.comparator(), larger, smaller);
+        testSortMatches(
+            Locale.getDefault(),
+            SIZE.comparator(),
+            larger,
+            smaller
+        );
     }
 
     @Test
@@ -57,8 +62,8 @@ public final class FileSortSizeTest extends FileSortTest {
         if (size > 10) {
             throw new IllegalArgumentException("size to big: " + size);
         }
-        Path path = Path.of(temporaryFolder.newFile(name));
-        Paths.writeUtf8(path, repeat("a", size));
+        Path path = temporaryFolder.newFile(name).toPath();
+        write(path, singleton(repeat("a", size)));
         return path;
     }
 
@@ -71,7 +76,7 @@ public final class FileSortSizeTest extends FileSortTest {
     }
 
     private Path createDir(String name) throws IOException {
-        return Path.of(temporaryFolder.newFolder(name));
+        return temporaryFolder.newFolder(name).toPath();
     }
 
 }

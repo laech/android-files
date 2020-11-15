@@ -7,14 +7,18 @@ import android.util.Log;
 import android.widget.EditText;
 import androidx.annotation.Nullable;
 import l.files.base.Consumer;
-import l.files.fs.Path;
 import l.files.ui.browser.FileCreationFragment;
 import l.files.ui.browser.R;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Optional;
 
 import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
+import static java.nio.file.Files.createDirectory;
+import static java.nio.file.Files.exists;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static l.files.base.Objects.requireNonNull;
 
@@ -24,7 +28,7 @@ public final class NewDirFragment extends FileCreationFragment {
 
     static NewDirFragment create(Path file) {
         Bundle bundle = new Bundle(1);
-        bundle.putParcelable(ARG_PARENT_PATH, file);
+        bundle.putString(ARG_PARENT_PATH, file.toString());
 
         NewDirFragment fragment = new NewDirFragment();
         fragment.setArguments(bundle);
@@ -51,7 +55,7 @@ public final class NewDirFragment extends FileCreationFragment {
 
     private void suggestName() {
         String name = getString(R.string.untitled_dir);
-        Path base = parent().concat(name);
+        Path base = Paths.get(parent().toString(), name);
         suggestion =
             new SuggestName(this).executeOnExecutor(THREAD_POOL_EXECUTOR, base);
     }
@@ -69,15 +73,16 @@ public final class NewDirFragment extends FileCreationFragment {
         protected Path doInBackground(Path... params) {
             // TODO use AbsolutePath
             Path base = params[0];
-            String baseName = base.getName().or(""); // TODO deal with ""
-            Path parent = base.parent();
-            assert parent != null;
+            String baseName = Optional.ofNullable(base.getFileName())
+                .map(Path::toString)
+                .orElse(""); // TODO deal with ""
+            Path parent = base.getParent();
             Path file = base;
-            for (int i = 2; file.exists(NOFOLLOW_LINKS); i++) {
+            for (int i = 2; exists(file, NOFOLLOW_LINKS); i++) {
                 if (isCancelled()) {
                     return null;
                 }
-                file = parent.concat(baseName + " " + i);
+                file = parent.resolve(baseName + " " + i);
             }
             return file;
         }
@@ -88,7 +93,9 @@ public final class NewDirFragment extends FileCreationFragment {
             if (result == null) {
                 set("");
             } else {
-                set(result.getName().or("")); // TODO deal with ""
+                set(Optional.ofNullable(result.getFileName())
+                    .map(Path::toString)
+                    .orElse("")); // TODO deal with ""
             }
         }
 
@@ -108,7 +115,7 @@ public final class NewDirFragment extends FileCreationFragment {
 
     @Override
     public void onClick(DialogInterface dialog, int which) {
-        createDir(parent().concat(getFilename()));
+        createDir(Paths.get(parent().toString(), getFilename()));
     }
 
     private void createDir(Path dir) {
@@ -131,7 +138,7 @@ public final class NewDirFragment extends FileCreationFragment {
         @Override
         protected IOException doInBackground(Path... params) {
             try {
-                dir.createDirectory();
+                createDirectory(dir);
                 return null;
             } catch (IOException e) {
                 return e;

@@ -5,10 +5,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import l.files.base.Objects;
 import l.files.base.text.CollationKey;
-import l.files.fs.Path;
 import l.files.fs.Stat;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.Collator;
+import java.util.Optional;
 
 import static l.files.base.Objects.requireNonNull;
 
@@ -58,13 +60,15 @@ public final class FileInfo implements Comparable<FileInfo> {
 
     public boolean isReadable() {
         if (readable == null) {
-            readable = selfPath().isReadable();
+            readable = Files.isReadable(selfPath());
         }
         return readable;
     }
 
     public String name() {
-        return selfPath().getName().or("");
+        return Optional.ofNullable(selfPath().getFileName())
+            .map(Path::toString)
+            .orElse("");
     }
 
     public Path getFileName() {

@@ -49,7 +49,7 @@ class InfoAction(
   private fun showSingleFileInfo(values: Collection<FileInfo>) {
     val file = values.iterator().next()
     val stat = file.selfStat()
-    InfoFragment.create(file.selfPath().toJavaPath(), stat)
+    InfoFragment.create(file.selfPath(), stat)
       .show(manager, InfoBaseFragment.FRAGMENT_TAG)
   }
 

@@ -1,23 +1,22 @@
 package l.files.ui.browser;
 
-import androidx.test.runner.AndroidJUnit4;
-import l.files.fs.Path;
-import l.files.testing.fs.Paths;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.file.Files.*;
 import static l.files.ui.browser.sort.FileSort.*;
 
-@RunWith(AndroidJUnit4.class)
 public final class SortTest extends BaseFilesActivityTest {
 
     @Test
     public void updates_list_on_sort_option_change_on_back() throws Exception {
-        Path a = dir().concat("a").createDirectory();
+        Path a = createDirectory(dir().resolve("a"));
         Path aa = createFile("aa", "aa", Instant.ofEpochSecond(1, 1), a);
         Path ab = createFile("ab", "ab", Instant.ofEpochSecond(2, 1), a);
         Path b = createFile("b", "b", Instant.ofEpochSecond(1, 1));
@@ -64,10 +63,9 @@ public final class SortTest extends BaseFilesActivityTest {
         Instant modified,
         Path dir
     ) throws IOException {
-
-        Path file = dir.concat(name).createFile();
-        Paths.writeUtf8(file, content);
-        file.setLastModifiedTime(FileTime.from(modified));
+        Path file = Files.createFile(dir.resolve(name));
+        write(file, content.getBytes(UTF_8));
+        setLastModifiedTime(file, FileTime.from(modified));
         return file;
 
     }

@@ -4,14 +4,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import androidx.appcompat.view.ActionMode;
 import androidx.fragment.app.FragmentManager;
-import l.files.fs.Path;
 import l.files.ui.base.selection.Selection;
 import l.files.ui.base.view.ActionModeItem;
 import l.files.ui.operations.R;
 
+import java.nio.file.Path;
+import java.util.ArrayList;
+
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
-import static java.util.stream.Collectors.toList;
 import static l.files.base.Objects.requireNonNull;
 
 public final class DeleteAction extends ActionModeItem {
@@ -37,10 +38,8 @@ public final class DeleteAction extends ActionModeItem {
 
     @Override
     protected void onItemSelected(ActionMode mode, MenuItem item) {
-        new DeleteDialog(selection.keys()
-            .stream()
-            .map(Path::toJavaPath)
-            .collect(toList()), mode).show(manager, DeleteDialog.FRAGMENT_TAG);
+        new DeleteDialog(new ArrayList<>(selection.keys()), mode)
+            .show(manager, DeleteDialog.FRAGMENT_TAG);
     }
 
 }

@@ -23,7 +23,6 @@ import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.*;
 import l.files.base.Provider;
-import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.app.LifeCycleListenable;
 import l.files.ui.base.app.LifeCycleListener;
@@ -41,6 +40,7 @@ import l.files.ui.preview.Preview;
 import l.files.ui.preview.PreviewKt;
 import l.files.ui.preview.SizedColorDrawable;
 
+import java.nio.file.Path;
 import java.util.List;
 
 import static android.graphics.Color.TRANSPARENT;
@@ -210,13 +210,13 @@ public final class FileViewHolder
         Path path = previewPath();
         Stat stat = previewStat();
         if (stat == null ||
-            !preview.isPreviewable(path.toJavaPath(), stat, constraint)) {
+            !preview.isPreviewable(path, stat, constraint)) {
             clearBackground();
             return newIcon();
         }
 
         Bitmap blurred = preview.getBlurredThumbnail(
-            path.toJavaPath(), stat, constraint, false
+            path, stat, constraint, false
         );
         if (blurred != null) {
             setBackground(blurred, false);
@@ -234,13 +234,13 @@ public final class FileViewHolder
 
         runWhenUiIsIdle(path, this::canInterruptScrollState, () ->
             decodeThumbnailTask = preview.get(
-                path.toJavaPath(), stat, constraint, this, context()));
+                path, stat, constraint, this, context()));
 
         return getOrNewIcon(path, stat);
     }
 
     private Drawable getOrNewIcon(Path path, Stat stat) {
-        Rect size = preview.getSize(path.toJavaPath(), stat, constraint, false);
+        Rect size = preview.getSize(path, stat, constraint, false);
         if (size != null) {
             Rect scaledSize = scaleSize(size);
             return new SizedColorDrawable(
@@ -312,14 +312,14 @@ public final class FileViewHolder
         boolean changedMoreThan5SecondsAgo = now - then > 5000;
         if (changedMoreThan5SecondsAgo) {
             return preview.getThumbnail(
-                path.toJavaPath(),
+                path,
                 stat,
                 constraint,
                 true
             );
         } else {
             return preview.getThumbnail(
-                path.toJavaPath(),
+                path,
                 stat,
                 constraint,
                 false
@@ -366,11 +366,11 @@ public final class FileViewHolder
 
     @Override
     public void onPreviewAvailable(
-        java.nio.file.Path path,
+        Path path,
         Stat stat,
         Bitmap bm
     ) {
-        runWhenUiIsIdle(Path.of(path), this::canUpdateUi, () -> {
+        runWhenUiIsIdle(path, this::canUpdateUi, () -> {
             int position = getAdapterPosition();
             if (position != NO_POSITION) {
                 recyclerView.getAdapter().notifyItemChanged(position, bm);
@@ -380,11 +380,11 @@ public final class FileViewHolder
 
     @Override
     public void onBlurredThumbnailAvailable(
-        java.nio.file.Path path,
+        Path path,
         Stat stat,
         Bitmap thumbnail
     ) {
-        runWhenUiIsIdle(Path.of(path), this::canUpdateUi,
+        runWhenUiIsIdle(path, this::canUpdateUi,
             () -> setBackground(thumbnail, true)
         );
     }
@@ -409,12 +409,7 @@ public final class FileViewHolder
     }
 
     @Override
-    public void onPreviewFailed(
-        java.nio.file.Path path,
-        Stat stat,
-        Object cause
-    ) {
-
+    public void onPreviewFailed(Path path, Stat stat, Object cause) {
         if (isDebugBuild(context())) {
             if (cause instanceof Throwable) {
                 Log.d(getClass().getSimpleName(),

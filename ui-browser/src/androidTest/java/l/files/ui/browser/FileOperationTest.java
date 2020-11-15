@@ -1,13 +1,13 @@
 package l.files.ui.browser;
 
-import l.files.fs.Path;
 import org.junit.Test;
 
-import java.io.IOException;
+import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.System.currentTimeMillis;
 import static java.lang.Thread.sleep;
+import static java.nio.file.Files.*;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.testing.Tests.timeout;
@@ -19,11 +19,11 @@ public final class FileOperationTest extends BaseFilesActivityTest {
     @Test
     public void delete() throws Exception {
 
-        Path file = dir().concat("file").createFile();
-        Path link = dir().concat("link").createSymbolicLink(file);
-        Path dir1 = dir().concat("dir1").createDirectory();
-        Path dir2 = dir().concat("dir2").createDirectory();
-        dir2.concat("a").createFile();
+        Path file = createFile(dir().resolve("file"));
+        Path link = createSymbolicLink(dir().resolve("link"), file);
+        Path dir1 = createDirectory(dir().resolve("dir1"));
+        Path dir2 = createDirectory(dir().resolve("dir2"));
+        createFile(dir2.resolve("a"));
 
         screen()
             .longClick(file)
@@ -34,10 +34,10 @@ public final class FileOperationTest extends BaseFilesActivityTest {
             .ok();
 
         timeout(5, SECONDS, () -> {
-            assertFalse(file.exists(NOFOLLOW_LINKS));
-            assertFalse(link.exists(NOFOLLOW_LINKS));
-            assertFalse(dir1.exists(NOFOLLOW_LINKS));
-            assertFalse(dir2.exists(NOFOLLOW_LINKS));
+            assertFalse(exists(file, NOFOLLOW_LINKS));
+            assertFalse(exists(link, NOFOLLOW_LINKS));
+            assertFalse(exists(dir1, NOFOLLOW_LINKS));
+            assertFalse(exists(dir2, NOFOLLOW_LINKS));
         });
 
     }
@@ -45,8 +45,8 @@ public final class FileOperationTest extends BaseFilesActivityTest {
     @Test
     public void cut_files() throws Exception {
 
-        Path file = dir().concat("a").createFile();
-        Path dir = dir().concat("dir").createDirectory();
+        Path file = createFile(dir().resolve("a"));
+        Path dir = createDirectory(dir().resolve("dir"));
 
         screen()
             .longClick(file)
@@ -55,8 +55,8 @@ public final class FileOperationTest extends BaseFilesActivityTest {
             .paste();
 
         timeout(5, SECONDS, () -> {
-            assertFalse(file.exists(NOFOLLOW_LINKS));
-            assertTrue(dir.concat(file.getFileName()).exists(NOFOLLOW_LINKS));
+            assertFalse(exists(file, NOFOLLOW_LINKS));
+            assertTrue(exists(dir.resolve(file.getFileName()), NOFOLLOW_LINKS));
         });
 
     }
@@ -64,14 +64,14 @@ public final class FileOperationTest extends BaseFilesActivityTest {
     @Test
     public void copy() throws Exception {
 
-        Path dstDir = dir().concat("dstDir").createDirectory();
-        Path srcFile = dir().concat("srcFile").createFile();
-        Path srcLink = dir().concat("srcLink").createSymbolicLink(srcFile);
-        Path srcEmpty = dir().concat("srcEmpty").createDirectory();
-        Path srcFull = dir().concat("srcFull").createDirectory();
-        srcFull.concat("a").createFile();
-        srcFull.concat("b").createDirectory();
-        srcFull.concat("c").createSymbolicLink(srcFull.concat("a"));
+        Path dstDir = createDirectory(dir().resolve("dstDir"));
+        Path srcFile = createFile(dir().resolve("srcFile"));
+        Path srcLink = createSymbolicLink(dir().resolve("srcLink"), srcFile);
+        Path srcEmpty = createDirectory(dir().resolve("srcEmpty"));
+        Path srcFull = createDirectory(dir().resolve("srcFull"));
+        createFile(srcFull.resolve("a"));
+        createDirectory(srcFull.resolve("b"));
+        createSymbolicLink(srcFull.resolve("c"), srcFull.resolve("a"));
 
         screen()
             .longClick(srcEmpty)
@@ -82,22 +82,22 @@ public final class FileOperationTest extends BaseFilesActivityTest {
             .click(dstDir)
             .paste();
 
-        assertTrue(waitFor(dstDir.concat(srcFile.getFileName()), 5, SECONDS));
-        assertTrue(waitFor(dstDir.concat(srcLink.getFileName()), 5, SECONDS));
-        assertTrue(waitFor(dstDir.concat(srcEmpty.getFileName()), 5, SECONDS));
-        assertTrue(waitFor(dstDir.concat(srcFull.getFileName()), 5, SECONDS));
+        assertTrue(waitFor(dstDir.resolve(srcFile.getFileName()), 5, SECONDS));
+        assertTrue(waitFor(dstDir.resolve(srcLink.getFileName()), 5, SECONDS));
+        assertTrue(waitFor(dstDir.resolve(srcEmpty.getFileName()), 5, SECONDS));
+        assertTrue(waitFor(dstDir.resolve(srcFull.getFileName()), 5, SECONDS));
         assertTrue(waitFor(
-            dstDir.concat(srcFull.getFileName()).concat("a"),
+            dstDir.resolve(srcFull.getFileName()).resolve("a"),
             5,
             SECONDS
         ));
         assertTrue(waitFor(
-            dstDir.concat(srcFull.getFileName()).concat("b"),
+            dstDir.resolve(srcFull.getFileName()).resolve("b"),
             5,
             SECONDS
         ));
         assertTrue(waitFor(
-            dstDir.concat(srcFull.getFileName()).concat("c"),
+            dstDir.resolve(srcFull.getFileName()).resolve("c"),
             5,
             SECONDS
         ));
@@ -111,7 +111,7 @@ public final class FileOperationTest extends BaseFilesActivityTest {
 
         long end = currentTimeMillis() + unit.toMillis(time);
         while (currentTimeMillis() < end) {
-            if (file.exists(NOFOLLOW_LINKS)) {
+            if (exists(file, NOFOLLOW_LINKS)) {
                 return true;
             }
             sleep(20);
@@ -123,7 +123,7 @@ public final class FileOperationTest extends BaseFilesActivityTest {
     public void paste_menu_is_disabled_inside_folder_being_copied()
         throws Exception {
 
-        Path dir = dir().concat("dir").createDirectory();
+        Path dir = createDirectory(dir().resolve("dir"));
 
         screen()
             .longClick(dir)

@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
@@ -40,6 +41,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static l.files.fs.PathKt.isHidden;
 import static l.files.fs.event.Event.DELETE;
 import static l.files.ui.base.content.Contexts.isDebugBuild;
 
@@ -270,7 +272,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
             files.addAll(data.values());
         } else {
             for (FileInfo item : data.values()) {
-                if (!item.selfPath().isHidden()) {
+                if (!isHidden(item.selfPath())) {
                     files.add(item);
                 }
             }
@@ -367,7 +369,15 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
             Stat targetStat = readTargetStatus(path, stat);
             Path target = readTarget(path, stat);
             FileInfo newStat =
-                FileInfo.create(path, stat, target, targetStat, collator);
+                FileInfo.create(
+                    path.toJavaPath(),
+                    stat,
+                    Optional.ofNullable(target)
+                        .map(Path::toJavaPath)
+                        .orElse(null),
+                    targetStat,
+                    collator
+                );
             FileInfo oldStat = data.put(path.getFileName(), newStat);
             return !newStat.equals(oldStat);
 
@@ -377,7 +387,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         } catch (IOException e) {
             data.put(
                 path.getFileName(),
-                FileInfo.create(path, null, null, null, collator)
+                FileInfo.create(path.toJavaPath(), null, null, null, collator)
             );
             return true;
         }

@@ -1,15 +1,16 @@
 package l.files.ui.browser.sort;
 
-import l.files.fs.Path;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 import java.util.Locale;
 
+import static java.nio.file.Files.setLastModifiedTime;
 import static l.files.ui.browser.sort.FileSort.MODIFIED;
 
 public final class FileSortDateTest extends FileSortTest {
@@ -53,11 +54,11 @@ public final class FileSortDateTest extends FileSortTest {
         throws IOException {
         Path path;
         if (dir) {
-            path = Path.of(temporaryFolder.newFolder(name));
+            path = temporaryFolder.newFolder(name).toPath();
         } else {
-            path = Path.of(temporaryFolder.newFile(name));
+            path = temporaryFolder.newFile(name).toPath();
         }
-        path.setLastModifiedTime(FileTime.from(instant));
+        setLastModifiedTime(path, FileTime.from(instant));
         return path;
     }
 

@@ -1,22 +1,20 @@
 package l.files.ui.browser;
 
 import android.util.Log;
-import androidx.test.runner.AndroidJUnit4;
-import l.files.fs.Path;
 import l.files.testing.fs.Paths;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
+import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermissions;
 
 import static java.lang.Thread.sleep;
+import static java.nio.file.Files.*;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.testing.Tests.timeout;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-@RunWith(AndroidJUnit4.class)
 public class RenameTest extends BaseFilesActivityTest {
 
     // TODO test click ok from keyboard
@@ -40,8 +38,8 @@ public class RenameTest extends BaseFilesActivityTest {
 
         try {
 
-            Path src = dir.concat("file.txt").createFile();
-            Path dst = dir.concat("file.TXT");
+            Path src = createFile(dir.resolve("file.txt"));
+            Path dst = dir.resolve("file.TXT");
 
             UiRename ui = rename(src);
             ui.setFilename(dst.getFileName().toString());
@@ -54,15 +52,15 @@ public class RenameTest extends BaseFilesActivityTest {
                 .assertAllItemsDisplayedInOrder(dst);
 
         } finally {
-            Paths.deleteRecursiveIfExists(dir);
+            Paths.deleteRecursiveIfExists(l.files.fs.Path.of(dir));
         }
     }
 
     @Test
     public void shows_error_when_failed_to_rename() throws Exception {
-        Path file = dir().concat("a").createFile();
+        Path file = createFile(dir().resolve("a"));
         Paths.removePermissions(
-            dir(),
+            l.files.fs.Path.of(dir()),
             PosixFilePermissions.fromString("-w--w--w-")
         );
         rename(file)
@@ -72,41 +70,41 @@ public class RenameTest extends BaseFilesActivityTest {
 
     @Test
     public void renames_file_to_specified_name() throws Throwable {
-        Path from = dir().concat("a").createFile();
-        Path to = dir().concat("abc");
+        Path from = createFile(dir().resolve("a"));
+        Path to = dir().resolve("abc");
 
         rename(from).setFilename(to.getFileName().toString()).ok();
 
         timeout(10, SECONDS, () -> {
-            assertFalse(from.exists(NOFOLLOW_LINKS));
-            assertTrue(to.exists(NOFOLLOW_LINKS));
+            assertFalse(exists(from, NOFOLLOW_LINKS));
+            assertTrue(exists(to, NOFOLLOW_LINKS));
         });
     }
 
     @Test
     public void highlights_file_base_name_in_dialog() throws Exception {
-        Path file = dir().concat("abc.txt").createFile();
+        Path file = createFile(dir().resolve("abc.txt"));
         rename(file).assertSelection("abc");
     }
 
     @Test
     public void uses_filename_as_default_text() throws Exception {
-        Path file = dir().concat("a").createFile();
+        Path file = createFile(dir().resolve("a"));
         rename(file).assertFilename(file.getFileName().toString());
     }
 
     @Test
     public void disables_ok_button_with_no_error_initially_because_we_use_source_filename_as_suggestion()
         throws Exception {
-        rename(dir().concat("a").createDirectory())
+        rename(createDirectory(dir().resolve("a")))
             .assertOkButtonEnabled(false)
             .assertHasNoError();
     }
 
     @Test
     public void cannot_rename_if_new_name_exists() throws Exception {
-        dir().concat("abc").createFile();
-        rename(dir().concat("a").createFile())
+        createFile(dir().resolve("abc"));
+        rename(createFile(dir().resolve("a")))
 
             .setFilename("abc")
             .assertOkButtonEnabled(false)
@@ -121,8 +119,8 @@ public class RenameTest extends BaseFilesActivityTest {
     public void rename_button_is_disable_if_there_are_more_than_one_file_checked()
         throws Exception {
 
-        Path f1 = dir().concat("dir").createDirectory();
-        Path f2 = dir().concat("a").createFile();
+        Path f1 = createDirectory(dir().resolve("dir"));
+        Path f2 = createFile(dir().resolve("a"));
 
         screen()
             .longClick(f1)

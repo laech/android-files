@@ -9,8 +9,6 @@ import androidx.test.uiautomator.UiObject;
 import androidx.test.uiautomator.UiObjectNotFoundException;
 import androidx.test.uiautomator.UiSelector;
 import l.files.base.Throwables;
-import l.files.fs.Path;
-import l.files.fs.TraversalCallback;
 import l.files.testing.fs.Paths;
 import org.junit.After;
 import org.junit.Before;
@@ -18,11 +16,13 @@ import org.junit.Rule;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.PosixFilePermission;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static android.content.Intent.ACTION_MAIN;
 import static android.os.Build.VERSION.SDK_INT;
@@ -30,9 +30,9 @@ import static android.os.Build.VERSION_CODES.M;
 import static android.os.Environment.getExternalStorageDirectory;
 import static androidx.test.InstrumentationRegistry.getInstrumentation;
 import static java.lang.System.currentTimeMillis;
+import static java.nio.file.Files.*;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
-import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.fs.TraversalCallback.Result.CONTINUE;
+import static java.util.stream.Collectors.toList;
 import static l.files.ui.browser.FilesActivity.EXTRA_DIRECTORY;
 import static l.files.ui.browser.FilesActivity.EXTRA_WATCH_LIMIT;
 import static org.junit.Assert.*;
@@ -73,19 +73,23 @@ public class BaseFilesActivityTest {
 
     @Before
     public void setUp() throws Exception {
-        dir = Path.of(createTempFolder());
+        dir = createTempFolder().toPath();
         setActivityIntent(newIntent(dir));
         screen = new UiFileActivity(
             getInstrumentation(),
-            () -> getActivity()
+            this::getActivity
         );
     }
 
     @After
     public void tearDown() throws Exception {
         screen = null;
-        if (dir != null && dir.exists(NOFOLLOW_LINKS)) {
-            dir.traverse(NOFOLLOW, delete());
+        if (dir != null && exists(dir, NOFOLLOW_LINKS)) {
+            setPosixFilePermissions(
+                dir,
+                EnumSet.allOf(PosixFilePermission.class)
+            );
+            walkFileTree(dir, deleter());
         }
         dir = null;
     }
@@ -128,24 +132,51 @@ public class BaseFilesActivityTest {
         }
     }
 
-    private TraversalCallback<Path> delete() {
-        return new TraversalCallback.Base<Path>() {
+    private FileVisitor<Path> deleter() {
+        return new SimpleFileVisitor<Path>() {
 
             @Override
-            public Result onPreVisit(Path file) {
+            public FileVisitResult visitFile(
+                Path file,
+                BasicFileAttributes attrs
+            ) throws IOException {
+                setPermissions(file);
+                delete(file);
+                return super.visitFile(file, attrs);
+            }
+
+            @Override
+            public FileVisitResult preVisitDirectory(
+                Path dir,
+                BasicFileAttributes attrs
+            ) throws IOException {
+                setPermissions(dir);
+                try (Stream<Path> stream = list(dir)) {
+                    stream
+                        .filter(Files::isDirectory)
+                        .forEach(this::setPermissions);
+                }
+                return super.preVisitDirectory(dir, attrs);
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException e)
+                throws IOException {
+                if (e == null) {
+                    delete(dir);
+                }
+                return super.postVisitDirectory(dir, e);
+            }
+
+            private void setPermissions(Path dir) {
                 try {
-                    file.setPermissions(EnumSet.allOf(PosixFilePermission.class));
+                    setPosixFilePermissions(
+                        dir,
+                        EnumSet.allOf(PosixFilePermission.class)
+                    );
                 } catch (IOException ignored) {
                 }
-                return CONTINUE;
             }
-
-            @Override
-            public Result onPostVisit(Path file) throws IOException {
-                file.delete();
-                return CONTINUE;
-            }
-
         };
     }
 
@@ -166,7 +197,7 @@ public class BaseFilesActivityTest {
 
     Intent newIntent(Path dir, int watchLimit) {
         return new Intent(ACTION_MAIN)
-            .putExtra(EXTRA_DIRECTORY, dir)
+            .putExtra(EXTRA_DIRECTORY, dir.toString())
             .putExtra(EXTRA_WATCH_LIMIT, watchLimit);
     }
 
@@ -187,22 +218,25 @@ public class BaseFilesActivityTest {
          * The bug: "a" gets renamed to "A", instead of displaying only
          * "A", both "a" and "A" are displayed.
          */
-        Path dir = Path.of(getExternalStorageDirectory()).concat(name);
-        Path src = dir.concat("z");
-        Path dst = dir.concat("Z");
+        Path dir = getExternalStorageDirectory().toPath().resolve(name);
+        Path src = dir.resolve("z");
+        Path dst = dir.resolve("Z");
         try {
 
-            Paths.deleteRecursiveIfExists(dir);
-            Paths.createFiles(src);
+            Paths.deleteRecursiveIfExists(l.files.fs.Path.of(dir));
+            Paths.createFiles(l.files.fs.Path.of(src));
 
-            assertTrue(src.exists(NOFOLLOW_LINKS));
+            assertTrue(exists(src, NOFOLLOW_LINKS));
             assertTrue(
                 "Assuming the underlying file system is case insensitive",
-                dst.exists(NOFOLLOW_LINKS)
+                exists(dst, NOFOLLOW_LINKS)
             );
 
-            src.move(dst);
-            List<Path> actual = dir.list(new ArrayList<Path>());
+            move(src, dst);
+            List<Path> actual;
+            try (Stream<Path> stream = list(dir)) {
+                actual = stream.collect(toList());
+            }
             List<Path> expected = Collections.singletonList(dst);
             assertEquals(1, actual.size());
             if (!expected.equals(actual)) {
@@ -214,7 +248,7 @@ public class BaseFilesActivityTest {
 
         } catch (Throwable e) {
             try {
-                Paths.deleteRecursiveIfExists(dir);
+                Paths.deleteRecursiveIfExists(l.files.fs.Path.of(dir));
             } catch (Throwable sup) {
                 Throwables.addSuppressed(e, sup);
             }
@@ -223,19 +257,19 @@ public class BaseFilesActivityTest {
         } finally {
 
             try {
-                Paths.deleteIfExists(src);
+                Paths.deleteIfExists(l.files.fs.Path.of(src));
             } catch (IOException ignore) {
             }
 
             try {
-                Paths.deleteIfExists(dst);
+                Paths.deleteIfExists(l.files.fs.Path.of(dst));
             } catch (IOException ignore) {
             }
 
         }
 
-        assertFalse(src.exists(NOFOLLOW_LINKS));
-        assertFalse(dst.exists(NOFOLLOW_LINKS));
+        assertFalse(exists(src, NOFOLLOW_LINKS));
+        assertFalse(exists(dst, NOFOLLOW_LINKS));
 
         return dir;
     }

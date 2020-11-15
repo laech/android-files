@@ -1,28 +1,29 @@
 package l.files.ui.browser.action;
 
-import androidx.fragment.app.FragmentManager;
-import androidx.appcompat.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
-
-import l.files.fs.Path;
+import androidx.appcompat.view.ActionMode;
+import androidx.fragment.app.FragmentManager;
 import l.files.ui.base.selection.Selection;
 import l.files.ui.base.view.ActionModeItem;
 import l.files.ui.browser.R;
+
+import java.nio.file.Path;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static l.files.base.Objects.requireNonNull;
 
 public final class RenameAction extends ActionModeItem
-        implements Selection.Callback {
+    implements Selection.Callback {
 
     private final Selection<Path, ?> selection;
     private final FragmentManager manager;
 
     public RenameAction(
-            Selection<Path, ?> selection,
-            FragmentManager manager) {
+        Selection<Path, ?> selection,
+        FragmentManager manager
+    ) {
         super(R.id.rename);
         this.manager = requireNonNull(manager, "manager");
         this.selection = requireNonNull(selection, "selection");
@@ -32,7 +33,7 @@ public final class RenameAction extends ActionModeItem
     public boolean onCreateActionMode(ActionMode mode, Menu menu) {
         super.onCreateActionMode(mode, menu);
         menu.add(NONE, id(), NONE, R.string.rename)
-                .setShowAsAction(SHOW_AS_ACTION_NEVER);
+            .setShowAsAction(SHOW_AS_ACTION_NEVER);
         selection.addWeaklyReferencedCallback(this);
         return true;
     }

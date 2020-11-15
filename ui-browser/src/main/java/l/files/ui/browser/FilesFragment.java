@@ -20,7 +20,6 @@ import androidx.loader.content.Loader;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import l.files.base.lifecycle.CollectionLiveData;
-import l.files.fs.Path;
 import l.files.ui.base.app.OptionsMenus;
 import l.files.ui.base.fs.FileInfo;
 import l.files.ui.base.fs.OpenFileEvent;
@@ -47,6 +46,8 @@ import l.files.ui.operations.action.DeleteAction;
 import l.files.ui.operations.menu.PasteMenu;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -90,7 +91,7 @@ public final class FilesFragment
 
     public static FilesFragment create(Path directory, int watchLimit) {
         Bundle bundle = new Bundle(2);
-        bundle.putParcelable(ARG_DIRECTORY, directory);
+        bundle.putString(ARG_DIRECTORY, directory.toString());
         bundle.putInt(ARG_WATCH_LIMIT, watchLimit);
 
         FilesFragment browser = new FilesFragment();
@@ -104,9 +105,7 @@ public final class FilesFragment
 
     private FilesAdapter adapter;
 
-    private CollectionLiveData<java.nio.file.Path, Set<java.nio.file.Path>,
-        Set<java.nio.file.Path>>
-        bookmarks;
+    private CollectionLiveData<Path, Set<Path>, Set<Path>> bookmarks;
 
     private DefaultPreferencesViewModel preferencesModel;
 
@@ -194,7 +193,7 @@ public final class FilesFragment
 
         Bundle args = getArguments();
         assert args != null;
-        directory = args.getParcelable(ARG_DIRECTORY);
+        directory = Paths.get(args.getString(ARG_DIRECTORY));
         watchLimit = args.getInt(ARG_WATCH_LIMIT, -1);
 
         bookmarks = getBookmarks(this);
@@ -316,7 +315,7 @@ public final class FilesFragment
         FragmentManager manager = activity.getSupportFragmentManager();
         setOptionsMenu(OptionsMenus.compose(
             new RefreshMenu(() -> refreshEnabled, this::refresh),
-            new BookmarkMenu(directory().toJavaPath(), bookmarks),
+            new BookmarkMenu(directory(), bookmarks),
             new NewDirMenu(manager, directory()),
             new PasteMenu(activity, directory()),
             new SortMenu(manager),
@@ -351,7 +350,7 @@ public final class FilesFragment
         return ActionModes.compose(
             new CountSelectedItemsAction(selection()),
             new ClearSelectionOnDestroyActionMode(selection()),
-            new InfoAction(selection(), manager, directory().toJavaPath()),
+            new InfoAction(selection(), manager, directory()),
             new SelectAllAction(this),
             new CutAction(selection()),
             new CopyAction(selection()),
@@ -373,7 +372,7 @@ public final class FilesFragment
         Activity context = getActivity();
         return new FilesLoader(
             context,
-            directory,
+            l.files.fs.Path.of(directory),
             () -> getSort(context),
             () -> getShowHiddenFiles(context),
             watchLimit

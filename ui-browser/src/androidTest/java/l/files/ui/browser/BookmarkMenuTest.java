@@ -1,69 +1,69 @@
 package l.files.ui.browser;
 
-import androidx.test.runner.AndroidJUnit4;
-
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
-import l.files.fs.Path;
+import java.nio.file.Path;
 
-@RunWith(AndroidJUnit4.class)
+import static java.nio.file.Files.createDirectory;
+
 public final class BookmarkMenuTest extends BaseFilesActivityTest {
 
     @Test
     public void bookmark_menu_is_unchecked_for_non_bookmarked_directory()
-            throws Exception {
+        throws Exception {
 
-        Path dir1 = dir().concat("Not bookmarked 1").createDirectory();
-        Path dir2 = dir().concat("Not bookmarked 2").createDirectory();
+        Path dir1 = createDirectory(dir().resolve("Not bookmarked 1"));
+        Path dir2 = createDirectory(dir().resolve("Not bookmarked 2"));
         screen()
-                .clickInto(dir1)
-                .assertBookmarkMenuChecked(false)
-                .pressBack()
-                .clickInto(dir2)
-                .assertBookmarkMenuChecked(false);
+            .clickInto(dir1)
+            .assertBookmarkMenuChecked(false)
+            .pressBack()
+            .clickInto(dir2)
+            .assertBookmarkMenuChecked(false);
     }
 
     @Test
     public void bookmark_menu_is_checked_for_bookmarked_directory()
-            throws Exception {
+        throws Exception {
 
-        Path dir = dir().concat("Bookmarked").createDirectory();
+        Path dir = createDirectory(dir().resolve("Bookmarked"));
         screen()
-                .clickInto(dir)
-                .bookmark()
-                .assertBookmarkMenuChecked(true);
+            .clickInto(dir)
+            .bookmark()
+            .assertBookmarkMenuChecked(true);
     }
 
     @Test
     public void bookmark_unbookmark_directory_checks_bookmark_menu_correctly()
-            throws Exception {
+        throws Exception {
 
-        Path dir = dir().concat("Bookmarked then unbookmarked").createDirectory();
+        Path dir =
+            createDirectory(dir().resolve("Bookmarked then unbookmarked"));
         screen()
-                .clickInto(dir)
-                .bookmark()
-                .assertBookmarkMenuChecked(true)
-                .unbookmark()
-                .assertBookmarkMenuChecked(false);
+            .clickInto(dir)
+            .bookmark()
+            .assertBookmarkMenuChecked(true)
+            .unbookmark()
+            .assertBookmarkMenuChecked(false);
     }
 
     @Test
     public void navigate_through_bookmarked_unbookmarked_directories_checks_bookmark_menu_correctly()
-            throws Exception {
+        throws Exception {
 
-        Path bookmarked = dir().concat("Bookmarked").createDirectory();
-        Path unbookmarked = dir().concat("Bookmarked/Unbookmarked").createDirectory();
+        Path bookmarked = createDirectory(dir().resolve("Bookmarked"));
+        Path unbookmarked =
+            createDirectory(dir().resolve("Bookmarked/Unbookmarked"));
         screen()
-                .clickInto(bookmarked)
-                .bookmark()
-                .assertBookmarkMenuChecked(true)
-                .clickInto(unbookmarked)
-                .assertBookmarkMenuChecked(false)
-                .pressBack()
-                .assertBookmarkMenuChecked(true)
-                .clickInto(unbookmarked)
-                .assertBookmarkMenuChecked(false);
+            .clickInto(bookmarked)
+            .bookmark()
+            .assertBookmarkMenuChecked(true)
+            .clickInto(unbookmarked)
+            .assertBookmarkMenuChecked(false)
+            .pressBack()
+            .assertBookmarkMenuChecked(true)
+            .clickInto(unbookmarked)
+            .assertBookmarkMenuChecked(false);
     }
 
 }

@@ -22,13 +22,16 @@ import androidx.loader.content.AsyncTaskLoader;
 import androidx.loader.content.Loader;
 import com.google.android.material.textfield.TextInputLayout;
 import l.files.base.Consumer;
-import l.files.fs.Path;
 import l.files.ui.browser.widget.Toaster;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE;
 import static android.view.inputmethod.EditorInfo.IME_ACTION_DONE;
 import static java.lang.System.identityHashCode;
+import static java.nio.file.Files.exists;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static l.files.base.Objects.requireNonNull;
 
@@ -119,7 +122,7 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
         // TODO use AbsolutePath
         Bundle args = getArguments();
         assert args != null;
-        return args.getParcelable(ARG_PARENT_PATH);
+        return Paths.get(args.getString(ARG_PARENT_PATH));
     }
 
     protected String getFilename() {
@@ -145,7 +148,7 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
         }
 
         private Loader<Existence> newChecker() {
-            Path file = parent().concat(getFilename());
+            Path file = Paths.get(parent().toString(), getFilename());
             return new CheckTask(getActivity(), file);
         }
 
@@ -190,7 +193,7 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
 
         @Override
         public Existence loadInBackground() {
-            boolean exists = path.exists(NOFOLLOW_LINKS);
+            boolean exists = exists(path, NOFOLLOW_LINKS);
             return new Existence(path, exists);
         }
 

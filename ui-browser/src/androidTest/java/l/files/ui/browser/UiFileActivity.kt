@@ -18,14 +18,15 @@ import kotlinx.android.synthetic.main.files_grid_item.view.*
 import l.files.base.Function
 import l.files.base.Provider
 import l.files.fs.LinkOption
-import l.files.fs.Path
 import l.files.fs.Stat
-import l.files.fs.listPaths
+import l.files.fs.hierarchy
 import l.files.ui.base.fs.FileInfo
 import l.files.ui.base.fs.FileLabels
 import l.files.ui.browser.Instrumentations.*
 import org.junit.Assert.*
 import java.io.IOException
+import java.nio.file.Files.list
+import java.nio.file.Path
 import java.util.concurrent.TimeUnit
 
 
@@ -112,7 +113,7 @@ internal class UiFileActivity(
     return this
   }
 
-  fun longClick(file: Path?): UiFileActivity {
+  fun longClick(file: Path): UiFileActivity {
     longClickItemOnMainThread(
       instrumentation,
       Provider(recycler),
@@ -390,7 +391,7 @@ internal class UiFileActivity(
   fun assertNavigationModeHierarchy(dir: Path): UiFileActivity {
     awaitOnMainThread(instrumentation) {
       val actual = activity.hierarchy()
-      val expected = dir.hierarchy().reversed()
+      val expected = dir.hierarchy()
       assertEquals(expected, actual)
       assertEquals(dir, activity.titleView.selectedItem)
     }
@@ -407,7 +408,7 @@ internal class UiFileActivity(
     await(
       {
         val filesInView = filesInView()
-        dir.listPaths().use {
+        list(dir).use {
           it.forEach { child ->
 
             val oldStat = filesInView.remove(child)
@@ -415,7 +416,7 @@ internal class UiFileActivity(
               fail("Path in file system but not in view: $child")
             }
 
-            val newStat = child.stat(LinkOption.NOFOLLOW)
+            val newStat = l.files.fs.Path.of(child).stat(LinkOption.NOFOLLOW)
             if (newStat != oldStat) {
               fail(
                 """
@@ -455,7 +456,8 @@ internal class UiFileActivity(
   private fun fileItems(): List<FileInfo> =
     fragment.items().filterIsInstance<FileInfo>()
 
-  private fun resources(): List<Path> = fileItems().map { it.selfPath() }
+  private fun resources(): List<Path> =
+    fileItems().map(FileInfo::selfPath)
 
   fun assertAllItemsDisplayedInOrder(vararg expected: Path): UiFileActivity {
     awaitOnMainThread(instrumentation) {

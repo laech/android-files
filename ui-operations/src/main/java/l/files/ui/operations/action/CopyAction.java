@@ -1,13 +1,13 @@
 package l.files.ui.operations.action;
 
-import androidx.appcompat.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
-
-import l.files.fs.Path;
+import androidx.appcompat.view.ActionMode;
 import l.files.ui.base.selection.Selection;
 import l.files.ui.base.view.ActionModeItem;
 import l.files.ui.operations.R;
+
+import java.nio.file.Path;
 
 import static l.files.base.Objects.requireNonNull;
 import static l.files.ui.operations.action.Clipboard.Action.COPY;

@@ -1,10 +1,10 @@
 package l.files.ui.browser.sort;
 
-import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.fs.FileInfo;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -45,7 +45,7 @@ abstract class FileSortTest {
         for (Path file : files) {
             Stat stat;
             try {
-                stat = file.stat(NOFOLLOW);
+                stat = l.files.fs.Path.of(file).stat(NOFOLLOW);
             } catch (IOException e) {
                 stat = null;
             }

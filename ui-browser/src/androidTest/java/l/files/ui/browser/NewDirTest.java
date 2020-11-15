@@ -3,12 +3,14 @@ package l.files.ui.browser;
 import android.widget.EditText;
 import androidx.test.runner.AndroidJUnit4;
 import l.files.base.Consumer;
+import l.files.fs.Path;
 import l.files.testing.fs.Paths;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.nio.file.attribute.PosixFilePermissions;
 
+import static java.nio.file.Files.createFile;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(AndroidJUnit4.class)
@@ -20,7 +22,7 @@ public final class NewDirTest extends BaseFilesActivityTest {
     public void shows_error_message_when_failed_to_create()
         throws Exception {
         Paths.removePermissions(
-            dir(),
+            Path.of(dir()),
             PosixFilePermissions.fromString("-w--w--w-")
         );
         screen()
@@ -35,7 +37,7 @@ public final class NewDirTest extends BaseFilesActivityTest {
             .newFolder()
             .setFilename("a")
             .ok()
-            .clickInto(dir().concat("a"));
+            .clickInto(dir().resolve("a"));
     }
 
     @Test
@@ -49,8 +51,8 @@ public final class NewDirTest extends BaseFilesActivityTest {
     public void name_field_has_new_name_suggestion_if_initial_names_are_taken()
         throws Exception {
 
-        dir().concat(string(R.string.untitled_dir)).createFile();
-        dir().concat(string(R.string.untitled_dir) + " " + 2).createFile();
+        createFile(dir().resolve(string(R.string.untitled_dir)));
+        createFile(dir().resolve(string(R.string.untitled_dir) + " " + 2));
 
         screen()
             .newFolder()
@@ -61,7 +63,7 @@ public final class NewDirTest extends BaseFilesActivityTest {
     public void can_not_create_if_folder_with_specified_name_already_exists()
         throws Exception {
 
-        dir().concat("a").createFile();
+        createFile(dir().resolve("a"));
         screen()
             .newFolder()
             .setFilename("a")

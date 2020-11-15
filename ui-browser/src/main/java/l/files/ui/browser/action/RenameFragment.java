@@ -4,25 +4,28 @@ import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import androidx.annotation.Nullable;
-import androidx.appcompat.view.ActionMode;
 import android.util.Pair;
 import android.widget.EditText;
-
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-
+import androidx.annotation.Nullable;
+import androidx.appcompat.view.ActionMode;
 import l.files.base.Consumer;
-import l.files.fs.Path;
-import l.files.fs.Stat;
 import l.files.ui.base.app.BaseActivity;
 import l.files.ui.browser.FileCreationFragment;
 import l.files.ui.browser.R;
 
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Optional;
+
 import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
+import static java.nio.file.Files.move;
+import static java.nio.file.Files.readAttributes;
+import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static l.files.base.Objects.requireNonNull;
-import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.ui.base.fs.IOExceptions.message;
+import static l.files.fs.PathKt.getBaseName;
 
 public final class RenameFragment extends FileCreationFragment {
 
@@ -32,8 +35,8 @@ public final class RenameFragment extends FileCreationFragment {
 
     static RenameFragment create(Path path) {
         Bundle args = new Bundle(2);
-        args.putParcelable(ARG_PARENT_PATH, path.parent());
-        args.putParcelable(ARG_PATH, path);
+        args.putString(ARG_PARENT_PATH, path.getParent().toString());
+        args.putString(ARG_PATH, path.toString());
 
         RenameFragment fragment = new RenameFragment();
         fragment.setArguments(args);
@@ -52,7 +55,7 @@ public final class RenameFragment extends FileCreationFragment {
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
         assert args != null;
-        path = args.getParcelable(ARG_PATH);
+        path = Paths.get(args.getString(ARG_PATH));
     }
 
     @Override
@@ -74,10 +77,12 @@ public final class RenameFragment extends FileCreationFragment {
     protected void restartChecker() {
 
         assert path != null;
-        String oldName = path.getName().or("");
+        String oldName = Optional.ofNullable(path.getFileName())
+            .map(Path::toString)
+            .orElse("");
         String newName = getFilename();
         if (!oldName.equals(newName) &&
-                oldName.equalsIgnoreCase(newName)) {
+            oldName.equalsIgnoreCase(newName)) {
             getOkButton().setEnabled(true);
             return;
         }
@@ -95,11 +100,12 @@ public final class RenameFragment extends FileCreationFragment {
     private void highlight() {
         if (getFilename().isEmpty()) {
             highlight = new Highlight(this)
-                    .executeOnExecutor(THREAD_POOL_EXECUTOR, path());
+                .executeOnExecutor(THREAD_POOL_EXECUTOR, path());
         }
     }
 
-    private static final class Highlight extends AsyncTask<Path, Void, Pair<Path, Stat>> {
+    private static final class Highlight
+        extends AsyncTask<Path, Void, Pair<Path, BasicFileAttributes>> {
 
         private final WeakReference<RenameFragment> fragmentRef;
 
@@ -109,17 +115,26 @@ public final class RenameFragment extends FileCreationFragment {
 
         @Nullable
         @Override
-        protected Pair<Path, Stat> doInBackground(Path... params) {
+        protected Pair<Path, BasicFileAttributes> doInBackground(Path... params) {
             Path path = params[0];
             try {
-                return Pair.create(path, path.stat(NOFOLLOW));
+                return Pair.create(
+                    path,
+                    readAttributes(
+                        path,
+                        BasicFileAttributes.class,
+                        NOFOLLOW_LINKS
+                    )
+                );
             } catch (IOException e) {
                 return null;
             }
         }
 
         @Override
-        protected void onPostExecute(@Nullable Pair<Path, Stat> pair) {
+        protected void onPostExecute(
+            @Nullable Pair<Path, BasicFileAttributes> pair
+        ) {
             super.onPostExecute(pair);
             if (isCancelled()) {
                 return;
@@ -130,16 +145,23 @@ public final class RenameFragment extends FileCreationFragment {
             }
             if (pair != null) {
                 Path path = pair.first;
-                Stat stat = pair.second;
+                BasicFileAttributes attrs = pair.second;
                 EditText field = fragment.getFilenameField();
                 if (!fragment.getFilename().isEmpty()) {
                     return;
                 }
-                field.setText(path.getName().or(""));
-                if (stat.isDirectory()) {
+                field.setText(Optional.ofNullable(path.getFileName())
+                    .map(Path::toString)
+                    .orElse(""));
+                if (attrs.isDirectory()) {
                     field.selectAll();
                 } else {
-                    field.setSelection(0, path.getBaseName().or("").length());
+                    field.setSelection(
+                        0,
+                        Optional.ofNullable(getBaseName(path))
+                            .orElse("")
+                            .length()
+                    );
                 }
             }
         }
@@ -164,8 +186,12 @@ public final class RenameFragment extends FileCreationFragment {
     }
 
     private void rename() {
-        Path dst = parent().concat(getFilename());
-        new Rename(toaster, path(), dst).executeOnExecutor(THREAD_POOL_EXECUTOR);
+        Path dst = Paths.get(parent().toString(), getFilename());
+        new Rename(
+            toaster,
+            path(),
+            dst
+        ).executeOnExecutor(THREAD_POOL_EXECUTOR);
 
         BaseActivity activity = (BaseActivity) getActivity();
         assert activity != null;
@@ -175,7 +201,8 @@ public final class RenameFragment extends FileCreationFragment {
         }
     }
 
-    private static final class Rename extends AsyncTask<Path, Void, IOException> {
+    private static final class Rename
+        extends AsyncTask<Path, Void, IOException> {
 
         private final Consumer<String> toaster;
         private final Path src;
@@ -191,7 +218,7 @@ public final class RenameFragment extends FileCreationFragment {
         @Override
         protected IOException doInBackground(Path... params) {
             try {
-                src.move(dst);
+                move(src, dst);
                 return null;
             } catch (IOException e) {
                 return e;

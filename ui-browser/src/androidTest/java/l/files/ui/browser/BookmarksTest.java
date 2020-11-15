@@ -1,17 +1,17 @@
 package l.files.ui.browser;
 
-import androidx.test.runner.AndroidJUnit4;
-import l.files.fs.Path;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
-@RunWith(AndroidJUnit4.class)
+import java.nio.file.Path;
+
+import static java.nio.file.Files.createDirectory;
+
 public final class BookmarksTest extends BaseFilesActivityTest {
 
     @Test
     public void clears_selection_on_finish_of_action_mode() throws Exception {
 
-        Path a = dir().concat("a").createDirectory();
+        Path a = createDirectory(dir().resolve("a"));
         screen()
             .clickInto(a)
             .bookmark()
@@ -33,8 +33,8 @@ public final class BookmarksTest extends BaseFilesActivityTest {
     @Test
     public void click_on_bookmark_opens_directory() throws Exception {
 
-        Path a = dir().concat("a").createDirectory();
-        Path b = dir().concat("b").createDirectory();
+        Path a = createDirectory(dir().resolve("a"));
+        Path b = createDirectory(dir().resolve("b"));
         screen()
             .clickInto(a)
             .assertCurrentDirectory(a)
@@ -56,9 +56,9 @@ public final class BookmarksTest extends BaseFilesActivityTest {
     @Test
     public void sidebar_displays_up_to_date_bookmarks() throws Exception {
 
-        Path a = dir().concat("a").createDirectory();
-        Path b = dir().concat("b").createDirectory();
-        Path c = dir().concat("c").createDirectory();
+        Path a = createDirectory(dir().resolve("a"));
+        Path b = createDirectory(dir().resolve("b"));
+        Path c = createDirectory(dir().resolve("c"));
 
         screen()
 

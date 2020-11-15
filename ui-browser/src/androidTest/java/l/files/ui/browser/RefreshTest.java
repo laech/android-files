@@ -1,29 +1,30 @@
 package l.files.ui.browser;
 
-import androidx.test.runner.AndroidJUnit4;
-import l.files.fs.Path;
-import l.files.fs.Path.Consumer;
 import l.files.testing.fs.Paths;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.time.Instant;
 import java.util.Random;
+import java.util.stream.Stream;
 
 import static java.lang.System.currentTimeMillis;
 import static java.lang.System.nanoTime;
+import static java.nio.file.Files.*;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.util.Collections.emptySet;
+import static java.util.Collections.singleton;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.ui.browser.FilesLoader.BATCH_UPDATE_MILLIS;
 import static l.files.ui.browser.sort.FileSort.MODIFIED;
 import static org.junit.Assert.assertFalse;
 
-@RunWith(AndroidJUnit4.class)
 public final class RefreshTest extends BaseFilesActivityTest {
 
     @Test
@@ -34,7 +35,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
         setActivityIntent(newIntent(dir(), watchLimit));
 
         for (int i = 0; i < watchLimit + 5; i++) {
-            dir().concat(String.valueOf(i)).createDirectory();
+            createDirectory(dir().resolve(String.valueOf(i)));
         }
 
         screen()
@@ -49,14 +50,17 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
     private void testRefreshInManualMode(Path dir) throws IOException {
 
-        Paths.listDirectories(dir, (Consumer) childDir -> {
-            // Inotify don't notify child directory last modified time,
-            // unless we explicitly monitor the child dir, but we aren't
-            // doing that because we ran out of watches, so this is a
-            // good operation for testing the manual refresh
-            childDir.concat("x").createFile();
-            return false;
-        });
+        try (Stream<Path> stream = list(dir)) {
+            stream.filter(Files::isDirectory)
+                .findFirst()
+                .ifPresent(childDir -> {
+                    try {
+                        createFile(childDir.resolve("x"));
+                    } catch (IOException e) {
+                        throw new UncheckedIOException(e);
+                    }
+                });
+        }
 
         boolean updated = false;
         try {
@@ -76,16 +80,22 @@ public final class RefreshTest extends BaseFilesActivityTest {
     private void testFileCreationDeletionWillStillBeNotifiedInManualMode(Path dir)
         throws IOException {
 
-        dir.concat("file-" + nanoTime()).createFile();
-        dir.concat("dir-" + nanoTime()).createDirectory();
-        dir.concat("before-move-" + nanoTime())
-            .createFile()
-            .move(dir.concat("after-move-" + nanoTime()));
+        createFile(dir.resolve("file-" + nanoTime()));
+        createDirectory(dir.resolve("dir-" + nanoTime()));
+        move(
+            createFile(dir.resolve("before-move-" + nanoTime())),
+            dir.resolve("after-move-" + nanoTime())
+        );
 
-        dir.list((Consumer) file -> {
-            Paths.deleteRecursive(file);
-            return false;
-        });
+        try (Stream<Path> stream = list(dir)) {
+            stream.findFirst().ifPresent(file -> {
+                try {
+                    Paths.deleteRecursive(l.files.fs.Path.of(file));
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            });
+        }
 
         screen().assertListMatchesFileSystem(dir);
     }
@@ -95,18 +105,16 @@ public final class RefreshTest extends BaseFilesActivityTest {
         throws Exception {
 
         for (int i = 0; i < 10; i++) {
-            dir().concat(String.valueOf(i)).createDirectory();
+            createDirectory(dir().resolve(String.valueOf(i)));
         }
 
         Thread thread = new Thread(() -> {
             long start = currentTimeMillis();
             while (currentTimeMillis() - start < 5000) {
                 try {
-
                     deleteFiles(2);
-                    randomFile(dir()).createDirectory();
-                    randomFile(dir()).createFile();
-
+                    createDirectory(randomFile(dir()));
+                    createFile(randomFile(dir()));
                 } catch (IOException ignore) {
                 }
             }
@@ -119,28 +127,25 @@ public final class RefreshTest extends BaseFilesActivityTest {
     }
 
     private void deleteFiles(int n) throws IOException {
-        dir().list(new Consumer() {
-
-            int count = 0;
-
-            @Override
-            public boolean accept(Path file) throws IOException {
-                Paths.deleteRecursive(file);
-                count++;
-                return count < n;
-            }
-
-        });
+        try (Stream<Path> stream = list(dir())) {
+            stream.limit(n).forEach(file -> {
+                try {
+                    Paths.deleteRecursive(l.files.fs.Path.of(file));
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            });
+        }
     }
 
     private Path randomFile(Path dir) {
-        return dir.concat(String.valueOf(Math.random()));
+        return dir.resolve(String.valueOf(Math.random()));
     }
 
     @Test
     public void auto_show_correct_information_on_large_change_events()
         throws Exception {
-        dir().concat("a").createFile();
+        createFile(dir().resolve("a"));
         screen().assertListMatchesFileSystem(dir());
 
         long end = currentTimeMillis() + SECONDS.toMillis(5);
@@ -159,60 +164,72 @@ public final class RefreshTest extends BaseFilesActivityTest {
     private void updateAttributes() throws IOException {
 
         Random r = new Random();
-        dir().list((Consumer) child -> {
-            child.setLastModifiedTime(FileTime.from(Instant.ofEpochSecond(
-                r.nextInt((int) (currentTimeMillis() / 1000)),
-                r.nextInt(999999)
-            )));
-            return true;
-        });
+        try (Stream<Path> stream = list(dir())) {
+            stream.forEach(child -> {
+                try {
+                    setLastModifiedTime(
+                        child,
+                        FileTime.from(Instant.ofEpochSecond(
+                            r.nextInt((int) (currentTimeMillis() / 1000)),
+                            r.nextInt(999999)
+                        ))
+                    );
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            });
+        }
     }
 
     private void updateDirectory(String name) throws IOException {
-        Path dir = dir().concat(name);
-        if (dir.exists(NOFOLLOW_LINKS)) {
-            dir.delete();
+        Path dir = dir().resolve(name);
+        if (exists(dir, NOFOLLOW_LINKS)) {
+            delete(dir);
         } else {
-            dir.createDirectory();
+            createDirectory(dir);
         }
     }
 
     private void updatePermissions(String name) throws IOException {
-        Path res = dir().concat(name);
-        Paths.createFiles(res);
-        if (res.isReadable()) {
-            res.setPermissions(PosixFilePermissions.fromString("r--r--r--"));
+        Path res = dir().resolve(name);
+        Paths.createFiles(l.files.fs.Path.of(res));
+        if (isReadable(res)) {
+            setPosixFilePermissions(
+                res,
+                PosixFilePermissions.fromString("r--r--r--")
+            );
         } else {
-            res.setPermissions(emptySet());
+            setPosixFilePermissions(res, emptySet());
         }
     }
 
     private void updateFileContent(String name) throws IOException {
-        Path file = dir().concat(name);
-        Paths.createFiles(file);
-        Paths.writeUtf8(file, String.valueOf(new Random().nextLong()));
+        Path file = dir().resolve(name);
+        Paths.createFiles(l.files.fs.Path.of(file));
+        write(file, singleton(String.valueOf(new Random().nextLong())));
     }
 
     private void updateDirectoryChild(String name) throws IOException {
-        Path dir = dir().concat(name).createDirectories();
-        Path child = dir.concat("child");
-        if (child.exists(NOFOLLOW_LINKS)) {
-            child.delete();
+        Path dir = createDirectories(dir().resolve(name));
+        Path child = dir.resolve("child");
+        if (exists(child, NOFOLLOW_LINKS)) {
+            delete(child);
         } else {
-            child.createFile();
+            createFile(child);
         }
     }
 
     private void updateLink(String name, String target1, String target2)
         throws IOException {
-        Path link = dir().concat(name);
-        if (link.exists(NOFOLLOW_LINKS)) {
-            link.delete();
+        Path link = dir().resolve(name);
+        if (exists(link, NOFOLLOW_LINKS)) {
+            delete(link);
         }
-        link.createSymbolicLink(
+        createSymbolicLink(
+            link,
             new Random().nextInt() % 2 == 0
-                ? dir().concat(target1)
-                : dir().concat(target2)
+                ? dir().resolve(target1)
+                : dir().resolve(target2)
         );
     }
 }

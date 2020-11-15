@@ -3,12 +3,13 @@ package l.files.ui.browser;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
-import l.files.fs.Path;
 import l.files.fs.media.MediaTypes;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.nio.file.Path;
 
 import static android.content.Intent.ACTION_VIEW;
 import static android.widget.Toast.LENGTH_SHORT;
@@ -35,7 +36,7 @@ final class OpenFile extends AsyncTask<Void, Void, Object> {
             return null;
         }
         try {
-            return MediaTypes.detect(context, file.toJavaPath());
+            return MediaTypes.detect(context, file);
         } catch (IOException e) {
             return e;
         }
@@ -70,7 +71,7 @@ final class OpenFile extends AsyncTask<Void, Void, Object> {
 
         try {
             Intent intent = new Intent(ACTION_VIEW);
-            intent.setDataAndType(file.toUri(), media);
+            intent.setDataAndType(Uri.fromFile(file.toFile()), media);
             context.startActivity(intent);
             return true;
         } catch (ActivityNotFoundException e) {
