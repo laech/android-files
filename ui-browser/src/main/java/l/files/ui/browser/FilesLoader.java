@@ -7,7 +7,6 @@ import android.os.OperationCanceledException;
 import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.loader.content.AsyncTaskLoader;
-import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.fs.event.BatchObserver;
 import l.files.fs.event.Event;
@@ -19,22 +18,24 @@ import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static android.os.Looper.getMainLooper;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.setThreadPriority;
 import static java.lang.Thread.currentThread;
+import static java.nio.file.Files.readSymbolicLink;
 import static java.util.Collections.*;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -207,7 +208,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     private List<Path> observe() throws IOException, InterruptedException {
         List<Path> childFileNames = new ArrayList<>();
-        observation = root.observe(
+        observation = l.files.fs.Path.of(root).observe(
             FOLLOW,
             listener,
             collectInto(childFileNames),
@@ -222,8 +223,8 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     private List<Path> visit() throws IOException {
         List<Path> children = new ArrayList<>();
-        root.list((Path.Consumer) child -> {
-            Path name = child.getFileName();
+        l.files.fs.Path.of(root).list((l.files.fs.Path.Consumer) child -> {
+            Path name = child.toJavaPath().getFileName();
             assert name != null;
             checkedAdd(children, name);
             return true;
@@ -244,12 +245,11 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         childFileNames.add(childFileName);
     }
 
-    private Path.Consumer collectInto(List<Path> childFileName) {
+    private Consumer<Path> collectInto(List<Path> childFileName) {
         return child -> {
             Path name = child.getFileName();
             assert name != null;
             checkedAdd(childFileName, name);
-            return true;
         };
     }
 
@@ -335,7 +335,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
      */
 
     private boolean update(Path childFileName, @Nullable Event event) {
-        Path path = root.concat(childFileName);
+        Path path = root.resolve(childFileName);
 
         /*
          * This if statement may seem unnecessary given the try-catch below
@@ -365,19 +365,11 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
         try {
 
-            Stat stat = path.stat(NOFOLLOW);
+            Stat stat = l.files.fs.Path.of(path).stat(NOFOLLOW);
             Stat targetStat = readTargetStatus(path, stat);
             Path target = readTarget(path, stat);
             FileInfo newStat =
-                FileInfo.create(
-                    path.toJavaPath(),
-                    stat,
-                    Optional.ofNullable(target)
-                        .map(Path::toJavaPath)
-                        .orElse(null),
-                    targetStat,
-                    collator
-                );
+                FileInfo.create(path, stat, target, targetStat, collator);
             FileInfo oldStat = data.put(path.getFileName(), newStat);
             return !newStat.equals(oldStat);
 
@@ -387,7 +379,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         } catch (IOException e) {
             data.put(
                 path.getFileName(),
-                FileInfo.create(path.toJavaPath(), null, null, null, collator)
+                FileInfo.create(path, null, null, null, collator)
             );
             return true;
         }
@@ -396,7 +388,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     private Path readTarget(Path path, Stat stat) throws IOException {
         if (stat.isSymbolicLink()) {
             try {
-                return path.readSymbolicLink();
+                return readSymbolicLink(path);
             } catch (FileNotFoundException | NoSuchFileException e) {
                 throw e;
             } catch (IOException ignored) {
@@ -408,7 +400,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     private Stat readTargetStatus(Path file, Stat stat) {
         if (stat.isSymbolicLink()) {
             try {
-                return file.stat(FOLLOW);
+                return l.files.fs.Path.of(file).stat(FOLLOW);
             } catch (IOException ignored) {
             }
         }

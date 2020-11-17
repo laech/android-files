@@ -43,7 +43,6 @@ import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.AdditionalMatchers.aryEq;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 public final class ObservableTest extends PathBaseTest {
@@ -193,8 +192,9 @@ public final class ObservableTest extends PathBaseTest {
             createRandomChildDir(dir1());
         }
 
-        Consumer consumer = mock(Consumer.class);
-        given(consumer.accept(any(Path.class))).willReturn(true);
+        @SuppressWarnings("unchecked")
+        java.util.function.Consumer<java.nio.file.Path> consumer =
+            mock(java.util.function.Consumer.class);
         Observer observer = mock(Observer.class);
 
         try (Tracker tracker = registerMockTracker();
@@ -202,7 +202,10 @@ public final class ObservableTest extends PathBaseTest {
             observation.start(FOLLOW, consumer, limit);
             verify(observer, atLeastOnce()).onIncompleteObservation(any(
                 IOException.class));
-            verify(consumer, times(count)).accept(notNull(Path.class));
+            verify(
+                consumer,
+                times(count)
+            ).accept(notNull(java.nio.file.Path.class));
             verifyAllWatchesRemovedAndRootWatchAddedOnMaxUserWatchesReached(
                 tracker,
                 limit
@@ -220,8 +223,9 @@ public final class ObservableTest extends PathBaseTest {
             createRandomChildDir(dir1());
         }
 
-        Consumer consumer = mock(Consumer.class);
-        given(consumer.accept(any(Path.class))).willReturn(true);
+        @SuppressWarnings("unchecked")
+        java.util.function.Consumer<java.nio.file.Path> consumer =
+            mock(java.util.function.Consumer.class);
         Observer observer = mock(Observer.class);
 
         try (Tracker tracker = registerMockTracker();
@@ -240,7 +244,10 @@ public final class ObservableTest extends PathBaseTest {
                 observer,
                 timeout(10000).atLeastOnce()
             ).onIncompleteObservation(any(IOException.class));
-            verify(consumer, times(count)).accept(notNull(Path.class));
+            verify(
+                consumer,
+                times(count)
+            ).accept(notNull(java.nio.file.Path.class));
             verifyAllWatchesRemovedAndRootWatchAddedOnMaxUserWatchesReached(
                 tracker,
                 limit
@@ -908,10 +915,12 @@ public final class ObservableTest extends PathBaseTest {
         }
 
         @Override
-        public void onEvent(Event event, Path childFileName) {
+        public void onEvent(Event event, java.nio.file.Path childFileName) {
             observer.onEvent(event, childFileName);
             Path target =
-                childFileName == null ? root : root.concat(childFileName);
+                childFileName == null
+                    ? root
+                    : root.concat(childFileName.toString());
             actual.add(WatchEvent.create(event, target));
             if (expected.equals(actual)) {
                 success.countDown();

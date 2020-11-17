@@ -1,28 +1,28 @@
 package l.files.fs;
 
-import l.files.fs.Path.Consumer;
 import l.files.fs.event.BatchObserver;
 import l.files.fs.event.Event;
 import l.files.fs.event.Observation;
 import l.files.testing.fs.PathBaseTest;
 import org.junit.Test;
 
+import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.util.HashMap;
+import java.util.function.Consumer;
 
+import static java.nio.file.Files.*;
 import static java.util.Collections.emptyMap;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.event.Event.*;
 import static org.junit.Assert.assertFalse;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 public final class LocalFileBatchObserveTest extends PathBaseTest {
 
     private BatchObserver observer;
-    private Consumer consumer;
+    private Consumer<Path> consumer;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -30,7 +30,6 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
         super.setUp();
         observer = mock(BatchObserver.class);
         consumer = mock(Consumer.class);
-        given(consumer.accept(any(Path.class))).willReturn(true);
     }
 
     @Test
@@ -61,10 +60,12 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
     @Test
     public void notifies_children_change() throws Exception {
 
-        Path b = dir1().concat("b").createDirectory();
-        Path a = dir1().concat("a").createFile();
-        Path c = dir1().concat("c").createDirectory();
-        Path d = dir1().concat("d");
+        Path b =
+            createDirectory(dir1().toJavaPath().resolve("b"));
+        Path a = createFile(dir1().toJavaPath().resolve("a"));
+        Path c =
+            createDirectory(dir1().toJavaPath().resolve("c"));
+        Path d = dir1().toJavaPath().resolve("d");
 
         dir1().concat("e").createFile();
         dir1().concat("f").createDirectory();
@@ -82,10 +83,10 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
 
             assertFalse(observation.isClosed());
 
-            a.setLastModifiedTime(FileTime.fromMillis(1));
-            b.setLastModifiedTime(FileTime.fromMillis(2));
-            c.delete();
-            d.createFile();
+            setLastModifiedTime(a, FileTime.fromMillis(1));
+            setLastModifiedTime(b, FileTime.fromMillis(2));
+            delete(c);
+            createFile(d);
 
             verify(observer, timeout(10000)).onLatestEvents(
                 false,
@@ -105,7 +106,8 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
     @Test
     public void notifies_latest_event() throws Exception {
 
-        Path file = dir1().concat("file").createFile();
+        Path file =
+            createFile(dir1().toJavaPath().resolve("file"));
         try (Observation ignored = dir1().observe(
             NOFOLLOW,
             observer,
@@ -117,9 +119,9 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
             -1
         )) {
 
-            file.setLastModifiedTime(FileTime.fromMillis(1));
-            file.delete();
-            file.createFile();
+            setLastModifiedTime(file, FileTime.fromMillis(1));
+            delete(file);
+            createFile(file);
 
             verify(observer, timeout(10000)).onLatestEvents(
                 false,
@@ -136,7 +138,7 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
     @Test
     public void notifies_self_and_children_change() throws Exception {
 
-        Path child = dir1().concat("a").createFile();
+        Path child = createFile(dir1().toJavaPath().resolve("a"));
         try (Observation ignored = dir1().observe(
             NOFOLLOW,
             observer,
@@ -150,8 +152,8 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
 
             verify(consumer).accept(child);
 
-            dir1().setLastModifiedTime(FileTime.fromMillis(1));
-            child.setLastModifiedTime(FileTime.fromMillis(2));
+            setLastModifiedTime(dir1().toJavaPath(), FileTime.fromMillis(1));
+            setLastModifiedTime(child, FileTime.fromMillis(2));
 
             verify(observer, timeout(10000)).onLatestEvents(
                 true,
@@ -160,7 +162,7 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
                 }}
             );
 
-            child.setLastModifiedTime(FileTime.fromMillis(3));
+            setLastModifiedTime(child, FileTime.fromMillis(3));
             verify(observer, timeout(10000)).onLatestEvents(
                 false,
                 new HashMap<Path, Event>() {{

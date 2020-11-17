@@ -372,7 +372,7 @@ public final class FilesFragment
         Activity context = getActivity();
         return new FilesLoader(
             context,
-            l.files.fs.Path.of(directory),
+            directory,
             () -> getSort(context),
             () -> getShowHiddenFiles(context),
             watchLimit

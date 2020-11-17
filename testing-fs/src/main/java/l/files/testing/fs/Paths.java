@@ -34,7 +34,7 @@ public final class Paths {
         Observer observer
     ) throws IOException, InterruptedException {
 
-        return path.observe(option, observer, entry -> true, null, -1);
+        return path.observe(option, observer, __ -> {}, null, -1);
     }
 
     public static void listDirectories(

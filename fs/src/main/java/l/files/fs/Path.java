@@ -303,7 +303,8 @@ public class Path implements Parcelable, Comparable<Path> {
         return new Path(Files.readSymbolicLink(delegate));
     }
 
-    public void move(Path destination, CopyOption... options) throws IOException {
+    public void move(Path destination, CopyOption... options)
+        throws IOException {
         Files.move(delegate, destination.delegate, options);
     }
 
@@ -348,7 +349,7 @@ public class Path implements Parcelable, Comparable<Path> {
     public Observation observe(
         LinkOption option,
         Observer observer,
-        Consumer childrenConsumer,
+        java.util.function.Consumer<java.nio.file.Path> childrenConsumer,
         @Nullable String logTag,
         int watchLimit
     ) throws IOException, InterruptedException {
@@ -361,7 +362,7 @@ public class Path implements Parcelable, Comparable<Path> {
     public Observation observe(
         LinkOption option,
         BatchObserver batchObserver,
-        Path.Consumer childrenConsumer,
+        java.util.function.Consumer<java.nio.file.Path> childrenConsumer,
         long batchInterval,
         TimeUnit batchInternalUnit,
         boolean quickNotifyFirstEvent,
@@ -376,7 +377,7 @@ public class Path implements Parcelable, Comparable<Path> {
             quickNotifyFirstEvent,
             tag,
             watchLimit
-        ).start(this, option, childrenConsumer);
+        ).start(this.toJavaPath(), option, childrenConsumer);
     }
 
     /**

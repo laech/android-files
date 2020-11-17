@@ -1,9 +1,9 @@
 package l.files.fs.event;
 
 import androidx.annotation.Nullable;
-import l.files.fs.Path;
 
 import java.io.IOException;
+import java.nio.file.Path;
 
 public interface Observer {
 

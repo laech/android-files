@@ -2,16 +2,16 @@ package l.files.fs.event;
 
 import androidx.annotation.Nullable;
 import l.files.fs.LinkOption;
-import l.files.fs.Path;
-import l.files.fs.Path.Consumer;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 import static java.lang.System.nanoTime;
 import static java.util.Collections.emptyMap;
@@ -75,7 +75,7 @@ public final class BatchObserverNotifier
     public Observation start(
         Path path,
         LinkOption option,
-        Consumer childrenConsumer
+        Consumer<Path> childrenConsumer
     ) throws IOException, InterruptedException {
 
         if (!started.compareAndSet(false, true)) {
@@ -85,7 +85,8 @@ public final class BatchObserverNotifier
         try {
 
             Observation ob =
-                path.observe(option, this, childrenConsumer, tag, watchLimit);
+                l.files.fs.Path.of(path)
+                    .observe(option, this, childrenConsumer, tag, watchLimit);
             observation = ob;
             if (!ob.isClosed()) {
                 checker = service.scheduleWithFixedDelay(

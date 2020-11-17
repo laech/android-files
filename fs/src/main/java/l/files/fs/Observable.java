@@ -3,7 +3,6 @@ package l.files.fs;
 import android.os.Handler;
 import android.util.Log;
 import androidx.annotation.Nullable;
-import l.files.fs.Path.Consumer;
 import l.files.fs.event.Event;
 import l.files.fs.event.Observation;
 import l.files.fs.event.Observer;
@@ -20,6 +19,7 @@ import java.util.List;
 import java.util.OptionalInt;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 import static android.os.Looper.getMainLooper;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
@@ -191,7 +191,7 @@ final class Observable extends Native
 
     void start(
         LinkOption option,
-        Consumer childrenConsumer,
+        java.util.function.Consumer<java.nio.file.Path> childrenConsumer,
         int watchLimit
     )
         throws IOException, InterruptedException {
@@ -268,7 +268,7 @@ final class Observable extends Native
     }
 
     private void traverseChildren(
-        Consumer childrenConsumer
+        Consumer<java.nio.file.Path> childrenConsumer
     ) throws IOException, InterruptedException {
 
         OptionalInt fd = this.fd;
@@ -286,10 +286,7 @@ final class Observable extends Native
 
                     byte[] name = Arrays.copyOf(entry.d_name, entry.d_name_len);
                     Path child = root.concat(name);
-                    if (!childrenConsumer.accept(child)) {
-                        currentThread().interrupt();
-                        break;
-                    }
+                    childrenConsumer.accept(child.toJavaPath());
 
                     if (limitReached || entry.d_type != Dirent.DT_DIR ||
                         released.get()) {
@@ -544,7 +541,10 @@ final class Observable extends Native
     private void notifyEventOrClose(Event kind, @Nullable Path childFileName) {
         Observer observer = observerRef.get();
         if (observer != null) {
-            observer.onEvent(kind, childFileName);
+            observer.onEvent(
+                kind,
+                childFileName != null ? childFileName.toJavaPath() : null
+            );
         } else {
             try {
                 doClose(new IOException("observer is gone"));
