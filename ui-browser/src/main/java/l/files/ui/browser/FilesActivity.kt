@@ -19,8 +19,6 @@ import androidx.fragment.app.FragmentManager.OnBackStackChangedListener
 import androidx.fragment.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN
 import kotlinx.android.synthetic.main.files_activity.*
 import l.files.base.Consumer
-import l.files.fs.LinkOption
-import l.files.fs.Stat
 import l.files.ui.base.app.BaseActivity
 import l.files.ui.base.app.OptionsMenus
 import l.files.ui.base.fs.IOExceptions
@@ -35,6 +33,7 @@ import java.lang.ref.WeakReference
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.nio.file.attribute.BasicFileAttributes
 
 class FilesActivity : BaseActivity(),
   OnBackStackChangedListener,
@@ -109,7 +108,7 @@ class FilesActivity : BaseActivity(),
   ) {
     val path = parent.adapter.getItem(position) as Path
     if (path != fragment.directory()) {
-      onOpen(OpenFileEvent(path, null))
+      onOpen(OpenFileEvent(path))
     }
   }
 
@@ -189,15 +188,7 @@ class FilesActivity : BaseActivity(),
     if (drawerView.isDrawerOpen(START)) {
       drawerView.closeDrawers()
     }
-    show(event.path, event.stat)
-  }
-
-  private fun show(path: Path, stat: Stat?) {
-    if (stat != null && !stat.isSymbolicLink) {
-      doShow(path, stat)
-      return
-    }
-    ShowTask(path, this).execute()
+    ShowTask(event.path, this).execute()
   }
 
   private class ShowTask(
@@ -209,7 +200,7 @@ class FilesActivity : BaseActivity(),
       WeakReference(activity)
 
     override fun doInBackground(vararg params: Void): Any = try {
-      l.files.fs.Path.of(path).stat(LinkOption.FOLLOW)
+      Files.readAttributes(path, BasicFileAttributes::class.java)
     } catch (e: IOException) {
       e
     }
@@ -218,7 +209,7 @@ class FilesActivity : BaseActivity(),
       super.onPostExecute(result)
       val activity = activityRef.get()
       if (activity != null && !activity.isFinishing) {
-        if (result is Stat) {
+        if (result is BasicFileAttributes) {
           activity.doShow(path, result)
         } else {
           val msg = IOExceptions.message(result as IOException)
@@ -228,10 +219,10 @@ class FilesActivity : BaseActivity(),
     }
   }
 
-  private fun doShow(path: Path, stat: Stat) {
+  private fun doShow(path: Path, attrs: BasicFileAttributes) {
     if (!isReadable(path)) { // TODO Check in background
       showPermissionDenied()
-    } else if (stat.isDirectory) {
+    } else if (attrs.isDirectory) {
       showDirectory(path)
     } else {
       showFile(path)

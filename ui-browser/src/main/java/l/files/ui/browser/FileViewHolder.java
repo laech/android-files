@@ -116,10 +116,7 @@ public final class FileViewHolder
 
     @Override
     protected void onClick(View v, FileInfo file) {
-        topic.postOnMainThread(new OpenFileEvent(
-            file.selfPath(),
-            file.linkTargetOrSelfStat()
-        ));
+        topic.postOnMainThread(new OpenFileEvent(file.selfPath()));
     }
 
     @Override

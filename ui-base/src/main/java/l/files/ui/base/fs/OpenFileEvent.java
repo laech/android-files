@@ -1,7 +1,5 @@
 package l.files.ui.base.fs;
 
-import androidx.annotation.Nullable;
-import l.files.fs.Stat;
 import l.files.ui.base.messaging.MainThreadTopic;
 
 import java.nio.file.Path;
@@ -15,11 +13,7 @@ public final class OpenFileEvent {
 
     public final Path path;
 
-    @Nullable
-    public final Stat stat;
-
-    public OpenFileEvent(Path path, @Nullable Stat stat) {
+    public OpenFileEvent(Path path) {
         this.path = requireNonNull(path);
-        this.stat = stat;
     }
 }

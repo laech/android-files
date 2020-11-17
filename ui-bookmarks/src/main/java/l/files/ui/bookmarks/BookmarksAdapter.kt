@@ -81,7 +81,7 @@ internal class BookmarksAdapter(
     }
 
     override fun onClick(v: View, path: Path) {
-      topic.postOnMainThread(OpenFileEvent(path, null))
+      topic.postOnMainThread(OpenFileEvent(path))
     }
   }
 }
