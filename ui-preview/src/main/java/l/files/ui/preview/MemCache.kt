@@ -1,24 +1,25 @@
 package l.files.ui.preview
 
 import androidx.collection.LruCache
-import l.files.fs.Stat
 import l.files.ui.base.graphics.Rect
 import java.nio.file.Path
+import java.nio.file.attribute.BasicFileAttributes
+import java.time.Instant
 
 internal abstract class MemCache<K, V> : Cache<V> {
 
-  private fun lastModifiedTime(stat: Stat): Long =
-    stat.lastModifiedTime().toEpochMilli()
+  private fun lastModifiedTime(attrs: BasicFileAttributes): Long =
+    attrs.lastModifiedTime().toMillis()
 
   override operator fun get(
     path: Path,
-    stat: Stat,
+    time: Instant,
     constraint: Rect,
     matchTime: Boolean
   ): V? {
     val key = getKey(path, constraint)
     val value = delegate[key] ?: return null
-    return if (matchTime && lastModifiedTime(stat) != value.time) {
+    return if (matchTime && time != value.time) {
       null
     } else {
       value.value
@@ -29,12 +30,12 @@ internal abstract class MemCache<K, V> : Cache<V> {
 
   override fun put(
     path: Path,
-    stat: Stat,
+    time: Instant,
     constraint: Rect,
     value: V
   ): Snapshot<V>? = delegate.put(
     getKey(path, constraint),
-    Snapshot(value, lastModifiedTime(stat))
+    Snapshot(value, time)
   )
 
   fun remove(path: Path, constraint: Rect): Snapshot<V>? =

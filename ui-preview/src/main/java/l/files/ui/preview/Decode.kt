@@ -6,7 +6,6 @@ import android.os.AsyncTask
 import android.os.Process
 import android.os.Process.setThreadPriority
 import android.util.Log
-import l.files.fs.Stat
 import l.files.fs.media.MediaTypes
 import l.files.thumbnail.Thumbnailer
 import l.files.ui.base.content.Contexts.isDebugBuild
@@ -14,13 +13,14 @@ import l.files.ui.base.graphics.Rect
 import l.files.ui.base.graphics.ScaledBitmap
 import java.io.IOException
 import java.nio.file.Path
+import java.time.Instant
 import java.util.Locale.ENGLISH
 import java.util.concurrent.*
 import java.util.concurrent.atomic.AtomicInteger
 
 class Decode internal constructor(
   private val path: Path,
-  private val stat: Stat,
+  private val time: Instant,
   private val constraint: Rect,
   private val callback: Preview.Callback,
   private val preview: Preview
@@ -85,16 +85,16 @@ class Decode internal constructor(
     }
     publishProgress(result)
     saveThumbnailToDiskTask = preview.putThumbnailToDiskAsync(
-      path, stat, constraint, result
+      path, time, constraint, result
     )
     publishBlurredIfNeeded(result.bitmap())
   }
 
   private fun decodeMediaType(context: Context): String {
-    var mediaType = preview.getMediaType(path, stat, constraint)
+    var mediaType = preview.getMediaType(path, time, constraint)
     if (mediaType == null) {
       mediaType = MediaTypes.detect(context, path)
-      preview.putMediaType(path, stat, constraint, mediaType)
+      preview.putMediaType(path, time, constraint, mediaType)
     }
     return mediaType
   }
@@ -108,7 +108,7 @@ class Decode internal constructor(
     }
 
   private fun checkNoPreviewCache(): Boolean {
-    val reason = preview.getNoPreviewReason(path, stat, constraint)
+    val reason = preview.getNoPreviewReason(path, time, constraint)
     return if (reason != null) {
       publishProgress(reason)
       true
@@ -118,7 +118,7 @@ class Decode internal constructor(
   }
 
   private fun checkThumbnailMemCache(): Boolean {
-    val thumbnail = preview.getThumbnail(path, stat, constraint, true)
+    val thumbnail = preview.getThumbnail(path, time, constraint, true)
     return if (thumbnail != null) {
       publishProgress(thumbnail)
       publishBlurredIfNeeded(thumbnail)
@@ -131,7 +131,7 @@ class Decode internal constructor(
   private fun checkThumbnailDiskCache(): Boolean {
     var thumbnail: ScaledBitmap? = null
     try {
-      thumbnail = preview.getThumbnailFromDisk(path, stat, constraint)
+      thumbnail = preview.getThumbnailFromDisk(path, time, constraint)
     } catch (e: IOException) {
       Log.w(javaClass.simpleName, "Failed to get disk thumbnail for $path", e)
     }
@@ -145,7 +145,7 @@ class Decode internal constructor(
   }
 
   private fun publishBlurredIfNeeded(bitmap: Bitmap) {
-    if (preview.getBlurredThumbnail(path, stat, constraint, true) == null) {
+    if (preview.getBlurredThumbnail(path, time, constraint, true) == null) {
       publishProgress(generateBlurredThumbnail(bitmap))
     }
   }
@@ -168,26 +168,26 @@ class Decode internal constructor(
   }
 
   private fun handleUpdate(value: Bitmap) {
-    preview.putThumbnail(path, stat, constraint, value)
-    preview.putPreviewable(path, stat, constraint, true)
-    callback.onPreviewAvailable(path, stat, value)
+    preview.putThumbnail(path, time, constraint, value)
+    preview.putPreviewable(path, time, constraint, true)
+    callback.onPreviewAvailable(path, time, value)
   }
 
   private fun handleUpdate(value: ScaledBitmap) {
-    preview.putThumbnail(path, stat, constraint, value.bitmap())
-    preview.putSize(path, stat, constraint, value.originalSize())
-    preview.putPreviewable(path, stat, constraint, true)
-    callback.onPreviewAvailable(path, stat, value.bitmap())
+    preview.putThumbnail(path, time, constraint, value.bitmap())
+    preview.putSize(path, time, constraint, value.originalSize())
+    preview.putPreviewable(path, time, constraint, true)
+    callback.onPreviewAvailable(path, time, value.bitmap())
   }
 
   private fun handleUpdate(value: BlurredThumbnail) {
-    preview.putBlurredThumbnail(path, stat, constraint, value.bitmap)
-    callback.onBlurredThumbnailAvailable(path, stat, value.bitmap)
+    preview.putBlurredThumbnail(path, time, constraint, value.bitmap)
+    callback.onBlurredThumbnailAvailable(path, time, value.bitmap)
   }
 
   private fun handleUpdate(value: NoPreview) {
-    preview.putPreviewable(path, stat, constraint, false)
-    callback.onPreviewFailed(path, stat, value.cause)
+    preview.putPreviewable(path, time, constraint, false)
+    callback.onPreviewFailed(path, time, value.cause)
   }
 
   fun executeOnPreferredExecutor(context: Context): Decode {

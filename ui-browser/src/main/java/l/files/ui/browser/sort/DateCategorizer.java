@@ -1,23 +1,15 @@
 package l.files.ui.browser.sort;
 
 import android.content.res.Resources;
+import l.files.ui.base.fs.FileInfo;
+import l.files.ui.browser.R;
 
+import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DateFormatSymbols;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-import l.files.fs.Stat;
-import l.files.ui.base.fs.FileInfo;
-import l.files.ui.browser.R;
-
-import static java.util.Calendar.DAY_OF_MONTH;
-import static java.util.Calendar.HOUR_OF_DAY;
-import static java.util.Calendar.JANUARY;
-import static java.util.Calendar.MILLISECOND;
-import static java.util.Calendar.MINUTE;
-import static java.util.Calendar.MONTH;
-import static java.util.Calendar.SECOND;
-import static java.util.Calendar.YEAR;
+import static java.util.Calendar.*;
 
 /**
  * Categories files by their last modified date.
@@ -56,10 +48,10 @@ final class DateCategorizer extends BaseCategorizer {
 
     @Override
     public int id(FileInfo file) {
-        Stat stat = file.selfStat();
-        if (stat == null) return R.string.__;
+        BasicFileAttributes attrs = file.selfAttrs();
+        if (attrs == null) return R.string.__;
 
-        long seconds = stat.lastModifiedEpochSecond();
+        long seconds = attrs.lastModifiedTime().toInstant().getEpochSecond();
         if (seconds >= startSecondOfTomorrow) return R.string.future;
         if (seconds >= startSecondOfToday) return R.string.today;
         if (seconds >= startSecondOfYesterday) return R.string.yesterday;

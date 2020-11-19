@@ -1,18 +1,19 @@
 package l.files.ui.browser.sort;
 
-import l.files.fs.Stat;
 import l.files.ui.base.fs.FileInfo;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
+import static java.nio.file.Files.readAttributes;
+import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.util.Collections.shuffle;
-import static l.files.fs.LinkOption.NOFOLLOW;
 import static org.junit.Assert.assertEquals;
 
 abstract class FileSortTest {
@@ -43,13 +44,17 @@ abstract class FileSortTest {
         Collator collator = Collator.getInstance(locale);
         List<FileInfo> expected = new ArrayList<>(files.length);
         for (Path file : files) {
-            Stat stat;
+            BasicFileAttributes attrs;
             try {
-                stat = l.files.fs.Path.of(file).stat(NOFOLLOW);
+                attrs = readAttributes(
+                    file,
+                    BasicFileAttributes.class,
+                    NOFOLLOW_LINKS
+                );
             } catch (IOException e) {
-                stat = null;
+                attrs = null;
             }
-            expected.add(FileInfo.create(file, stat, null, null, collator));
+            expected.add(FileInfo.create(file, attrs, null, null, collator));
         }
         return expected;
     }

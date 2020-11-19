@@ -6,15 +6,17 @@ import android.os.Bundle
 import android.text.format.DateUtils.*
 import android.view.View
 import kotlinx.android.synthetic.main.info_fragment.*
-import l.files.fs.Stat
 import l.files.ui.base.graphics.Rect
 import l.files.ui.preview.Preview
 import l.files.ui.preview.getPreview
 import java.nio.file.Path
+import java.nio.file.attribute.BasicFileAttributes
+import java.time.Instant
 
 class InfoFragment : InfoBaseFragment(), Preview.Callback {
 
-  private var stat: Stat? = null
+  private var time: Instant? = null
+  private var isDirectory: Boolean? = null
   private lateinit var path: Path
   private lateinit var constraint: Rect
 
@@ -30,7 +32,8 @@ class InfoFragment : InfoBaseFragment(), Preview.Callback {
     super.onViewCreated(view, savedInstanceState)
     constraint = calculateConstraint()
     path = readParentDirectory().resolve(readChildren().iterator().next())
-    stat = requireArguments().getParcelable(ARG_STAT)
+    time = requireArguments().getSerializable(ARG_TIME) as Instant
+    isDirectory = requireArguments().getSerializable(ARG_IS_DIR) as Boolean
   }
 
   override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -40,10 +43,10 @@ class InfoFragment : InfoBaseFragment(), Preview.Callback {
 
   private fun updateViews() {
     updateNameView(path)
-    if (stat != null) {
-      updateBackgroundView(path, stat!!)
-      updateThumbnailView(path, stat!!)
-      updateLastModifiedView(stat!!)
+    if (time != null) {
+      updateBackgroundView(path, time!!)
+      updateThumbnailView(path, time!!)
+      updateLastModifiedView(time!!)
     }
   }
 
@@ -54,14 +57,14 @@ class InfoFragment : InfoBaseFragment(), Preview.Callback {
   }
 
   override fun formatSize(size: Long, count: Int): String =
-    if (stat == null || stat!!.isDirectory) {
+    if (isDirectory == null || isDirectory!!) {
       super.formatSize(size, count)
     } else {
       formatSize(size)
     }
 
-  private fun updateLastModifiedView(stat: Stat) {
-    val millis = stat.lastModifiedTime().toEpochMilli()
+  private fun updateLastModifiedView(time: Instant) {
+    val millis = time.toEpochMilli()
     val flags = FORMAT_SHOW_DATE or FORMAT_SHOW_TIME
     val text = formatDateTime(activity, millis, flags)
     lastModifiedView.text = text
@@ -74,9 +77,9 @@ class InfoFragment : InfoBaseFragment(), Preview.Callback {
     return Rect.of(width, height)
   }
 
-  private fun updateBackgroundView(path: Path, stat: Stat) {
+  private fun updateBackgroundView(path: Path, time: Instant) {
     val preview = requireContext().getPreview()
-    val bg = preview.getBlurredThumbnail(path, stat, constraint, true)
+    val bg = preview.getBlurredThumbnail(path, time, constraint, true)
     bg?.let { updateBackgroundView(it) }
   }
 
@@ -86,19 +89,19 @@ class InfoFragment : InfoBaseFragment(), Preview.Callback {
     backgroundView.background = bg
   }
 
-  private fun updateThumbnailView(path: Path, stat: Stat) {
+  private fun updateThumbnailView(path: Path, time: Instant) {
     val context = requireContext()
     val preview = context.getPreview()
     val thumbnail =
-      preview.getThumbnail(path, stat, constraint, true)
+      preview.getThumbnail(path, time, constraint, true)
     if (thumbnail != null) {
       thumbnailView.setImageBitmap(thumbnail)
       return
     }
     val size =
-      preview.getSize(path, stat, constraint, false)
+      preview.getSize(path, time, constraint, false)
     size?.let { setImageViewMinSize(it) }
-    preview.get(path, stat, constraint, this, context)
+    preview.get(path, time, constraint, this, context)
   }
 
   private fun scaleSize(size: Rect): Rect = size.scaleDown(constraint)
@@ -109,7 +112,11 @@ class InfoFragment : InfoBaseFragment(), Preview.Callback {
     thumbnailView.minimumHeight = scaled.height()
   }
 
-  override fun onPreviewAvailable(path: Path, stat: Stat, thumbnail: Bitmap) {
+  override fun onPreviewAvailable(
+    path: Path,
+    time: Instant,
+    thumbnail: Bitmap
+  ) {
     showImageView(thumbnail)
   }
 
@@ -124,12 +131,12 @@ class InfoFragment : InfoBaseFragment(), Preview.Callback {
 
   override fun onBlurredThumbnailAvailable(
     path: Path,
-    stat: Stat,
+    time: Instant,
     thumbnail: Bitmap
   ) {
   }
 
-  override fun onPreviewFailed(path: Path, stat: Stat, cause: Any) =
+  override fun onPreviewFailed(path: Path, time: Instant, cause: Any) =
     hindImageView()
 
   private fun hindImageView() {
@@ -138,20 +145,22 @@ class InfoFragment : InfoBaseFragment(), Preview.Callback {
   }
 
   companion object {
-    private const val ARG_STAT = "stat"
+    private const val ARG_TIME = "time"
+    private const val ARG_IS_DIR = "is-dir"
 
     @JvmStatic
-    fun create(path: Path, stat: Stat?): InfoFragment =
-      newFragment(newArgs(path, stat))
+    fun create(path: Path, attrs: BasicFileAttributes?): InfoFragment =
+      newFragment(newArgs(path, attrs))
 
-    private fun newArgs(path: Path, stat: Stat?): Bundle {
+    private fun newArgs(path: Path, attrs: BasicFileAttributes?): Bundle {
       val bundle = Bundle()
       bundle.putStringArrayList(
         ARG_CHILDREN,
         arrayListOf(path.fileName.toString())
       )
       bundle.putString(ARG_PARENT_DIRECTORY, path.parent.toString())
-      bundle.putParcelable(ARG_STAT, stat)
+      bundle.putSerializable(ARG_TIME, attrs?.lastModifiedTime()?.toInstant())
+      bundle.putSerializable(ARG_IS_DIR, attrs?.isDirectory)
       return bundle
     }
 

@@ -13,10 +13,10 @@ internal class ThumbnailMemCacheTest :
   fun constraint_is_used_as_part_of_key() {
     val constraint = newConstraint()
     val value = newValue()
-    cache.put(file, stat, constraint, value)
-    assertEquals(value, cache.get(file, stat, constraint, true))
-    assertNull(cache.get(file, stat, newConstraint(), true))
-    assertNull(cache.get(file, stat, newConstraint(), true))
+    cache.put(file, time, constraint, value)
+    assertEquals(value, cache.get(file, time, constraint, true))
+    assertNull(cache.get(file, time, newConstraint(), true))
+    assertNull(cache.get(file, time, newConstraint(), true))
   }
 
   override fun newCache() = ThumbnailMemCache(1024 * 1024, true)

@@ -5,10 +5,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import l.files.base.Objects;
 import l.files.base.text.CollationKey;
-import l.files.fs.Stat;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.text.Collator;
 import java.util.Optional;
 
@@ -27,32 +27,32 @@ public final class FileInfo implements Comparable<FileInfo> {
     private final Path selfPath;
 
     @Nullable
-    private final Stat selfStat;
+    private final BasicFileAttributes selfAttrs;
 
     @Nullable
     private final Path linkTargetPath;
 
     @Nullable
-    private final Stat linkTargetStat;
+    private final BasicFileAttributes linkTargetAttrs;
 
     private FileInfo(
         Path selfPath,
-        @Nullable Stat selfStat,
+        @Nullable BasicFileAttributes selfAttrs,
         @Nullable Path linkTargetPath,
-        @Nullable Stat linkTargetStat,
+        @Nullable BasicFileAttributes linkTargetAttrs,
         Collator collator
     ) {
 
         this.selfPath = requireNonNull(selfPath);
-        this.selfStat = selfStat;
+        this.selfAttrs = selfAttrs;
         this.linkTargetPath = linkTargetPath;
-        this.linkTargetStat = linkTargetStat;
+        this.linkTargetAttrs = linkTargetAttrs;
         this.collator = requireNonNull(collator);
     }
 
     @DrawableRes
     public int iconDrawableResourceId() {
-        if (selfStat != null && selfStat.isDirectory()) {
+        if (selfAttrs != null && selfAttrs.isDirectory()) {
             return FileIcons.getDirectory(selfPath());
         }
         return FileIcons.getFile();
@@ -80,8 +80,8 @@ public final class FileInfo implements Comparable<FileInfo> {
     }
 
     @Nullable
-    public Stat selfStat() {
-        return selfStat;
+    public BasicFileAttributes selfAttrs() {
+        return selfAttrs;
     }
 
     @Nullable
@@ -90,13 +90,13 @@ public final class FileInfo implements Comparable<FileInfo> {
     }
 
     @Nullable
-    private Stat linkTargetStat() {
-        return linkTargetStat;
+    private BasicFileAttributes linkTargetAttrs() {
+        return linkTargetAttrs;
     }
 
     @Nullable
-    public Stat linkTargetOrSelfStat() {
-        return linkTargetStat() != null ? linkTargetStat() : selfStat();
+    public BasicFileAttributes linkTargetOrSelfAttrs() {
+        return linkTargetAttrs() != null ? linkTargetAttrs() : selfAttrs();
     }
 
     public Path linkTargetOrSelfPath() {
@@ -120,9 +120,9 @@ public final class FileInfo implements Comparable<FileInfo> {
     public String toString() {
         return "FileInfo{" +
             "selfPath=" + selfPath +
-            ", selfStat=" + selfStat +
+            ", selfAttrs=" + selfAttrs +
             ", linkTargetPath=" + linkTargetPath +
-            ", linkTargetStat=" + linkTargetStat +
+            ", linkTargetAttrs=" + linkTargetAttrs +
             '}';
     }
 
@@ -138,24 +138,29 @@ public final class FileInfo implements Comparable<FileInfo> {
         FileInfo that = (FileInfo) o;
 
         return Objects.equal(selfPath, that.selfPath)
-            && Objects.equal(selfStat, that.selfStat)
+            && Objects.equal(selfAttrs, that.selfAttrs)
             && Objects.equal(linkTargetPath, that.linkTargetPath)
-            && Objects.equal(linkTargetStat, that.linkTargetStat);
+            && Objects.equal(linkTargetAttrs, that.linkTargetAttrs);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(selfPath, selfStat, linkTargetPath, linkTargetStat);
+        return Objects.hash(
+            selfPath,
+            selfAttrs,
+            linkTargetPath,
+            linkTargetAttrs
+        );
     }
 
     public static FileInfo create(
         Path path,
-        @Nullable Stat stat,
+        @Nullable BasicFileAttributes attrs,
         @Nullable Path target,
-        @Nullable Stat targetStat,
+        @Nullable BasicFileAttributes targetAttrs,
         Collator collator
     ) {
-        return new FileInfo(path, stat, target, targetStat, collator);
+        return new FileInfo(path, attrs, target, targetAttrs, collator);
     }
 
 }

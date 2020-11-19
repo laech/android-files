@@ -3,12 +3,13 @@ package l.files.ui.preview
 import android.content.Context
 import android.graphics.Bitmap
 import androidx.annotation.MainThread
-import l.files.fs.Stat
 import l.files.ui.base.graphics.Rect
 import l.files.ui.base.graphics.ScaledBitmap
 import java.io.IOException
 import java.nio.file.Files.isReadable
+import java.nio.file.Files.isRegularFile
 import java.nio.file.Path
+import java.time.Instant
 import java.util.concurrent.Future
 
 internal data class BlurredThumbnail(val bitmap: Bitmap)
@@ -57,103 +58,94 @@ class Preview internal constructor(
 
   fun getBlurredThumbnail(
     path: Path,
-    stat: Stat,
+    time: Instant,
     constraint: Rect,
     matchTime: Boolean
-  ) = blurredThumbnailMemCache.get(path, stat, constraint, matchTime)
+  ) = blurredThumbnailMemCache.get(path, time, constraint, matchTime)
 
   fun putBlurredThumbnail(
     path: Path,
-    stat: Stat,
+    time: Instant,
     constraint: Rect,
     thumbnail: Bitmap
   ) {
-    blurredThumbnailMemCache.put(path, stat, constraint, thumbnail)
+    blurredThumbnailMemCache.put(path, time, constraint, thumbnail)
   }
 
   fun getThumbnail(
     path: Path,
-    stat: Stat,
+    time: Instant,
     constraint: Rect,
     matchTime: Boolean
-  ) = thumbnailMemCache.get(path, stat, constraint, matchTime)
+  ) = thumbnailMemCache.get(path, time, constraint, matchTime)
 
   fun putThumbnail(
     path: Path,
-    stat: Stat,
+    time: Instant,
     constraint: Rect,
     thumbnail: Bitmap
   ) {
-    thumbnailMemCache.put(path, stat, constraint, thumbnail)
+    thumbnailMemCache.put(path, time, constraint, thumbnail)
   }
 
   @Throws(IOException::class)
   fun getThumbnailFromDisk(
     path: Path,
-    stat: Stat,
+    time: Instant,
     constraint: Rect
-  ): ScaledBitmap? = thumbnailDiskCache.get(path, stat, constraint, true)
+  ): ScaledBitmap? = thumbnailDiskCache.get(path, time, constraint, true)
 
   fun putThumbnailToDiskAsync(
     path: Path,
-    stat: Stat,
+    time: Instant,
     constraint: Rect,
     thumbnail: ScaledBitmap
-  ): Future<*> = thumbnailDiskCache.putAsync(path, stat, constraint, thumbnail)
+  ): Future<*> = thumbnailDiskCache.putAsync(path, time, constraint, thumbnail)
 
   fun getSize(
     path: Path,
-    stat: Stat,
+    time: Instant,
     constraint: Rect,
     matchTime: Boolean
-  ): Rect? = sizeCache.get(path, stat, constraint, matchTime)
+  ): Rect? = sizeCache.get(path, time, constraint, matchTime)
 
   fun putSize(
     path: Path,
-    stat: Stat,
+    time: Instant,
     constraint: Rect,
     size: Rect
   ) {
-    sizeCache.put(path, stat, constraint, size)
+    sizeCache.put(path, time, constraint, size)
   }
 
   fun getMediaType(
     path: Path,
-    stat: Stat,
+    time: Instant,
     constraint: Rect
-  ): String? = mediaTypeCache.get(path, stat, constraint, true)
+  ): String? = mediaTypeCache.get(path, time, constraint, true)
 
   fun putMediaType(
     path: Path,
-    stat: Stat,
+    time: Instant,
     constraint: Rect,
     media: String
   ) {
-    mediaTypeCache.put(path, stat, constraint, media)
+    mediaTypeCache.put(path, time, constraint, media)
   }
 
   internal fun getNoPreviewReason(
     path: Path,
-    stat: Stat,
+    time: Instant,
     constraint: Rect
   ): NoPreview? {
-    if (!stat.isRegularFile) {
+    if (!isRegularFile(path)) {
       return NoPreview.NOT_REGULAR_FILE
     }
-    try {
-      if (!isReadable(path)) {
-        return NoPreview.FILE_UNREADABLE
-      }
-    } catch (e: IOException) {
-      return NoPreview(e)
+    if (!isReadable(path)) {
+      return NoPreview.FILE_UNREADABLE
     }
-    return if (java.lang.Boolean.TRUE == noPreviewCache.get(
-        path,
-        stat,
-        constraint,
-        true
-      )
-    ) {
+    val noPreview = noPreviewCache.get(path, time, constraint, true)
+    return if (java.lang.Boolean.TRUE == noPreview) {
       NoPreview.IN_NO_PREVIEW_CACHE
     } else {
       null
@@ -162,35 +154,35 @@ class Preview internal constructor(
 
   fun isPreviewable(
     path: Path,
-    stat: Stat,
+    time: Instant,
     constraint: Rect
   ): Boolean {
-    return getNoPreviewReason(path, stat, constraint) == null
+    return getNoPreviewReason(path, time, constraint) == null
   }
 
   fun putPreviewable(
     path: Path,
-    stat: Stat,
+    time: Instant,
     constraint: Rect,
     previewable: Boolean
   ) {
     if (previewable) {
       noPreviewCache.remove(path, constraint)
     } else {
-      noPreviewCache.put(path, stat, constraint, true)
+      noPreviewCache.put(path, time, constraint, true)
     }
   }
 
   fun get(
     path: Path,
-    stat: Stat,
+    time: Instant,
     constraint: Rect,
     callback: Callback,
     context: Context
-  ): Decode? = if (!isPreviewable(path, stat, constraint)) {
+  ): Decode? = if (!isPreviewable(path, time, constraint)) {
     null
   } else {
-    Decode(path, stat, constraint, callback, this)
+    Decode(path, time, constraint, callback, this)
       .executeOnPreferredExecutor(context)
   }
 
@@ -203,9 +195,19 @@ class Preview internal constructor(
   }
 
   interface Callback {
-    fun onPreviewAvailable(path: Path, stat: Stat, thumbnail: Bitmap)
-    fun onBlurredThumbnailAvailable(path: Path, stat: Stat, thumbnail: Bitmap)
-    fun onPreviewFailed(path: Path, stat: Stat, cause: Any)
+    fun onPreviewAvailable(
+      path: Path,
+      time: Instant,
+      thumbnail: Bitmap
+    )
+
+    fun onBlurredThumbnailAvailable(
+      path: Path,
+      time: Instant,
+      thumbnail: Bitmap
+    )
+
+    fun onPreviewFailed(path: Path, time: Instant, cause: Any)
   }
 
 }

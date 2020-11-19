@@ -5,7 +5,6 @@ import android.graphics.BitmapFactory
 import android.os.Process
 import android.os.Process.setThreadPriority
 import android.util.Log
-import l.files.fs.Stat
 import l.files.ui.base.graphics.Rect
 import l.files.ui.base.graphics.ScaledBitmap
 import java.io.DataInputStream
@@ -20,6 +19,7 @@ import java.nio.file.Files.*
 import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.attribute.FileTime
+import java.time.Instant
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.concurrent.ThreadFactory
@@ -93,10 +93,9 @@ internal class ThumbnailDiskCache(getCacheDir: () -> Path) :
       "${path}_${constraint.width()}_${constraint.height()}"
     )
 
-  @Throws(IOException::class)
   internal fun cacheFile(
     path: Path,
-    stat: Stat,
+    time: Instant,
     constraint: Rect,
     matchTime: Boolean
   ): Path {
@@ -108,7 +107,6 @@ internal class ThumbnailDiskCache(getCacheDir: () -> Path) :
     }
 
     if (result == null) {
-      val time = stat.lastModifiedTime()
       result = cacheDir(path, constraint)
         .resolve("${time.epochSecond}-${time.nano}")
     }
@@ -116,15 +114,14 @@ internal class ThumbnailDiskCache(getCacheDir: () -> Path) :
     return result!!
   }
 
-  @Throws(IOException::class)
   override fun get(
     path: Path,
-    stat: Stat,
+    time: Instant,
     constraint: Rect,
     matchTime: Boolean
   ): ScaledBitmap? {
 
-    val cache = cacheFile(path, stat, constraint, matchTime)
+    val cache = cacheFile(path, time, constraint, matchTime)
     return try {
       DataInputStream(newInputStream(cache).buffered()).use { input ->
         val version = input.readByte()
@@ -158,14 +155,14 @@ internal class ThumbnailDiskCache(getCacheDir: () -> Path) :
   @Throws(IOException::class)
   override fun put(
     path: Path,
-    stat: Stat,
+    time: Instant,
     constraint: Rect,
     value: ScaledBitmap
   ): Snapshot<ScaledBitmap>? {
 
     purgeOldCacheFiles(path, constraint)
 
-    val cache = cacheFile(path, stat, constraint, true)
+    val cache = cacheFile(path, time, constraint, true)
     val parent = cache.parent!!
     createDirectories(parent)
 
@@ -211,13 +208,13 @@ internal class ThumbnailDiskCache(getCacheDir: () -> Path) :
 
   fun putAsync(
     path: Path,
-    stat: Stat,
+    time: Instant,
     constraint: Rect,
     thumbnail: ScaledBitmap
   ): Future<*> = executor.submit(
     WriteThumbnail(
       path,
-      stat,
+      time,
       constraint,
       WeakReference(thumbnail)
     )
@@ -225,7 +222,7 @@ internal class ThumbnailDiskCache(getCacheDir: () -> Path) :
 
   private inner class WriteThumbnail(
     private val path: Path,
-    private val stat: Stat,
+    private val time: Instant,
     private val constraint: Rect,
     private val ref: WeakReference<ScaledBitmap>
   ) : () -> Unit {
@@ -234,7 +231,7 @@ internal class ThumbnailDiskCache(getCacheDir: () -> Path) :
       setThreadPriority(BACKGROUND_THREAD_PRIORITY)
       val thumbnail = ref.get() ?: return
       try {
-        put(path, stat, constraint, thumbnail)
+        put(path, time, constraint, thumbnail)
       } catch (e: IOException) {
         Log.w(javaClass.simpleName, "Failed to put $path", e)
       }

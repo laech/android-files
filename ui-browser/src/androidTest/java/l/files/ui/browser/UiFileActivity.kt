@@ -17,8 +17,6 @@ import kotlinx.android.synthetic.main.files_activity.*
 import kotlinx.android.synthetic.main.files_grid_item.view.*
 import l.files.base.Function
 import l.files.base.Provider
-import l.files.fs.LinkOption
-import l.files.fs.Stat
 import l.files.fs.hierarchy
 import l.files.ui.base.fs.FileInfo
 import l.files.ui.base.fs.FileLabels
@@ -26,7 +24,10 @@ import l.files.ui.browser.Instrumentations.*
 import org.junit.Assert.*
 import java.io.IOException
 import java.nio.file.Files.list
+import java.nio.file.Files.readAttributes
+import java.nio.file.LinkOption.NOFOLLOW_LINKS
 import java.nio.file.Path
+import java.nio.file.attribute.BasicFileAttributes
 import java.util.concurrent.TimeUnit
 
 
@@ -407,22 +408,26 @@ internal class UiFileActivity(
   ): UiFileActivity {
     await(
       {
-        val filesInView = filesInView()
+        val filesInView = fileAttrsInView()
         list(dir).use {
           it.forEach { child ->
 
-            val oldStat = filesInView.remove(child)
-            if (oldStat == null) {
+            val oldAttrs = filesInView.remove(child)
+            if (oldAttrs == null) {
               fail("Path in file system but not in view: $child")
             }
 
-            val newStat = l.files.fs.Path.of(child).stat(LinkOption.NOFOLLOW)
-            if (newStat != oldStat) {
+            val newAttrs = readAttributes(
+              child,
+              BasicFileAttributes::class.java,
+              NOFOLLOW_LINKS
+            ).toMap()
+            if (newAttrs != oldAttrs) {
               fail(
                 """
                     Path details differ for : $child
-                    new: $newStat
-                    old: $oldStat
+                    new: $newAttrs
+                    old: $oldAttrs
                     """.trimIndent()
               )
             }
@@ -444,14 +449,19 @@ internal class UiFileActivity(
     return this
   }
 
-  private fun filesInView(): SimpleArrayMap<Path, Stat> {
+  private fun fileAttrsInView(): SimpleArrayMap<Path, Map<String, Any>> {
     val items = fileItems()
-    val result = SimpleArrayMap<Path, Stat>(items.size)
+    val result = SimpleArrayMap<Path, Map<String, Any>>(items.size)
     for (item in items) {
-      result.put(item.selfPath(), item.selfStat())
+      result.put(item.selfPath(), item.selfAttrs()?.toMap())
     }
     return result
   }
+
+  private fun BasicFileAttributes.toMap() = mapOf(
+    "size" to size(),
+    "lastModifiedTime" to lastModifiedTime(),
+  )
 
   private fun fileItems(): List<FileInfo> =
     fragment.items().filterIsInstance<FileInfo>()

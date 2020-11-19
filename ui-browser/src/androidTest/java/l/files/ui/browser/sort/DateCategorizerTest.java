@@ -12,20 +12,22 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.text.Collator;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static androidx.test.InstrumentationRegistry.getInstrumentation;
+import static java.nio.file.Files.readAttributes;
 import static java.nio.file.Files.setLastModifiedTime;
+import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.util.Arrays.asList;
 import static java.util.Calendar.JUNE;
 import static java.util.Calendar.YEAR;
 import static java.util.Collections.unmodifiableList;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.concurrent.TimeUnit.HOURS;
-import static l.files.fs.LinkOption.NOFOLLOW;
 import static org.junit.Assert.assertEquals;
 
 public final class DateCategorizerTest {
@@ -268,8 +270,12 @@ public final class DateCategorizerTest {
     private FileInfo file(long time) throws IOException {
         Path path = temporaryFolder.newFile().toPath();
         setLastModifiedTime(path, FileTime.fromMillis(time));
-        return FileInfo.create(path,
-            l.files.fs.Path.of(path).stat(NOFOLLOW), null, null, collator
+        return FileInfo.create(
+            path,
+            readAttributes(path, BasicFileAttributes.class, NOFOLLOW_LINKS),
+            null,
+            null,
+            collator
         );
     }
 

@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.time.Instant;
+import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.stream.Stream;
 
@@ -29,7 +30,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
     @Test
     public void manual_refresh_updates_outdated_files()
-        throws Exception {
+        throws Throwable {
 
         int watchLimit = 5;
         setActivityIntent(newIntent(dir(), watchLimit));
@@ -48,18 +49,23 @@ public final class RefreshTest extends BaseFilesActivityTest {
         testFileCreationDeletionWillStillBeNotifiedInManualMode(dir());
     }
 
-    private void testRefreshInManualMode(Path dir) throws IOException {
+    private void testRefreshInManualMode(Path dir)
+        throws Throwable {
+
+        // Currently Files::getLastModifiedTime only has second precision,
+        // so need to wait for a bit until it changes
+        Thread.sleep(1500);
 
         try (Stream<Path> stream = list(dir)) {
-            stream.filter(Files::isDirectory)
+            Path childDir = stream.filter(Files::isDirectory)
                 .findFirst()
-                .ifPresent(childDir -> {
-                    try {
-                        createFile(childDir.resolve("x"));
-                    } catch (IOException e) {
-                        throw new UncheckedIOException(e);
-                    }
-                });
+                .orElseThrow(NoSuchElementException::new);
+
+            try {
+                createFile(childDir.resolve("x"));
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
         }
 
         boolean updated = false;

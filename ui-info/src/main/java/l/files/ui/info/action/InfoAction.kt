@@ -48,8 +48,8 @@ class InfoAction(
 
   private fun showSingleFileInfo(values: Collection<FileInfo>) {
     val file = values.iterator().next()
-    val stat = file.selfStat()
-    InfoFragment.create(file.selfPath(), stat)
+    val attrs = file.selfAttrs()
+    InfoFragment.create(file.selfPath(), attrs)
       .show(manager, InfoBaseFragment.FRAGMENT_TAG)
   }
 
@@ -68,6 +68,6 @@ class InfoAction(
   private fun updateMenuItem(menu: Menu) {
     val item = menu.findItem(id()) ?: return
     item.isEnabled =
-      selection.values().any { it.linkTargetOrSelfStat() != null }
+      selection.values().any { it.linkTargetOrSelfAttrs() != null }
   }
 }

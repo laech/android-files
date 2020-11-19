@@ -23,7 +23,6 @@ import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.*;
 import l.files.base.Provider;
-import l.files.fs.Stat;
 import l.files.ui.base.app.LifeCycleListenable;
 import l.files.ui.base.app.LifeCycleListener;
 import l.files.ui.base.fs.FileInfo;
@@ -41,6 +40,8 @@ import l.files.ui.preview.PreviewKt;
 import l.files.ui.preview.SizedColorDrawable;
 
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.time.Instant;
 import java.util.List;
 
 import static android.graphics.Color.TRANSPARENT;
@@ -205,15 +206,14 @@ public final class FileViewHolder
         }
 
         Path path = previewPath();
-        Stat stat = previewStat();
-        if (stat == null ||
-            !preview.isPreviewable(path, stat, constraint)) {
+        Instant time = previewTime();
+        if (time == null || !preview.isPreviewable(path, time, constraint)) {
             clearBackground();
             return newIcon();
         }
 
         Bitmap blurred = preview.getBlurredThumbnail(
-            path, stat, constraint, false
+            path, time, constraint, false
         );
         if (blurred != null) {
             setBackground(blurred, false);
@@ -221,7 +221,7 @@ public final class FileViewHolder
             clearBackground();
         }
 
-        Bitmap thumbnail = getCachedThumbnail(path, stat);
+        Bitmap thumbnail = getCachedThumbnail(path, time);
         if (thumbnail != null) {
             // if (blurred == null) {
             // TODO
@@ -231,13 +231,13 @@ public final class FileViewHolder
 
         runWhenUiIsIdle(path, this::canInterruptScrollState, () ->
             decodeThumbnailTask = preview.get(
-                path, stat, constraint, this, context()));
+                path, time, constraint, this, context()));
 
-        return getOrNewIcon(path, stat);
+        return getOrNewIcon(path, time);
     }
 
-    private Drawable getOrNewIcon(Path path, Stat stat) {
-        Rect size = preview.getSize(path, stat, constraint, false);
+    private Drawable getOrNewIcon(Path path, Instant time) {
+        Rect size = preview.getSize(path, time, constraint, false);
         if (size != null) {
             Rect scaledSize = scaleSize(size);
             return new SizedColorDrawable(
@@ -297,27 +297,32 @@ public final class FileViewHolder
     }
 
     @Nullable
-    private Stat previewStat() {
-        return item().linkTargetOrSelfStat();
+    private Instant previewTime() {
+        BasicFileAttributes attrs =
+            item().linkTargetOrSelfAttrs();
+        if (attrs == null) {
+            return null;
+        }
+        return attrs.lastModifiedTime().toInstant();
     }
 
     @Nullable
-    private Bitmap getCachedThumbnail(Path path, Stat stat) {
+    private Bitmap getCachedThumbnail(Path path, Instant time) {
         long now = currentTimeMillis();
-        long then = stat.lastModifiedTime().toEpochMilli();
+        long then = time.toEpochMilli();
         // TODO this will cause thumbnail not to be the latest correct one
         boolean changedMoreThan5SecondsAgo = now - then > 5000;
         if (changedMoreThan5SecondsAgo) {
             return preview.getThumbnail(
                 path,
-                stat,
+                time,
                 constraint,
                 true
             );
         } else {
             return preview.getThumbnail(
                 path,
-                stat,
+                time,
                 constraint,
                 false
             );
@@ -362,11 +367,7 @@ public final class FileViewHolder
     }
 
     @Override
-    public void onPreviewAvailable(
-        Path path,
-        Stat stat,
-        Bitmap bm
-    ) {
+    public void onPreviewAvailable(Path path, Instant time, Bitmap bm) {
         runWhenUiIsIdle(path, this::canUpdateUi, () -> {
             int position = getAdapterPosition();
             if (position != NO_POSITION) {
@@ -378,7 +379,7 @@ public final class FileViewHolder
     @Override
     public void onBlurredThumbnailAvailable(
         Path path,
-        Stat stat,
+        Instant time,
         Bitmap thumbnail
     ) {
         runWhenUiIsIdle(path, this::canUpdateUi,
@@ -406,7 +407,7 @@ public final class FileViewHolder
     }
 
     @Override
-    public void onPreviewFailed(Path path, Stat stat, Object cause) {
+    public void onPreviewFailed(Path path, Instant time, Object cause) {
         if (isDebugBuild(context())) {
             if (cause instanceof Throwable) {
                 Log.d(getClass().getSimpleName(),

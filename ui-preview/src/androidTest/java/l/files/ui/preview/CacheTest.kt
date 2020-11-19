@@ -1,8 +1,5 @@
 package l.files.ui.preview
 
-import l.files.fs.LinkOption
-import l.files.fs.LinkOption.NOFOLLOW
-import l.files.fs.Stat
 import l.files.ui.base.graphics.Rect
 import org.junit.After
 import org.junit.Assert.*
@@ -11,6 +8,7 @@ import org.junit.Test
 import java.nio.file.Files.*
 import java.nio.file.Path
 import java.nio.file.attribute.FileTime
+import java.time.Instant
 import java.util.*
 
 internal abstract class CacheTest<V, C : Cache<V>> {
@@ -18,7 +16,7 @@ internal abstract class CacheTest<V, C : Cache<V>> {
   lateinit var cache: C
   lateinit var random: Random
   lateinit var file: Path
-  lateinit var stat: Stat
+  lateinit var time: Instant
   private lateinit var tempDir: Path
 
   private fun createTempDir(): Path {
@@ -31,7 +29,7 @@ internal abstract class CacheTest<V, C : Cache<V>> {
     cache = newCache()
     random = Random()
     file = createTempFile(tempDir, "123", null)
-    stat = l.files.fs.Path.of(file).stat(LinkOption.FOLLOW)
+    time = getLastModifiedTime(file).toInstant()
   }
 
   @After
@@ -43,20 +41,20 @@ internal abstract class CacheTest<V, C : Cache<V>> {
   fun gets_what_has_put_in() {
     val constraint = newConstraint()
     val value = newValue()
-    cache.put(file, stat, constraint, value)
-    assertValueEquals(value, cache.get(file, stat, constraint, true))
+    cache.put(file, time, constraint, value)
+    assertValueEquals(value, cache.get(file, time, constraint, true))
   }
 
   @Test
   fun gets_null_when_time_changes() {
     val constraint = newConstraint()
     val value = newValue()
-    cache.put(file, stat, constraint, value)
+    cache.put(file, time, constraint, value)
     setLastModifiedTime(file, FileTime.fromMillis(0))
     assertNull(
       cache.get(
         file,
-        l.files.fs.Path.of(file).stat(NOFOLLOW),
+        getLastModifiedTime(file).toInstant(),
         constraint,
         true
       )
@@ -67,8 +65,8 @@ internal abstract class CacheTest<V, C : Cache<V>> {
   fun gets_old_value_if_stat_not_provided() {
     val constraint = newConstraint()
     val value = newValue()
-    cache.put(file, stat, constraint, value)
-    assertValueEquals(value, cache.get(file, stat, constraint, false))
+    cache.put(file, time, constraint, value)
+    assertValueEquals(value, cache.get(file, time, constraint, false))
   }
 
   abstract fun newCache(): C

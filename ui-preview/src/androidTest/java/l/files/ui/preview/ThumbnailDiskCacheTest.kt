@@ -4,15 +4,13 @@ import android.graphics.Bitmap
 import android.graphics.Bitmap.Config.ARGB_8888
 import android.graphics.Canvas
 import android.graphics.Color.BLUE
-import l.files.fs.LinkOption.NOFOLLOW
-import l.files.fs.Path
 import l.files.ui.base.graphics.Rect
 import l.files.ui.base.graphics.ScaledBitmap
 import org.junit.Assert.*
 import org.junit.Test
 import java.lang.System.currentTimeMillis
-import java.nio.file.Files.exists
-import java.nio.file.Files.setLastModifiedTime
+import java.nio.file.Files.*
+import java.nio.file.LinkOption.NOFOLLOW_LINKS
 import java.nio.file.attribute.FileTime
 import java.util.concurrent.TimeUnit.DAYS
 
@@ -21,7 +19,7 @@ internal class ThumbnailDiskCacheTest :
 
   @Test
   fun cache_file_stored_in_cache_dir() {
-    val cacheFilePath = cache.cacheFile(file, stat, newConstraint(), true)
+    val cacheFilePath = cache.cacheFile(file, time, newConstraint(), true)
     val cacheDirPath = cache.cacheDir
     assertTrue(
       "\ncacheFile: $cacheFilePath,\ncacheDir:  $cacheDirPath",
@@ -33,10 +31,10 @@ internal class ThumbnailDiskCacheTest :
   fun cleans_old_cache_files_not_accessed_in_30_days() {
     val constraint = newConstraint()
     val value = newValue()
-    val cacheFile = cache.cacheFile(file, stat, constraint, true)
+    val cacheFile = cache.cacheFile(file, time, constraint, true)
     assertFalse(exists(cacheFile))
 
-    cache.put(file, stat, constraint, value)
+    cache.put(file, time, constraint, value)
     assertTrue(exists(cacheFile))
 
     cache.cleanup()
@@ -62,27 +60,27 @@ internal class ThumbnailDiskCacheTest :
   fun updates_modified_time_on_read() {
     val constraint = newConstraint()
     val value = newValue()
-    cache.put(file, stat, constraint, value)
-    val cacheFile = cache.cacheFile(file, stat, constraint, true)
+    cache.put(file, time, constraint, value)
+    val cacheFile = cache.cacheFile(file, time, constraint, true)
 
-    val oldTime = java.time.Instant.ofEpochMilli(1000)
-    setLastModifiedTime(cacheFile, FileTime.from(oldTime))
-    assertEquals(oldTime, Path.of(cacheFile).stat(NOFOLLOW).lastModifiedTime())
+    val oldTime = FileTime.fromMillis(1000)
+    setLastModifiedTime(cacheFile, oldTime)
+    assertEquals(oldTime, getLastModifiedTime(cacheFile, NOFOLLOW_LINKS))
 
-    cache.get(file, stat, constraint, true)
-    val newTime = Path.of(cacheFile).stat(NOFOLLOW).lastModifiedTime()
+    cache.get(file, time, constraint, true)
+    val newTime = getLastModifiedTime(cacheFile, NOFOLLOW_LINKS)
     assertNotEquals(oldTime, newTime)
-    assertTrue(oldTime.epochSecond < newTime.epochSecond)
+    assertTrue(oldTime < newTime)
   }
 
   @Test
   fun constraint_is_used_as_part_of_key() {
     val constraint = newConstraint()
     val value = newValue()
-    cache.put(file, stat, constraint, value)
-    assertValueEquals(value, cache.get(file, stat, constraint, true))
-    assertNull(cache.get(file, stat, newConstraint(), true))
-    assertNull(cache.get(file, stat, newConstraint(), true))
+    cache.put(file, time, constraint, value)
+    assertValueEquals(value, cache.get(file, time, constraint, true))
+    assertNull(cache.get(file, time, newConstraint(), true))
+    assertNull(cache.get(file, time, newConstraint(), true))
   }
 
   override fun assertValueEquals(a: ScaledBitmap?, b: ScaledBitmap?) {

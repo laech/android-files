@@ -2,9 +2,10 @@ package l.files.ui.browser.text;
 
 import android.content.Context;
 import androidx.annotation.Nullable;
-import l.files.fs.Stat;
 import l.files.ui.base.fs.FileInfo;
 import l.files.ui.browser.R;
+
+import java.nio.file.attribute.BasicFileAttributes;
 
 import static android.text.format.Formatter.formatShortFileSize;
 
@@ -22,17 +23,18 @@ public final class FileTextLayouts {
 
     @Nullable
     public static String getSummary(Context context, FileInfo file) {
-        Stat stat = file.selfStat();
-        if (stat == null) {
+        BasicFileAttributes attrs = file.selfAttrs();
+        if (attrs == null) {
             return null;
         }
         if (formatter == null) {
             formatter = createFormatter(context.getApplicationContext());
         }
-        String date = formatter.apply(stat, context);
-        String size = formatShortFileSize(context, stat.size());
-        boolean hasDate = stat.lastModifiedTime().getEpochSecond() > 0;
-        boolean isFile = stat.isRegularFile();
+        String date = formatter.apply(attrs, context);
+        String size = formatShortFileSize(context, attrs.size());
+        boolean hasDate =
+            attrs.lastModifiedTime().toInstant().getEpochSecond() > 0;
+        boolean isFile = attrs.isRegularFile();
         if (hasDate && isFile) {
             return context.getString(R.string.x_dot_y, date, size);
         } else if (hasDate) {

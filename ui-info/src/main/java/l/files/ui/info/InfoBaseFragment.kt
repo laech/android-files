@@ -34,7 +34,7 @@ abstract class InfoBaseFragment : AppCompatDialogFragment() {
     super.onViewCreated(view, savedInstanceState)
 
     sizeModel.target.value = Target(readParentDirectory(), readChildren())
-    sizeModel.calculation.observe(viewLifecycleOwner, Observer {
+    sizeModel.calculation.observe(viewLifecycleOwner, {
       sizeView.text = formatSize(it.size, it.count)
       calculateSizeProgressBar.visibility = if (it.done) GONE else VISIBLE
     })

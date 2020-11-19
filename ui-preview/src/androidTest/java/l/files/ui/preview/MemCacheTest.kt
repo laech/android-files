@@ -13,9 +13,9 @@ internal abstract class MemCacheTest<K, V, C : MemCache<K, V>> :
     val value: V = newValue()
     assertNull(cache.remove(file, constraint))
 
-    cache.put(file, stat, constraint, value)
+    cache.put(file, time, constraint, value)
     assertEquals(value, cache.remove(file, constraint)!!.value)
     assertNull(cache.remove(file, constraint))
-    assertNull(cache[file, stat, constraint, true])
+    assertNull(cache[file, time, constraint, true])
   }
 }

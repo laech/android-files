@@ -3,8 +3,6 @@ package l.files.ui.preview
 import android.content.Context
 import android.graphics.Bitmap
 import androidx.test.platform.app.InstrumentationRegistry
-import l.files.fs.LinkOption
-import l.files.fs.Stat
 import l.files.testing.fs.PathBaseTest
 import l.files.ui.base.graphics.Rect
 import org.junit.Assert.*
@@ -15,6 +13,7 @@ import java.nio.charset.StandardCharsets.UTF_8
 import java.nio.file.Files.*
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption.REPLACE_EXISTING
+import java.time.Instant
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -125,10 +124,12 @@ class PreviewTest : PathBaseTest() {
 
   @Test
   fun preview_link_modified_target() {
-    val file = createFile(dir1().toJavaPath().resolve("file"))
-    val link = createSymbolicLink(dir1().toJavaPath().resolve("link"), file)
+    val target = createDirectory(dir1().toJavaPath().resolve("target"))
+    val link = createSymbolicLink(dir1().toJavaPath().resolve("link"), target)
     testPreviewFailure(link)
-    write(file, "hi".toByteArray(UTF_8))
+    delete(target)
+    createFile(target)
+    write(target, "hi".toByteArray(UTF_8))
     testPreviewSuccess(link)
     testPreviewSuccess(link)
   }
@@ -142,12 +143,12 @@ class PreviewTest : PathBaseTest() {
 
   private fun testPreviewSuccess(file: Path) {
     val callback = TestCallback(1, 1)
-    val stat = l.files.fs.Path.of(file).stat(LinkOption.FOLLOW)
+    val time = getLastModifiedTime(file).toInstant()
     val preview = newPreview()
     val max = Rect.of(100, 100)
     val task = preview.get(
       file,
-      stat,
+      time,
       max,
       callback,
       context
@@ -158,22 +159,22 @@ class PreviewTest : PathBaseTest() {
     callback.onPreviewLatch.await()
     callback.onBlurredThumbnailLatch.await()
 
-    assertEquals(listOf(Pair(file, stat)), callback.onPreviews)
-    assertEquals(listOf(Pair(file, stat)), callback.onBlurredThumbnails)
+    assertEquals(listOf(Pair(file, time)), callback.onPreviews)
+    assertEquals(listOf(Pair(file, time)), callback.onBlurredThumbnails)
 
-    assertNotNull(preview.getSize(file, stat, max, true))
-    assertNotNull(preview.getThumbnail(file, stat, max, true))
-    assertNotNull(preview.getBlurredThumbnail(file, stat, max, true))
-    assertNotNull(preview.getMediaType(file, stat, max))
-    assertNotNull(preview.getThumbnailFromDisk(file, stat, max))
-    assertNull(preview.getNoPreviewReason(file, stat, max))
+    assertNotNull(preview.getSize(file, time, max, true))
+    assertNotNull(preview.getThumbnail(file, time, max, true))
+    assertNotNull(preview.getBlurredThumbnail(file, time, max, true))
+    assertNotNull(preview.getMediaType(file, time, max))
+    assertNotNull(preview.getThumbnailFromDisk(file, time, max))
+    assertNull(preview.getNoPreviewReason(file, time, max))
   }
 
   private fun testPreviewFailure(file: Path) {
     val callback = mock(Preview.Callback::class.java)
-    val stat = l.files.fs.Path.of(file).stat(LinkOption.NOFOLLOW)
+    val time = getLastModifiedTime(file).toInstant()
     val rect = Rect.of(10, 10)
-    assertNull(newPreview().get(file, stat, rect, callback, context))
+    assertNull(newPreview().get(file, time, rect, callback, context))
   }
 }
 
@@ -185,24 +186,28 @@ private class TestCallback(
   val onPreviewLatch = CountDownLatch(onPreviewCount)
   val onBlurredThumbnailLatch = CountDownLatch(onBlurredThumbnailCount)
 
-  val onPreviews = ArrayList<Pair<Path, Stat>>()
-  val onBlurredThumbnails = ArrayList<Pair<Path, Stat>>()
+  val onPreviews = ArrayList<Pair<Path, Instant>>()
+  val onBlurredThumbnails = ArrayList<Pair<Path, Instant>>()
 
-  override fun onPreviewAvailable(path: Path, stat: Stat, thumbnail: Bitmap) {
-    onPreviews.add(Pair(path, stat))
+  override fun onPreviewAvailable(
+    path: Path,
+    time: Instant,
+    thumbnail: Bitmap
+  ) {
+    onPreviews.add(Pair(path, time))
     onPreviewLatch.countDown()
   }
 
   override fun onBlurredThumbnailAvailable(
     path: Path,
-    stat: Stat,
+    time: Instant,
     thumbnail: Bitmap
   ) {
-    onBlurredThumbnails.add(Pair(path, stat))
+    onBlurredThumbnails.add(Pair(path, time))
     onBlurredThumbnailLatch.countDown()
   }
 
-  override fun onPreviewFailed(path: Path, stat: Stat, cause: Any) {
+  override fun onPreviewFailed(path: Path, time: Instant, cause: Any) {
     fail()
   }
 

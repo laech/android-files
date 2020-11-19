@@ -6,12 +6,12 @@ import android.net.Uri;
 import android.view.Menu;
 import android.view.MenuItem;
 import androidx.appcompat.view.ActionMode;
-import l.files.fs.Stat;
 import l.files.ui.base.fs.FileInfo;
 import l.files.ui.base.selection.Selection;
 import l.files.ui.base.view.ActionModeItem;
 import l.files.ui.browser.R;
 
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 
 import static android.content.Intent.*;
@@ -75,8 +75,8 @@ public final class ShareAction extends ActionModeItem
         }
 
         for (FileInfo file : selection.values()) {
-            Stat stat = file.linkTargetOrSelfStat();
-            if (stat == null || !stat.isRegularFile()) {
+            BasicFileAttributes attrs = file.linkTargetOrSelfAttrs();
+            if (attrs == null || !attrs.isRegularFile()) {
                 item.setEnabled(false);
                 return;
             }

@@ -4,7 +4,6 @@ import android.os.AsyncTask
 import android.util.Log
 import androidx.collection.LruCache
 import l.files.base.Throwables
-import l.files.fs.Stat
 import l.files.ui.base.graphics.Rect
 import java.io.*
 import java.lang.System.nanoTime
@@ -13,9 +12,11 @@ import java.nio.file.NoSuchFileException
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption.REPLACE_EXISTING
+import java.time.DateTimeException
+import java.time.Instant
 import java.util.concurrent.atomic.AtomicBoolean
 
-private const val SUPERCLASS_VERSION = 7
+private const val SUPERCLASS_VERSION = 8
 
 internal abstract class PersistenceCache<V>(
   cacheDir: () -> Path,
@@ -46,15 +47,12 @@ internal abstract class PersistenceCache<V>(
 
   override fun put(
     path: Path,
-    stat: Stat,
+    time: Instant,
     constraint: Rect,
     value: V
   ): Snapshot<V>? {
-    val old = super.put(path, stat, constraint, value)
-    if (old == null
-      || old.value != value
-      || old.time != stat.lastModifiedTime().toEpochMilli()
-    ) {
+    val old = super.put(path, time, constraint, value)
+    if (old == null || old.value != value || old.time != time) {
       dirty.set(true)
     }
     return old
@@ -94,9 +92,13 @@ internal abstract class PersistenceCache<V>(
         while (true) {
           try {
             val key = Paths.get(it.readUTF())
-            val time = it.readLong()
+            val second = it.readLong()
+            val nano = it.readInt()
+            val time = Instant.ofEpochSecond(second, nano.toLong())
             val value = read(it)
             delegate.put(key, Snapshot(value, time))
+          } catch (e: DateTimeException) {
+            Log.d(this@PersistenceCache.javaClass.simpleName, "", e)
           } catch (e: EOFException) {
             break
           }
@@ -119,7 +121,8 @@ internal abstract class PersistenceCache<V>(
       } catch (e: IOException) {
         Log.w(
           this@PersistenceCache.javaClass.simpleName,
-          "Failed to write cache.", e
+          "Failed to write cache.",
+          e
         )
       }
     }
@@ -140,7 +143,8 @@ internal abstract class PersistenceCache<V>(
         val snapshot = delegate.snapshot()
         for ((key, value) in snapshot) {
           it.writeUTF(key.toString())
-          it.writeLong(value.time)
+          it.writeLong(value.time.epochSecond)
+          it.writeInt(value.time.nano)
           write(it, value.value)
         }
       }

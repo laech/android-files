@@ -1,16 +1,13 @@
 package l.files.ui.browser.sort;
 
 import android.content.res.Resources;
+import l.files.ui.base.fs.FileInfo;
+import l.files.ui.browser.R;
 
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
-import l.files.base.Integers;
-import l.files.base.Longs;
-import l.files.fs.Stat;
-import l.files.ui.base.fs.FileInfo;
-import l.files.ui.browser.R;
 
 import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.unmodifiableList;
@@ -38,26 +35,17 @@ public enum FileSort {
     MODIFIED(R.string.date_modified) {
         @Override
         Comparator<FileInfo> comparator() {
-            return new StatComparator() {
+            return new AttrsComparator() {
                 @Override
                 protected int compareNotNull(
-                        FileInfo a, Stat aStat,
-                        FileInfo b, Stat bStat) {
-
-                    int result = Longs.compare(
-                            bStat.lastModifiedEpochSecond(),
-                            aStat.lastModifiedEpochSecond());
-
-                    if (result == 0) {
-                        result = Integers.compare(
-                                bStat.lastModifiedNanoOfSecond(),
-                                aStat.lastModifiedNanoOfSecond());
-                    }
-
+                    FileInfo a, BasicFileAttributes aAttrs,
+                    FileInfo b, BasicFileAttributes bAttrs
+                ) {
+                    int result = bAttrs.lastModifiedTime()
+                        .compareTo(aAttrs.lastModifiedTime());
                     if (result == 0) {
                         return a.compareTo(b);
                     }
-
                     return result;
                 }
             };
@@ -72,29 +60,25 @@ public enum FileSort {
     SIZE(R.string.size) {
         @Override
         Comparator<FileInfo> comparator() {
-            return new StatComparator() {
+            return new AttrsComparator() {
                 @Override
                 protected int compareNotNull(
-                        FileInfo a, Stat aStat,
-                        FileInfo b, Stat bStat) {
-                    if (aStat.isDirectory() && bStat.isDirectory()) {
+                    FileInfo a, BasicFileAttributes aAttrs,
+                    FileInfo b, BasicFileAttributes bAttrs
+                ) {
+                    if (aAttrs.isDirectory() && bAttrs.isDirectory()) {
                         return a.compareTo(b);
                     }
 
-                    if (aStat.isDirectory()) return 1;
-                    if (bStat.isDirectory()) return -1;
+                    if (aAttrs.isDirectory()) return 1;
+                    if (bAttrs.isDirectory()) return -1;
 
-                    int result = compare(bStat.size(), aStat.size());
+                    int result = Long.compare(bAttrs.size(), aAttrs.size());
                     if (result == 0) {
                         return a.compareTo(b);
                     }
                     return result;
                 }
-
-                private int compare(long a, long b) {
-                    return a < b ? -1 : (a == b ? 0 : 1);
-                }
-
             };
         }
 
@@ -119,28 +103,30 @@ public enum FileSort {
     abstract Categorizer categorizer();
 
     public List<Object> sort(List<FileInfo> items, Resources res) {
-        Collections.sort(items, comparator());
+        items.sort(comparator());
         return categorizer().categorize(res, items);
     }
 
-    private static abstract class StatComparator implements Comparator<FileInfo> {
+    private static abstract class AttrsComparator
+        implements Comparator<FileInfo> {
 
         @Override
         public int compare(FileInfo a, FileInfo b) {
-            Stat aStat = a.selfStat();
-            Stat bStat = b.selfStat();
-            if (aStat == null && bStat == null) return a.compareTo(b);
-            if (aStat == null) return 1;
-            if (bStat == null) return -1;
+            BasicFileAttributes aAttrs = a.selfAttrs();
+            BasicFileAttributes bAttrs = b.selfAttrs();
+            if (aAttrs == null && bAttrs == null) return a.compareTo(b);
+            if (aAttrs == null) return 1;
+            if (bAttrs == null) return -1;
 
             return compareNotNull(
-                    a, aStat,
-                    b, bStat);
+                a, aAttrs,
+                b, bAttrs
+            );
         }
 
         protected abstract int compareNotNull(
-                FileInfo a, Stat aStat,
-                FileInfo b, Stat bStat
+            FileInfo a, BasicFileAttributes aAttrs,
+            FileInfo b, BasicFileAttributes bAttrs
         );
 
     }

@@ -7,7 +7,6 @@ import android.os.OperationCanceledException;
 import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.loader.content.AsyncTaskLoader;
-import l.files.fs.Stat;
 import l.files.fs.event.BatchObserver;
 import l.files.fs.event.Event;
 import l.files.fs.event.Observation;
@@ -19,6 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,13 +35,14 @@ import static android.os.Looper.getMainLooper;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.setThreadPriority;
 import static java.lang.Thread.currentThread;
+import static java.nio.file.Files.readAttributes;
 import static java.nio.file.Files.readSymbolicLink;
+import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.util.Collections.*;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
-import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.PathKt.isHidden;
 import static l.files.fs.event.Event.DELETE;
 import static l.files.ui.base.content.Contexts.isDebugBuild;
@@ -365,11 +366,12 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
         try {
 
-            Stat stat = l.files.fs.Path.of(path).stat(NOFOLLOW);
-            Stat targetStat = readTargetStatus(path, stat);
-            Path target = readTarget(path, stat);
+            BasicFileAttributes attrs =
+                readAttributes(path, BasicFileAttributes.class, NOFOLLOW_LINKS);
+            BasicFileAttributes targetAttrs = readTargetStatus(path, attrs);
+            Path target = readTarget(path, attrs);
             FileInfo newStat =
-                FileInfo.create(path, stat, target, targetStat, collator);
+                FileInfo.create(path, attrs, target, targetAttrs, collator);
             FileInfo oldStat = data.put(path.getFileName(), newStat);
             return !newStat.equals(oldStat);
 
@@ -385,8 +387,9 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         }
     }
 
-    private Path readTarget(Path path, Stat stat) throws IOException {
-        if (stat.isSymbolicLink()) {
+    private Path readTarget(Path path, BasicFileAttributes attrs)
+        throws IOException {
+        if (attrs.isSymbolicLink()) {
             try {
                 return readSymbolicLink(path);
             } catch (FileNotFoundException | NoSuchFileException e) {
@@ -397,14 +400,17 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         return null;
     }
 
-    private Stat readTargetStatus(Path file, Stat stat) {
-        if (stat.isSymbolicLink()) {
+    private BasicFileAttributes readTargetStatus(
+        Path file,
+        BasicFileAttributes attrs
+    ) {
+        if (attrs.isSymbolicLink()) {
             try {
-                return l.files.fs.Path.of(file).stat(FOLLOW);
+                return readAttributes(file, BasicFileAttributes.class);
             } catch (IOException ignored) {
             }
         }
-        return stat;
+        return attrs;
     }
 
     static final class Result {

@@ -2,8 +2,8 @@ package l.files.ui.browser.text;
 
 import android.content.Context;
 import android.os.Looper;
-import l.files.fs.Stat;
 
+import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DateFormat;
 import java.text.FieldPosition;
 import java.util.Calendar;
@@ -48,14 +48,14 @@ final class DateFormatter {
         this.mainLooper = getMainLooper();
     }
 
-    String apply(Stat file, Context context) {
+    String apply(BasicFileAttributes attrs, Context context) {
 
         if (myLooper() != mainLooper) {
             throw new IllegalStateException(
                 "Can only be called on the UI thread.");
         }
 
-        long millis = file.lastModifiedTime().toEpochMilli();
+        long millis = attrs.lastModifiedTime().toMillis();
 
         tempDate.setTime(millis);
         tempField.setBeginIndex(0);
