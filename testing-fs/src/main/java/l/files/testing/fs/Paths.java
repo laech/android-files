@@ -12,10 +12,11 @@ import java.nio.charset.Charset;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.OpenOption;
-import java.nio.file.attribute.PosixFileAttributes;
+import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.Set;
 
 import static java.nio.file.Files.*;
@@ -78,16 +79,39 @@ public final class Paths {
         return path;
     }
 
-    public static void removePermissions(
-        Path path,
-        Set<PosixFilePermission> permissions
+    public static void removeReadPermissions(
+        java.nio.file.Path path,
+        java.nio.file.LinkOption... options
     ) throws IOException {
-        Set<PosixFilePermission> existing = path.readAttributes(
-            PosixFileAttributes.class
-        ).permissions();
-        Set<PosixFilePermission> perms = new HashSet<>(existing);
-        perms.removeAll(permissions);
-        path.setPermissions(perms);
+        removePermissions(
+            path,
+            PosixFilePermissions.fromString("r--r--r--"),
+            options
+        );
+    }
+
+    public static void removeWritePermissions(
+        java.nio.file.Path path,
+        java.nio.file.LinkOption... options
+    ) throws IOException {
+        removePermissions(
+            path,
+            PosixFilePermissions.fromString("-w--w--w-"),
+            options
+        );
+    }
+
+    public static void removePermissions(
+        java.nio.file.Path path,
+        Set<PosixFilePermission> permissions,
+        java.nio.file.LinkOption... options
+    ) throws IOException {
+        PosixFileAttributeView view =
+            getFileAttributeView(path, PosixFileAttributeView.class, options);
+        Set<PosixFilePermission> newPermissions =
+            EnumSet.copyOf(view.readAttributes().permissions());
+        newPermissions.removeAll(permissions);
+        view.setPermissions(newPermissions);
     }
 
     public static Reader newReader(Path path, Charset charset)

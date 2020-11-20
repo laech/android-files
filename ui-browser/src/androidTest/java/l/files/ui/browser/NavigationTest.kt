@@ -10,6 +10,7 @@ import android.text.format.DateUtils.*
 import android.text.format.Formatter.formatShortFileSize
 import android.util.Log
 import l.files.testing.fs.Paths
+import l.files.testing.fs.Paths.removeReadPermissions
 import l.files.ui.browser.sort.FileSort
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
@@ -20,7 +21,6 @@ import java.lang.System.nanoTime
 import java.nio.file.Files.*
 import java.nio.file.Path
 import java.nio.file.attribute.FileTime
-import java.nio.file.attribute.PosixFilePermissions
 import java.time.Instant
 import java.util.*
 import java.util.Collections.singleton
@@ -166,10 +166,7 @@ class NavigationTest : BaseFilesActivityTest() {
   @Test
   fun directory_view_is_disabled_if_no_read_permission() {
     val dir = createDirectory(dir().resolve("dir"))
-    Paths.removePermissions(
-      l.files.fs.Path.of(dir),
-      PosixFilePermissions.fromString("r--r--r--")
-    )
+    removeReadPermissions(dir)
     screen().assertDisabled(dir)
   }
 

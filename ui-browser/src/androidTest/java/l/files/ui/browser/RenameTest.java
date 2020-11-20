@@ -5,13 +5,13 @@ import l.files.testing.fs.Paths;
 import org.junit.Test;
 
 import java.nio.file.Path;
-import java.nio.file.attribute.PosixFilePermissions;
 
 import static java.lang.Thread.sleep;
 import static java.nio.file.Files.*;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.testing.Tests.timeout;
+import static l.files.testing.fs.Paths.removeWritePermissions;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -59,10 +59,7 @@ public class RenameTest extends BaseFilesActivityTest {
     @Test
     public void shows_error_when_failed_to_rename() throws Exception {
         Path file = createFile(dir().resolve("a"));
-        Paths.removePermissions(
-            l.files.fs.Path.of(dir()),
-            PosixFilePermissions.fromString("-w--w--w-")
-        );
+        removeWritePermissions(dir());
         rename(file)
             .setFilename("abc")
             .okExpectingFailure(".+AccessDeniedException.+$");

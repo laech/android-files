@@ -1,13 +1,12 @@
 package l.files.ui.browser;
 
-import l.files.testing.fs.Paths;
 import org.junit.Test;
 
 import java.nio.file.Path;
-import java.nio.file.attribute.PosixFilePermissions;
 
 import static java.nio.file.Files.createFile;
 import static java.nio.file.Files.delete;
+import static l.files.testing.fs.Paths.removeReadPermissions;
 import static l.files.ui.browser.sort.FileSort.NAME;
 
 public final class ActionModeTest extends BaseFilesActivityTest {
@@ -15,10 +14,7 @@ public final class ActionModeTest extends BaseFilesActivityTest {
     @Test
     public void disabled_item_can_still_be_selected() throws Exception {
         Path a = createFile(dir().resolve("a"));
-        Paths.removePermissions(
-            l.files.fs.Path.of(a),
-            PosixFilePermissions.fromString("r--r--r--")
-        );
+        removeReadPermissions(a);
         screen()
             .longClick(a)
             .assertActionModePresent(true)

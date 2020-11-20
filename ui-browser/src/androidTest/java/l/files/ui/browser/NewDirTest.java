@@ -1,19 +1,13 @@
 package l.files.ui.browser;
 
 import android.widget.EditText;
-import androidx.test.runner.AndroidJUnit4;
 import l.files.base.Consumer;
-import l.files.fs.Path;
-import l.files.testing.fs.Paths;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import java.nio.file.attribute.PosixFilePermissions;
 
 import static java.nio.file.Files.createFile;
+import static l.files.testing.fs.Paths.removeWritePermissions;
 import static org.junit.Assert.assertEquals;
 
-@RunWith(AndroidJUnit4.class)
 public final class NewDirTest extends BaseFilesActivityTest {
 
     // TODO test click ok from keyboard
@@ -21,10 +15,7 @@ public final class NewDirTest extends BaseFilesActivityTest {
     @Test
     public void shows_error_message_when_failed_to_create()
         throws Exception {
-        Paths.removePermissions(
-            Path.of(dir()),
-            PosixFilePermissions.fromString("-w--w--w-")
-        );
+        removeWritePermissions(dir());
         screen()
             .newFolder()
             .setFilename("a")
