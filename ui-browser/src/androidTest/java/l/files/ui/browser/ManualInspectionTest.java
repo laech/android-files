@@ -14,11 +14,13 @@ import java.util.List;
 import static android.os.Environment.getExternalStorageDirectory;
 import static androidx.test.InstrumentationRegistry.getInstrumentation;
 import static java.lang.System.currentTimeMillis;
+import static java.nio.file.Files.setLastModifiedTime;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.util.Arrays.asList;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.base.io.Charsets.UTF_8;
+import static l.files.testing.fs.Paths.createFiles;
 import static org.junit.Assert.assertNotEquals;
 
 public final class ManualInspectionTest {
@@ -32,9 +34,9 @@ public final class ManualInspectionTest {
         } catch (IOException ignore) {
             // Older versions does not support changing mtime
         }
-        Paths.createFiles(dir.concat(".nomedia"));
-        Paths.createFiles(dir.concat("html.html"));
-        Paths.createFiles(dir.concat("zip.zip"));
+        createFiles(dir.toJavaPath().resolve(".nomedia"));
+        createFiles(dir.toJavaPath().resolve("html.html"));
+        createFiles(dir.toJavaPath().resolve("zip.zip"));
         try {
             createNonUtf8Dir();
         } catch (IOException e) {
@@ -92,20 +94,18 @@ public final class ManualInspectionTest {
     }
 
     private void createFutureFiles(Path dir) throws IOException {
-        Paths.createFiles(dir.concat("future"))
-            .setLastModifiedTime(
-                FileTime.fromMillis(currentTimeMillis() + DAYS.toMillis(365))
-            );
-
-        Paths.createFiles(dir.concat("future3"))
-            .setLastModifiedTime(
-                FileTime.fromMillis(currentTimeMillis() + DAYS.toMillis(2))
-            );
-
-        Paths.createFiles(dir.concat("future5"))
-            .setLastModifiedTime(
-                FileTime.fromMillis(currentTimeMillis() + SECONDS.toMillis(5))
-            );
+        setLastModifiedTime(
+            createFiles(dir.toJavaPath().resolve("future")),
+            FileTime.fromMillis(currentTimeMillis() + DAYS.toMillis(365))
+        );
+        setLastModifiedTime(
+            createFiles(dir.toJavaPath().resolve("future3")),
+            FileTime.fromMillis(currentTimeMillis() + DAYS.toMillis(2))
+        );
+        setLastModifiedTime(
+            createFiles(dir.toJavaPath().resolve("future5")),
+            FileTime.fromMillis(currentTimeMillis() + SECONDS.toMillis(5))
+        );
     }
 
 }

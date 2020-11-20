@@ -33,6 +33,8 @@ import static java.lang.System.currentTimeMillis;
 import static java.nio.file.Files.*;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.util.stream.Collectors.toList;
+import static l.files.testing.fs.Paths.createFiles;
+import static l.files.testing.fs.Paths.deleteRecursiveIfExists;
 import static l.files.ui.browser.FilesActivity.EXTRA_DIRECTORY;
 import static l.files.ui.browser.FilesActivity.EXTRA_WATCH_LIMIT;
 import static org.junit.Assert.*;
@@ -223,8 +225,8 @@ public class BaseFilesActivityTest {
         Path dst = dir.resolve("Z");
         try {
 
-            Paths.deleteRecursiveIfExists(l.files.fs.Path.of(dir));
-            Paths.createFiles(l.files.fs.Path.of(src));
+            deleteRecursiveIfExists(l.files.fs.Path.of(dir));
+            createFiles(src);
 
             assertTrue(exists(src, NOFOLLOW_LINKS));
             assertTrue(
@@ -248,7 +250,7 @@ public class BaseFilesActivityTest {
 
         } catch (Throwable e) {
             try {
-                Paths.deleteRecursiveIfExists(l.files.fs.Path.of(dir));
+                deleteRecursiveIfExists(l.files.fs.Path.of(dir));
             } catch (Throwable sup) {
                 Throwables.addSuppressed(e, sup);
             }

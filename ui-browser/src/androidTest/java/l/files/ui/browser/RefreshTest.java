@@ -22,6 +22,7 @@ import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static l.files.testing.fs.Paths.createFiles;
 import static l.files.ui.browser.FilesLoader.BATCH_UPDATE_MILLIS;
 import static l.files.ui.browser.sort.FileSort.MODIFIED;
 import static org.junit.Assert.assertFalse;
@@ -198,7 +199,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
     private void updatePermissions(String name) throws IOException {
         Path res = dir().resolve(name);
-        Paths.createFiles(l.files.fs.Path.of(res));
+        createFiles(res);
         if (isReadable(res)) {
             setPosixFilePermissions(
                 res,
@@ -211,7 +212,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
     private void updateFileContent(String name) throws IOException {
         Path file = dir().resolve(name);
-        Paths.createFiles(l.files.fs.Path.of(file));
+        createFiles(file);
         write(file, singleton(String.valueOf(new Random().nextLong())));
     }
 

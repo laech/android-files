@@ -6,10 +6,10 @@ import l.files.fs.Path.Consumer;
 import l.files.fs.TraversalCallback;
 import l.files.fs.event.Observation;
 import l.files.fs.event.Observer;
-import l.files.fs.exception.AlreadyExist;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.OpenOption;
 import java.nio.file.attribute.PosixFileAttributes;
@@ -18,6 +18,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import static java.nio.file.Files.*;
+import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.nio.file.StandardOpenOption.APPEND;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static l.files.base.io.Charsets.UTF_8;
@@ -63,24 +65,16 @@ public final class Paths {
      * will throw the same exceptions as {@link Path#createFile()}
      * except will not error if already exists.
      */
-    public static Path createFiles(Path path) throws IOException {
+    public static java.nio.file.Path createFiles(java.nio.file.Path path)
+        throws IOException {
+        createDirectories(path.getParent());
         try {
-            if (path.stat(NOFOLLOW).isRegularFile()) {
-                return path;
+            createFile(path);
+        } catch (FileAlreadyExistsException e) {
+            if (!isRegularFile(path, NOFOLLOW_LINKS)) {
+                throw e;
             }
-        } catch (FileNotFoundException | NoSuchFileException ignore) {
         }
-
-        Path parent = path.parent();
-        if (parent != null) {
-            parent.createDirectories();
-        }
-
-        try {
-            path.createFile();
-        } catch (AlreadyExist ignore) {
-        }
-
         return path;
     }
 

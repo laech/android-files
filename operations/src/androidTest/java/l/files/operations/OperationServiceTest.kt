@@ -3,9 +3,8 @@ package l.files.operations
 import android.content.ComponentName
 import android.content.Context
 import androidx.test.platform.app.InstrumentationRegistry
-import l.files.fs.Path
 import l.files.testing.fs.PathBaseTest
-import l.files.testing.fs.Paths
+import l.files.testing.fs.Paths.createFiles
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertEquals
@@ -91,8 +90,8 @@ class OperationServiceTest : PathBaseTest() {
   fun deletes_files() {
     val a = dir1().toJavaPath().resolve("a")
     val b = dir1().toJavaPath().resolve("b/c")
-    Paths.createFiles(Path.of(a))
-    Paths.createFiles(Path.of(b))
+    createFiles(a)
+    createFiles(b)
     val listener = setListener(CountDownListener(TaskKind.DELETE))
     service.onCreate()
     service.onStartCommand(newDeleteIntent(context, listOf(a, b)), 0, 0)

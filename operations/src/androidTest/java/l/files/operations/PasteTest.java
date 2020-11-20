@@ -1,7 +1,6 @@
 package l.files.operations;
 
 import l.files.testing.fs.PathBaseTest;
-import l.files.testing.fs.Paths;
 import org.junit.Test;
 
 import java.nio.file.Files;
@@ -16,6 +15,7 @@ import static java.nio.file.Files.createFile;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
+import static l.files.testing.fs.Paths.createFiles;
 import static org.junit.Assert.*;
 
 public abstract class PasteTest extends PathBaseTest {
@@ -64,10 +64,10 @@ public abstract class PasteTest extends PathBaseTest {
      */
     @Test
     public void doesNotOverrideExistingDirectory() throws Exception {
-        Paths.createFiles(dir1().concat("a/1.txt"));
-        Paths.createFiles(dir1().concat("a/b/2.txt"));
-        Paths.createFiles(dir1().concat("a/b/3.txt"));
-        Paths.createFiles(dir1().concat("b/a/1.txt"));
+        createFiles(dir1().toJavaPath().resolve("a/1.txt"));
+        createFiles(dir1().toJavaPath().resolve("a/b/2.txt"));
+        createFiles(dir1().toJavaPath().resolve("a/b/3.txt"));
+        createFiles(dir1().toJavaPath().resolve("b/a/1.txt"));
         Set<Path> sources = singleton(dir1().toJavaPath().resolve("a"));
         Path dstDir = dir1().toJavaPath().resolve("b");
 
@@ -82,8 +82,8 @@ public abstract class PasteTest extends PathBaseTest {
     @Test
     public void doesNothingIfAlreadyCancelledOnExecution() throws Exception {
         Set<Path> sources = new HashSet<>(asList(
-            Paths.createFiles(dir1().concat("a/1.txt")).toJavaPath(),
-            Paths.createFiles(dir1().concat("a/2.txt")).toJavaPath()
+            createFiles(dir1().toJavaPath().resolve("a/1.txt")),
+            createFiles(dir1().toJavaPath().resolve("a/2.txt"))
         ));
         Path dstDir = createDirectory(dir1().toJavaPath().resolve("b"));
 
