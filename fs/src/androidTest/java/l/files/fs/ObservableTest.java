@@ -39,6 +39,7 @@ import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.ObservableTest.Recorder.observe;
 import static l.files.fs.event.Event.*;
+import static l.files.testing.fs.Paths.removeReadPermissions;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.AdditionalMatchers.aryEq;
@@ -81,10 +82,7 @@ public final class ObservableTest extends PathBaseTest {
         observables.add(createRandomChildDir(dir1()));
 
         Path unobservable = dir1().concat("unobservable").createDirectory();
-        Paths.removePermissions(
-            unobservable,
-            PosixFilePermissions.fromString("r--r--r--")
-        );
+        removeReadPermissions(unobservable.toJavaPath());
 
         observables.add(createRandomChildDir(dir1()));
         observables.add(createRandomChildDir(dir1()));
@@ -651,10 +649,7 @@ public final class ObservableTest extends PathBaseTest {
         throws Exception {
 
         Path dir = dir1().concat("dir").createDirectory();
-        Paths.removePermissions(
-            dir,
-            PosixFilePermissions.fromString("r--r--r--")
-        );
+        removeReadPermissions(dir.toJavaPath());
         try (Recorder observer = observe(dir1())) {
             observer.awaitOnIncompleteObservation();
             observer.awaitCreateFile(dir1().concat("parent watch still works"));
@@ -1269,10 +1264,7 @@ public final class ObservableTest extends PathBaseTest {
         }
 
         PreActions removeReadPermissions() {
-            return add(src -> Paths.removePermissions(
-                src,
-                PosixFilePermissions.fromString("r--r--r--")
-            ));
+            return add(src -> Paths.removeReadPermissions(src.toJavaPath()));
         }
 
         PreActions createFile(String name) {
