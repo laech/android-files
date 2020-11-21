@@ -16,6 +16,7 @@ import l.files.ui.browser.sort.FileSort;
 import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -30,6 +31,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import static android.os.Looper.getMainLooper;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
@@ -224,12 +226,9 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     private List<Path> visit() throws IOException {
         List<Path> children = new ArrayList<>();
-        l.files.fs.Path.of(root).list((l.files.fs.Path.Consumer) child -> {
-            Path name = child.toJavaPath().getFileName();
-            assert name != null;
-            checkedAdd(children, name);
-            return true;
-        });
+        try (Stream<Path> stream = Files.list(root)) {
+            stream.forEach(child -> checkedAdd(children, child.getFileName()));
+        }
         return children;
     }
 
