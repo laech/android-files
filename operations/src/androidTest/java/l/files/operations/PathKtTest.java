@@ -13,11 +13,11 @@ import static org.junit.Assert.assertEquals;
 public final class PathKtTest extends PathBaseTest {
 
     private Path createFile(String name) throws IOException {
-        return Files.createFile(dir1().concat(name).toJavaPath());
+        return Files.createFile(dir1().resolve(name));
     }
 
     private Path createDir(String name) throws IOException {
-        return Files.createDirectory(dir1().concat(name).toJavaPath());
+        return Files.createDirectory(dir1().resolve(name));
     }
 
     @Test
@@ -65,8 +65,8 @@ public final class PathKtTest extends PathBaseTest {
     }
 
     private void testExistent(Path file, String expectedName) {
-        Path expected = dir1().toJavaPath().resolve(expectedName);
-        Path actual = getNonExistentDestinationFile(file, dir1().toJavaPath());
+        Path expected = dir1().resolve(expectedName);
+        Path actual = getNonExistentDestinationFile(file, dir1());
         assertEquals(expected, actual);
     }
 

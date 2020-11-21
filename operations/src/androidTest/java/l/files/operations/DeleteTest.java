@@ -19,8 +19,8 @@ public final class DeleteTest extends PathBaseTest {
 
     @Test
     public void notifiesListener() throws Exception {
-        Path a = createDirectory(dir1().concat("a").toJavaPath());
-        Path b = createFile(dir1().concat("a/b").toJavaPath());
+        Path a = createDirectory(dir1().resolve("a"));
+        Path b = createFile(dir1().resolve("a/b"));
 
         Set<Path> expected = new HashSet<>(asList(a, b));
 
@@ -32,15 +32,15 @@ public final class DeleteTest extends PathBaseTest {
 
     @Test
     public void deletesFile() throws Exception {
-        Path file = createFile(dir1().concat("a").toJavaPath());
+        Path file = createFile(dir1().resolve("a"));
         delete(file);
         assertFalse(exists(file, NOFOLLOW_LINKS));
     }
 
     @Test
     public void deletesNonEmptyDirectory() throws Exception {
-        Path dir = createDirectory(dir1().concat("a").toJavaPath());
-        Path file = createFile(dir1().concat("a/child.txt").toJavaPath());
+        Path dir = createDirectory(dir1().resolve("a"));
+        Path file = createFile(dir1().resolve("a/child.txt"));
         delete(dir);
         assertFalse(exists(file, NOFOLLOW_LINKS));
         assertFalse(exists(dir, NOFOLLOW_LINKS));
@@ -48,15 +48,15 @@ public final class DeleteTest extends PathBaseTest {
 
     @Test
     public void deletesEmptyDirectory() throws Exception {
-        Path dir = createDirectory(dir1().concat("a").toJavaPath());
+        Path dir = createDirectory(dir1().resolve("a"));
         delete(dir);
         assertFalse(exists(dir, NOFOLLOW_LINKS));
     }
 
     @Test
     public void deletesSymbolicLinkButNotLinkedFile() throws Exception {
-        Path a = createFile(dir1().concat("a").toJavaPath());
-        Path b = createSymbolicLink(dir1().concat("b").toJavaPath(), a);
+        Path a = createFile(dir1().resolve("a"));
+        Path b = createSymbolicLink(dir1().resolve("b"), a);
         assertTrue(exists(a, NOFOLLOW_LINKS));
         assertTrue(exists(b, NOFOLLOW_LINKS));
         delete(b);

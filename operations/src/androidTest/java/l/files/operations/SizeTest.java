@@ -15,10 +15,10 @@ public final class SizeTest extends PathBaseTest {
 
     @Test
     public void size() throws Exception {
-        Path a = createDirectory(dir1().toJavaPath().resolve("a"));
-        Path b = createFile(dir1().toJavaPath().resolve("a/b"));
-        Path c = createFile(dir1().toJavaPath().resolve("c"));
-        Path d = createDirectory(dir1().toJavaPath().resolve("d"));
+        Path a = createDirectory(dir1().resolve("a"));
+        Path b = createFile(dir1().resolve("a/b"));
+        Path c = createFile(dir1().resolve("c"));
+        Path d = createDirectory(dir1().resolve("d"));
 
         Size size = new Size(asList(a, b, c, d));
         size.execute();

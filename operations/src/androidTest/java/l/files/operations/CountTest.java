@@ -14,19 +14,19 @@ public final class CountTest extends PathBaseTest {
 
     @Test
     public void count() throws Exception {
-        createFiles(dir1().toJavaPath().resolve("1/a.txt"));
-        createFiles(dir1().toJavaPath().resolve("3/4/c.txt"));
+        createFiles(dir1().resolve("1/a.txt"));
+        createFiles(dir1().resolve("3/4/c.txt"));
 
         Collection<?> expected = asList(
             dir1(),
-            dir1().concat("1"),
-            dir1().concat("1/a.txt"),
-            dir1().concat("3"),
-            dir1().concat("3/4"),
-            dir1().concat("3/4/c.txt")
+            dir1().resolve("1"),
+            dir1().resolve("1/a.txt"),
+            dir1().resolve("3"),
+            dir1().resolve("3/4"),
+            dir1().resolve("3/4/c.txt")
         );
 
-        Count counter = new Count(singleton(dir1().toJavaPath()));
+        Count counter = new Count(singleton(dir1()));
         counter.execute();
 
         assertEquals(expected.size(), counter.getCount());

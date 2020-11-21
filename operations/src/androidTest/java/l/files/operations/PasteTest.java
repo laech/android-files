@@ -10,8 +10,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static java.lang.Thread.currentThread;
-import static java.nio.file.Files.createDirectory;
-import static java.nio.file.Files.createFile;
+import static java.nio.file.Files.*;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
@@ -26,10 +25,10 @@ public abstract class PasteTest extends PathBaseTest {
      */
     @Test
     public void pastesEmptyDirectories() throws Exception {
-        Path src = createDirectory(dir1().concat("empty").toJavaPath());
-        Path dstDir = createDirectory(dir1().concat("dst").toJavaPath());
+        Path src = createDirectory(dir1().resolve("empty"));
+        Path dstDir = createDirectory(dir1().resolve("dst"));
         create(singleton(src), dstDir).execute();
-        assertTrue(dir1().concat("dst/empty").exists(NOFOLLOW_LINKS));
+        assertTrue(exists(dir1().resolve("dst/empty"), NOFOLLOW_LINKS));
     }
 
     /**
@@ -40,21 +39,21 @@ public abstract class PasteTest extends PathBaseTest {
     @Test
     public void doesNotOverrideExistingFile() throws Exception {
         Set<Path> sources = new HashSet<>(asList(
-            createFile(dir1().concat("a.txt").toJavaPath()),
-            createFile(dir1().concat("b.mp4").toJavaPath())
+            createFile(dir1().resolve("a.txt")),
+            createFile(dir1().resolve("b.mp4"))
         ));
-        dir1().concat("1").createDirectory();
-        dir1().concat("1/a.txt").createFile();
-        dir1().concat("1/b.mp4").createFile();
+        createDirectory(dir1().resolve("1"));
+        createFile(dir1().resolve("1/a.txt"));
+        createFile(dir1().resolve("1/b.mp4"));
 
-        Path dstDir = dir1().toJavaPath().resolve("1");
+        Path dstDir = dir1().resolve("1");
 
         create(sources, dstDir).execute();
 
-        assertTrue(dir1().concat("1/a.txt").exists(NOFOLLOW_LINKS));
-        assertTrue(dir1().concat("1/b.mp4").exists(NOFOLLOW_LINKS));
-        assertTrue(dir1().concat("1/a 2.txt").exists(NOFOLLOW_LINKS));
-        assertTrue(dir1().concat("1/b 2.mp4").exists(NOFOLLOW_LINKS));
+        assertTrue(exists(dir1().resolve("1/a.txt"), NOFOLLOW_LINKS));
+        assertTrue(exists(dir1().resolve("1/b.mp4"), NOFOLLOW_LINKS));
+        assertTrue(exists(dir1().resolve("1/a 2.txt"), NOFOLLOW_LINKS));
+        assertTrue(exists(dir1().resolve("1/b 2.mp4"), NOFOLLOW_LINKS));
     }
 
     /**
@@ -64,28 +63,28 @@ public abstract class PasteTest extends PathBaseTest {
      */
     @Test
     public void doesNotOverrideExistingDirectory() throws Exception {
-        createFiles(dir1().toJavaPath().resolve("a/1.txt"));
-        createFiles(dir1().toJavaPath().resolve("a/b/2.txt"));
-        createFiles(dir1().toJavaPath().resolve("a/b/3.txt"));
-        createFiles(dir1().toJavaPath().resolve("b/a/1.txt"));
-        Set<Path> sources = singleton(dir1().toJavaPath().resolve("a"));
-        Path dstDir = dir1().toJavaPath().resolve("b");
+        createFiles(dir1().resolve("a/1.txt"));
+        createFiles(dir1().resolve("a/b/2.txt"));
+        createFiles(dir1().resolve("a/b/3.txt"));
+        createFiles(dir1().resolve("b/a/1.txt"));
+        Set<Path> sources = singleton(dir1().resolve("a"));
+        Path dstDir = dir1().resolve("b");
 
         create(sources, dstDir).execute();
 
-        assertTrue(dir1().concat("b/a/1.txt").exists(NOFOLLOW_LINKS));
-        assertTrue(dir1().concat("b/a 2/1.txt").exists(NOFOLLOW_LINKS));
-        assertTrue(dir1().concat("b/a 2/b/2.txt").exists(NOFOLLOW_LINKS));
-        assertTrue(dir1().concat("b/a 2/b/3.txt").exists(NOFOLLOW_LINKS));
+        assertTrue(exists(dir1().resolve("b/a/1.txt"), NOFOLLOW_LINKS));
+        assertTrue(exists(dir1().resolve("b/a 2/1.txt"), NOFOLLOW_LINKS));
+        assertTrue(exists(dir1().resolve("b/a 2/b/2.txt"), NOFOLLOW_LINKS));
+        assertTrue(exists(dir1().resolve("b/a 2/b/3.txt"), NOFOLLOW_LINKS));
     }
 
     @Test
     public void doesNothingIfAlreadyCancelledOnExecution() throws Exception {
         Set<Path> sources = new HashSet<>(asList(
-            createFiles(dir1().toJavaPath().resolve("a/1.txt")),
-            createFiles(dir1().toJavaPath().resolve("a/2.txt"))
+            createFiles(dir1().resolve("a/1.txt")),
+            createFiles(dir1().resolve("a/2.txt"))
         ));
-        Path dstDir = createDirectory(dir1().toJavaPath().resolve("b"));
+        Path dstDir = createDirectory(dir1().resolve("b"));
 
         Thread thread = new Thread(() -> {
             currentThread().interrupt();
@@ -109,9 +108,9 @@ public abstract class PasteTest extends PathBaseTest {
 
     @Test
     public void errorOnPastingSelfIntoSubDirectory() throws Exception {
-        Path parent = createDirectory(dir1().concat("parent").toJavaPath());
+        Path parent = createDirectory(dir1().resolve("parent"));
         Path child =
-            createDirectory(dir1().concat("parent/child").toJavaPath());
+            createDirectory(dir1().resolve("parent/child"));
         try {
             create(singleton(parent), child).execute();
             fail();
@@ -122,7 +121,7 @@ public abstract class PasteTest extends PathBaseTest {
 
     @Test
     public void errorOnPastingIntoSelf() throws Exception {
-        Path dir = createDirectory(dir1().concat("parent").toJavaPath());
+        Path dir = createDirectory(dir1().resolve("parent"));
         try {
             create(singleton(dir), dir).execute();
             fail();

@@ -3,12 +3,11 @@ package l.files.bookmarks
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import androidx.test.platform.app.InstrumentationRegistry
-import l.files.fs.Path
 import l.files.testing.fs.PathBaseTest
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
-import java.nio.file.Files
+import java.nio.file.Files.*
 import java.nio.file.Paths
 
 class BookmarksTest : PathBaseTest() {
@@ -30,10 +29,9 @@ class BookmarksTest : PathBaseTest() {
 
   @Test
   fun removes_non_existing_bookmarks() {
-    val file = dir1().concat("file").createFile().toJavaPath()
-    val dir = dir1().concat("dir").createDirectory().toJavaPath()
-    val link =
-      dir1().concat("link").createSymbolicLink(Path.of(file)).toJavaPath()
+    val file = createFile(dir1().resolve("file"))
+    val dir = createDirectory(dir1().resolve("dir"))
+    val link = createSymbolicLink(dir1().resolve("link"), file)
     assertThat(
       pref.edit()
         .putStringSet(
@@ -45,7 +43,7 @@ class BookmarksTest : PathBaseTest() {
     )
 
     assertThat(loadBookmarks(pref), equalTo(setOf(file, link, dir)))
-    Files.delete(file)
+    delete(file)
     assertThat(loadBookmarks(pref), equalTo(setOf(dir)))
   }
 

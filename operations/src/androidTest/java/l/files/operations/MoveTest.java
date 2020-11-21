@@ -16,32 +16,32 @@ public final class MoveTest extends PasteTest {
 
     @Test
     public void movedCountInitialZero() throws Exception {
-        Path src = createFile(dir1().concat("a").toJavaPath());
-        Path dstDir = createDirectory(dir1().concat("b").toJavaPath());
+        Path src = createFile(dir1().resolve("a"));
+        Path dstDir = createDirectory(dir1().resolve("b"));
         Move move = create(src, dstDir);
         assertEquals(move.getMovedItemCount(), 0);
     }
 
     @Test
     public void movesSymlink() throws Exception {
-        Path target = createFile(dir1().concat("target").toJavaPath());
+        Path target = createFile(dir1().resolve("target"));
         Path link =
-            createSymbolicLink(dir1().concat("link").toJavaPath(), target);
+            createSymbolicLink(dir1().resolve("link"), target);
 
         Move move =
-            create(link, createDirectory(dir1().toJavaPath().resolve("moved")));
+            create(link, createDirectory(dir1().resolve("moved")));
         move.execute();
 
         Path actual =
-            readSymbolicLink(dir1().toJavaPath().resolve("moved/link"));
+            readSymbolicLink(dir1().resolve("moved/link"));
         assertEquals(target, actual);
         assertEquals(1, move.getMovedItemCount());
     }
 
     @Test
     public void movesFile() throws Exception {
-        Path srcFile = createFile(dir1().concat("a.txt").toJavaPath());
-        Path dstDir = createDirectory(dir1().concat("dst").toJavaPath());
+        Path srcFile = createFile(dir1().resolve("a.txt"));
+        Path dstDir = createDirectory(dir1().resolve("dst"));
         Path dstFile = dstDir.resolve("a.txt");
         write(srcFile, singleton("Test"));
 
@@ -56,8 +56,8 @@ public final class MoveTest extends PasteTest {
 
     @Test
     public void movesDirectory() throws Exception {
-        Path srcDir = createDirectory(dir1().concat("a").toJavaPath());
-        Path dstDir = createDirectory(dir1().concat("dst").toJavaPath());
+        Path srcDir = createDirectory(dir1().resolve("a"));
+        Path dstDir = createDirectory(dir1().resolve("dst"));
         Path srcFile = srcDir.resolve("test.txt");
         Path dstFile = dstDir.resolve("a/test.txt");
         write(srcFile, singleton("Test"));

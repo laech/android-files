@@ -29,7 +29,7 @@ class PreviewTest : PathBaseTest() {
   }
 
   private fun newPreview() = Preview(context) {
-    dir2().toJavaPath().resolve(nanoTime().toString())
+    dir2().resolve(nanoTime().toString())
   }
 
   @Test
@@ -100,7 +100,7 @@ class PreviewTest : PathBaseTest() {
     testFile: String,
     dstFileName: String = testFile
   ) {
-    val file = dir1().concat(dstFileName).toJavaPath()
+    val file = dir1().resolve(dstFileName)
     context.assets.open(testFile).use { copy(it, file, REPLACE_EXISTING) }
     testPreviewSuccess(file)
     testPreviewSuccess(file)
@@ -113,8 +113,8 @@ class PreviewTest : PathBaseTest() {
 
   @Test
   fun preview_link() {
-    val file = createFile(dir1().toJavaPath().resolve("file"))
-    val link = createSymbolicLink(dir1().toJavaPath().resolve("link"), file)
+    val file = createFile(dir1().resolve("file"))
+    val link = createSymbolicLink(dir1().resolve("link"), file)
     write(file, "hi".toByteArray(UTF_8))
     testPreviewSuccess(file)
     testPreviewSuccess(file)
@@ -124,8 +124,8 @@ class PreviewTest : PathBaseTest() {
 
   @Test
   fun preview_link_modified_target() {
-    val target = createDirectory(dir1().toJavaPath().resolve("target"))
-    val link = createSymbolicLink(dir1().toJavaPath().resolve("link"), target)
+    val target = createDirectory(dir1().resolve("target"))
+    val link = createSymbolicLink(dir1().resolve("link"), target)
     testPreviewFailure(link)
     delete(target)
     createFile(target)
@@ -135,7 +135,7 @@ class PreviewTest : PathBaseTest() {
   }
 
   private fun testPreviewSuccessForContent(content: String) {
-    val file = dir1().toJavaPath().resolve(nanoTime().toString())
+    val file = dir1().resolve(nanoTime().toString())
     write(file, content.toByteArray(UTF_8))
     testPreviewSuccess(file)
     testPreviewSuccess(file)

@@ -24,9 +24,9 @@ public final class CopyTest extends PasteTest {
 
     @Test
     public void copy_reports_summary() throws Exception {
-        Path dstDir = createDirectory(dir1().concat("dir").toJavaPath());
-        Path srcDir = createDirectory(dir1().concat("a").toJavaPath());
-        Path srcFile = createFile(dir1().concat("a/file").toJavaPath());
+        Path dstDir = createDirectory(dir1().resolve("dir"));
+        Path srcDir = createDirectory(dir1().resolve("a"));
+        Path srcFile = createFile(dir1().resolve("a/file"));
 
         Copy copy = create(singleton(srcDir), dstDir);
         copy.execute();
@@ -50,22 +50,22 @@ public final class CopyTest extends PasteTest {
 
     @Test
     public void preserves_timestamps_for_file() throws Exception {
-        Path src = createFile(dir1().concat("a").toJavaPath());
-        Path dir = createDirectory(dir1().concat("dir").toJavaPath());
+        Path src = createFile(dir1().resolve("a"));
+        Path dir = createDirectory(dir1().resolve("dir"));
         testCopyPreservesTimestamp(src, dir);
     }
 
     @Test
     public void preserves_timestamps_for_empty_dir() throws Exception {
-        Path src = createDirectory(dir1().concat("dir1").toJavaPath());
-        Path dir = createDirectory(dir1().concat("dir2").toJavaPath());
+        Path src = createDirectory(dir1().resolve("dir1"));
+        Path dir = createDirectory(dir1().resolve("dir2"));
         testCopyPreservesTimestamp(src, dir);
     }
 
     @Test
     public void preserves_timestamps_for_full_dir() throws Exception {
-        Path dir = createDirectory(dir1().concat("dir2").toJavaPath());
-        Path src = createDirectory(dir1().concat("dir1").toJavaPath());
+        Path dir = createDirectory(dir1().resolve("dir2"));
+        Path src = createDirectory(dir1().resolve("dir1"));
         createFile(src.resolve("a"));
         createDirectory(src.resolve("b"));
         createSymbolicLink(src.resolve("c"), src);
@@ -119,20 +119,20 @@ public final class CopyTest extends PasteTest {
 
     @Test
     public void copies_link() throws Exception {
-        Path target = createFile(dir1().concat("target").toJavaPath());
+        Path target = createFile(dir1().resolve("target"));
         Path link =
-            createSymbolicLink(dir1().concat("link").toJavaPath(), target);
+            createSymbolicLink(dir1().resolve("link"), target);
 
-        copy(link, createDirectory(dir1().toJavaPath().resolve("copied")));
+        copy(link, createDirectory(dir1().resolve("copied")));
 
-        Path copied = dir1().toJavaPath().resolve("copied/link");
+        Path copied = dir1().resolve("copied/link");
         assertEquals(target, readSymbolicLink(copied));
     }
 
     @Test
     public void copies_directory() throws Exception {
-        Path srcDir = createDirectory(dir1().concat("a").toJavaPath());
-        Path dstDir = createDirectory(dir1().concat("dst").toJavaPath());
+        Path srcDir = createDirectory(dir1().resolve("a"));
+        Path dstDir = createDirectory(dir1().resolve("dst"));
         Path srcFile = srcDir.resolve("test.txt");
         Path dstFile = dstDir.resolve("a/test.txt");
         write(srcFile, singleton("Testing"));
@@ -144,19 +144,19 @@ public final class CopyTest extends PasteTest {
 
     @Test
     public void copies_empty_directory() throws Exception {
-        Path src = createDirectory(dir1().concat("empty").toJavaPath());
-        Path dir = createDirectory(dir1().concat("dst").toJavaPath());
+        Path src = createDirectory(dir1().resolve("empty"));
+        Path dir = createDirectory(dir1().resolve("dst"));
         copy(src, dir);
         assertTrue(exists(
-            dir1().toJavaPath().resolve("dst/empty"),
+            dir1().resolve("dst/empty"),
             NOFOLLOW_LINKS
         ));
     }
 
     @Test
     public void copies_empty_file() throws Exception {
-        Path srcFile = createFile(dir1().concat("empty").toJavaPath());
-        Path dstDir = createDirectory(dir1().concat("dst").toJavaPath());
+        Path srcFile = createFile(dir1().resolve("empty"));
+        Path dstDir = createDirectory(dir1().resolve("dst"));
 
         copy(srcFile, dstDir);
         Path expected = dstDir.resolve("empty");
@@ -171,8 +171,8 @@ public final class CopyTest extends PasteTest {
 
     @Test
     public void copies_file() throws Exception {
-        Path srcFile = createFile(dir1().concat("test.txt").toJavaPath());
-        Path dstDir = createDirectory(dir1().concat("dst").toJavaPath());
+        Path srcFile = createFile(dir1().resolve("test.txt"));
+        Path dstDir = createDirectory(dir1().resolve("dst"));
         Path dstFile = dstDir.resolve("test.txt");
         write(srcFile, singleton("Testing"));
 

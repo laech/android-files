@@ -1,22 +1,23 @@
 package l.files.testing.fs;
 
 import androidx.annotation.Nullable;
-import l.files.fs.Path;
-import l.files.fs.TraversalCallback;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestName;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.EnumSet;
 
+import static java.nio.file.Files.*;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.nio.file.attribute.PosixFilePermission.*;
-import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.fs.TraversalCallback.Result.CONTINUE;
-import static org.junit.Assert.assertTrue;
 
 public abstract class PathBaseTest {
 
@@ -36,32 +37,42 @@ public abstract class PathBaseTest {
     @After
     public void tearDown() throws Exception {
         if (dir1 != null) {
-            delete(dir1);
+            deleteRecursive(dir1);
         }
         if (dir2 != null) {
-            delete(dir2);
+            deleteRecursive(dir2);
         }
     }
 
-    private void delete(Path path) throws IOException {
-        if (!path.exists(NOFOLLOW_LINKS)) {
+    private void deleteRecursive(Path path) throws IOException {
+        if (!exists(path, NOFOLLOW_LINKS)) {
             return;
         }
-        path.traverse(NOFOLLOW, new TraversalCallback.Base<Path>() {
-
+        walkFileTree(path, new SimpleFileVisitor<Path>() {
             @Override
-            public Result onPreVisit(Path path) throws IOException {
-                if (path.stat(NOFOLLOW).isDirectory()) {
-                    path.setPermissions(EnumSet.of(
-                        OWNER_READ, OWNER_WRITE, OWNER_EXECUTE));
-                }
-                return CONTINUE;
+            public FileVisitResult preVisitDirectory(
+                Path dir,
+                BasicFileAttributes attrs
+            ) throws IOException {
+                setPosixFilePermissions(dir, EnumSet.of(
+                    OWNER_READ, OWNER_WRITE, OWNER_EXECUTE));
+                return super.preVisitDirectory(dir, attrs);
             }
 
             @Override
-            public Result onPostVisit(Path element) throws IOException {
-                element.delete();
-                return CONTINUE;
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc)
+                throws IOException {
+                delete(dir);
+                return super.postVisitDirectory(dir, exc);
+            }
+
+            @Override
+            public FileVisitResult visitFile(
+                Path file,
+                BasicFileAttributes attrs
+            ) throws IOException {
+                delete(file);
+                return super.visitFile(file, attrs);
             }
         });
     }
@@ -69,9 +80,9 @@ public abstract class PathBaseTest {
     protected Path dir1() {
         if (dir1 == null) {
             try {
-                dir1 = Path.of(createTempFolder());
+                dir1 = createTempFolder();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new UncheckedIOException(e);
             }
         }
         return dir1;
@@ -80,20 +91,17 @@ public abstract class PathBaseTest {
     protected Path dir2() {
         if (dir2 == null) {
             try {
-                dir2 = Path.of(createTempFolder());
+                dir2 = createTempFolder();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new UncheckedIOException(e);
             }
         }
         return dir2;
     }
 
-    private File createTempFolder() throws IOException {
-        File dir = File.createTempFile(getClass().getSimpleName()
-            + "." + testName.getMethodName(), null);
-        assertTrue(dir.delete());
-        assertTrue(dir.mkdirs());
-        return dir;
+    private Path createTempFolder() throws IOException {
+        return Files.createTempDirectory(
+            getClass().getSimpleName() + "." + testName.getMethodName());
     }
 
 }

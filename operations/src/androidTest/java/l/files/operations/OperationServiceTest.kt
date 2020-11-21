@@ -58,8 +58,8 @@ class OperationServiceTest : PathBaseTest() {
 
   @Test
   fun moves_file() {
-    val src = createFile(dir1().toJavaPath().resolve("a"))
-    val dst = createDirectory(dir1().toJavaPath().resolve("dst"))
+    val src = createFile(dir1().resolve("a"))
+    val dst = createDirectory(dir1().resolve("dst"))
     val listener = setListener(CountDownListener(TaskKind.MOVE))
     service.onCreate()
     service.onStartCommand(newMoveIntent(context, setOf(src), dst), 0, 0)
@@ -73,8 +73,8 @@ class OperationServiceTest : PathBaseTest() {
 
   @Test
   fun copies_file() {
-    val src = createFile(dir1().concat("a").toJavaPath())
-    val dst = createDirectory(dir1().concat("dst").toJavaPath())
+    val src = createFile(dir1().resolve("a"))
+    val dst = createDirectory(dir1().resolve("dst"))
     val listener = setListener(CountDownListener(TaskKind.COPY))
     service.onCreate()
     service.onStartCommand(newCopyIntent(context, setOf(src), dst), 0, 0)
@@ -88,8 +88,8 @@ class OperationServiceTest : PathBaseTest() {
 
   @Test
   fun deletes_files() {
-    val a = dir1().toJavaPath().resolve("a")
-    val b = dir1().toJavaPath().resolve("b/c")
+    val a = dir1().resolve("a")
+    val b = dir1().resolve("b/c")
     createFiles(a)
     createFiles(b)
     val listener = setListener(CountDownListener(TaskKind.DELETE))
@@ -102,8 +102,8 @@ class OperationServiceTest : PathBaseTest() {
 
   @Test
   fun task_start_time_is_correct() {
-    val file1 = createFile(dir1().concat("a").toJavaPath())
-    val file2 = createFile(dir1().concat("b").toJavaPath())
+    val file1 = createFile(dir1().resolve("a"))
+    val file2 = createFile(dir1().resolve("b"))
     val listener = setListener(CountDownListener(TaskKind.DELETE))
     service.onCreate()
     val start = System.currentTimeMillis()

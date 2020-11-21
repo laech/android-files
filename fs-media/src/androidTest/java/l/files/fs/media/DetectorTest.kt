@@ -2,13 +2,13 @@ package l.files.fs.media
 
 import android.content.Context
 import androidx.test.platform.app.InstrumentationRegistry
-import l.files.fs.Path
 import l.files.testing.fs.PathBaseTest
-import l.files.testing.fs.Paths
 import org.junit.Assert.assertEquals
 import org.junit.Assert.fail
 import org.junit.Test
 import java.io.IOException
+import java.nio.file.Files.*
+import java.nio.file.Path
 
 class DetectorTest : PathBaseTest() {
 
@@ -17,64 +17,64 @@ class DetectorTest : PathBaseTest() {
 
   @Test
   fun can_detect_by_name() {
-    val file = createTextFile("a.txt", "").toJavaPath()
+    val file = createTextFile("a.txt", "")
     assertEquals("text/plain", Detector.detect(context, file))
   }
 
   @Test
   fun can_detect_by_content() {
-    val file = createTextFile("a.png").toJavaPath()
+    val file = createTextFile("a.png")
     assertEquals("text/plain", Detector.detect(context, file))
   }
 
   @Test
   fun detects_directory_type() {
-    val dir = createDir("b").toJavaPath()
+    val dir = createDir("b")
     assertEquals("inode/directory", Detector.detect(context, dir))
   }
 
   @Test
   fun detects_file_type() {
-    val file = createTextFile("a.txt").toJavaPath()
+    val file = createTextFile("a.txt")
     assertEquals("text/plain", Detector.detect(context, file))
   }
 
   @Test
   fun detects_file_type_uppercase_extension() {
-    val file = createTextFile("a.TXT").toJavaPath()
+    val file = createTextFile("a.TXT")
     assertEquals("text/plain", Detector.detect(context, file))
   }
 
   @Test
   fun detects_linked_file_type() {
     val file = createTextFile("a.mp3")
-    val link = createSymbolicLink("b.txt", file).toJavaPath()
+    val link = createSymbolicLink(dir1().resolve("b.txt"), file)
     assertEquals("text/plain", Detector.detect(context, link))
   }
 
   @Test
   fun detects_linked_directory_type() {
     val dir = createDir("a")
-    val link = createSymbolicLink("b", dir).toJavaPath()
+    val link = createSymbolicLink(dir1().resolve("b"), dir)
     assertEquals("inode/directory", Detector.detect(context, link))
   }
 
   @Test
   fun detects_multi_linked_directory_type() {
     val dir = createDir("a")
-    val link1 = createSymbolicLink("b", dir)
-    val link2 = createSymbolicLink("c", link1).toJavaPath()
+    val link1 = createSymbolicLink(dir1().resolve("b"), dir)
+    val link2 = createSymbolicLink(dir1().resolve("c"), link1)
     assertEquals("inode/directory", Detector.detect(context, link2))
   }
 
   @Test
   fun fails_on_broken_circular_links() {
-    val link1 = dir1().concat("link1")
-    val link2 = dir1().concat("link2")
-    link1.createSymbolicLink(link2)
-    link2.createSymbolicLink(link1)
+    val link1 = dir1().resolve("link1")
+    val link2 = dir1().resolve("link2")
+    createSymbolicLink(link1, link2)
+    createSymbolicLink(link2, link1)
     try {
-      Detector.detect(context, link1.toJavaPath())
+      Detector.detect(context, link1)
       fail()
     } catch (e: IOException) {
       // Pass
@@ -82,17 +82,14 @@ class DetectorTest : PathBaseTest() {
   }
 
   private fun createDir(name: String): Path =
-    dir1().concat(name).createDirectory()
-
-  private fun createSymbolicLink(name: String, target: Path): Path =
-    dir1().concat(name).createSymbolicLink(target)
+    createDirectory(dir1().resolve(name))
 
   private fun createTextFile(
     name: String,
     content: String = "hello world"
   ): Path {
-    val path = dir1().concat(name)
-    Paths.writeUtf8(path, content)
+    val path = dir1().resolve(name)
+    write(path, content.toByteArray())
     return path
   }
 }
