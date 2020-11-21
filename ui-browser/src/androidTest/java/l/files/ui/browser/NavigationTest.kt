@@ -53,7 +53,7 @@ class NavigationTest : BaseFilesActivityTest() {
         .assertAllItemsDisplayedInOrder(dst)
 
     } finally {
-      Paths.deleteRecursiveIfExists(l.files.fs.Path.of(dir))
+      Paths.deleteRecursiveIfExists(dir)
     }
   }
 

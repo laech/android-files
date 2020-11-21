@@ -9,7 +9,6 @@ import androidx.test.uiautomator.UiObject;
 import androidx.test.uiautomator.UiObjectNotFoundException;
 import androidx.test.uiautomator.UiSelector;
 import l.files.base.Throwables;
-import l.files.testing.fs.Paths;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -225,7 +224,7 @@ public class BaseFilesActivityTest {
         Path dst = dir.resolve("Z");
         try {
 
-            deleteRecursiveIfExists(l.files.fs.Path.of(dir));
+            deleteRecursiveIfExists(dir);
             createFiles(src);
 
             assertTrue(exists(src, NOFOLLOW_LINKS));
@@ -250,7 +249,7 @@ public class BaseFilesActivityTest {
 
         } catch (Throwable e) {
             try {
-                deleteRecursiveIfExists(l.files.fs.Path.of(dir));
+                deleteRecursiveIfExists(dir);
             } catch (Throwable sup) {
                 Throwables.addSuppressed(e, sup);
             }
@@ -259,12 +258,12 @@ public class BaseFilesActivityTest {
         } finally {
 
             try {
-                Paths.deleteIfExists(l.files.fs.Path.of(src));
+                deleteIfExists(src);
             } catch (IOException ignore) {
             }
 
             try {
-                Paths.deleteIfExists(l.files.fs.Path.of(dst));
+                deleteIfExists(dst);
             } catch (IOException ignore) {
             }
 

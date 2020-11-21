@@ -52,7 +52,7 @@ public class RenameTest extends BaseFilesActivityTest {
                 .assertAllItemsDisplayedInOrder(dst);
 
         } finally {
-            Paths.deleteRecursiveIfExists(l.files.fs.Path.of(dir));
+            Paths.deleteRecursiveIfExists(dir);
         }
     }
 

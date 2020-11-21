@@ -97,7 +97,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
         try (Stream<Path> stream = list(dir)) {
             stream.findFirst().ifPresent(file -> {
                 try {
-                    Paths.deleteRecursive(l.files.fs.Path.of(file));
+                    Paths.deleteRecursive(file);
                 } catch (IOException e) {
                     throw new UncheckedIOException(e);
                 }
@@ -137,7 +137,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
         try (Stream<Path> stream = list(dir())) {
             stream.limit(n).forEach(file -> {
                 try {
-                    Paths.deleteRecursive(l.files.fs.Path.of(file));
+                    Paths.deleteRecursive(file);
                 } catch (IOException e) {
                     throw new UncheckedIOException(e);
                 }

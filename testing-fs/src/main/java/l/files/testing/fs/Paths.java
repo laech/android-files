@@ -3,15 +3,13 @@ package l.files.testing.fs;
 import l.files.fs.LinkOption;
 import l.files.fs.Path;
 import l.files.fs.Path.Consumer;
-import l.files.fs.TraversalCallback;
 import l.files.fs.event.Observation;
 import l.files.fs.event.Observer;
 
 import java.io.*;
 import java.nio.charset.Charset;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.OpenOption;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
@@ -158,40 +156,34 @@ public final class Paths {
         }
     }
 
-
-    public static void deleteIfExists(Path path) throws IOException {
-        try {
-            path.delete();
-        } catch (FileNotFoundException | NoSuchFileException ignored) {
-        }
-    }
-
-    public static void deleteRecursive(Path path) throws IOException {
-        path.traverse(NOFOLLOW, new TraversalCallback.Base<Path>() {
-
+    public static void deleteRecursive(java.nio.file.Path path)
+        throws IOException {
+        walkFileTree(path, new SimpleFileVisitor<java.nio.file.Path>() {
             @Override
-            public Result onPostVisit(Path path) throws IOException {
-                deleteIfExists(path);
-                return super.onPostVisit(path);
+            public FileVisitResult visitFile(
+                java.nio.file.Path file,
+                BasicFileAttributes attrs
+            ) throws IOException {
+                delete(file);
+                return super.visitFile(file, attrs);
             }
 
             @Override
-            public void onException(Path path, IOException e)
-                throws IOException {
-                if (e instanceof FileNotFoundException ||
-                    e instanceof NoSuchFileException) {
-                    return;
-                }
-                super.onException(path, e);
+            public FileVisitResult postVisitDirectory(
+                java.nio.file.Path dir,
+                IOException exc
+            ) throws IOException {
+                delete(dir);
+                return super.postVisitDirectory(dir, exc);
             }
-
         });
     }
 
-    public static void deleteRecursiveIfExists(Path path) throws IOException {
+    public static void deleteRecursiveIfExists(java.nio.file.Path path)
+        throws IOException {
         try {
             deleteRecursive(path);
-        } catch (FileNotFoundException | NoSuchFileException ignore) {
+        } catch (NoSuchFileException ignore) {
         }
     }
 
