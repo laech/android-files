@@ -8,7 +8,7 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.loader.content.AsyncTaskLoader;
 import l.files.fs.event.BatchObserver;
-import l.files.fs.event.Event;
+import l.files.fs.event.BatchObserverNotifier;
 import l.files.fs.event.Observation;
 import l.files.ui.base.fs.FileInfo;
 import l.files.ui.browser.sort.FileSort;
@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.WatchEvent;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.Collator;
 import java.util.ArrayList;
@@ -40,13 +41,12 @@ import static java.lang.Thread.currentThread;
 import static java.nio.file.Files.readAttributes;
 import static java.nio.file.Files.readSymbolicLink;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
+import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.util.Collections.*;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.base.Objects.requireNonNull;
-import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.PathKt.isHidden;
-import static l.files.fs.event.Event.DELETE;
 import static l.files.ui.base.content.Contexts.isDebugBuild;
 
 final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
@@ -57,7 +57,6 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     private final ConcurrentMap<Path, FileInfo> data;
     private final Path root;
-    private final int watchLimit;
 
     private final Collator collator;
 
@@ -82,7 +81,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         @Override
         public void onLatestEvents(
             boolean selfChanged,
-            Map<Path, Event> childFileNames
+            Map<Path, WatchEvent.Kind<?>> childFileNames
         ) {
             if (!childFileNames.isEmpty()) {
                 updateAll(childFileNames, false);
@@ -99,14 +98,15 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     };
 
     private void updateAll(
-        Map<Path, Event> changedChildFileNames,
+        Map<Path, WatchEvent.Kind<?>> changedChildFileNames,
         boolean forceReload
     ) {
         executor.execute(() -> {
             setThreadPriority(THREAD_PRIORITY_BACKGROUND);
 
             boolean changed = false;
-            for (Entry<Path, Event> entry : changedChildFileNames.entrySet()) {
+            for (Entry<Path, WatchEvent.Kind<?>> entry :
+                changedChildFileNames.entrySet()) {
                 changed |= update(entry.getKey(), entry.getValue());
             }
 
@@ -123,8 +123,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         Context context,
         Path root,
         Supplier<FileSort> sort,
-        BooleanSupplier showHidden,
-        int watchLimit
+        BooleanSupplier showHidden
     ) {
         super(context);
 
@@ -134,7 +133,6 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         this.data = new ConcurrentHashMap<>();
         this.executor = newSingleThreadExecutor();
         this.collator = Collator.getInstance();
-        this.watchLimit = watchLimit;
     }
 
     int approximateChildTotal() {
@@ -197,6 +195,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
                 childFileNames = visit();
             }
         } catch (IOException e) {
+            Log.d("bbbbbbb", "", e);
             return Result.of(e);
 
         } catch (InterruptedException e) {
@@ -211,16 +210,12 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     private List<Path> observe() throws IOException, InterruptedException {
         List<Path> childFileNames = new ArrayList<>();
-        observation = l.files.fs.Path.of(root).observe(
-            FOLLOW,
+        observation = new BatchObserverNotifier(
             listener,
-            collectInto(childFileNames),
             BATCH_UPDATE_MILLIS,
             MILLISECONDS,
-            true,
-            null,
-            watchLimit
-        );
+            true
+        ).start(root, collectInto(childFileNames));
         return childFileNames;
     }
 
@@ -334,7 +329,10 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
      * the data map is changed.
      */
 
-    private boolean update(Path childFileName, @Nullable Event event) {
+    private boolean update(
+        Path childFileName,
+        @Nullable WatchEvent.Kind<?> kind
+    ) {
         Path path = root.resolve(childFileName);
 
         /*
@@ -359,7 +357,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
          *
          * resulting both "a" and "A" be displayed.
          */
-        if (DELETE.equals(event)) {
+        if (ENTRY_DELETE.equals(kind)) {
             return data.remove(path.getFileName()) != null;
         }
 

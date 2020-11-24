@@ -4,6 +4,7 @@ import androidx.annotation.Nullable;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.WatchEvent;
 
 public interface Observer {
 
@@ -12,7 +13,7 @@ public interface Observer {
      *                      itself, if not null the event is for the child of
      *                      the observed file with that this name
      */
-    void onEvent(Event event, @Nullable Path childFileName);
+    void onEvent(WatchEvent.Kind<?> kind, @Nullable Path childFileName);
 
     /**
      * Called when we can no longer fully observe on all files.

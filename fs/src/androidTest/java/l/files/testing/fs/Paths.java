@@ -29,15 +29,6 @@ public final class Paths {
     private Paths() {
     }
 
-    public static Observation observe(
-        Path path,
-        LinkOption option,
-        Observer observer
-    ) throws IOException, InterruptedException {
-
-        return path.observe(option, observer, __ -> {}, null, -1);
-    }
-
     public static void listDirectories(
         Path path,
         Consumer consumer

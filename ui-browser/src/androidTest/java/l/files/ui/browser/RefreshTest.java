@@ -5,107 +5,22 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.time.Instant;
-import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.stream.Stream;
 
 import static java.lang.System.currentTimeMillis;
-import static java.lang.System.nanoTime;
 import static java.nio.file.Files.*;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.testing.fs.Paths.createFiles;
-import static l.files.ui.browser.FilesLoader.BATCH_UPDATE_MILLIS;
-import static l.files.ui.browser.sort.FileSort.MODIFIED;
-import static org.junit.Assert.assertFalse;
 
 public final class RefreshTest extends BaseFilesActivityTest {
-
-    @Test
-    public void manual_refresh_updates_outdated_files()
-        throws Throwable {
-
-        int watchLimit = 5;
-        setActivityIntent(newIntent(dir(), watchLimit));
-
-        for (int i = 0; i < watchLimit + 5; i++) {
-            createDirectory(dir().resolve(String.valueOf(i)));
-        }
-
-        screen()
-            .sort()
-            .by(MODIFIED)
-            .assertListMatchesFileSystem(dir())
-            .assertRefreshMenuVisible(true);
-
-        testRefreshInManualMode(dir());
-        testFileCreationDeletionWillStillBeNotifiedInManualMode(dir());
-    }
-
-    private void testRefreshInManualMode(Path dir)
-        throws Throwable {
-
-        // Currently Files::getLastModifiedTime only has second precision,
-        // so need to wait for a bit until it changes
-        Thread.sleep(1500);
-
-        try (Stream<Path> stream = list(dir)) {
-            Path childDir = stream.filter(Files::isDirectory)
-                .findFirst()
-                .orElseThrow(NoSuchElementException::new);
-
-            try {
-                createFile(childDir.resolve("x"));
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-        }
-
-        boolean updated = false;
-        try {
-            screen().assertListMatchesFileSystem(
-                dir,
-                BATCH_UPDATE_MILLIS + 2000,
-                MILLISECONDS
-            );
-            updated = true;
-        } catch (AssertionError e) {
-            // Pass
-        }
-        assertFalse("Expected auto refresh to have been disabled", updated);
-        screen().refresh().assertListMatchesFileSystem(dir);
-    }
-
-    private void testFileCreationDeletionWillStillBeNotifiedInManualMode(Path dir)
-        throws IOException {
-
-        createFile(dir.resolve("file-" + nanoTime()));
-        createDirectory(dir.resolve("dir-" + nanoTime()));
-        move(
-            createFile(dir.resolve("before-move-" + nanoTime())),
-            dir.resolve("after-move-" + nanoTime())
-        );
-
-        try (Stream<Path> stream = list(dir)) {
-            stream.findFirst().ifPresent(file -> {
-                try {
-                    Paths.deleteRecursive(file);
-                } catch (IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            });
-        }
-
-        screen().assertListMatchesFileSystem(dir);
-    }
 
     @Test
     public void auto_detect_files_added_and_removed_while_loading()

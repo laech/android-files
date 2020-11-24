@@ -87,12 +87,10 @@ public final class FilesFragment
         new String[]{WRITE_EXTERNAL_STORAGE};
 
     private static final String ARG_DIRECTORY = "directory";
-    private static final String ARG_WATCH_LIMIT = "watch_limit";
 
-    public static FilesFragment create(Path directory, int watchLimit) {
+    public static FilesFragment create(Path directory) {
         Bundle bundle = new Bundle(2);
         bundle.putString(ARG_DIRECTORY, directory.toString());
-        bundle.putInt(ARG_WATCH_LIMIT, watchLimit);
 
         FilesFragment browser = new FilesFragment();
         browser.setArguments(bundle);
@@ -101,7 +99,6 @@ public final class FilesFragment
 
     @Nullable
     private Path directory;
-    private int watchLimit;
 
     private FilesAdapter adapter;
 
@@ -194,7 +191,6 @@ public final class FilesFragment
         Bundle args = getArguments();
         assert args != null;
         directory = Paths.get(args.getString(ARG_DIRECTORY));
-        watchLimit = args.getInt(ARG_WATCH_LIMIT, -1);
 
         bookmarks = getBookmarks(this);
 
@@ -374,8 +370,7 @@ public final class FilesFragment
             context,
             directory,
             () -> getSort(context),
-            () -> getShowHiddenFiles(context),
-            watchLimit
+            () -> getShowHiddenFiles(context)
         );
     }
 

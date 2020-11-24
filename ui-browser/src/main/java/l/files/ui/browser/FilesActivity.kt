@@ -84,7 +84,7 @@ class FilesActivity : BaseActivity(),
         .beginTransaction()
         .replace(
           R.id.content,
-          FilesFragment.create(initialDirectory, watchLimit),
+          FilesFragment.create(initialDirectory),
           FilesFragment.TAG
         )
         .commit()
@@ -123,9 +123,6 @@ class FilesActivity : BaseActivity(),
       }
       return dir ?: UserDirs.DIR_HOME
     }
-
-  private val watchLimit: Int
-    get() = intent.getIntExtra(EXTRA_WATCH_LIMIT, -1)
 
   override fun onPause() {
     this.getPreview().writeCacheAsyncIfNeeded()
@@ -243,7 +240,7 @@ class FilesActivity : BaseActivity(),
     if (fragment.directory() == path) {
       return
     }
-    val f = FilesFragment.create(path, watchLimit)
+    val f = FilesFragment.create(path)
     supportFragmentManager
       .beginTransaction()
       .setBreadCrumbTitle(
@@ -265,6 +262,5 @@ class FilesActivity : BaseActivity(),
 
   companion object {
     const val EXTRA_DIRECTORY = "directory"
-    const val EXTRA_WATCH_LIMIT = "watch_limit"
   }
 }

@@ -1,10 +1,11 @@
 package l.files.fs.event;
 
 import androidx.annotation.Nullable;
-import l.files.fs.LinkOption;
+import l.files.fs.Observable;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.WatchEvent;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
@@ -28,7 +29,7 @@ public final class BatchObserverNotifier
         ));
 
     private boolean selfChanged;
-    private final Map<Path, Event> childFileNameChanged;
+    private final Map<Path, WatchEvent.Kind<?>> childFileNameChanged;
     private final BatchObserver batchObserver;
     private final long batchInterval;
     private final long batchIntervalNanos;
@@ -50,16 +51,11 @@ public final class BatchObserverNotifier
     private final boolean quickNotifyFirstEvent;
     private volatile long quickNotifyLastRunNanos;
 
-    private final String tag;
-    private final int watchLimit;
-
     public BatchObserverNotifier(
         BatchObserver batchObserver,
         long batchInterval,
         TimeUnit batchInternalUnit,
-        boolean quickNotifyFirstEvent,
-        String tag,
-        int watchLimit
+        boolean quickNotifyFirstEvent
     ) {
         this.batchObserver = batchObserver;
         this.batchInterval = batchInterval;
@@ -67,16 +63,11 @@ public final class BatchObserverNotifier
         this.batchIntervalNanos = batchInternalUnit.toNanos(batchInterval);
         this.quickNotifyFirstEvent = quickNotifyFirstEvent;
         this.childFileNameChanged = new HashMap<>();
-        this.tag = tag;
-        this.watchLimit = watchLimit;
         this.started = new AtomicBoolean(false);
     }
 
-    public Observation start(
-        Path path,
-        LinkOption option,
-        Consumer<Path> childrenConsumer
-    ) throws IOException, InterruptedException {
+    public Observation start(Path path, Consumer<Path> childrenConsumer)
+        throws IOException {
 
         if (!started.compareAndSet(false, true)) {
             throw new IllegalStateException();
@@ -84,9 +75,8 @@ public final class BatchObserverNotifier
 
         try {
 
-            Observation ob =
-                l.files.fs.Path.of(path)
-                    .observe(option, this, childrenConsumer, tag, watchLimit);
+            Observable ob = new Observable(path, this, childrenConsumer);
+            ob.start();
             observation = ob;
             if (!ob.isClosed()) {
                 checker = service.scheduleWithFixedDelay(
@@ -108,13 +98,13 @@ public final class BatchObserverNotifier
     }
 
     @Override
-    public void onEvent(Event event, @Nullable Path childFileName) {
+    public void onEvent(WatchEvent.Kind<?> kind, @Nullable Path childFileName) {
         synchronized (this) {
 
             if (childFileName == null) {
                 selfChanged = true;
             } else {
-                childFileNameChanged.put(childFileName, event);
+                childFileNameChanged.put(childFileName, kind);
             }
 
         }
@@ -141,7 +131,7 @@ public final class BatchObserverNotifier
         }
 
         boolean snapshotSelfChanged;
-        Map<Path, Event> snapshotChildFileNameChanged;
+        Map<Path, WatchEvent.Kind<?>> snapshotChildFileNameChanged;
 
         synchronized (this) {
 

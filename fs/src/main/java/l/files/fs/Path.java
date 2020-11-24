@@ -6,10 +6,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import androidx.annotation.Nullable;
 import l.files.base.Optional;
-import l.files.fs.event.BatchObserver;
-import l.files.fs.event.BatchObserverNotifier;
-import l.files.fs.event.Observation;
-import l.files.fs.event.Observer;
 import l.files.fs.exception.*;
 import linux.ErrnoException;
 import org.apache.commons.io.FilenameUtils;
@@ -24,7 +20,6 @@ import java.nio.file.OpenOption;
 import java.nio.file.Paths;
 import java.nio.file.attribute.*;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.reverse;
@@ -322,62 +317,6 @@ public class Path implements Parcelable, Comparable<Path> {
 
     public boolean isWritable() {
         return Files.isWritable(delegate);
-    }
-
-    /**
-     * Observes on this file for change events.
-     * <p>
-     * If this file is a directory, adding/removing immediate children and
-     * any changes to the content/attributes of immediate children of this
-     * directory will be notified, this is true for existing children as well as
-     * newly added items after observation started.
-     * <p>
-     * Note that by the time a listener is notified, the target file may
-     * have already be changed again, therefore a robust application should have
-     * an alternative way of handling instead of reply on this fully.
-     * <p>
-     * The returned observation is closed if failed to observe.
-     *
-     * @param option           if option is {@link LinkOption#NOFOLLOW} and
-     *                         this file is a link, observe on the link instead
-     *                         of the link target
-     * @param childrenConsumer consumer will be called for all immediate
-     *                         children of {@code path}
-     * @param logTag           tag for debug logging
-     * @param watchLimit       limit the number of watch descriptors, or -1
-     */
-    public Observation observe(
-        LinkOption option,
-        Observer observer,
-        java.util.function.Consumer<java.nio.file.Path> childrenConsumer,
-        @Nullable String logTag,
-        int watchLimit
-    ) throws IOException, InterruptedException {
-
-        Observable observable = new Observable(this, observer, logTag);
-        observable.start(option, childrenConsumer, watchLimit);
-        return observable;
-    }
-
-    public Observation observe(
-        LinkOption option,
-        BatchObserver batchObserver,
-        java.util.function.Consumer<java.nio.file.Path> childrenConsumer,
-        long batchInterval,
-        TimeUnit batchInternalUnit,
-        boolean quickNotifyFirstEvent,
-        @Nullable String tag,
-        int watchLimit
-    ) throws IOException, InterruptedException {
-
-        return new BatchObserverNotifier(
-            batchObserver,
-            batchInterval,
-            batchInternalUnit,
-            quickNotifyFirstEvent,
-            tag,
-            watchLimit
-        ).start(this.toJavaPath(), option, childrenConsumer);
     }
 
     /**

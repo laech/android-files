@@ -35,7 +35,6 @@ import static java.util.stream.Collectors.toList;
 import static l.files.testing.fs.Paths.createFiles;
 import static l.files.testing.fs.Paths.deleteRecursiveIfExists;
 import static l.files.ui.browser.FilesActivity.EXTRA_DIRECTORY;
-import static l.files.ui.browser.FilesActivity.EXTRA_WATCH_LIMIT;
 import static org.junit.Assert.*;
 
 public class BaseFilesActivityTest {
@@ -193,13 +192,8 @@ public class BaseFilesActivityTest {
     }
 
     private Intent newIntent(Path dir) {
-        return newIntent(dir, -1);
-    }
-
-    Intent newIntent(Path dir, int watchLimit) {
         return new Intent(ACTION_MAIN)
-            .putExtra(EXTRA_DIRECTORY, dir.toString())
-            .putExtra(EXTRA_WATCH_LIMIT, watchLimit);
+            .putExtra(EXTRA_DIRECTORY, dir.toString());
     }
 
     static final class CannotRenameFileToDifferentCasing

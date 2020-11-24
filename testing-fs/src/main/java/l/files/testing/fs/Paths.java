@@ -1,10 +1,7 @@
 package l.files.testing.fs;
 
-import l.files.fs.LinkOption;
 import l.files.fs.Path;
 import l.files.fs.Path.Consumer;
-import l.files.fs.event.Observation;
-import l.files.fs.event.Observer;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -27,15 +24,6 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 public final class Paths {
 
     private Paths() {
-    }
-
-    public static Observation observe(
-        Path path,
-        LinkOption option,
-        Observer observer
-    ) throws IOException, InterruptedException {
-
-        return path.observe(option, observer, __ -> {}, null, -1);
     }
 
     public static void listDirectories(
