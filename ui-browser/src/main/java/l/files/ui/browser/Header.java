@@ -1,6 +1,6 @@
 package l.files.ui.browser;
 
-import static l.files.base.Objects.requireNonNull;
+import static java.util.Objects.requireNonNull;
 
 public final class Header {
 
@@ -18,7 +18,7 @@ public final class Header {
     @Override
     public boolean equals(Object o) {
         return o instanceof Header &&
-                value.equals(((Header) o).value);
+            value.equals(((Header) o).value);
     }
 
     @Override

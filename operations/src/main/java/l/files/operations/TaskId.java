@@ -2,7 +2,7 @@ package l.files.operations;
 
 import androidx.annotation.Nullable;
 
-import static l.files.base.Objects.requireNonNull;
+import static java.util.Objects.requireNonNull;
 
 public final class TaskId {
 
@@ -29,15 +29,19 @@ public final class TaskId {
     @Override
     public String toString() {
         return "TaskId{" +
-                "id=" + id +
-                ", kind=" + kind +
-                '}';
+            "id=" + id +
+            ", kind=" + kind +
+            '}';
     }
 
     @Override
     public boolean equals(@Nullable Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         TaskId taskId = (TaskId) o;
 

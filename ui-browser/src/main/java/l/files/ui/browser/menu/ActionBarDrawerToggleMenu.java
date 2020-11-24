@@ -1,13 +1,12 @@
 package l.files.ui.browser.menu;
 
-import androidx.fragment.app.FragmentManager;
-import androidx.drawerlayout.widget.DrawerLayout;
 import android.view.MenuItem;
-
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.FragmentManager;
 import l.files.ui.base.app.OptionsMenuAdapter;
 
 import static androidx.core.view.GravityCompat.START;
-import static l.files.base.Objects.requireNonNull;
+import static java.util.Objects.requireNonNull;
 
 public final class ActionBarDrawerToggleMenu extends OptionsMenuAdapter {
 
@@ -15,8 +14,9 @@ public final class ActionBarDrawerToggleMenu extends OptionsMenuAdapter {
     private final FragmentManager fragments;
 
     public ActionBarDrawerToggleMenu(
-            DrawerLayout drawer,
-            FragmentManager fragments) {
+        DrawerLayout drawer,
+        FragmentManager fragments
+    ) {
         this.drawer = requireNonNull(drawer);
         this.fragments = requireNonNull(fragments);
     }
@@ -24,7 +24,7 @@ public final class ActionBarDrawerToggleMenu extends OptionsMenuAdapter {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home &&
-                fragments.getBackStackEntryCount() == 0) {
+            fragments.getBackStackEntryCount() == 0) {
             if (drawer.isDrawerVisible(START)) {
                 drawer.closeDrawer(START);
             } else {

@@ -1,15 +1,14 @@
 package l.files.ui.base.view;
 
-import androidx.appcompat.view.ActionMode;
 import android.view.Menu;
-
+import androidx.appcompat.view.ActionMode;
 import l.files.ui.base.selection.Selection;
 
-import static l.files.base.Objects.requireNonNull;
+import static java.util.Objects.requireNonNull;
 
 public final class CountSelectedItemsAction
-        extends ActionModeAdapter
-        implements Selection.Callback {
+    extends ActionModeAdapter
+    implements Selection.Callback {
 
     private final Selection<?, ?> selection;
 

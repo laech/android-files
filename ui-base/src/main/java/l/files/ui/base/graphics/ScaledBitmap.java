@@ -2,7 +2,7 @@ package l.files.ui.base.graphics;
 
 import android.graphics.Bitmap;
 
-import static l.files.base.Objects.requireNonNull;
+import static java.util.Objects.requireNonNull;
 
 public final class ScaledBitmap {
 

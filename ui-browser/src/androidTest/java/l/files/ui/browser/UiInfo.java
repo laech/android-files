@@ -3,9 +3,9 @@ package l.files.ui.browser;
 import l.files.ui.info.InfoBaseFragment;
 import l.files.ui.info.InfoFragment;
 
+import static java.util.Objects.requireNonNull;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
-import static l.files.base.Objects.requireNonNull;
 import static l.files.ui.browser.Instrumentations.awaitOnMainThread;
 
 final class UiInfo {
@@ -17,17 +17,26 @@ final class UiInfo {
     }
 
     UiInfo assertName(String value) {
-        awaitOnMainThread(context.getInstrumentation(), () -> assertEquals(value, getName()));
+        awaitOnMainThread(
+            context.getInstrumentation(),
+            () -> assertEquals(value, getName())
+        );
         return this;
     }
 
     UiInfo assertDate(String value) {
-        awaitOnMainThread(context.getInstrumentation(), () -> assertEquals(value, getDate()));
+        awaitOnMainThread(
+            context.getInstrumentation(),
+            () -> assertEquals(value, getDate())
+        );
         return this;
     }
 
     UiInfo assertSize(String value) {
-        awaitOnMainThread(context.getInstrumentation(), () -> assertEquals(value, getSize()));
+        awaitOnMainThread(
+            context.getInstrumentation(),
+            () -> assertEquals(value, getSize())
+        );
         return this;
     }
 
@@ -36,7 +45,8 @@ final class UiInfo {
     }
 
     private String getDate() {
-        return ((InfoFragment) fragment()).getDisplayedLastModifiedTime().toString();
+        return ((InfoFragment) fragment()).getDisplayedLastModifiedTime()
+            .toString();
     }
 
     private String getSize() {
@@ -45,9 +55,9 @@ final class UiInfo {
 
     private InfoBaseFragment fragment() {
         InfoBaseFragment fragment = (InfoBaseFragment) context
-                .getActivity()
-                .getSupportFragmentManager()
-                .findFragmentByTag(InfoBaseFragment.FRAGMENT_TAG);
+            .getActivity()
+            .getSupportFragmentManager()
+            .findFragmentByTag(InfoBaseFragment.FRAGMENT_TAG);
         assertNotNull(fragment);
         return fragment;
     }

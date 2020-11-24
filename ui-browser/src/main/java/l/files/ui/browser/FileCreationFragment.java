@@ -33,7 +33,7 @@ import static android.view.inputmethod.EditorInfo.IME_ACTION_DONE;
 import static java.lang.System.identityHashCode;
 import static java.nio.file.Files.exists;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
-import static l.files.base.Objects.requireNonNull;
+import static java.util.Objects.requireNonNull;
 
 public abstract class FileCreationFragment extends AppCompatDialogFragment
     implements OnClickListener {

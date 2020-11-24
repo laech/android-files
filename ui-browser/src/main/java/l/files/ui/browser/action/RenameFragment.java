@@ -24,7 +24,7 @@ import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
 import static java.nio.file.Files.move;
 import static java.nio.file.Files.readAttributes;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
-import static l.files.base.Objects.requireNonNull;
+import static java.util.Objects.requireNonNull;
 import static l.files.fs.PathKt.getBaseName;
 
 public final class RenameFragment extends FileCreationFragment {

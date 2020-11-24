@@ -23,10 +23,10 @@ import java.nio.file.Path;
 import java.util.List;
 
 import static java.util.Collections.emptyList;
+import static java.util.Objects.requireNonNull;
 import static kotlin.collections.CollectionsKt.asSequence;
 import static kotlin.sequences.SequencesKt.associateBy;
 import static kotlin.sequences.SequencesKt.filterIsInstance;
-import static l.files.base.Objects.requireNonNull;
 
 final class FilesAdapter extends StableAdapter<Object, ViewHolder>
     implements Selectable {

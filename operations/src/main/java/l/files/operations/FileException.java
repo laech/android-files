@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import l.files.base.Throwables;
-
 import static java.util.Collections.unmodifiableList;
 
 /**
@@ -22,12 +20,12 @@ final class FileException extends RuntimeException {
         }
 
         for (Failure failure : failures) {
-            Throwables.addSuppressed(this, failure.cause());
+            addSuppressed(failure.cause());
         }
     }
 
     static void throwIfNotEmpty(Collection<Failure> failures)
-            throws FileException {
+        throws FileException {
         if (!failures.isEmpty()) {
             throw new FileException(failures);
         }

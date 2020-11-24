@@ -6,14 +6,12 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.List;
 
-import l.files.base.Integers;
-
 import static java.lang.Character.isWhitespace;
 import static java.lang.Math.min;
 
 /**
- * Like a locale sensitive {@link java.text.CollationKey} but performs more natural
- * sorting for numbers.
+ * Like a locale sensitive {@link java.text.CollationKey} but performs more
+ * natural sorting for numbers.
  * <p/>
  * This provides more meaning to humans, for example if you have a list of book
  * chapters to be sorted:
@@ -57,15 +55,23 @@ public final class CollationKey implements Comparable<CollationKey> {
 
             } else {
                 while (end < chars.length &&
-                        !isDigit(chars[end]) &&
-                        !isWhitespace(chars[end])) {
+                    !isDigit(chars[end]) &&
+                    !isWhitespace(chars[end])) {
                     end++;
                 }
             }
 
             if (end > start) {
-                byte[] collationKey = collator.getCollationKey(value.substring(start, end)).toByteArray();
-                segments.add(new Segment(chars, start, end, isDigit(c), collationKey));
+                byte[] collationKey =
+                    collator.getCollationKey(value.substring(start, end))
+                        .toByteArray();
+                segments.add(new Segment(
+                    chars,
+                    start,
+                    end,
+                    isDigit(c),
+                    collationKey
+                ));
             }
 
         }
@@ -84,8 +90,15 @@ public final class CollationKey implements Comparable<CollationKey> {
             Segment a = this.segments[i];
             Segment b = that.segments[i];
             int compare = (a.isNumber && b.isNumber)
-                    ? compareNumber(a.chars, a.start, a.end, b.chars, b.start, b.end)
-                    : compare(a.collectionKey, b.collectionKey);
+                ? compareNumber(
+                a.chars,
+                a.start,
+                a.end,
+                b.chars,
+                b.start,
+                b.end
+            )
+                : compare(a.collectionKey, b.collectionKey);
             if (compare != 0) {
                 return compare;
             }
@@ -95,12 +108,13 @@ public final class CollationKey implements Comparable<CollationKey> {
     }
 
     private static int compareNumber(
-            char[] a, int startA, int endA,
-            char[] b, int startB, int endB) {
+        char[] a, int startA, int endA,
+        char[] b, int startB, int endB
+    ) {
 
         int startOffsetA = skipLeadingZeros(a, startA, endA);
         int startOffsetB = skipLeadingZeros(b, startB, endB);
-        int compare = Integers.compare(endA - startOffsetA, endB - startOffsetB);
+        int compare = Integer.compare(endA - startOffsetA, endB - startOffsetB);
         if (compare == 0) {
             return compareChars(a, startOffsetA, endA, b, startOffsetB, endB);
         }
@@ -118,8 +132,9 @@ public final class CollationKey implements Comparable<CollationKey> {
     }
 
     private static int compareChars(
-            char[] a, int startA, int endA,
-            char[] b, int startB, int endB) {
+        char[] a, int startA, int endA,
+        char[] b, int startB, int endB
+    ) {
 
         int len = min(endA - startA, endB - startB);
         int i;
@@ -149,11 +164,12 @@ public final class CollationKey implements Comparable<CollationKey> {
         final byte[] collectionKey;
 
         Segment(
-                char[] chars,
-                int start,
-                int end,
-                boolean isNumber,
-                byte[] collectionKey) {
+            char[] chars,
+            int start,
+            int end,
+            boolean isNumber,
+            byte[] collectionKey
+        ) {
             this.chars = chars;
             this.start = start;
             this.end = end;

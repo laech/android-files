@@ -1,12 +1,11 @@
 package l.files.ui.browser.widget;
 
 import android.content.Context;
-
 import l.files.base.Consumer;
 
 import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
-import static l.files.base.Objects.requireNonNull;
+import static java.util.Objects.requireNonNull;
 
 public final class Toaster implements Consumer<String> {
 

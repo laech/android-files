@@ -9,7 +9,7 @@ import l.files.ui.operations.R;
 
 import java.nio.file.Path;
 
-import static l.files.base.Objects.requireNonNull;
+import static java.util.Objects.requireNonNull;
 import static l.files.ui.operations.action.Clipboard.Action.CUT;
 
 public final class CutAction extends ActionModeItem {

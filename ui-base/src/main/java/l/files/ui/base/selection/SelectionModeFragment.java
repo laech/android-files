@@ -1,21 +1,19 @@
 package l.files.ui.base.selection;
 
 import android.os.Bundle;
+import androidx.annotation.Nullable;
 import androidx.appcompat.view.ActionMode;
+import l.files.ui.base.app.BaseFragment;
+import l.files.ui.base.view.ActionModeProvider;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import androidx.annotation.Nullable;
-
-import l.files.ui.base.app.BaseFragment;
-import l.files.ui.base.view.ActionModeProvider;
-
 import static java.lang.System.currentTimeMillis;
 import static java.lang.System.identityHashCode;
-import static l.files.base.Objects.requireNonNull;
+import static java.util.Objects.requireNonNull;
 
 public abstract class SelectionModeFragment<K, V> extends BaseFragment {
 
@@ -60,7 +58,7 @@ public abstract class SelectionModeFragment<K, V> extends BaseFragment {
         while (it.hasNext()) {
             Entry<Integer, State> entry = it.next();
             if (entry.getKey().equals(selectionId) ||
-                    now - entry.getValue().creationTime > 10000) {
+                now - entry.getValue().creationTime > 10000) {
                 it.remove();
             }
         }

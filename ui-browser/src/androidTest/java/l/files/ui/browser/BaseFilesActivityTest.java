@@ -8,7 +8,6 @@ import androidx.test.uiautomator.UiDevice;
 import androidx.test.uiautomator.UiObject;
 import androidx.test.uiautomator.UiObjectNotFoundException;
 import androidx.test.uiautomator.UiSelector;
-import l.files.base.Throwables;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -245,7 +244,7 @@ public class BaseFilesActivityTest {
             try {
                 deleteRecursiveIfExists(dir);
             } catch (Throwable sup) {
-                Throwables.addSuppressed(e, sup);
+                e.addSuppressed(sup);
             }
             throw e;
 

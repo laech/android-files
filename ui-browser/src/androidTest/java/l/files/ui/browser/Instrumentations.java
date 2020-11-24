@@ -2,15 +2,14 @@ package l.files.ui.browser;
 
 import android.app.Instrumentation;
 import android.view.View;
-
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
-
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 import l.files.base.Function;
-import l.files.base.Provider;
 import l.files.ui.base.widget.StableAdapter;
+
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 import static android.os.Looper.getMainLooper;
 import static android.os.Looper.myLooper;
@@ -29,14 +28,15 @@ final class Instrumentations {
         private final Callable<T> delegate;
 
         private InstrumentCallable(
-                Instrumentation instrumentation, Callable<T> delegate) {
+            Instrumentation instrumentation, Callable<T> delegate
+        ) {
             this.instrumentation = instrumentation;
             this.delegate = delegate;
         }
 
         @Override
         @SuppressWarnings("unchecked")
-        public final T call() throws Exception {
+        public final T call() {
             Object[] result = {null};
             Throwable[] error = {null};
             Runnable code = () -> {
@@ -71,12 +71,9 @@ final class Instrumentations {
         }
     }
 
-    static <T> T await(Callable<T> callable) {
-        return await(callable, 10, SECONDS);
-    }
-
     static <T> T awaitOnMainThread(
-            Instrumentation in, Callable<T> callable) {
+        Instrumentation in, Callable<T> callable
+    ) {
         return await(new InstrumentCallable<>(in, callable), 10, SECONDS);
     }
 
@@ -110,13 +107,13 @@ final class Instrumentations {
             throw new AssertionError("Timed out.");
         }
 
-        AssertionError e = new AssertionError(error.getMessage(), error);
-        throw e;
+        throw new AssertionError(error.getMessage(), error);
     }
 
     private static void scrollToTop(
-            Instrumentation in,
-            Provider<RecyclerView> recycler) {
+        Instrumentation in,
+        Supplier<RecyclerView> recycler
+    ) {
 
         awaitOnMainThread(in, () -> {
             if (getStableAdapter(recycler).getItemCount() > 0) {
@@ -127,14 +124,16 @@ final class Instrumentations {
 
     @SuppressWarnings("unchecked")
     private static StableAdapter<Object, ViewHolder> getStableAdapter(
-            Provider<RecyclerView> recycler) {
+        Supplier<RecyclerView> recycler
+    ) {
         return (StableAdapter<Object, ViewHolder>) recycler.get().getAdapter();
     }
 
     static void clickItemOnMainThread(
-            Instrumentation in,
-            Provider<RecyclerView> recycler,
-            Object itemId) {
+        Instrumentation in,
+        Supplier<RecyclerView> recycler,
+        Object itemId
+    ) {
         findItemOnMainThread(in, recycler, itemId, input -> {
             assertTrue(input.performClick());
             return null;
@@ -142,9 +141,10 @@ final class Instrumentations {
     }
 
     static void longClickItemOnMainThread(
-            Instrumentation in,
-            Provider<RecyclerView> recycler,
-            Object itemId) {
+        Instrumentation in,
+        Supplier<RecyclerView> recycler,
+        Object itemId
+    ) {
         findItemOnMainThread(in, recycler, itemId, input -> {
             assertTrue(input.performLongClick());
             return null;
@@ -152,18 +152,20 @@ final class Instrumentations {
     }
 
     static <R> R findItemOnMainThread(
-            Instrumentation in,
-            Provider<RecyclerView> recycler,
-            Object itemId,
-            Function<View, R> function) {
+        Instrumentation in,
+        Supplier<RecyclerView> recycler,
+        Object itemId,
+        Function<View, R> function
+    ) {
         scrollToTop(in, recycler);
         return awaitOnMainThread(in, () -> find(recycler, itemId, function));
     }
 
     private static <R> R find(
-            Provider<RecyclerView> recycler,
-            Object itemId,
-            Function<View, R> function) {
+        Supplier<RecyclerView> recycler,
+        Object itemId,
+        Function<View, R> function
+    ) {
 
         RecyclerView view = recycler.get();
         StableAdapter<Object, ViewHolder> adapter = getStableAdapter(recycler);

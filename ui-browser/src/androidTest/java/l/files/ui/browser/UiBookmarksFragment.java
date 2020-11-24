@@ -5,7 +5,7 @@ import l.files.ui.bookmarks.BookmarksFragment;
 
 import java.nio.file.Path;
 
-import static l.files.base.Objects.requireNonNull;
+import static java.util.Objects.requireNonNull;
 import static l.files.ui.browser.Instrumentations.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

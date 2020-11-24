@@ -18,7 +18,6 @@ import static java.lang.System.nanoTime;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
-import static l.files.base.Throwables.addSuppressed;
 
 public final class BatchObserverNotifier
     implements Observer, Observation, Runnable {
@@ -88,7 +87,7 @@ public final class BatchObserverNotifier
             try {
                 close();
             } catch (Exception sup) {
-                addSuppressed(e, sup);
+                e.addSuppressed(sup);
             }
             throw e;
 

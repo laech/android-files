@@ -3,12 +3,12 @@ package l.files.ui.operations;
 import android.os.Parcel;
 import android.os.Parcelable;
 import androidx.annotation.Nullable;
-import l.files.base.Objects;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 
-import static l.files.base.Objects.requireNonNull;
+import static java.util.Objects.requireNonNull;
 
 final class FailureMessage implements Parcelable {
 
@@ -50,8 +50,8 @@ final class FailureMessage implements Parcelable {
         }
 
         FailureMessage that = (FailureMessage) o;
-        return Objects.equal(path, that.path) &&
-            Objects.equal(message, that.message);
+        return Objects.equals(path, that.path) &&
+            Objects.equals(message, that.message);
     }
 
     @Override

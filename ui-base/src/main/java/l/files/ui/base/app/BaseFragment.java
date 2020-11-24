@@ -1,28 +1,29 @@
 package l.files.ui.base.app;
 
-import androidx.fragment.app.Fragment;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import androidx.fragment.app.Fragment;
 
 import java.util.IdentityHashMap;
 import java.util.Set;
 
 import static java.util.Collections.newSetFromMap;
-import static l.files.base.Objects.requireNonNull;
+import static java.util.Objects.requireNonNull;
 
 public class BaseFragment extends Fragment
-        implements LifeCycleListenable {
+    implements LifeCycleListenable {
 
     private OptionsMenu optionsMenu = OptionsMenus.EMPTY;
 
 
     private final Set<LifeCycleListener> lifeCycleListeners =
-            newSetFromMap(new IdentityHashMap<LifeCycleListener, Boolean>(2));
+        newSetFromMap(new IdentityHashMap<>(2));
 
     @Override
     public void addWeaklyReferencedLifeCycleListener(
-            LifeCycleListener listener) {
+        LifeCycleListener listener
+    ) {
         lifeCycleListeners.add(listener);
     }
 
@@ -57,7 +58,8 @@ public class BaseFragment extends Fragment
 
     @Override
     public final void onCreateOptionsMenu(
-            Menu menu, MenuInflater inflater) {
+        Menu menu, MenuInflater inflater
+    ) {
         super.onCreateOptionsMenu(menu, inflater);
         optionsMenu.onCreateOptionsMenu(menu);
     }

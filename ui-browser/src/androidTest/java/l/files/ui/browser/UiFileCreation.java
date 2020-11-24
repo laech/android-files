@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static android.content.DialogInterface.BUTTON_POSITIVE;
+import static java.util.Objects.requireNonNull;
 import static junit.framework.Assert.*;
-import static l.files.base.Objects.requireNonNull;
 import static l.files.ui.browser.Instrumentations.awaitOnMainThread;
 
 abstract class UiFileCreation<T extends UiFileCreation> {

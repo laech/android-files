@@ -3,16 +3,16 @@ package l.files.ui.base.fs;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import l.files.base.Objects;
 import l.files.base.text.CollationKey;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.Collator;
+import java.util.Objects;
 import java.util.Optional;
 
-import static l.files.base.Objects.requireNonNull;
+import static java.util.Objects.requireNonNull;
 
 public final class FileInfo implements Comparable<FileInfo> {
 
@@ -137,10 +137,10 @@ public final class FileInfo implements Comparable<FileInfo> {
 
         FileInfo that = (FileInfo) o;
 
-        return Objects.equal(selfPath, that.selfPath)
-            && Objects.equal(selfAttrs, that.selfAttrs)
-            && Objects.equal(linkTargetPath, that.linkTargetPath)
-            && Objects.equal(linkTargetAttrs, that.linkTargetAttrs);
+        return Objects.equals(selfPath, that.selfPath)
+            && Objects.equals(selfAttrs, that.selfAttrs)
+            && Objects.equals(linkTargetPath, that.linkTargetPath)
+            && Objects.equals(linkTargetAttrs, that.linkTargetAttrs);
     }
 
     @Override

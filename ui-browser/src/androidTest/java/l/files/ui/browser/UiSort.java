@@ -1,15 +1,14 @@
 package l.files.ui.browser;
 
 import android.app.Dialog;
-import androidx.appcompat.app.AlertDialog;
 import android.widget.ListView;
-
+import androidx.appcompat.app.AlertDialog;
 import l.files.ui.browser.menu.SortDialog;
 import l.files.ui.browser.sort.FileSort;
 
+import static java.util.Objects.requireNonNull;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.fail;
-import static l.files.base.Objects.requireNonNull;
 import static l.files.ui.browser.Instrumentations.awaitOnMainThread;
 
 final class UiSort {
@@ -42,9 +41,9 @@ final class UiSort {
 
     private AlertDialog dialog() {
         SortDialog fragment = (SortDialog) context
-                .getActivity()
-                .getSupportFragmentManager()
-                .findFragmentByTag(SortDialog.FRAGMENT_TAG);
+            .getActivity()
+            .getSupportFragmentManager()
+            .findFragmentByTag(SortDialog.FRAGMENT_TAG);
         assertNotNull(fragment);
         Dialog dialog = fragment.getDialog();
         assertNotNull(dialog);

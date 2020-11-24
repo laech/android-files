@@ -1,13 +1,13 @@
 package l.files.operations;
 
-import l.files.base.Objects;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 
 import static java.util.Collections.unmodifiableList;
-import static l.files.base.Objects.requireNonNull;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Source and destination of a file task.
@@ -53,8 +53,8 @@ public final class Target {
             return false;
         }
         Target target = (Target) o;
-        return Objects.equal(srcFiles, target.srcFiles) &&
-            Objects.equal(dstDir, target.dstDir);
+        return Objects.equals(srcFiles, target.srcFiles) &&
+            Objects.equals(dstDir, target.dstDir);
     }
 
     @Override

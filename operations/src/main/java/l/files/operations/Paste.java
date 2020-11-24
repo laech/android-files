@@ -1,10 +1,11 @@
 package l.files.operations;
 
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
 
-import static l.files.base.Objects.requireNonNull;
+import static java.util.Objects.requireNonNull;
 import static l.files.fs.PathKt.getNonExistentDestinationFile;
 
 abstract class Paste extends AbstractOperation {

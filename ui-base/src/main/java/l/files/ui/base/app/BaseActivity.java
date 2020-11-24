@@ -1,21 +1,19 @@
 package l.files.ui.base.app;
 
 import android.annotation.SuppressLint;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
-
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.ActionMode;
 import l.files.ui.base.view.ActionModeProvider;
 
-import static l.files.base.Objects.requireNonNull;
+import static java.util.Objects.requireNonNull;
 
 @SuppressLint("Registered")
 public class BaseActivity extends AppCompatActivity
-        implements ActionModeProvider {
+    implements ActionModeProvider {
 
     private OptionsMenu optionsMenu = OptionsMenus.EMPTY;
 
@@ -56,7 +54,9 @@ public class BaseActivity extends AppCompatActivity
     }
 
     @Override
-    public ActionMode startSupportActionMode(@NonNull ActionMode.Callback callback) {
+    public ActionMode startSupportActionMode(
+        @NonNull ActionMode.Callback callback
+    ) {
         currentActionModeCallback = callback;
         currentActionMode = super.startSupportActionMode(callback);
         return currentActionMode;

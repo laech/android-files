@@ -4,7 +4,7 @@ import l.files.ui.base.messaging.MainThreadTopic;
 
 import java.nio.file.Path;
 
-import static l.files.base.Objects.requireNonNull;
+import static java.util.Objects.requireNonNull;
 
 public final class OpenFileEvent {
 

@@ -3,7 +3,6 @@ package l.files.ui.preview
 import android.os.AsyncTask
 import android.util.Log
 import androidx.collection.LruCache
-import l.files.base.Throwables
 import l.files.ui.base.graphics.Rect
 import java.io.*
 import java.lang.System.nanoTime
@@ -152,7 +151,7 @@ internal abstract class PersistenceCache<V>(
       try {
         delete(tmp)
       } catch (sup: IOException) {
-        Throwables.addSuppressed(e, sup)
+        e.addSuppressed(sup)
       }
       throw e
     }

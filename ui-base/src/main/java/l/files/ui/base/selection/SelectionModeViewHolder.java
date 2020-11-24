@@ -1,29 +1,28 @@
 package l.files.ui.base.selection;
 
-import androidx.appcompat.view.ActionMode;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
-
-import java.util.List;
-
+import androidx.appcompat.view.ActionMode;
 import l.files.ui.base.view.ActionModeProvider;
 import l.files.ui.base.widget.ItemViewHolder;
 
-import static l.files.base.Objects.requireNonNull;
+import java.util.List;
+
+import static java.util.Objects.requireNonNull;
 
 public abstract class SelectionModeViewHolder<K, V> extends ItemViewHolder<V>
-        implements OnClickListener, OnLongClickListener, Selection.Callback {
+    implements OnClickListener, OnLongClickListener, Selection.Callback {
 
     private final Selection<K, V> selection;
     private final ActionModeProvider actionModeProvider;
     private final ActionMode.Callback actionModeCallback;
 
     public SelectionModeViewHolder(
-            View itemView,
-            Selection<K, V> selection,
-            ActionModeProvider actionModeProvider,
-            ActionMode.Callback actionModeCallback
+        View itemView,
+        Selection<K, V> selection,
+        ActionModeProvider actionModeProvider,
+        ActionMode.Callback actionModeCallback
     ) {
         super(itemView);
 

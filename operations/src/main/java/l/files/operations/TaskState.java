@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Collections.unmodifiableList;
-import static l.files.base.Objects.requireNonNull;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Represents the state of a task. Instances of this will be posted to the event
@@ -73,7 +73,13 @@ public abstract class TaskState {
         private final Progress items;
         private final Progress bytes;
 
-        Running(TaskId task, Target target, Time time, Progress items, Progress bytes) {
+        Running(
+            TaskId task,
+            Target target,
+            Time time,
+            Progress items,
+            Progress bytes
+        ) {
             super(task, target, time);
             this.items = requireNonNull(items);
             this.bytes = requireNonNull(bytes);
@@ -104,7 +110,8 @@ public abstract class TaskState {
 
         public Failed failed(Time time, List<Failure> failures) {
             return new Failed(task(), target(), time,
-                    unmodifiableList(new ArrayList<>(failures)));
+                unmodifiableList(new ArrayList<>(failures))
+            );
         }
     }
 

@@ -2,12 +2,11 @@ package l.files.ui.operations;
 
 import android.content.Context;
 import androidx.annotation.PluralsRes;
-
 import l.files.operations.Clock;
 import l.files.operations.Progress;
 import l.files.operations.TaskState;
 
-import static l.files.base.Objects.requireNonNull;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Base viewer for decorating subclasses of {@link TaskState} to ensure
@@ -17,7 +16,8 @@ abstract class ProgressViewer implements TaskStateViewer {
 
     private final Clock clock;
 
-    RemainingTimeFormatter remainingTimeFormatter = RemainingTimeFormatter.INSTANCE;
+    RemainingTimeFormatter remainingTimeFormatter =
+        RemainingTimeFormatter.INSTANCE;
     FileSizeFormatter fileSizeFormatter = FileSizeFormatter.INSTANCE;
 
     ProgressViewer(Clock clock) {
@@ -30,29 +30,38 @@ abstract class ProgressViewer implements TaskStateViewer {
     }
 
     @Override
-    public final String getContentTitleRunning(Context context, TaskState.Running state) {
+    public final String getContentTitleRunning(
+        Context context,
+        TaskState.Running state
+    ) {
         if (state.items().isDone() || state.bytes().isDone()) {
             return context.getString(R.string.cleaning_up);
         }
         int total = (int) state.items().total();
         int template = getWork(state).processed() > 0
-                ? getTitleRunning() : getTitlePreparing();
+            ? getTitleRunning() : getTitlePreparing();
         return context.getResources().getQuantityString(
-                template,
-                total,
-                total,
-                state.target().dstDir().getFileName()
+            template,
+            total,
+            total,
+            state.target().dstDir().getFileName()
         );
     }
 
     @Override
-    public String getContentTitleFailed(Context context, TaskState.Failed state) {
+    public String getContentTitleFailed(
+        Context context,
+        TaskState.Failed state
+    ) {
         return context.getResources()
-                .getQuantityString(getTitleFailed(), state.failures().size());
+            .getQuantityString(getTitleFailed(), state.failures().size());
     }
 
     @Override
-    public final String getContentText(Context context, TaskState.Running state) {
+    public final String getContentText(
+        Context context,
+        TaskState.Running state
+    ) {
         return getItemsRemaining(context, state);
     }
 
@@ -63,23 +72,27 @@ abstract class ProgressViewer implements TaskStateViewer {
             return "";
         }
         return context.getString(
-                R.string.remain_count_x_size_x,
-                count,
-                fileSizeFormatter.format(context, size)
+            R.string.remain_count_x_size_x,
+            count,
+            fileSizeFormatter.format(context, size)
         );
     }
 
     @Override
-    public final String getContentInfo(Context context, TaskState.Running state) {
+    public final String getContentInfo(
+        Context context,
+        TaskState.Running state
+    ) {
         return getTimeRemaining(context, state);
     }
 
     private String getTimeRemaining(Context context, TaskState.Running state) {
         String formatted = remainingTimeFormatter.format(
-                state.time().tick(),
-                clock.tick(),
-                getWork(state).total(),
-                getWork(state).processed());
+            state.time().tick(),
+            clock.tick(),
+            getWork(state).total(),
+            getWork(state).processed()
+        );
         if (formatted != null) {
             return context.getString(R.string.x_countdown, formatted);
         }

@@ -3,14 +3,13 @@ package l.files.ui.browser.menu;
 import android.content.Context;
 import android.view.Menu;
 import android.view.MenuItem;
-
 import l.files.ui.base.app.OptionsMenuAction;
-import l.files.ui.browser.preference.Preferences;
 import l.files.ui.browser.R;
+import l.files.ui.browser.preference.Preferences;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
-import static l.files.base.Objects.requireNonNull;
+import static java.util.Objects.requireNonNull;
 
 public final class ShowHiddenFilesMenu extends OptionsMenuAction {
 
@@ -25,8 +24,8 @@ public final class ShowHiddenFilesMenu extends OptionsMenuAction {
     public void onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         menu.add(NONE, id(), NONE, R.string.show_hidden_files)
-                .setCheckable(true)
-                .setShowAsAction(SHOW_AS_ACTION_NEVER);
+            .setCheckable(true)
+            .setShowAsAction(SHOW_AS_ACTION_NEVER);
     }
 
     @Override

@@ -22,7 +22,6 @@ import androidx.core.graphics.drawable.RoundedBitmapDrawable;
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.*;
-import l.files.base.Provider;
 import l.files.ui.base.app.LifeCycleListenable;
 import l.files.ui.base.app.LifeCycleListener;
 import l.files.ui.base.fs.FileInfo;
@@ -43,6 +42,7 @@ import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 
 import static android.graphics.Color.TRANSPARENT;
 import static android.graphics.Color.WHITE;
@@ -55,7 +55,7 @@ import static androidx.core.content.ContextCompat.getDrawable;
 import static androidx.core.graphics.drawable.DrawableCompat.setTintList;
 import static androidx.recyclerview.widget.RecyclerView.*;
 import static java.lang.System.currentTimeMillis;
-import static l.files.base.Objects.requireNonNull;
+import static java.util.Objects.requireNonNull;
 import static l.files.ui.base.content.Contexts.isDebugBuild;
 import static l.files.ui.browser.FilesAdapter.calculateCardContentWidthPixels;
 
@@ -389,13 +389,13 @@ public final class FileViewHolder
 
     private void runWhenUiIsIdle(
         Path previewPath,
-        Provider<Boolean> canUpdateUi,
+        BooleanSupplier canUpdateUi,
         Runnable update
     ) {
         if (!previewPath.equals(previewPath())) {
             return;
         }
-        if (!canUpdateUi.get()) {
+        if (!canUpdateUi.getAsBoolean()) {
             itemView.postDelayed(() ->
                 runWhenUiIsIdle(previewPath, canUpdateUi, update), 50);
             return;

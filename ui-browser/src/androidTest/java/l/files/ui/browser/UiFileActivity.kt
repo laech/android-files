@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.files_activity.*
 import kotlinx.android.synthetic.main.files_grid_item.view.*
 import l.files.base.Function
-import l.files.base.Provider
 import l.files.fs.hierarchy
 import l.files.ui.base.fs.FileInfo
 import l.files.ui.base.fs.FileLabels
@@ -29,22 +28,18 @@ import java.nio.file.LinkOption.NOFOLLOW_LINKS
 import java.nio.file.Path
 import java.nio.file.attribute.BasicFileAttributes
 import java.util.concurrent.TimeUnit
+import java.util.function.Supplier
 
 
 internal class UiFileActivity(
   val instrumentation: Instrumentation,
-  provider: Provider<FilesActivity>
+  provider: Supplier<FilesActivity>
 ) {
 
   val activity: FilesActivity by lazy { provider.get() }
 
   private val fragment: FilesFragment
     get() = activity.fragment
-
-  fun refresh(): UiFileActivity {
-    selectMenuAction(R.id.refresh)
-    return this
-  }
 
   fun bookmark(): UiFileActivity {
     assertBookmarkMenuChecked(false)
@@ -110,14 +105,14 @@ internal class UiFileActivity(
   }
 
   fun click(file: Path): UiFileActivity {
-    clickItemOnMainThread(instrumentation, Provider(recycler), file)
+    clickItemOnMainThread(instrumentation, Supplier(recycler), file)
     return this
   }
 
   fun longClick(file: Path): UiFileActivity {
     longClickItemOnMainThread(
       instrumentation,
-      Provider(recycler),
+      Supplier(recycler),
       file
     )
     return this
@@ -243,7 +238,7 @@ internal class UiFileActivity(
   private fun <R> findItemOnMainThread(file: Path, function: (View) -> R): R =
     findItemOnMainThread(
       instrumentation,
-      Provider(recycler),
+      Supplier(recycler),
       file,
       Function(function)
     )
@@ -320,11 +315,6 @@ internal class UiFileActivity(
   fun assertBookmarkMenuChecked(checked: Boolean): UiFileActivity =
     findOptionMenuItem(R.id.bookmark) {
       assertEquals(checked, it.isChecked)
-    }
-
-  fun assertRefreshMenuVisible(visible: Boolean): UiFileActivity =
-    findOptionMenuItem(R.id.refresh) {
-      assertEquals("Refresh menu visible to be $visible", visible, it.isVisible)
     }
 
   fun assertThumbnailShown(

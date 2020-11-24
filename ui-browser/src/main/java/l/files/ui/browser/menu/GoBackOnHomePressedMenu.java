@@ -2,10 +2,9 @@ package l.files.ui.browser.menu;
 
 import android.app.Activity;
 import android.view.MenuItem;
-
 import l.files.ui.base.app.OptionsMenuAction;
 
-import static l.files.base.Objects.requireNonNull;
+import static java.util.Objects.requireNonNull;
 
 public final class GoBackOnHomePressedMenu extends OptionsMenuAction {
 

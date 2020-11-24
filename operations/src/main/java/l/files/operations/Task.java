@@ -2,12 +2,11 @@ package l.files.operations;
 
 import android.os.AsyncTask;
 import android.os.Handler;
+import l.files.operations.TaskState.Running;
 
 import java.util.Collections;
 
-import l.files.operations.TaskState.Running;
-
-import static l.files.base.Objects.requireNonNull;
+import static java.util.Objects.requireNonNull;
 
 abstract class Task extends AsyncTask<Void, TaskState, Void> {
 
@@ -33,7 +32,13 @@ abstract class Task extends AsyncTask<Void, TaskState, Void> {
 
     private volatile TaskState state;
 
-    Task(TaskId id, Target target, Clock clock, Callback callback, Handler handler) {
+    Task(
+        TaskId id,
+        Target target,
+        Clock clock,
+        Callback callback,
+        Handler handler
+    ) {
         this.id = requireNonNull(id);
         this.target = requireNonNull(target);
         this.clock = requireNonNull(clock);
@@ -65,10 +70,16 @@ abstract class Task extends AsyncTask<Void, TaskState, Void> {
                 state = ((Running) state).success(clock.read());
 
             } else if (e instanceof FileException) {
-                state = ((Running) state).failed(clock.read(), ((FileException) e).failures());
+                state = ((Running) state).failed(
+                    clock.read(),
+                    ((FileException) e).failures()
+                );
 
             } else {
-                state = ((Running) state).failed(clock.read(), Collections.emptyList());
+                state = ((Running) state).failed(
+                    clock.read(),
+                    Collections.emptyList()
+                );
 
                 if (e instanceof Error) {
                     throw (Error) e;

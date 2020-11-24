@@ -9,7 +9,7 @@ import java.util.Set;
 
 import static java.util.Collections.emptySet;
 import static java.util.Collections.unmodifiableSet;
-import static l.files.base.Objects.requireNonNull;
+import static java.util.Objects.requireNonNull;
 
 public enum Clipboard {
 
