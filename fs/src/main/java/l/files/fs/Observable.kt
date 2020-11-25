@@ -26,7 +26,7 @@ internal class Observable(
 
   override val isClosed get() = closed.get()
 
-  override fun closeReason() = null
+  override fun closeReason(): Throwable? = null
 
   override fun close() {
     if (closed.compareAndSet(false, true)) {

@@ -6,10 +6,7 @@ import java.nio.file.WatchEvent
 
 interface BatchObserver {
 
-  fun onLatestEvents(
-    selfChanged: Boolean,
-    childFileNames: Map<Path, WatchEvent.Kind<*>>
-  )
+  fun onLatestEvents(childFileNames: Map<Path, WatchEvent.Kind<*>>)
 
   fun onIncompleteObservation(cause: IOException)
 }

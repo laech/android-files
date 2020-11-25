@@ -80,7 +80,6 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
         @Override
         public void onLatestEvents(
-            boolean selfChanged,
             Map<Path, ? extends WatchEvent.Kind<?>> childFileNames
         ) {
             if (!childFileNames.isEmpty()) {

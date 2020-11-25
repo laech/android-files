@@ -5,7 +5,6 @@ import java.io.IOException
 import java.lang.System.nanoTime
 import java.nio.file.Path
 import java.nio.file.WatchEvent
-import java.util.Collections.unmodifiableMap
 import java.util.concurrent.Executors.newSingleThreadScheduledExecutor
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
@@ -28,7 +27,6 @@ class BatchObserverNotifier(
   private val quickNotifyFirstEvent: Boolean
 ) : Observer, Observation, Runnable {
 
-  private var selfChanged = false
   private val childFileNameChanged = HashMap<Path, WatchEvent.Kind<*>>()
   private val batchIntervalNanos = batchInternalUnit.toNanos(batchInterval)
 
@@ -66,13 +64,9 @@ class BatchObserverNotifier(
     return this
   }
 
-  override fun onEvent(kind: WatchEvent.Kind<*>, childFileName: Path?) {
+  override fun onEvent(kind: WatchEvent.Kind<*>, childFileName: Path) {
     synchronized(this) {
-      if (childFileName == null) {
-        selfChanged = true
-      } else {
-        childFileNameChanged.put(childFileName, kind)
-      }
+      childFileNameChanged.put(childFileName, kind)
     }
     if (quickNotifyFirstEvent) {
       val now = nanoTime()
@@ -92,22 +86,13 @@ class BatchObserverNotifier(
       quickNotifyLastRunNanos = nanoTime()
     }
 
-    var snapshotSelfChanged: Boolean
     var snapshotChildFileNameChanged: Map<Path, WatchEvent.Kind<*>>
     synchronized(this) {
-      snapshotSelfChanged = selfChanged
-      snapshotChildFileNameChanged =
-        if (childFileNameChanged.isEmpty()) emptyMap()
-        else unmodifiableMap(HashMap(childFileNameChanged))
-      selfChanged = false
+      snapshotChildFileNameChanged = childFileNameChanged.toMap()
       childFileNameChanged.clear()
     }
-
-    if (snapshotSelfChanged || snapshotChildFileNameChanged.isNotEmpty()) {
-      batchObserver.onLatestEvents(
-        snapshotSelfChanged,
-        snapshotChildFileNameChanged
-      )
+    if (snapshotChildFileNameChanged.isNotEmpty()) {
+      batchObserver.onLatestEvents(snapshotChildFileNameChanged)
     }
   }
 
