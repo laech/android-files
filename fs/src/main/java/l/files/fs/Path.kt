@@ -7,8 +7,6 @@ import java.nio.file.LinkOption.NOFOLLOW_LINKS
 import java.nio.file.Path
 import java.util.regex.Pattern
 
-fun Path.isHidden(): Boolean = fileName?.toString()?.startsWith(".") ?: false
-
 /**
  * e.g. `"/a/b/c" => ["/a/b/c", "/a/b", "/a", "/"]`
  */

@@ -37,15 +37,13 @@ import static android.os.Looper.getMainLooper;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.setThreadPriority;
 import static java.lang.Thread.currentThread;
-import static java.nio.file.Files.readAttributes;
-import static java.nio.file.Files.readSymbolicLink;
+import static java.nio.file.Files.*;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.util.Collections.*;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static l.files.fs.PathKt.isHidden;
 import static l.files.ui.base.content.Contexts.isDebugBuild;
 
 final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
@@ -266,7 +264,11 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
             files.addAll(data.values());
         } else {
             for (FileInfo item : data.values()) {
-                if (!isHidden(item.selfPath())) {
+                try {
+                    if (!isHidden(item.selfPath())) {
+                        files.add(item);
+                    }
+                } catch (IOException e) {
                     files.add(item);
                 }
             }
