@@ -56,7 +56,8 @@ internal class Observable(
         val watchKey = watchService!!.take()
         for (event in watchKey.pollEvents()) {
           if (event.kind() == OVERFLOW) {
-            observer.onIncompleteObservation(IOException("Overflow"))
+            Log.d(javaClass.simpleName, "Event overflowed.")
+            close()
             return
           }
           observer.onEvent(

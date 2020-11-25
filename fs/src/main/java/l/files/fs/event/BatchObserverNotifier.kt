@@ -74,10 +74,6 @@ class BatchObserverNotifier(
     }
   }
 
-  override fun onIncompleteObservation(cause: IOException) {
-    batchObserver.onIncompleteObservation(cause)
-  }
-
   override fun run() {
     if (quickNotifyFirstEvent) {
       quickNotifyLastRunNanos = nanoTime()

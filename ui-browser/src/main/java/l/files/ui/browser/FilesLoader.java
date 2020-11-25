@@ -44,7 +44,6 @@ import static java.util.Collections.*;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static l.files.ui.base.content.Contexts.isDebugBuild;
 
 final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
@@ -73,24 +72,10 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     private final ExecutorService executor;
 
-    private final BatchObserver listener = new BatchObserver() {
-
-        @Override
-        public void onLatestEvents(
-            Map<Path, ? extends WatchEvent.Kind<?>> childFileNames
-        ) {
-            if (!childFileNames.isEmpty()) {
-                updateAll(childFileNames, false);
-            }
+    private final BatchObserver listener = childFileNames -> {
+        if (!childFileNames.isEmpty()) {
+            updateAll(childFileNames, false);
         }
-
-        @Override
-        public void onIncompleteObservation(IOException cause) {
-            if (isDebugBuild(getContext())) {
-                Log.w("FilesLoader", "onIncompleteObservation()", cause);
-            }
-        }
-
     };
 
     private void updateAll(
@@ -194,18 +179,13 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
             // TODO fail to observe just visit
             Log.d(getClass().getSimpleName(), "", e);
             return Result.of(e);
-
-        } catch (InterruptedException e) {
-            currentThread().interrupt();
-            cancelLoad();
-            throw new OperationCanceledException();
         }
 
         update(childFileNames);
         return buildResult();
     }
 
-    private List<Path> observe() throws IOException, InterruptedException {
+    private List<Path> observe() throws IOException {
         List<Path> childFileNames = new ArrayList<>();
         observation = new BatchObserverNotifier(
             listener,
