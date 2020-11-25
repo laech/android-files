@@ -1,26 +1,17 @@
 package l.files.ui.base.content.pm;
 
 import android.content.pm.PackageManager;
-
-import org.junit.Test;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import l.files.base.Consumer;
 import l.files.ui.base.graphics.Rect;
 import l.files.ui.base.graphics.ScaledBitmap;
+import org.junit.Test;
+
+import java.io.*;
+import java.util.function.Consumer;
 
 import static androidx.test.InstrumentationRegistry.getContext;
 import static java.io.File.createTempFile;
 import static l.files.ui.base.content.pm.Packages.getApkIconBitmap;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public final class PackagesTest {
 
@@ -28,7 +19,10 @@ public final class PackagesTest {
     public void getApkIconDrawable() throws Exception {
         testGetApkIcon(file -> {
             String path = file.getPath();
-            assertNotNull(Packages.getApkIconDrawable(path, getPackageManager()));
+            assertNotNull(Packages.getApkIconDrawable(
+                path,
+                getPackageManager()
+            ));
         });
     }
 
@@ -46,7 +40,8 @@ public final class PackagesTest {
         testGetApkIcon(file -> {
             String path = file.getPath();
             Rect max = Rect.of(1, 1);
-            ScaledBitmap result = getApkIconBitmap(path, max, getPackageManager());
+            ScaledBitmap result =
+                getApkIconBitmap(path, max, getPackageManager());
             assertNotNull(result);
             assertNotEquals(max, result);
             assertEquals(max, Rect.of(result.bitmap()));

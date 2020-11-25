@@ -1,8 +1,9 @@
 package l.files.ui.browser;
 
 import android.widget.EditText;
-import l.files.base.Consumer;
 import org.junit.Test;
+
+import java.util.function.Consumer;
 
 import static java.nio.file.Files.createFile;
 import static l.files.testing.fs.Paths.removeWritePermissions;

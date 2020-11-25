@@ -1,7 +1,6 @@
 package l.files.ui.base.media;
 
 import android.media.MediaMetadataRetriever;
-import l.files.base.Consumer;
 import l.files.ui.base.graphics.Rect;
 import l.files.ui.base.graphics.ScaledBitmap;
 import org.junit.Test;
@@ -10,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.function.Consumer;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 import static java.nio.file.Files.deleteIfExists;

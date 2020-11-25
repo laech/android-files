@@ -15,7 +15,6 @@ import androidx.core.view.GravityCompat.START
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.files_activity.*
 import kotlinx.android.synthetic.main.files_grid_item.view.*
-import l.files.base.Function
 import l.files.fs.hierarchy
 import l.files.ui.base.fs.FileInfo
 import l.files.ui.base.fs.FileLabels
@@ -28,6 +27,7 @@ import java.nio.file.LinkOption.NOFOLLOW_LINKS
 import java.nio.file.Path
 import java.nio.file.attribute.BasicFileAttributes
 import java.util.concurrent.TimeUnit
+import java.util.function.Function
 import java.util.function.Supplier
 
 

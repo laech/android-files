@@ -4,8 +4,7 @@ import androidx.annotation.MainThread;
 
 import java.util.Set;
 import java.util.WeakHashMap;
-
-import l.files.base.Consumer;
+import java.util.function.Consumer;
 
 import static android.os.Looper.getMainLooper;
 import static android.os.Looper.myLooper;
@@ -14,11 +13,13 @@ import static java.util.Collections.newSetFromMap;
 @MainThread
 public final class MainThreadTopic<T> {
 
-    private final Set<Consumer<T>> listeners = newSetFromMap(new WeakHashMap<>());
+    private final Set<Consumer<T>> listeners =
+        newSetFromMap(new WeakHashMap<>());
 
     private static void ensureMainThread() {
         if (myLooper() != getMainLooper()) {
-            throw new IllegalStateException("Can only be called on the main thread.");
+            throw new IllegalStateException(
+                "Can only be called on the main thread.");
         }
     }
 

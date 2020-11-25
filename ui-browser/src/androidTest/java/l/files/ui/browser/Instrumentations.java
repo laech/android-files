@@ -4,11 +4,11 @@ import android.app.Instrumentation;
 import android.view.View;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.ViewHolder;
-import l.files.base.Function;
 import l.files.ui.base.widget.StableAdapter;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static android.os.Looper.getMainLooper;

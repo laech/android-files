@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.EditText;
 import androidx.annotation.Nullable;
-import l.files.base.Consumer;
 import l.files.ui.browser.FileCreationFragment;
 import l.files.ui.browser.R;
 
@@ -15,6 +14,7 @@ import java.lang.ref.WeakReference;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
 import static java.nio.file.Files.createDirectory;

@@ -1,7 +1,8 @@
 package l.files.ui.browser.widget;
 
 import android.content.Context;
-import l.files.base.Consumer;
+
+import java.util.function.Consumer;
 
 import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;

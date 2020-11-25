@@ -5,10 +5,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import androidx.appcompat.app.AlertDialog;
 import com.google.android.material.textfield.TextInputLayout;
-import l.files.base.Consumer;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 
 import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static java.util.Objects.requireNonNull;

@@ -8,7 +8,6 @@ import android.util.Pair;
 import android.widget.EditText;
 import androidx.annotation.Nullable;
 import androidx.appcompat.view.ActionMode;
-import l.files.base.Consumer;
 import l.files.ui.base.app.BaseActivity;
 import l.files.ui.browser.FileCreationFragment;
 import l.files.ui.browser.R;
@@ -19,6 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
 import static java.nio.file.Files.move;

@@ -18,7 +18,6 @@ import androidx.drawerlayout.widget.DrawerLayout.*
 import androidx.fragment.app.FragmentManager.OnBackStackChangedListener
 import androidx.fragment.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN
 import kotlinx.android.synthetic.main.files_activity.*
-import l.files.base.Consumer
 import l.files.ui.base.app.BaseActivity
 import l.files.ui.base.app.OptionsMenus
 import l.files.ui.base.fs.IOExceptions
@@ -34,6 +33,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.attribute.BasicFileAttributes
+import java.util.function.Consumer
 
 class FilesActivity : BaseActivity(),
   OnBackStackChangedListener,
