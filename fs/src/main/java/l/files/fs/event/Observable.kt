@@ -1,7 +1,6 @@
-package l.files.fs
+package l.files.fs.event
 
 import android.util.Log
-import l.files.fs.event.Observer
 import java.io.Closeable
 import java.io.IOException
 import java.nio.file.ClosedWatchServiceException

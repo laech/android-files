@@ -1,6 +1,5 @@
 package l.files.fs.event
 
-import l.files.fs.Observable
 import java.io.Closeable
 import java.io.IOException
 import java.lang.System.nanoTime
