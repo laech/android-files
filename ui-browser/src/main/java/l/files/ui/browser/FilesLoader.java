@@ -9,7 +9,6 @@ import androidx.annotation.Nullable;
 import androidx.loader.content.AsyncTaskLoader;
 import l.files.fs.event.BatchObserver;
 import l.files.fs.event.BatchObserverNotifier;
-import l.files.fs.event.Observation;
 import l.files.ui.base.fs.FileInfo;
 import l.files.ui.browser.sort.FileSort;
 
@@ -66,7 +65,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     private volatile boolean observing;
 
     @Nullable
-    private volatile Observation observation;
+    private volatile Closeable observation;
 
     @Nullable
     private volatile Thread loadInBackgroundThread;
@@ -194,7 +193,8 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
                 childFileNames = visit();
             }
         } catch (IOException e) {
-            Log.d("bbbbbbb", "", e);
+            // TODO fail to observe just visit
+            Log.d(getClass().getSimpleName(), "", e);
             return Result.of(e);
 
         } catch (InterruptedException e) {

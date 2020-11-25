@@ -1,8 +1,8 @@
 package l.files.fs
 
 import android.util.Log
-import l.files.fs.event.Observation
 import l.files.fs.event.Observer
+import java.io.Closeable
 import java.io.IOException
 import java.nio.file.ClosedWatchServiceException
 import java.nio.file.Files.isDirectory
@@ -11,31 +11,23 @@ import java.nio.file.Path
 import java.nio.file.StandardWatchEventKinds.*
 import java.nio.file.WatchKey
 import java.nio.file.WatchService
-import java.util.concurrent.atomic.AtomicBoolean
 import java.util.function.Consumer
 
 internal class Observable(
   private val dir: Path,
   private val observer: Observer,
   private val childConsumer: Consumer<Path>
-) : Observation, Runnable {
+) : Closeable, Runnable {
 
-  private var closed = AtomicBoolean(false)
   private var watchService: WatchService? = null
   private val watchKeyToChildFileName = HashMap<WatchKey, Path>()
 
-  override val isClosed get() = closed.get()
-
-  override fun closeReason(): Throwable? = null
-
   override fun close() {
-    if (closed.compareAndSet(false, true)) {
-      watchService?.close()
-    }
+    watchService?.close()
   }
 
   @Throws(IOException::class)
-  fun start() {
+  fun start(): Observable {
     watchService = dir.fileSystem.newWatchService()
     dir.register(watchService, ENTRY_CREATE, ENTRY_MODIFY, ENTRY_DELETE)
     Thread(this).start()
@@ -55,6 +47,7 @@ internal class Observable(
         childConsumer.accept(child)
       }
     }
+    return this
   }
 
   override fun run() {
