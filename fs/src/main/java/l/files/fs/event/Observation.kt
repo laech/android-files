@@ -1,13 +1,11 @@
-package l.files.fs.event;
+package l.files.fs.event
 
-import java.io.Closeable;
+import java.io.Closeable
 
-import androidx.annotation.Nullable;
+interface Observation : Closeable {
 
-public interface Observation extends Closeable {
+  val isClosed: Boolean
 
-    boolean isClosed();
+  fun closeReason(): Throwable?
 
-    @Nullable
-    Throwable closeReason();
 }

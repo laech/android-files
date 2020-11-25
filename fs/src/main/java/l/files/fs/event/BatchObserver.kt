@@ -1,17 +1,15 @@
-package l.files.fs.event;
+package l.files.fs.event
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.WatchEvent;
-import java.util.Map;
+import java.io.IOException
+import java.nio.file.Path
+import java.nio.file.WatchEvent
 
-public interface BatchObserver {
+interface BatchObserver {
 
-    void onLatestEvents(
-        boolean selfChanged,
-        Map<Path, WatchEvent.Kind<?>> childFileNames
-    );
+  fun onLatestEvents(
+    selfChanged: Boolean,
+    childFileNames: Map<Path, WatchEvent.Kind<*>>
+  )
 
-    void onIncompleteObservation(IOException cause);
-
+  fun onIncompleteObservation(cause: IOException)
 }

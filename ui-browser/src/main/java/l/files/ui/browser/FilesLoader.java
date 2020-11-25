@@ -81,7 +81,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         @Override
         public void onLatestEvents(
             boolean selfChanged,
-            Map<Path, WatchEvent.Kind<?>> childFileNames
+            Map<Path, ? extends WatchEvent.Kind<?>> childFileNames
         ) {
             if (!childFileNames.isEmpty()) {
                 updateAll(childFileNames, false);
@@ -98,14 +98,14 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     };
 
     private void updateAll(
-        Map<Path, WatchEvent.Kind<?>> changedChildFileNames,
+        Map<Path, ? extends WatchEvent.Kind<?>> changedChildFileNames,
         boolean forceReload
     ) {
         executor.execute(() -> {
             setThreadPriority(THREAD_PRIORITY_BACKGROUND);
 
             boolean changed = false;
-            for (Entry<Path, WatchEvent.Kind<?>> entry :
+            for (Entry<Path, ? extends WatchEvent.Kind<?>> entry :
                 changedChildFileNames.entrySet()) {
                 changed |= update(entry.getKey(), entry.getValue());
             }

@@ -24,13 +24,9 @@ internal class Observable(
   private var watchService: WatchService? = null
   private val watchKeyToChildFileName = HashMap<WatchKey, Path>()
 
-  override fun isClosed(): Boolean {
-    return closed.get()
-  }
+  override val isClosed get() = closed.get()
 
-  override fun closeReason(): Throwable? {
-    return null
-  }
+  override fun closeReason() = null
 
   override fun close() {
     if (closed.compareAndSet(false, true)) {
@@ -67,7 +63,7 @@ internal class Observable(
         val watchKey = watchService!!.take()
         for (event in watchKey.pollEvents()) {
           if (event.kind() == OVERFLOW) {
-            observer.onIncompleteObservation(null)
+            observer.onIncompleteObservation(IOException("Overflow"))
             return
           }
           observer.onEvent(
