@@ -1,26 +1,30 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion project.compileSdkVersion
-    buildToolsVersion project.buildToolsVersion
+  compileSdkVersion project.compileSdkVersion
+  buildToolsVersion project.buildToolsVersion
 
-    defaultConfig {
-        minSdkVersion project.minSdkVersion
-        targetSdkVersion project.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
-    }
+  defaultConfig {
+    minSdkVersion project.minSdkVersion
+    targetSdkVersion project.targetSdkVersion
+    versionCode 1
+    versionName "1.0"
+  }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+
+  sourceSets {
+    main.java.srcDirs += 'src/main/kotlin'
+  }
 }
 
 dependencies {
-    implementation project(':base')
-    implementation project(':fs')
-    implementation project(':testing')
-    implementation deps.junit
-    implementation deps.androidAnnotations
+  implementation project(':base')
+  implementation project(':fs')
+  implementation project(':testing')
+  implementation deps.junit
+  implementation deps.androidAnnotations
 }

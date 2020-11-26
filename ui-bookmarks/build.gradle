@@ -3,48 +3,52 @@ apply plugin: "kotlin-android"
 apply plugin: "kotlin-android-extensions"
 
 android {
-    compileSdkVersion project.compileSdkVersion
-    buildToolsVersion project.buildToolsVersion
+  compileSdkVersion project.compileSdkVersion
+  buildToolsVersion project.buildToolsVersion
 
-    defaultConfig {
-        minSdkVersion project.minSdkVersion
-        targetSdkVersion project.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-    }
+  defaultConfig {
+    minSdkVersion project.minSdkVersion
+    targetSdkVersion project.targetSdkVersion
+    versionCode 1
+    versionName "1.0"
+    testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+  }
 
-    packagingOptions {
-        exclude 'META-INF/LICENSE'
-        exclude 'META-INF/NOTICE'
-    }
+  packagingOptions {
+    exclude 'META-INF/LICENSE'
+    exclude 'META-INF/NOTICE'
+  }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
 
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
+  kotlinOptions {
+    jvmTarget = "1.8"
+  }
+
+  sourceSets {
+    main.java.srcDirs += 'src/main/kotlin'
+  }
 }
 
 dependencies {
 
-    implementation project(':base')
-    implementation project(':bookmarks')
-    implementation project(':ui-base')
-    implementation project(':fs')
-    implementation deps.androidAppcompat
-    implementation deps.recyclerview
-    implementation deps.lifecycleLivedataKtx
-    implementation deps.kotlinStdlibJdk7
+  implementation project(':base')
+  implementation project(':bookmarks')
+  implementation project(':ui-base')
+  implementation project(':fs')
+  implementation deps.androidAppcompat
+  implementation deps.recyclerview
+  implementation deps.lifecycleLivedataKtx
+  implementation deps.kotlinStdlibJdk7
 
-    androidTestImplementation deps.androidTestRunner
-    androidTestImplementation deps.androidTestRules
-    androidTestImplementation deps.mockitoAndroid
+  androidTestImplementation deps.androidTestRunner
+  androidTestImplementation deps.androidTestRules
+  androidTestImplementation deps.mockitoAndroid
 
-    testImplementation deps.junit
-    testImplementation deps.mockitoCore
+  testImplementation deps.junit
+  testImplementation deps.mockitoCore
 
 }

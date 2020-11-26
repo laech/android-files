@@ -1,78 +1,64 @@
-package l.files.base.io;
+package l.files.base.io
 
-import org.junit.Test;
+import org.junit.Assert.assertEquals
+import org.junit.Test
+import java.io.ByteArrayInputStream
+import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets.US_ASCII
+import java.nio.charset.StandardCharsets.UTF_8
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
+class ReadStringTest {
 
-import static l.files.base.io.Readers.readString;
-import static org.junit.Assert.assertEquals;
+  @Test
+  fun readString_single_charset_read_full_string() {
+    testReadString("hello", US_ASCII, Int.MAX_VALUE, "hello", UTF_8)
+  }
 
-public final class ReadersTest {
+  @Test
+  fun readString_single_charset_read_partial_string() {
+    testReadString("hello", US_ASCII, 1, "h", UTF_8)
+  }
 
-    private final Charset utf8 = Charset.forName("UTF-8");
-    private final Charset ascii = Charset.forName("US-ASCII");
+  @Test
+  fun readString_single_charset_read_empty_string() {
+    testReadString("hello", US_ASCII, 0, "", UTF_8)
+  }
 
-    @Test
-    public void readString_single_charset_read_full_string() throws Exception {
-        testReadString("hello", ascii, Integer.MAX_VALUE, "hello", utf8);
+  @Test
+  fun readString_multi_charset_read_full_string() {
+    val src = repeat("a", 8192) + repeat("你", 8192)
+    testReadString(src, UTF_8, Int.MAX_VALUE, src, US_ASCII, UTF_8)
+  }
+
+  @Test
+  fun readString_multi_charset_read_partial_string() {
+    val src = repeat("a", 8192) + repeat("你", 8192)
+    val expected = repeat("a", 8192) + "你"
+    testReadString(src, UTF_8, 8193, expected, US_ASCII, UTF_8)
+  }
+
+  @Test
+  fun readString_multi_charset_read_empty_string() {
+    val src = repeat("a", 1024) + repeat("你", 1024)
+    testReadString(src, UTF_8, 0, "", US_ASCII, UTF_8)
+  }
+
+  private fun testReadString(
+    src: String,
+    srcCharset: Charset,
+    limit: Int,
+    expected: String,
+    vararg charsets: Charset
+  ) {
+    val input = object : ByteArrayInputStream(src.toByteArray(srcCharset)) {
+      override fun markSupported() = false
     }
+    val actual = readString(input, limit, *charsets)
+    assertEquals(expected, actual)
+  }
 
-    @Test
-    public void readString_single_charset_read_partial_string() throws Exception {
-        testReadString("hello", ascii, 1, "h", utf8);
-    }
-
-    @Test
-    public void readString_single_charset_read_empty_string() throws Exception {
-        testReadString("hello", ascii, 0, "", utf8);
-    }
-
-    @Test
-    public void readString_multi_charset_read_full_string() throws Exception {
-        String src = repeat("a", 8192) + repeat("你", 8192);
-        testReadString(src, utf8, Integer.MAX_VALUE, src, ascii, utf8);
-    }
-
-    @Test
-    public void readString_multi_charset_read_partial_string() throws Exception {
-        String src = repeat("a", 8192) + repeat("你", 8192);
-        String expected = repeat("a", 8192) + "你";
-        testReadString(src, utf8, 8193, expected, ascii, utf8);
-    }
-
-    @Test
-    public void readString_multi_charset_read_empty_string() throws Exception {
-        String src = repeat("a", 8192) + repeat("你", 8192);
-        testReadString(src, utf8, 0, "", ascii, utf8);
-    }
-
-    private void testReadString(
-            String src,
-            Charset srcCharset,
-            int limit,
-            String expected,
-            Charset... charsets) throws IOException {
-
-        InputStream in = new ByteArrayInputStream(src.getBytes(srcCharset)) {
-            @Override
-            public boolean markSupported() {
-                return false;
-            }
-        };
-
-        String actual = readString(in, limit, charsets);
-        assertEquals(expected, actual);
-    }
-
-    private String repeat(String s, int n) {
-        StringBuilder builder = new StringBuilder(s.length() * n);
-        for (int i = 0; i < n; i++) {
-            builder.append(s);
-        }
-        return builder.toString();
-    }
-
+  private fun repeat(s: String, n: Int): String =
+    (0 until n).fold(StringBuilder(s.length * n)) { builder, _ ->
+      builder.append(s)
+    }.toString()
 }

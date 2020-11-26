@@ -10,7 +10,7 @@ import android.graphics.Typeface.MONOSPACE
 import android.util.TypedValue.*
 import android.view.View.MeasureSpec.*
 import android.widget.TextView
-import l.files.base.io.Readers
+import l.files.base.io.readString
 import l.files.fs.media.MediaTypes.generalize
 import l.files.ui.base.graphics.Rect
 import l.files.ui.base.graphics.ScaledBitmap
@@ -33,7 +33,7 @@ internal object TextThumbnailer : Thumbnailer<InputStream> {
     context: Context
   ): ScaledBitmap? {
     // TODO support more charsets
-    val text = Readers.readString(input, PREVIEW_LIMIT, UTF_8) ?: return null
+    val text = readString(input, PREVIEW_LIMIT, UTF_8) ?: return null
     val bitmap = draw(text, max, context)
     // TODO this returns bitmaps of different sizes and aspect ratio
     // when on portrait and on landscape, this causes problem since
