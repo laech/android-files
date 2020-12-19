@@ -3,7 +3,7 @@ package l.files.ui.base.fs;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import l.files.base.text.CollationKey;
+import l.files.base.text.Collation;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,7 +19,7 @@ public final class FileInfo implements Comparable<FileInfo> {
     private final Collator collator;
 
     @Nullable
-    private CollationKey collationKey;
+    private Collation collationKey;
 
     @Nullable
     private Boolean readable;
@@ -104,9 +104,9 @@ public final class FileInfo implements Comparable<FileInfo> {
         return path != null ? path : selfPath();
     }
 
-    private CollationKey collationKey() {
+    private Collation collationKey() {
         if (collationKey == null) {
-            collationKey = CollationKey.create(collator, name());
+            collationKey = Collation.create(collator, name());
         }
         return collationKey;
     }

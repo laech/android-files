@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import l.files.base.lifecycle.CollectionLiveData.Companion.setLiveData
 import l.files.base.lifecycle.SetLiveData
-import l.files.base.text.CollationKey
+import l.files.base.text.Collation
 import java.nio.file.Files.exists
 import java.nio.file.InvalidPathException
 import java.nio.file.Path
@@ -62,7 +62,7 @@ fun Collection<Path>.collate(
     .map {
       Pair(
         it,
-        CollationKey.create(collator, it.fileName?.toString() ?: "")
+        Collation.create(collator, it.fileName?.toString() ?: "")
       )
     }
     .sortedBy { it.second }
