@@ -24,7 +24,7 @@ class BatchObserverNotifier(
    * schedule check to run, if the previous event was a while ago or there was
    * no previous event.
    */
-  private val quickNotifyFirstEvent: Boolean
+  private val quickNotifyFirstEvent: Boolean,
 ) : Observer, Closeable, Runnable {
 
   private val childFileNameChanged = HashMap<Path, WatchEvent.Kind<*>>()
@@ -47,7 +47,7 @@ class BatchObserverNotifier(
     try {
       observation = Observable(path, this, childrenConsumer).start()
       checker = service.scheduleWithFixedDelay(
-        this, batchInterval, batchInterval, batchInternalUnit
+        this, batchInterval, batchInterval, batchInternalUnit,
       )
     } catch (e: Throwable) {
       try {

@@ -15,7 +15,7 @@ import java.util.function.Consumer
 internal class Observable(
   private val dir: Path,
   private val observer: Observer,
-  private val childConsumer: Consumer<Path>
+  private val childConsumer: Consumer<Path>,
 ) : Closeable, Runnable {
 
   private var watchService: WatchService? = null
@@ -34,11 +34,13 @@ internal class Observable(
       it.forEach { child ->
         if (isDirectory(child)) {
           try {
-            watchKeyToChildFileName[child.register(
-              watchService,
-              ENTRY_CREATE,
-              ENTRY_DELETE
-            )] = child.fileName
+            watchKeyToChildFileName[
+              child.register(
+                watchService,
+                ENTRY_CREATE,
+                ENTRY_DELETE,
+              ),
+            ] = child.fileName
           } catch (e: IOException) {
             Log.d(javaClass.simpleName, "", e)
           }
@@ -61,7 +63,7 @@ internal class Observable(
           }
           observer.onEvent(
             event.kind(),
-            watchKeyToChildFileName[watchKey] ?: event.context() as Path
+            watchKeyToChildFileName[watchKey] ?: event.context() as Path,
           )
         }
         watchKey.reset()

@@ -56,13 +56,13 @@ private fun initBookmarks(app: Application): SetLiveData<Path> {
 
 fun Collection<Path>.collate(
   alwaysOnTop: (Path) -> Boolean = { false },
-  collator: Collator = Collator.getInstance()
+  collator: Collator = Collator.getInstance(),
 ): List<Path> = partition(alwaysOnTop).let { (top, bottom) ->
   top + bottom
     .map {
       Pair(
         it,
-        Collation.create(collator, it.fileName?.toString() ?: "")
+        Collation.create(collator, it.fileName?.toString() ?: ""),
       )
     }
     .sortedBy { it.second }

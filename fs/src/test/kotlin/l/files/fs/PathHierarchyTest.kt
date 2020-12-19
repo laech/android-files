@@ -10,7 +10,7 @@ import java.nio.file.Paths
 @RunWith(Parameterized::class)
 class PathHierarchyTest(
   path: String,
-  expectedHierarchy: List<String>
+  expectedHierarchy: List<String>,
 ) {
 
   private val path = Paths.get(path)
@@ -27,7 +27,7 @@ class PathHierarchyTest(
     fun paths() = listOf(
       arrayOf("", listOf("")),
       arrayOf("/", listOf("/")),
-      arrayOf("/a/b/c", listOf("/a/b/c", "/a/b", "/a", "/"))
+      arrayOf("/a/b/c", listOf("/a/b/c", "/a/b", "/a", "/")),
     )
   }
 }

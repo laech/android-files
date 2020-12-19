@@ -48,7 +48,7 @@ class ReadStringTest {
     srcCharset: Charset,
     limit: Int,
     expected: String,
-    vararg charsets: Charset
+    vararg charsets: Charset,
   ) {
     val input = object : ByteArrayInputStream(src.toByteArray(srcCharset)) {
       override fun markSupported() = false

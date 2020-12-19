@@ -36,10 +36,10 @@ class BookmarksTest : PathBaseTest() {
       pref.edit()
         .putStringSet(
           PREF_KEY,
-          listOf(file, dir, link).map(Any::toString).toSet()
+          listOf(file, dir, link).map(Any::toString).toSet(),
         )
         .commit(),
-      equalTo(true)
+      equalTo(true),
     )
 
     assertThat(loadBookmarks(pref), equalTo(setOf(file, link, dir)))

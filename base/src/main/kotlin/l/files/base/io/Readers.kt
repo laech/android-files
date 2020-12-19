@@ -18,7 +18,7 @@ import kotlin.math.min
 fun readString(
   input: InputStream,
   limit: Int,
-  vararg charsets: Charset
+  vararg charsets: Charset,
 ): String? {
   val buffered = input.buffered()
   buffered.mark(Int.MAX_VALUE)
@@ -35,7 +35,7 @@ fun readString(
 private fun readStringWithCharset(
   input: InputStream,
   limit: Int,
-  charset: Charset
+  charset: Charset,
 ): String {
   val builder = StringBuilder()
   val reader = InputStreamReader(input, newThrowingDecoder(charset))

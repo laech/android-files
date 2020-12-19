@@ -86,7 +86,7 @@ class DetectorTest : PathBaseTest() {
 
   private fun createTextFile(
     name: String,
-    content: String = "hello world"
+    content: String = "hello world",
   ): Path {
     val path = dir1().resolve(name)
     write(path, content.toByteArray())
